@@ -1,0 +1,66 @@
+export const vi = {
+  appTitle: "Visual Git",
+  m0Badge: "Mốc M0: Khung nền tảng",
+  screens: {
+    welcome: "Chào mừng",
+    changes: "Thay đổi",
+    history: "Lịch sử",
+    conflict: "Xử lý Conflict",
+  },
+  gitActions: {
+    simple: {
+      fetch: "Kiểm tra thay đổi từ xa",
+      pull: "Lấy thay đổi mới",
+      push: "Gửi lên máy chủ",
+      branch: "Nhánh làm việc",
+      commit: "Lưu thay đổi",
+      stage: "Đánh dấu để lưu",
+      unstage: "Bỏ đánh dấu",
+      discard: "Huỷ các sửa đổi",
+    },
+    advanced: {
+      fetch: "Fetch",
+      pull: "Pull",
+      push: "Push",
+      branch: "Branch",
+      commit: "Commit",
+      stage: "Stage",
+      unstage: "Unstage",
+      discard: "Discard Changes",
+    },
+  },
+  settings: {
+    theme: "Giao diện",
+    themeLight: "Sáng",
+    themeDark: "Tối",
+    themeSystem: "Tự động (Hệ thống)",
+    colorblind: "Chế độ mù màu",
+    colorblindOn: "Bật",
+    colorblindOff: "Tắt",
+    language: "Ngôn ngữ",
+    mode: "Chế độ Git",
+    modeSimple: "Đơn giản (Dễ hiểu)",
+    modeAdvanced: "Nâng cao (Chuẩn Git)",
+  },
+  ipc: {
+    testButton: "Kiểm tra IPC Rust",
+    pingResponse: "Phản hồi từ Rust",
+    systemInfo: "Thông tin hệ thống",
+    triggerEvent: "Mô phỏng sự kiện Repo Changed",
+    lastEvent: "Sự kiện gần nhất nhận được",
+    noEventsYet: "Chưa có sự kiện nào từ backend",
+  },
+  shell: {
+    sidebarTitle: "Dự án & Nhánh",
+    graphTitle: "Đồ thị Lịch sử & Thay đổi",
+    detailTitle: "Chi tiết & Commit",
+    emptyPlaceholder: "Khung bố cục 3 cột sẵn sàng cho M1 (Git Viewer)",
+    localBranches: "Nhánh nội bộ",
+    remoteBranches: "Nhánh máy chủ",
+    stagedFiles: "Đã đánh dấu",
+    unstagedFiles: "Chưa đánh dấu",
+  },
+};
+
+export type Translations = typeof vi;
+

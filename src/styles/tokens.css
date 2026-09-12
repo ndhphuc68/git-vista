@@ -1,0 +1,153 @@
+/**
+ * Design Tokens - Visual Git Client v1
+ * Theo đặc tả kỹ thuật 2026-09-12-visual-git-client-design.md
+ * Nguồn chân lý duy nhất cho màu sắc, typography, khoảng cách và chuyển động.
+ */
+
+:root {
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", Inter, sans-serif;
+  --font-mono: "SF Mono", "Cascadia Code", "JetBrains Mono", monospace;
+
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 13px; /* Cỡ nền desktop chuẩn */
+  --font-size-md: 15px;
+  --font-size-lg: 17px;
+  --font-size-xl: 22px;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.45;
+  --line-height-relaxed: 1.6;
+
+  /* Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-full: 9999px;
+
+  /* Motion & Easing */
+  --ease-macos: cubic-bezier(0.32, 0.72, 0, 1);
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+
+  /* Focus ring */
+  --focus-ring: 0 0 0 2px var(--accent);
+
+  /* Touch / Click target */
+  --min-target-size: 28px;
+}
+
+/* Light Theme (Mặc định) */
+:root,
+[data-theme="light"] {
+  --bg-window: #F5F3F1;
+  --bg-surface: #FFFFFF;
+  --bg-surface-hover: #F0EDE9;
+  --bg-surface-active: #E6E2DE;
+  --border-subtle: #E3DFDA;
+  --border-strong: #CCC7C2;
+
+  --text-primary: #1A1918;
+  --text-secondary: #6B6764;
+  --text-tertiary: #96918C;
+
+  --accent: #2F6FEB;
+  --accent-hover: #2558BC;
+  --accent-subtle: #EBF2FE;
+  --accent-contrast: #FFFFFF;
+
+  --diff-add-bg: #DAFBE1;
+  --diff-add-text: #0E4429;
+  --diff-add-border: #80E39F;
+
+  --diff-remove-bg: #FFEBE9;
+  --diff-remove-text: #82071E;
+  --diff-remove-border: #FF8182;
+
+  --skeleton-bg: #E8E5E1;
+  --skeleton-shine: #F2EFEA;
+
+  --shadow-sm: 0 1px 2px rgba(26, 25, 24, 0.05);
+  --shadow-md: 0 4px 12px rgba(26, 25, 24, 0.08);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --bg-window: #1C1B1A;
+  --bg-surface: #252423;
+  --bg-surface-hover: #302E2D;
+  --bg-surface-active: #3C3A38;
+  --border-subtle: #333130;
+  --border-strong: #4A4745;
+
+  --text-primary: #EDEBE9;
+  --text-secondary: #98938E;
+  --text-tertiary: #6E6A66;
+
+  --accent: #4D8DFF;
+  --accent-hover: #70A4FF;
+  --accent-subtle: #1C2C4A;
+  --accent-contrast: #0E1A2E;
+
+  --diff-add-bg: #12261E;
+  --diff-add-text: #3FB950;
+  --diff-add-border: #1B4B32;
+
+  --diff-remove-bg: #2D1416;
+  --diff-remove-text: #F85149;
+  --diff-remove-border: #5C1D24;
+
+  --skeleton-bg: #2B2A29;
+  --skeleton-shine: #383634;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Colorblind Mode Override: Xanh lá/Đỏ chuyển sang Xanh dương/Cam */
+[data-colorblind="true"] {
+  /* Light Colorblind */
+  --diff-add-bg: #E0F2FE;
+  --diff-add-text: #0369A1;
+  --diff-add-border: #7DD3FC;
+
+  --diff-remove-bg: #FEF3C7;
+  --diff-remove-text: #B45309;
+  --diff-remove-border: #FCD34D;
+}
+
+[data-theme="dark"][data-colorblind="true"] {
+  /* Dark Colorblind */
+  --diff-add-bg: #0C283E;
+  --diff-add-text: #38BDF8;
+  --diff-add-border: #0369A1;
+
+  --diff-remove-bg: #3E240C;
+  --diff-remove-text: #FBBF24;
+  --diff-remove-border: #B45309;
+}
+
+/* Tôn trọng người dùng tắt hiệu ứng chuyển động */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

@@ -1,0 +1,66 @@
+import { Translations } from "./vi";
+
+export const en: Translations = {
+  appTitle: "Visual Git",
+  m0Badge: "Milestone M0: Foundation Shell",
+  screens: {
+    welcome: "Welcome",
+    changes: "Changes",
+    history: "History",
+    conflict: "Conflict Resolver",
+  },
+  gitActions: {
+    simple: {
+      fetch: "Check Remote Updates",
+      pull: "Get Latest Changes",
+      push: "Upload Changes",
+      branch: "Working Branch",
+      commit: "Save Changes",
+      stage: "Mark for Saving",
+      unstage: "Unmark",
+      discard: "Discard Changes",
+    },
+    advanced: {
+      fetch: "Fetch",
+      pull: "Pull",
+      push: "Push",
+      branch: "Branch",
+      commit: "Commit",
+      stage: "Stage",
+      unstage: "Unstage",
+      discard: "Discard Changes",
+    },
+  },
+  settings: {
+    theme: "Theme",
+    themeLight: "Light",
+    themeDark: "Dark",
+    themeSystem: "System Default",
+    colorblind: "Colorblind Mode",
+    colorblindOn: "Enabled",
+    colorblindOff: "Disabled",
+    language: "Language",
+    mode: "Git Mode",
+    modeSimple: "Simple (Friendly)",
+    modeAdvanced: "Advanced (Standard Git)",
+  },
+  ipc: {
+    testButton: "Test Rust IPC",
+    pingResponse: "Response from Rust",
+    systemInfo: "System Info",
+    triggerEvent: "Simulate Repo Changed Event",
+    lastEvent: "Latest Received Event",
+    noEventsYet: "No events received from backend yet",
+  },
+  shell: {
+    sidebarTitle: "Repos & Branches",
+    graphTitle: "History Graph & Changes",
+    detailTitle: "Details & Commit",
+    emptyPlaceholder: "3-column layout shell ready for M1 (Git Viewer)",
+    localBranches: "Local Branches",
+    remoteBranches: "Remote Branches",
+    stagedFiles: "Staged Files",
+    unstagedFiles: "Unstaged Files",
+  },
+};
+

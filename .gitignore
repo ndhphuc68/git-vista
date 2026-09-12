@@ -35,6 +35,7 @@ lerna-debug.log*
 *.tsbuildinfo
 coverage/
 .nyc_output/
+.codegraph/
 
 # Editor / IDE
 .vscode/*

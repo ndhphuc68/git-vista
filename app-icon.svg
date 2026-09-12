@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2F6FEB"/>
+      <stop offset="100%" stop-color="#1A4DB8"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Background rounded rect -->
+  <rect width="512" height="512" rx="115" fill="url(#bgGrad)"/>
+
+  <!-- Git Graph Node paths -->
+  <g filter="url(#shadow)" stroke="#FFFFFF" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Main branch line -->
+    <path d="M 160 120 L 160 392" />
+    
+    <!-- Feature branch curved path -->
+    <path d="M 160 256 C 220 256, 260 200, 320 200 L 352 200" />
+    <path d="M 352 200 C 352 300, 240 392, 160 392" />
+  </g>
+
+  <!-- Git commit circles -->
+  <circle cx="160" cy="120" r="32" fill="#FFFFFF" />
+  <circle cx="160" cy="256" r="32" fill="#FFFFFF" />
+  <circle cx="352" cy="200" r="32" fill="#FFFFFF" />
+  <circle cx="160" cy="392" r="36" fill="#FFFFFF" />
+  <circle cx="160" cy="392" r="18" fill="#2F6FEB" />
+</svg>
+
