@@ -33,7 +33,7 @@
 - Consumes: Existing project dependencies.
 - Produces: `@tanstack/react-virtual` in frontend, `rfd` crate in backend.
 
-- [ ] **Step 1: Write failing test verifying @tanstack/react-virtual and rfd availability**
+- [x] **Step 1: Write failing test verifying @tanstack/react-virtual and rfd availability**
 
 In `src/test/setup.ts`, verify `@tanstack/react-virtual` import can be resolved:
 ```typescript
@@ -46,12 +46,12 @@ describe("Task 1 Dependencies", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm test src/test/setup.ts`
 Expected: FAIL with "Cannot find module '@tanstack/react-virtual'"
 
-- [ ] **Step 3: Add dependencies to package.json and Cargo.toml**
+- [x] **Step 3: Add dependencies to package.json and Cargo.toml**
 
 In `package.json` dependencies:
 Add `"@tanstack/react-virtual": "^3.13.2"`
@@ -64,7 +64,7 @@ Run package installation:
 pnpm install
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm test src/test/setup.ts`
 Expected: PASS
@@ -75,7 +75,7 @@ cargo check --manifest-path src-tauri/Cargo.toml
 ```
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add package.json pnpm-lock.yaml src-tauri/Cargo.toml src-tauri/Cargo.lock src/test/setup.ts
@@ -102,7 +102,7 @@ git commit -m "chore(m1): add @tanstack/react-virtual and rfd dependencies"
   - Command: `get_recent_repos() -> Result<Vec<RecentRepoEntry>, AppError>`
   - Command: `select_repo_folder() -> Result<Option<String>, AppError>`
 
-- [ ] **Step 1: Write the failing integration test**
+- [x] **Step 1: Write the failing integration test**
 
 Create `src-tauri/tests/m1_repo_test.rs`:
 ```rust
@@ -126,12 +126,12 @@ fn test_open_repository_and_recent_tracking() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cargo test --test m1_repo_test --manifest-path src-tauri/Cargo.toml`
 Expected: FAIL with "open_repository not found in commands"
 
-- [ ] **Step 3: Implement recent repo storage and open_repository commands**
+- [x] **Step 3: Implement recent repo storage and open_repository commands**
 
 Create `src-tauri/src/repo/recent.rs`:
 ```rust
@@ -325,12 +325,12 @@ pub use app::*;
 pub use repo::*;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cargo test --test m1_repo_test --manifest-path src-tauri/Cargo.toml`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src-tauri/src/repo src-tauri/src/commands src-tauri/tests/m1_repo_test.rs
@@ -354,7 +354,7 @@ git commit -m "feat(m1): implement open_repository, get_recent_repos and select_
   - `pub struct BranchListResult { pub current_branch: Option<String>, pub is_detached: bool, pub local: Vec<BranchItem>, pub remote: Vec<BranchItem>, pub tags: Vec<String> }`
   - Command: `get_branches(repo_path: String) -> Result<BranchListResult, AppError>`
 
-- [ ] **Step 1: Write the failing integration test**
+- [x] **Step 1: Write the failing integration test**
 
 Create `src-tauri/tests/m1_branch_test.rs`:
 ```rust
@@ -378,12 +378,12 @@ fn test_get_branches_lists_local_and_head() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cargo test --test m1_branch_test --manifest-path src-tauri/Cargo.toml`
 Expected: FAIL with "get_branches not found"
 
-- [ ] **Step 3: Implement get_branches in read module and command**
+- [x] **Step 3: Implement get_branches in read module and command**
 
 Create `src-tauri/src/read/branches.rs`:
 ```rust
@@ -492,12 +492,12 @@ pub fn get_branches(repo_path: String) -> Result<crate::read::BranchListResult, 
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cargo test --test m1_branch_test --manifest-path src-tauri/Cargo.toml`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src-tauri/src/read/branches.rs src-tauri/src/read/mod.rs src-tauri/src/commands/repo.rs src-tauri/tests/m1_branch_test.rs
@@ -523,7 +523,7 @@ git commit -m "feat(m1): implement branch and tag listing backend"
   - `pub struct CommitGraphPage { pub commits: Vec<GraphCommitNode>, pub has_more: bool, pub total_count: usize }`
   - Command: `get_commit_graph(repo_path: String, offset: usize, limit: usize) -> Result<CommitGraphPage, AppError>`
 
-- [ ] **Step 1: Write failing test for graph layout**
+- [x] **Step 1: Write failing test for graph layout**
 
 Create `src-tauri/tests/m1_graph_test.rs`:
 ```rust
@@ -555,12 +555,12 @@ fn test_get_commit_graph_layout_and_pagination() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cargo test --test m1_graph_test --manifest-path src-tauri/Cargo.toml`
 Expected: FAIL with "get_commit_graph not found"
 
-- [ ] **Step 3: Implement lane layout algorithm in graph.rs**
+- [x] **Step 3: Implement lane layout algorithm in graph.rs**
 
 Create `src-tauri/src/read/graph.rs`:
 ```rust
@@ -795,12 +795,12 @@ pub fn get_commit_graph(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cargo test --test m1_graph_test --manifest-path src-tauri/Cargo.toml`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src-tauri/src/read/graph.rs src-tauri/src/read/mod.rs src-tauri/src/commands/repo.rs src-tauri/tests/m1_graph_test.rs
@@ -829,7 +829,7 @@ git commit -m "feat(m1): implement topological commit graph with SVG lane alloca
   - Command: `get_commit_details(repo_path: String, commit_id: String) -> Result<CommitDetails, AppError>`
   - Command: `get_commit_file_diff(repo_path: String, commit_id: String, file_path: String) -> Result<FileDiffResult, AppError>`
 
-- [ ] **Step 1: Write failing integration test for details and diff**
+- [x] **Step 1: Write failing integration test for details and diff**
 
 Create `src-tauri/tests/m1_diff_test.rs`:
 ```rust
@@ -862,12 +862,12 @@ fn test_commit_details_and_file_diff() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cargo test --test m1_diff_test --manifest-path src-tauri/Cargo.toml`
 Expected: FAIL with "get_commit_details not found"
 
-- [ ] **Step 3: Implement diff parsing and caching in diff.rs**
+- [x] **Step 3: Implement diff parsing and caching in diff.rs**
 
 Create `src-tauri/src/read/diff.rs`:
 ```rust
@@ -1176,12 +1176,12 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cargo test --test m1_diff_test --manifest-path src-tauri/Cargo.toml`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src-tauri/src/read/diff.rs src-tauri/src/read/mod.rs src-tauri/src/commands/repo.rs src-tauri/src/lib.rs src-tauri/tests/m1_diff_test.rs
@@ -1204,7 +1204,7 @@ git commit -m "feat(m1): implement commit details, file diff with in-memory cach
   - `useRepoStore` hook: `currentRepo: RepoSummary | null`, `selectedCommitId: string | null`, `selectedFilePath: string | null`, `selectedBranch: string | null`, `setRepo`, `setSelectedCommit`, `setSelectedFile`, `setSelectedBranch`, `clearRepo`.
   - Typed IPC methods in `invokeCommand`: `openRepository`, `getRecentRepos`, `selectRepoFolder`, `getBranches`, `getCommitGraph`, `getCommitDetails`, `getCommitFileDiff`.
 
-- [ ] **Step 1: Write failing test for useRepoStore**
+- [x] **Step 1: Write failing test for useRepoStore**
 
 Create `src/test/useRepoStore.test.ts`:
 ```typescript
@@ -1245,12 +1245,12 @@ describe("useRepoStore", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm test src/test/useRepoStore.test.ts`
 Expected: FAIL with "Cannot find module '../store/useRepoStore'"
 
-- [ ] **Step 3: Update IPC bindings, client, and implement useRepoStore**
+- [x] **Step 3: Update IPC bindings, client, and implement useRepoStore**
 
 Update `src/ipc/bindings.ts` with the M1 exported types:
 ```typescript
@@ -1527,12 +1527,12 @@ export const useRepoStore = create<RepoState>((set) => ({
 }));
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm test src/test/useRepoStore.test.ts`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/ipc/bindings.ts src/ipc/client.ts src/store/useRepoStore.ts src/test/useRepoStore.test.ts
@@ -2858,3 +2858,4 @@ Plan complete and saved to `docs/superpowers/plans/2026-09-12-m1-git-viewer.md`.
 2. **Inline Execution** - Execute tasks in this session using executing-plans, batch execution with checkpoints.
 
 Which approach?
+
