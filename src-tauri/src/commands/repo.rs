@@ -52,3 +52,22 @@ pub fn get_commit_graph(
     crate::read::get_repo_commit_graph(repo_path, offset, limit)
 }
 
+#[tauri::command]
+#[specta::specta]
+pub fn get_commit_details(
+    repo_path: String,
+    commit_id: String,
+) -> Result<crate::read::CommitDetails, AppError> {
+    crate::read::get_commit_info(repo_path, &commit_id)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn get_commit_file_diff(
+    repo_path: String,
+    commit_id: String,
+    file_path: String,
+) -> Result<crate::read::FileDiffResult, AppError> {
+    crate::read::get_file_diff(repo_path, &commit_id, &file_path)
+}
+

@@ -14,7 +14,14 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         ping,
         get_system_info,
         get_repo_head_info,
-        simulate_repo_change
+        simulate_repo_change,
+        open_repository,
+        get_recent_repos,
+        select_repo_folder,
+        get_branches,
+        get_commit_graph,
+        get_commit_details,
+        get_commit_file_diff
     ])
 }
 

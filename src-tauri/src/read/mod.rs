@@ -3,9 +3,11 @@
 //! Có thể gọi song song từ nhiều thread mà không cần khoá.
 
 pub mod branches;
+pub mod diff;
 pub mod graph;
 
 pub use branches::*;
+pub use diff::*;
 pub use graph::*;
 
 use crate::error::AppError;
