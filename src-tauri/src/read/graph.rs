@@ -9,10 +9,10 @@ const NUM_COLORS: usize = 6;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct GraphEdge {
-    pub from_col: usize,
-    pub to_col: usize,
+    pub from_col: u32,
+    pub to_col: u32,
     pub edge_type: String, // "straight", "fork", "merge"
-    pub color_index: usize,
+    pub color_index: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -28,10 +28,10 @@ pub struct GraphCommitNode {
     pub summary: String,
     pub author_name: String,
     pub author_email: String,
-    pub timestamp_sec: i64,
+    pub timestamp_sec: f64,
     pub parent_ids: Vec<String>,
-    pub col: usize,
-    pub color_index: usize,
+    pub col: u32,
+    pub color_index: u32,
     pub lines: Vec<GraphEdge>,
     pub refs: Vec<RefBadge>,
 }
@@ -40,14 +40,16 @@ pub struct GraphCommitNode {
 pub struct CommitGraphPage {
     pub commits: Vec<GraphCommitNode>,
     pub has_more: bool,
-    pub total_count: usize,
+    pub total_count: u32,
 }
 
 pub fn get_repo_commit_graph<P: AsRef<Path>>(
     repo_path: P,
-    offset: usize,
-    limit: usize,
+    offset: u32,
+    limit: u32,
 ) -> Result<CommitGraphPage, AppError> {
+    let offset = offset as usize;
+    let limit = limit as usize;
     let repo = Repository::open(repo_path.as_ref())?;
 
     if repo.is_empty()? {
@@ -115,10 +117,10 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
         for (i, slot) in active_lanes.iter().enumerate() {
             if i != col && slot.is_some() {
                 edges.push(GraphEdge {
-                    from_col: i,
-                    to_col: i,
+                    from_col: i as u32,
+                    to_col: i as u32,
                     edge_type: "straight".to_string(),
-                    color_index: i % NUM_COLORS,
+                    color_index: (i % NUM_COLORS) as u32,
                 });
             }
         }
@@ -127,10 +129,10 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
         if let Some(first_parent) = parent_oids.first() {
             active_lanes[col] = Some(*first_parent);
             edges.push(GraphEdge {
-                from_col: col,
-                to_col: col,
+                from_col: col as u32,
+                to_col: col as u32,
                 edge_type: "straight".to_string(),
-                color_index,
+                color_index: color_index as u32,
             });
 
             // Extra merge parents
@@ -149,10 +151,10 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
                     },
                 };
                 edges.push(GraphEdge {
-                    from_col: col,
-                    to_col,
+                    from_col: col as u32,
+                    to_col: to_col as u32,
                     edge_type: "fork".to_string(),
-                    color_index: to_col % NUM_COLORS,
+                    color_index: (to_col % NUM_COLORS) as u32,
                 });
             }
         } else {
@@ -169,7 +171,7 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
         let author = commit.author();
         let author_name = author.name().unwrap_or("Unknown").to_string();
         let author_email = author.email().unwrap_or("").to_string();
-        let timestamp_sec = commit.time().seconds();
+        let timestamp_sec = commit.time().seconds() as f64;
         let parent_ids: Vec<String> = parent_oids.iter().map(|p| p.to_string()).collect();
 
         let badges = ref_map.remove(oid).unwrap_or_default();
@@ -184,8 +186,8 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
             author_email,
             timestamp_sec,
             parent_ids,
-            col,
-            color_index,
+            col: col as u32,
+            color_index: color_index as u32,
             lines: edges,
             refs: badges,
         });
@@ -202,7 +204,7 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
     Ok(CommitGraphPage {
         commits,
         has_more,
-        total_count,
+        total_count: total_count as u32,
     })
 }
 

@@ -5,11 +5,11 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq)]
 pub struct RecentRepoEntry {
     pub path: String,
     pub name: String,
-    pub last_opened_at_ms: u64,
+    pub last_opened_at_ms: f64,
 }
 
 pub struct RecentRepoStore {
@@ -41,7 +41,7 @@ impl RecentRepoStore {
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default()
-            .as_millis() as u64;
+            .as_millis() as f64;
 
         list.retain(|item| item.path != path_str);
         list.insert(

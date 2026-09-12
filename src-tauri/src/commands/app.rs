@@ -45,7 +45,7 @@ pub fn simulate_repo_change(app: tauri::AppHandle, repo_path: String) -> Result<
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default()
-        .as_millis() as u64;
+        .as_millis() as f64;
 
     let payload = RepoChangedPayload {
         repo_path,

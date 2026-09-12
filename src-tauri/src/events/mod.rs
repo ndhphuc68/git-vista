@@ -6,7 +6,7 @@ use tauri_specta::Event;
 pub struct RepoChangedPayload {
     pub repo_path: String,
     pub reason: String,
-    pub timestamp_ms: u64,
+    pub timestamp_ms: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]

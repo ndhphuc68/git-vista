@@ -46,8 +46,8 @@ pub fn get_branches(repo_path: String) -> Result<crate::read::BranchListResult, 
 #[specta::specta]
 pub fn get_commit_graph(
     repo_path: String,
-    offset: usize,
-    limit: usize,
+    offset: u32,
+    limit: u32,
 ) -> Result<crate::read::CommitGraphPage, AppError> {
     crate::read::get_repo_commit_graph(repo_path, offset, limit)
 }

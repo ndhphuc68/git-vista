@@ -29,13 +29,10 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
 pub fn run() {
     let specta_builder = create_specta_builder();
 
-    #[cfg(debug_assertions)]
-    specta_builder
-        .export(
-            specta_typescript::Typescript::default(),
-            "../src/ipc/bindings.ts",
-        )
-        .expect("Failed to export typescript bindings");
+    // Không tự động ghi đè src/ipc/bindings.ts: file đó được viết tay và
+    // giữ hình dạng IPC riêng (invokeCommand trả Promise<T> trực tiếp, có
+    // fallback mock cho môi trường browser dev), khác với format mà
+    // tauri-specta tự sinh ra (commands.* trả {status, data|error}).
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())

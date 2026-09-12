@@ -10,8 +10,8 @@ use std::sync::Mutex;
 pub struct CommitChangedFile {
     pub path: String,
     pub status: String,
-    pub additions: usize,
-    pub deletions: usize,
+    pub additions: u32,
+    pub deletions: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -20,11 +20,11 @@ pub struct CommitDetails {
     pub full_message: String,
     pub author_name: String,
     pub author_email: String,
-    pub author_timestamp_sec: i64,
+    pub author_timestamp_sec: f64,
     pub parent_ids: Vec<String>,
     pub files: Vec<CommitChangedFile>,
-    pub total_additions: usize,
-    pub total_deletions: usize,
+    pub total_additions: u32,
+    pub total_deletions: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -50,8 +50,8 @@ pub struct FileDiffResult {
     pub file_path: String,
     pub status: String,
     pub hunks: Vec<DiffHunk>,
-    pub additions: usize,
-    pub deletions: usize,
+    pub additions: u32,
+    pub deletions: u32,
 }
 
 static DIFF_CACHE: Mutex<Option<HashMap<(String, String), FileDiffResult>>> = Mutex::new(None);
@@ -86,8 +86,8 @@ pub fn get_commit_info<P: AsRef<Path>>(
 
     let diff = repo.diff_tree_to_tree(parent_tree.as_ref(), Some(&commit_tree), None)?;
     let mut files = Vec::new();
-    let mut total_additions = 0;
-    let mut total_deletions = 0;
+    let mut total_additions: u32 = 0;
+    let mut total_deletions: u32 = 0;
 
     let deltas: Vec<_> = diff.deltas().collect();
     for (idx, delta) in deltas.into_iter().enumerate() {
@@ -106,12 +106,12 @@ pub fn get_commit_info<P: AsRef<Path>>(
         };
 
         let mut patch = git2::Patch::from_diff(&diff, idx)?;
-        let mut additions = 0;
-        let mut deletions = 0;
+        let mut additions: u32 = 0;
+        let mut deletions: u32 = 0;
         if let Some(ref mut p) = patch {
             let (_, adds, dels) = p.line_stats()?;
-            additions = adds;
-            deletions = dels;
+            additions = adds as u32;
+            deletions = dels as u32;
         }
 
         total_additions += additions;
@@ -130,7 +130,7 @@ pub fn get_commit_info<P: AsRef<Path>>(
     let author_name = author.name().unwrap_or("Unknown").to_string();
     let author_email = author.email().unwrap_or("").to_string();
     let full_message = commit.message().unwrap_or("").to_string();
-    let author_timestamp_sec = commit.time().seconds();
+    let author_timestamp_sec = commit.time().seconds() as f64;
 
     Ok(CommitDetails {
         id: commit_id_str.to_string(),
@@ -172,8 +172,8 @@ pub fn get_file_diff<P: AsRef<Path>>(
     let diff = repo.diff_tree_to_tree(parent_tree.as_ref(), Some(&commit_tree), Some(&mut opts))?;
 
     let mut hunks: Vec<DiffHunk> = Vec::new();
-    let mut additions = 0;
-    let mut deletions = 0;
+    let mut additions: u32 = 0;
+    let mut deletions: u32 = 0;
     let mut status = "modified".to_string();
 
     if let Some(delta) = diff.deltas().next() {
