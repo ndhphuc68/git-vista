@@ -57,8 +57,3 @@ Desktop.ini
 test-results/
 playwright-report/
 wdio-logs/
-
-# Công cụ agent (cục bộ, không chia sẻ)
-.agents/
-.claude/
-skills-lock.json
