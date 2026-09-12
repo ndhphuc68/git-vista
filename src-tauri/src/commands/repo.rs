@@ -35,3 +35,10 @@ pub fn select_repo_folder() -> Result<Option<String>, AppError> {
         .pick_folder();
     Ok(picked.map(|p| p.to_string_lossy().to_string()))
 }
+
+#[tauri::command]
+#[specta::specta]
+pub fn get_branches(repo_path: String) -> Result<crate::read::BranchListResult, AppError> {
+    crate::read::list_repo_branches(repo_path)
+}
+

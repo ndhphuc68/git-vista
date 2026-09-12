@@ -2,6 +2,9 @@
 //! Quy tắc bất biến: Module này KHÔNG BAO GIỜ ghi hay thay đổi trạng thái repo.
 //! Có thể gọi song song từ nhiều thread mà không cần khoá.
 
+pub mod branches;
+pub use branches::*;
+
 use crate::error::AppError;
 use serde::{Deserialize, Serialize};
 use specta::Type;
