@@ -1552,7 +1552,7 @@ git commit -m "feat(m1): add M1 types, client invocation fallbacks and useRepoSt
 - Consumes: `useRepoStore`, `invokeCommand.getRecentRepos`, `invokeCommand.openRepository`, `invokeCommand.selectRepoFolder`.
 - Produces: `<WelcomeScreen onOpenRepo={...} />`, `<RepoHeader onSwitchRepo={...} />`.
 
-- [ ] **Step 1: Write failing test for WelcomeScreen**
+- [x] **Step 1: Write failing test for WelcomeScreen**
 
 Create `src/test/WelcomeScreen.test.tsx`:
 ```typescript
@@ -1585,12 +1585,12 @@ describe("WelcomeScreen", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm test src/test/WelcomeScreen.test.tsx`
 Expected: FAIL with "Cannot find module '../components/welcome/WelcomeScreen'"
 
-- [ ] **Step 3: Implement WelcomeScreen and RepoHeader**
+- [x] **Step 3: Implement WelcomeScreen and RepoHeader**
 
 Create `src/components/welcome/WelcomeScreen.tsx`:
 ```tsx
@@ -1834,12 +1834,12 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
 };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm test src/test/WelcomeScreen.test.tsx`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/welcome/WelcomeScreen.tsx src/components/header/RepoHeader.tsx src/test/WelcomeScreen.test.tsx
@@ -1858,7 +1858,7 @@ git commit -m "feat(m1): implement WelcomeScreen and RepoHeader components"
 - Consumes: `useRepoStore`, `invokeCommand.getBranches`.
 - Produces: `<BranchSidebar />`.
 
-- [ ] **Step 1: Write failing test for BranchSidebar**
+- [x] **Step 1: Write failing test for BranchSidebar**
 
 Create `src/test/BranchSidebar.test.tsx`:
 ```typescript
@@ -1894,12 +1894,12 @@ describe("BranchSidebar", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm test src/test/BranchSidebar.test.tsx`
 Expected: FAIL with "Cannot find module '../components/sidebar/BranchSidebar'"
 
-- [ ] **Step 3: Implement BranchSidebar component**
+- [x] **Step 3: Implement BranchSidebar component**
 
 Create `src/components/sidebar/BranchSidebar.tsx`:
 ```tsx
@@ -2140,12 +2140,12 @@ export const BranchSidebar: React.FC = () => {
 };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm test src/test/BranchSidebar.test.tsx`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/sidebar/BranchSidebar.tsx src/test/BranchSidebar.test.tsx
@@ -2165,7 +2165,7 @@ git commit -m "feat(m1): implement BranchSidebar with local, remote and tag tree
 - Consumes: `@tanstack/react-virtual`, `useRepoStore`, `invokeCommand.getCommitGraph`.
 - Produces: `<CommitGraph />` rendering virtualized rows with SVG lanes and commit selection.
 
-- [ ] **Step 1: Write failing test for CommitGraph**
+- [x] **Step 1: Write failing test for CommitGraph**
 
 Create `src/test/CommitGraph.test.tsx`:
 ```typescript
@@ -2202,12 +2202,12 @@ describe("CommitGraph", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm test src/test/CommitGraph.test.tsx`
 Expected: FAIL with "Cannot find module '../components/graph/CommitGraph'"
 
-- [ ] **Step 3: Implement GraphSvgLane and CommitGraph**
+- [x] **Step 3: Implement GraphSvgLane and CommitGraph**
 
 Create `src/components/graph/GraphSvgLane.tsx`:
 ```tsx
@@ -2446,12 +2446,12 @@ export const CommitGraph: React.FC = () => {
 };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm test src/test/CommitGraph.test.tsx`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/graph/CommitGraph.tsx src/components/graph/GraphSvgLane.tsx src/test/CommitGraph.test.tsx
@@ -2471,7 +2471,7 @@ git commit -m "feat(m1): implement virtualized commit graph with lane SVG render
 - Consumes: `useRepoStore`, `invokeCommand.getCommitDetails`, `invokeCommand.getCommitFileDiff`.
 - Produces: `<CommitDetailPanel />` showing commit metadata, files list, and line-by-line diff.
 
-- [ ] **Step 1: Write failing test for CommitDetailPanel**
+- [x] **Step 1: Write failing test for CommitDetailPanel**
 
 Create `src/test/CommitDetailPanel.test.tsx`:
 ```typescript
@@ -2509,12 +2509,12 @@ describe("CommitDetailPanel", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm test src/test/CommitDetailPanel.test.tsx`
 Expected: FAIL with "Cannot find module '../components/diff/CommitDetailPanel'"
 
-- [ ] **Step 3: Implement FileDiffViewer and CommitDetailPanel**
+- [x] **Step 3: Implement FileDiffViewer and CommitDetailPanel**
 
 Create `src/components/diff/FileDiffViewer.tsx`:
 ```tsx
@@ -2785,12 +2785,12 @@ export const CommitDetailPanel: React.FC = () => {
 };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm test src/test/CommitDetailPanel.test.tsx`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/diff/CommitDetailPanel.tsx src/components/diff/FileDiffViewer.tsx src/test/CommitDetailPanel.test.tsx
@@ -2810,19 +2810,19 @@ git commit -m "feat(m1): implement CommitDetailPanel and FileDiffViewer"
 - Consumes: `WelcomeScreen`, `RepoHeader`, `BranchSidebar`, `CommitGraph`, `CommitDetailPanel`, `useRepoStore`.
 - Produces: Complete working Visual Git Viewer UI for Milestone M1.
 
-- [ ] **Step 1: Write integration tests for M1 app shell**
+- [x] **Step 1: Write integration tests for M1 app shell**
 
 Update `src/test/App.test.tsx` to verify:
 - Welcome screen is rendered initially when no repo is selected.
 - Selecting a repo displays RepoHeader, BranchSidebar, CommitGraph, and CommitDetailPanel.
 - Clicking a commit displays its details and diff.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm test src/test/App.test.tsx`
 Expected: FAIL (shell does not yet mount M1 components)
 
-- [ ] **Step 3: Wire components into Shell.tsx and App.tsx**
+- [x] **Step 3: Wire components into Shell.tsx and App.tsx**
 
 In `src/components/Shell.tsx`:
 Mount `BranchSidebar`, `CommitGraph`, and `CommitDetailPanel` in a responsive 3-column layout.
@@ -2831,7 +2831,7 @@ In `src/App.tsx`:
 Check `currentRepo`. If `null`, render `<WelcomeScreen onSelectRepo={setRepo} />`.
 If `currentRepo` exists, render `<RepoHeader onBackToWelcome={clearRepo} />` and `<Shell />`.
 
-- [ ] **Step 4: Run test to verify all tests pass**
+- [x] **Step 4: Run test to verify all tests pass**
 
 Run frontend tests:
 `pnpm test`
@@ -2841,7 +2841,7 @@ Run backend tests:
 `cargo test --manifest-path src-tauri/Cargo.toml`
 Expected: All tests PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/Shell.tsx src/App.tsx src/test/App.test.tsx
