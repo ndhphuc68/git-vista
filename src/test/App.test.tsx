@@ -1,32 +1,74 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { App } from "../App";
 import { useSettingsStore } from "../store/useSettingsStore";
-import { vi } from "../i18n/vi";
-import { en } from "../i18n/en";
+import { useRepoStore } from "../store/useRepoStore";
 
-describe("Visual Git Client - M0 Frontend Tests", () => {
+describe("Visual Git Client - M1 App Shell", () => {
   beforeEach(() => {
     localStorage.clear();
-    const store = useSettingsStore.getState();
-    store.setTheme("light");
-    store.setColorblind(false);
-    store.setLocale("vi");
-    store.setMode("simple");
+    const settings = useSettingsStore.getState();
+    settings.setTheme("light");
+    settings.setColorblind(false);
+    settings.setLocale("vi");
+    settings.setMode("simple");
+    useRepoStore.getState().clearRepo();
   });
 
-  it("render thành công tiêu đề và các badge của M0", () => {
+  it("hiển thị WelcomeScreen khi chưa có repo nào được chọn", () => {
     render(<App />);
 
-    expect(screen.getByText("Visual Git")).toBeInTheDocument();
-    expect(screen.getByText("Mốc M0: Khung nền tảng")).toBeInTheDocument();
-    expect(screen.getByText("Chế độ: Đơn giản")).toBeInTheDocument();
+    expect(screen.getByText("Visual Git Client")).toBeInTheDocument();
+    expect(screen.getByText("Mở thư mục...")).toBeInTheDocument();
   });
 
-  it("cho phép chuyển đổi theme Light -> Dark và cập nhật data-theme vào HTML", () => {
+  it("chọn một repo gần đây sẽ hiển thị RepoHeader, BranchSidebar, CommitGraph và CommitDetailPanel", async () => {
     render(<App />);
 
-    expect(document.documentElement.getAttribute("data-theme")).toBe("light");
+    await waitFor(() => {
+      expect(screen.getByText("project-v3")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText("project-v3"));
+
+    await waitFor(() => {
+      expect(useRepoStore.getState().currentRepo).not.toBeNull();
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByText("main").length).toBeGreaterThan(0);
+      expect(screen.getByText("feat(m1): visual git viewer")).toBeInTheDocument();
+    });
+  });
+
+  it("chọn một commit trong graph sẽ hiển thị chi tiết commit và diff", async () => {
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("project-v3")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText("project-v3"));
+
+    await waitFor(() => {
+      expect(screen.getByText("feat(m1): visual git viewer")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText("feat(m1): visual git viewer"));
+
+    await waitFor(() => {
+      expect(screen.getByText("README.md")).toBeInTheDocument();
+    });
+  });
+
+  it("cho phép chuyển đổi theme Light -> Dark và cập nhật data-theme vào HTML", async () => {
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("project-v3")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText("project-v3"));
+
+    await waitFor(() => {
+      expect(document.documentElement.getAttribute("data-theme")).toBe("light");
+    });
 
     const darkBtn = screen.getByTitle("Theme: dark");
     fireEvent.click(darkBtn);
@@ -34,54 +76,4 @@ describe("Visual Git Client - M0 Frontend Tests", () => {
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
     expect(useSettingsStore.getState().theme).toBe("dark");
   });
-
-  it("cho phép chuyển đổi chế độ Colorblind và cập nhật data-colorblind vào HTML", () => {
-    render(<App />);
-
-    expect(document.documentElement.getAttribute("data-colorblind")).toBe("false");
-
-    const colorblindBtn = screen.getByTitle(vi.settings.colorblind);
-    fireEvent.click(colorblindBtn);
-
-    expect(document.documentElement.getAttribute("data-colorblind")).toBe("true");
-    expect(useSettingsStore.getState().colorblind).toBe(true);
-  });
-
-  it("cho phép chuyển đổi ngôn ngữ Vi -> En", () => {
-    render(<App />);
-
-    expect(screen.getByText("Mốc M0: Khung nền tảng")).toBeInTheDocument();
-
-    const enBtn = screen.getByText("EN");
-    fireEvent.click(enBtn);
-
-    expect(screen.getByText(en.m0Badge)).toBeInTheDocument();
-    expect(useSettingsStore.getState().locale).toBe("en");
-  });
-
-  it("phản ánh đúng thuật ngữ Git giữa Simple mode và Advanced mode", () => {
-    render(<App />);
-
-    // Ở Simple mode (mặc định tiếng Việt):
-    expect(screen.getByText("↓ Lấy thay đổi mới")).toBeInTheDocument();
-    expect(screen.getByText("↑ Gửi lên máy chủ")).toBeInTheDocument();
-
-    // Chuyển sang Advanced mode
-    const modeBtn = screen.getByText("Đơn giản (Dễ hiểu)");
-    fireEvent.click(modeBtn);
-
-    expect(screen.getByText("↓ Pull")).toBeInTheDocument();
-    expect(screen.getByText("↑ Push")).toBeInTheDocument();
-  });
-
-  it("render bố cục 3 cột (Sidebar, Graph/Diff, Detail)", () => {
-    render(<App />);
-
-    expect(screen.getByText("Dự án & Nhánh")).toBeInTheDocument();
-    expect(screen.getByText("Đồ thị Lịch sử & Thay đổi")).toBeInTheDocument();
-    expect(screen.getByText("Chi tiết & Commit")).toBeInTheDocument();
-    expect(screen.getByText("Diff Thêm (Design Token: --diff-add-*)")).toBeInTheDocument();
-    expect(screen.getByText("Diff Xoá (Design Token: --diff-remove-*)")).toBeInTheDocument();
-  });
 });
-

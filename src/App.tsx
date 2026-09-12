@@ -3,7 +3,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Titlebar } from "./components/Titlebar";
 import { ControlsBar } from "./components/ControlsBar";
 import { Shell } from "./components/Shell";
+import { WelcomeScreen } from "./components/welcome/WelcomeScreen";
+import { RepoHeader } from "./components/header/RepoHeader";
 import { listenToRepoChanged, RepoChangedPayload } from "./ipc/client";
+import { useRepoStore } from "./store/useRepoStore";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,6 +19,7 @@ const queryClient = new QueryClient({
 
 export const App: React.FC = () => {
   const [lastEvent, setLastEvent] = useState<RepoChangedPayload | null>(null);
+  const { currentRepo, setRepo, clearRepo } = useRepoStore();
 
   useEffect(() => {
     let unlistenFn: (() => void) | undefined;
@@ -46,8 +50,15 @@ export const App: React.FC = () => {
         }}
       >
         <Titlebar />
-        <ControlsBar lastEvent={lastEvent} />
-        <Shell />
+        {currentRepo ? (
+          <>
+            <ControlsBar lastEvent={lastEvent} />
+            <RepoHeader onBackToWelcome={clearRepo} />
+            <Shell />
+          </>
+        ) : (
+          <WelcomeScreen onSelectRepo={setRepo} />
+        )}
       </div>
     </QueryClientProvider>
   );
