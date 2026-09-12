@@ -42,3 +42,13 @@ pub fn get_branches(repo_path: String) -> Result<crate::read::BranchListResult, 
     crate::read::list_repo_branches(repo_path)
 }
 
+#[tauri::command]
+#[specta::specta]
+pub fn get_commit_graph(
+    repo_path: String,
+    offset: usize,
+    limit: usize,
+) -> Result<crate::read::CommitGraphPage, AppError> {
+    crate::read::get_repo_commit_graph(repo_path, offset, limit)
+}
+
