@@ -1,4 +1,15 @@
-import { SystemInfo, RepoHeadInfo, RepoChangedPayload, TaskProgressPayload } from "./bindings";
+import {
+  SystemInfo,
+  RepoHeadInfo,
+  RepoChangedPayload,
+  TaskProgressPayload,
+  RepoSummary,
+  RecentRepoEntry,
+  BranchListResult,
+  CommitGraphPage,
+  CommitDetails,
+  FileDiffResult,
+} from "./bindings";
 
 // Helper kiểm tra môi trường chạy có phải trong Tauri runtime không
 export const isTauri = (): boolean => {
@@ -54,6 +65,120 @@ export const invokeCommand = {
     }
     const { invoke } = await import("@tauri-apps/api/core");
     await invoke("simulate_repo_change", { repoPath });
+  },
+
+  openRepository: async (path: string): Promise<RepoSummary> => {
+    if (!isTauri()) {
+      return {
+        path,
+        name: path.split("/").pop() || "mock-repo",
+        is_bare: false,
+        head_branch: "main",
+        head_commit_id: "a1b2c3d",
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<RepoSummary>("open_repository", { path });
+  },
+
+  getRecentRepos: async (): Promise<RecentRepoEntry[]> => {
+    if (!isTauri()) {
+      return [
+        { path: "d:/project-v3", name: "project-v3", last_opened_at_ms: Date.now() - 3600000 },
+      ];
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<RecentRepoEntry[]>("get_recent_repos");
+  },
+
+  selectRepoFolder: async (): Promise<string | null> => {
+    if (!isTauri()) return "d:/project-v3";
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<string | null>("select_repo_folder");
+  },
+
+  getBranches: async (repoPath: string): Promise<BranchListResult> => {
+    if (!isTauri()) {
+      return {
+        current_branch: "main",
+        is_detached: false,
+        local: [{ name: "main", is_head: true, target_commit_id: "c1", upstream: "origin/main" }],
+        remote: [{ name: "origin/main", is_head: false, target_commit_id: "c1", upstream: null }],
+        tags: ["v0.1.0"],
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<BranchListResult>("get_branches", { repoPath });
+  },
+
+  getCommitGraph: async (repoPath: string, offset: number, limit: number): Promise<CommitGraphPage> => {
+    if (!isTauri()) {
+      return {
+        commits: [
+          {
+            id: "1111111111111111111111111111111111111111",
+            short_id: "1111111",
+            summary: "feat(m1): visual git viewer",
+            author_name: "Visual Git Team",
+            author_email: "team@visualgit.dev",
+            timestamp_sec: Math.floor(Date.now() / 1000),
+            parent_ids: [],
+            col: 0,
+            color_index: 0,
+            lines: [],
+            refs: [{ name: "main", ref_type: "head" }],
+          },
+        ],
+        has_more: false,
+        total_count: 1,
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<CommitGraphPage>("get_commit_graph", { repoPath, offset, limit });
+  },
+
+  getCommitDetails: async (repoPath: string, commitId: string): Promise<CommitDetails> => {
+    if (!isTauri()) {
+      return {
+        id: commitId,
+        full_message: "feat(m1): visual git viewer\n\nFull details preview",
+        author_name: "Tester",
+        author_email: "tester@dev.com",
+        author_timestamp_sec: Math.floor(Date.now() / 1000),
+        parent_ids: [],
+        files: [{ path: "README.md", status: "modified", additions: 10, deletions: 2 }],
+        total_additions: 10,
+        total_deletions: 2,
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<CommitDetails>("get_commit_details", { repoPath, commitId });
+  },
+
+  getCommitFileDiff: async (repoPath: string, commitId: string, filePath: string): Promise<FileDiffResult> => {
+    if (!isTauri()) {
+      return {
+        file_path: filePath,
+        status: "modified",
+        additions: 1,
+        deletions: 1,
+        hunks: [
+          {
+            header: "@@ -1,2 +1,2 @@",
+            old_start: 1,
+            old_lines: 2,
+            new_start: 1,
+            new_lines: 2,
+            lines: [
+              { line_type: "delete", content: "- legacy mock line\n", old_lineno: 1, new_lineno: null },
+              { line_type: "add", content: "+ new live line\n", old_lineno: null, new_lineno: 1 },
+            ],
+          },
+        ],
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<FileDiffResult>("get_commit_file_diff", { repoPath, commitId, filePath });
   },
 };
 
