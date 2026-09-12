@@ -86,3 +86,4 @@ pub fn list_repo_branches<P: AsRef<Path>>(repo_path: P) -> Result<BranchListResu
         tags,
     })
 }
+

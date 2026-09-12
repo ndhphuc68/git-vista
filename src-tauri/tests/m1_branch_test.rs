@@ -16,3 +16,4 @@ fn test_get_branches_lists_local_and_head() {
     let head_branch = result.local.iter().find(|b| b.is_head);
     assert!(head_branch.is_some());
 }
+

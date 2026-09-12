@@ -3,7 +3,10 @@
 //! Có thể gọi song song từ nhiều thread mà không cần khoá.
 
 pub mod branches;
+pub mod graph;
+
 pub use branches::*;
+pub use graph::*;
 
 use crate::error::AppError;
 use serde::{Deserialize, Serialize};

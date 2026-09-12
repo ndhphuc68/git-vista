@@ -66,3 +66,4 @@ impl RecentRepoStore {
 fn dirs_fallback() -> PathBuf {
     std::env::temp_dir().join("visual_git_client_data")
 }
+
