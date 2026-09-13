@@ -83,3 +83,6 @@ jobs:
       - name: Tầng 1 - Rust Unit & Git Fixture Integration Tests
         run: cargo test --manifest-path src-tauri/Cargo.toml -- --nocapture
 
+      - name: Tầng 3 - Performance Benchmark Guard
+        run: cargo test --test m5_benchmark_test --manifest-path src-tauri/Cargo.toml -- --nocapture
+
