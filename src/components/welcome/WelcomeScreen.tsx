@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   FolderGit2,
   FolderOpen,
+  Download,
   Clock,
   ArrowRight,
   AlertCircle,
@@ -11,6 +12,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { invokeCommand } from "../../ipc/client";
 import { RepoSummary } from "../../ipc/bindings";
+import { CloneModal } from "./CloneModal";
 
 interface WelcomeScreenProps {
   onSelectRepo: (repo: RepoSummary) => void;
@@ -20,6 +22,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onSelectRepo,
 }) => {
   const [error, setError] = useState<string | null>(null);
+  const [isCloneOpen, setIsCloneOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: recents = [], isLoading } = useQuery({
@@ -108,13 +111,25 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           </div>
         )}
 
-        <button
-          onClick={handleOpenFolder}
-          className="flex items-center justify-center gap-2 px-4 py-3 bg-accent text-accent-contrast rounded-lg font-semibold text-xs cursor-pointer border-0 shadow-md min-h-[40px] hover:bg-accent-hover active:scale-[0.99] transition-all"
-        >
-          <FolderOpen size={18} />
-          <span>Mở thư mục...</span>
-        </button>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={handleOpenFolder}
+            className="flex items-center justify-center gap-2 px-4 py-3 bg-accent text-accent-contrast rounded-lg font-semibold text-xs cursor-pointer border-0 shadow-md min-h-[40px] hover:bg-accent-hover active:scale-[0.99] transition-all"
+          >
+            <FolderOpen size={18} />
+            <span>Mở thư mục...</span>
+          </button>
+
+          <button
+            type="button"
+            data-testid="welcome-clone-btn"
+            onClick={() => setIsCloneOpen(true)}
+            className="flex items-center justify-center gap-2 px-4 py-3 bg-surface hover:bg-surface-hover text-primary border border-border-subtle rounded-lg font-semibold text-xs cursor-pointer shadow-sm min-h-[40px] active:scale-[0.99] transition-all"
+          >
+            <Download size={18} className="text-accent" />
+            <span>Clone kho chứa...</span>
+          </button>
+        </div>
 
         <div className="bg-surface border border-border-subtle rounded-lg p-4 flex flex-col gap-3 shadow-sm">
           <div className="flex items-center justify-between text-secondary text-xs font-semibold uppercase tracking-wider">
@@ -182,6 +197,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           )}
         </div>
       </div>
+
+      <CloneModal
+        isOpen={isCloneOpen}
+        onClose={() => setIsCloneOpen(false)}
+        onCloneSuccess={(summary) => onSelectRepo(summary)}
+      />
     </div>
   );
 };

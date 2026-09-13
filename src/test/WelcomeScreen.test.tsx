@@ -62,4 +62,21 @@ describe("WelcomeScreen", () => {
     fireEvent.click(screen.getByTestId("remove-recent-d:/project-v3"));
     expect(removeSpy).toHaveBeenCalledWith("d:/project-v3");
   });
+
+  it("opens CloneModal when clicking Clone kho chứa... button", async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <WelcomeScreen onSelectRepo={vi.fn()} />
+      </QueryClientProvider>
+    );
+
+    const cloneBtn = screen.getByTestId("welcome-clone-btn");
+    expect(cloneBtn).toBeInTheDocument();
+
+    fireEvent.click(cloneBtn);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText("Clone Repository")).toBeInTheDocument();
+  });
 });
+
