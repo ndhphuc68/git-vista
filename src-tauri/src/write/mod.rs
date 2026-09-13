@@ -7,7 +7,9 @@ pub mod commit;
 pub mod conflict;
 pub mod staging;
 pub mod stash;
+pub mod undo;
 
 pub use backup::*;
 pub use conflict::*;
+pub use undo::*;
 
