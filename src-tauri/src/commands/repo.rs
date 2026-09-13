@@ -228,4 +228,66 @@ pub fn create_commit(
     Ok(details)
 }
 
+#[tauri::command]
+#[specta::specta]
+pub fn create_branch(
+    app: tauri::AppHandle,
+    repo_path: String,
+    name: String,
+    target_commit: Option<String>,
+    checkout: Option<bool>,
+) -> Result<(), AppError> {
+    crate::write::branch::create_branch(
+        &repo_path,
+        &name,
+        target_commit.as_deref(),
+        checkout.unwrap_or(false),
+    )?;
+    emit_repo_changed(&app, repo_path, "create_branch".to_string());
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn checkout_branch(
+    app: tauri::AppHandle,
+    repo_path: String,
+    branch_name: String,
+) -> Result<(), AppError> {
+    crate::write::branch::checkout_branch(&repo_path, &branch_name)?;
+    emit_repo_changed(&app, repo_path, "checkout_branch".to_string());
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn rename_branch(
+    app: tauri::AppHandle,
+    repo_path: String,
+    old_name: String,
+    new_name: String,
+) -> Result<(), AppError> {
+    crate::write::branch::rename_branch(&repo_path, &old_name, &new_name)?;
+    emit_repo_changed(&app, repo_path, "rename_branch".to_string());
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn delete_branch(
+    app: tauri::AppHandle,
+    repo_path: String,
+    branch_name: String,
+    force: Option<bool>,
+) -> Result<String, AppError> {
+    let backup_ref = crate::write::branch::delete_branch(
+        &repo_path,
+        &branch_name,
+        force.unwrap_or(false),
+    )?;
+    emit_repo_changed(&app, repo_path, "delete_branch".to_string());
+    Ok(backup_ref)
+}
+
+
 

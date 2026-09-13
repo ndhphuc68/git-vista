@@ -33,7 +33,11 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         discard_file_changes,
         stage_hunk,
         stage_lines,
-        create_commit
+        create_commit,
+        create_branch,
+        checkout_branch,
+        rename_branch,
+        delete_branch
     ])
 }
 
