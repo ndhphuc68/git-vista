@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+﻿import React, { useEffect, useState } from "react";
+import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Titlebar } from "./components/Titlebar";
 import { ControlsBar } from "./components/ControlsBar";
 import { Shell } from "./components/Shell";
 import { WelcomeScreen } from "./components/welcome/WelcomeScreen";
 import { RepoHeader } from "./components/header/RepoHeader";
 import { ChangesScreen } from "./components/changes/ChangesScreen";
-import { listenToRepoChanged, RepoChangedPayload } from "./ipc/client";
+import { InProgressOperationBanner } from "./components/banner/InProgressOperationBanner";
+import { listenToRepoChanged, RepoChangedPayload, invokeCommand } from "./ipc/client";
+import { RepoSummary } from "./ipc/bindings";
 import { useRepoStore } from "./store/useRepoStore";
 import { useViewStore } from "./store/useViewStore";
 import { useLayoutStore } from "./store/useLayoutStore";
@@ -22,11 +24,69 @@ const queryClient = new QueryClient({
   },
 });
 
+interface RepoContentProps {
+  currentRepo: RepoSummary;
+  clearRepo: () => void;
+  controlsOpen: boolean;
+  lastEvent: RepoChangedPayload | null;
+  isGlobalCreateBranchOpen: boolean;
+  setIsGlobalCreateBranchOpen: (open: boolean) => void;
+}
+
+const RepoContent: React.FC<RepoContentProps> = ({
+  currentRepo,
+  clearRepo,
+  controlsOpen,
+  lastEvent,
+  isGlobalCreateBranchOpen,
+  setIsGlobalCreateBranchOpen,
+}) => {
+  const queryClient = useQueryClient();
+  const { activeScreen, setActiveScreen } = useViewStore();
+
+  const { data: repoState } = useQuery({
+    queryKey: ["repo_state", currentRepo.path],
+    queryFn: () => invokeCommand.getRepoState(currentRepo.path),
+    enabled: Boolean(currentRepo),
+  });
+
+  const handleAbort = async (operation: string) => {
+    await invokeCommand.abortInProgress(currentRepo.path, operation);
+    queryClient.invalidateQueries();
+  };
+
+  const handleContinue = async (operation: string) => {
+    await invokeCommand.continueInProgress(currentRepo.path, operation);
+    queryClient.invalidateQueries();
+  };
+
+  return (
+    <>
+      {controlsOpen && <ControlsBar lastEvent={lastEvent} />}
+      <RepoHeader onBackToWelcome={clearRepo} />
+      <InProgressOperationBanner
+        repoState={repoState}
+        onAbort={handleAbort}
+        onContinue={handleContinue}
+        onNavigateToChanges={() => setActiveScreen("changes")}
+      />
+      <div className="flex-1 min-h-0 h-full w-full overflow-hidden flex flex-col">
+        {activeScreen === "history" ? <Shell /> : <ChangesScreen />}
+      </div>
+      <CreateBranchModal
+        isOpen={isGlobalCreateBranchOpen}
+        onClose={() => setIsGlobalCreateBranchOpen(false)}
+        repoPath={currentRepo.path}
+        onSuccess={() => queryClient.invalidateQueries()}
+      />
+    </>
+  );
+};
+
 export const App: React.FC = () => {
   const [lastEvent, setLastEvent] = useState<RepoChangedPayload | null>(null);
   const [isGlobalCreateBranchOpen, setIsGlobalCreateBranchOpen] = useState(false);
   const { currentRepo, setRepo, clearRepo } = useRepoStore();
-  const { activeScreen } = useViewStore();
   const { controlsOpen } = useLayoutStore();
 
   useGlobalShortcuts({
@@ -67,19 +127,14 @@ export const App: React.FC = () => {
       <div className="flex flex-col h-screen w-screen overflow-hidden">
         <Titlebar />
         {currentRepo ? (
-          <>
-            {controlsOpen && <ControlsBar lastEvent={lastEvent} />}
-            <RepoHeader onBackToWelcome={clearRepo} />
-            <div className="flex-1 min-h-0 h-full w-full overflow-hidden flex flex-col">
-              {activeScreen === "history" ? <Shell /> : <ChangesScreen />}
-            </div>
-            <CreateBranchModal
-              isOpen={isGlobalCreateBranchOpen}
-              onClose={() => setIsGlobalCreateBranchOpen(false)}
-              repoPath={currentRepo.path}
-              onSuccess={() => queryClient.invalidateQueries()}
-            />
-          </>
+          <RepoContent
+            currentRepo={currentRepo}
+            clearRepo={clearRepo}
+            controlsOpen={controlsOpen}
+            lastEvent={lastEvent}
+            isGlobalCreateBranchOpen={isGlobalCreateBranchOpen}
+            setIsGlobalCreateBranchOpen={setIsGlobalCreateBranchOpen}
+          />
         ) : (
           <WelcomeScreen onSelectRepo={setRepo} />
         )}
@@ -87,4 +142,3 @@ export const App: React.FC = () => {
     </QueryClientProvider>
   );
 };
-

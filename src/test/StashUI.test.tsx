@@ -1,7 +1,5 @@
-﻿import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import React from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CreateStashModal } from "../components/stash/CreateStashModal";
 
 describe("CreateStashModal Component", () => {

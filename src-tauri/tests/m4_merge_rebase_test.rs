@@ -60,3 +60,13 @@ fn test_merge_conflict_and_abort() {
     let after_abort = get_repo_state(dir.path()).unwrap();
     assert_eq!(after_abort.state, "clean");
 }
+
+#[test]
+fn test_rebase_success() {
+    let dir = create_repo_with_branch(false);
+    let res = git_rebase(dir.path(), "feature").unwrap();
+    assert!(res.success);
+    let state = get_repo_state(dir.path()).unwrap();
+    assert_eq!(state.state, "clean");
+}
+

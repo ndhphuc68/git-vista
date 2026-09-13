@@ -1,6 +1,5 @@
-﻿import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import React from "react";
 import { MergeBranchModal } from "../components/merge/MergeBranchModal";
 import { RebaseBranchModal } from "../components/merge/RebaseBranchModal";
 
