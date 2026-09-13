@@ -14,6 +14,9 @@ export interface RepoHeadInfo {
   branch_name: string | null;
   head_commit_id: string | null;
   is_detached: boolean;
+  ahead: number;
+  behind: number;
+  upstream: string | null;
 }
 
 export interface RepoChangedPayload {
@@ -54,6 +57,8 @@ export interface BranchItem {
   is_head: boolean;
   target_commit_id: string;
   upstream: string | null;
+  ahead: number;
+  behind: number;
 }
 
 export interface BranchListResult {

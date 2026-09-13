@@ -59,3 +59,34 @@ describe("invokeCommand M2.1 methods in browser environment", () => {
     expect(commit.full_message).toContain("detailed commit message");
   });
 });
+
+describe("invokeCommand M3 remote operations in browser environment", () => {
+  it("fetchRepo returns success message in browser mock", async () => {
+    const result = await invokeCommand.fetchRepo("/mock/repo");
+    expect(result).toContain("Fetch");
+  });
+
+  it("pullRepo returns success message in browser mock", async () => {
+    const result = await invokeCommand.pullRepo("/mock/repo", "origin", "main", false);
+    expect(result).toContain("Pull");
+  });
+
+  it("pushRepo returns success message in browser mock", async () => {
+    const result = await invokeCommand.pushRepo("/mock/repo", "origin", "main", true, false);
+    expect(result).toContain("Push");
+  });
+
+  it("cloneRepo returns success message in browser mock", async () => {
+    const result = await invokeCommand.cloneRepo("https://github.com/example/repo.git", "/target/dir");
+    expect(result).toContain("Clone");
+  });
+
+  it("cancelRemoteTask resolves without error", async () => {
+    await expect(invokeCommand.cancelRemoteTask("task-123")).resolves.toBeUndefined();
+  });
+
+  it("setRepoPullRebase resolves without error", async () => {
+    await expect(invokeCommand.setRepoPullRebase("/mock/repo", true)).resolves.toBeUndefined();
+  });
+});
+

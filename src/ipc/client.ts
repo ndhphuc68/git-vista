@@ -47,6 +47,9 @@ export const invokeCommand = {
         branch_name: "main",
         head_commit_id: "abc1234567890",
         is_detached: false,
+        ahead: 0,
+        behind: 0,
+        upstream: "origin/main",
       };
     }
     const { invoke } = await import("@tauri-apps/api/core");
@@ -117,8 +120,8 @@ export const invokeCommand = {
       return {
         current_branch: "main",
         is_detached: false,
-        local: [{ name: "main", is_head: true, target_commit_id: "c1", upstream: "origin/main" }],
-        remote: [{ name: "origin/main", is_head: false, target_commit_id: "c1", upstream: null }],
+        local: [{ name: "main", is_head: true, target_commit_id: "c1", upstream: "origin/main", ahead: 0, behind: 0 }],
+        remote: [{ name: "origin/main", is_head: false, target_commit_id: "c1", upstream: null, ahead: 0, behind: 0 }],
         tags: ["v0.1.0"],
       };
     }
@@ -369,6 +372,98 @@ export const invokeCommand = {
     const { invoke } = await import("@tauri-apps/api/core");
     return await invoke<string>("delete_branch", { repoPath, branchName, force });
   },
+
+  fetchRepo: async (
+    repoPath: string,
+    remote?: string,
+    prune?: boolean,
+    taskId?: string
+  ): Promise<string> => {
+    if (!isTauri()) {
+      return "[Browser mock] Fetch hoàn tất";
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<string>("fetch_repo", {
+      repoPath,
+      remote,
+      prune,
+      taskId,
+    });
+  },
+
+  pullRepo: async (
+    repoPath: string,
+    remote?: string,
+    branch?: string,
+    rebase?: boolean,
+    taskId?: string
+  ): Promise<string> => {
+    if (!isTauri()) {
+      return "[Browser mock] Pull hoàn tất";
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<string>("pull_repo", {
+      repoPath,
+      remote,
+      branch,
+      rebase,
+      taskId,
+    });
+  },
+
+  pushRepo: async (
+    repoPath: string,
+    remote?: string,
+    branch?: string,
+    setUpstream?: boolean,
+    force?: boolean,
+    taskId?: string
+  ): Promise<string> => {
+    if (!isTauri()) {
+      return "[Browser mock] Push hoàn tất";
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<string>("push_repo", {
+      repoPath,
+      remote,
+      branch,
+      setUpstream,
+      force,
+      taskId,
+    });
+  },
+
+  cloneRepo: async (
+    url: string,
+    targetDir: string,
+    taskId?: string
+  ): Promise<string> => {
+    if (!isTauri()) {
+      return "[Browser mock] Clone hoàn tất";
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<string>("clone_repo", {
+      url,
+      targetDir,
+      taskId,
+    });
+  },
+
+  cancelRemoteTask: async (taskId: string): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("cancel_remote_task", { taskId });
+  },
+
+  setRepoPullRebase: async (repoPath: string, rebase: boolean): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("set_repo_pull_rebase", { repoPath, rebase });
+  },
 };
 
 export async function listenToRepoChanged(
@@ -385,6 +480,25 @@ export async function listenToRepoChanged(
 
   const { listen } = await import("@tauri-apps/api/event");
   const unlisten = await listen<RepoChangedPayload>("repo-changed", (event) => {
+    handler(event.payload);
+  });
+  return unlisten;
+}
+
+export async function listenToTaskProgress(
+  handler: (payload: TaskProgressPayload) => void
+): Promise<() => void> {
+  if (!isTauri()) {
+    const mockListener = (e: Event) => {
+      const customEvent = e as CustomEvent<TaskProgressPayload>;
+      handler(customEvent.detail);
+    };
+    window.addEventListener("mock-task-progress", mockListener);
+    return () => window.removeEventListener("mock-task-progress", mockListener);
+  }
+
+  const { listen } = await import("@tauri-apps/api/event");
+  const unlisten = await listen<TaskProgressPayload>("task-progress", (event) => {
     handler(event.payload);
   });
   return unlisten;
