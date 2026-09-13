@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, Archive } from "lucide-react";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
+import { useViewStore } from "../../store/useViewStore";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import { invokeCommand } from "../../ipc/client";
 import { StagingFileList, SelectedWorkingFile } from "./StagingFileList";
@@ -15,6 +16,7 @@ export const ChangesScreen: React.FC = () => {
   const { currentRepo } = useRepoStore();
   const { sidebarOpen, activeChangesView, setActiveChangesView } =
     useLayoutStore();
+  const { openConflictResolver } = useViewStore();
   const { isMobile, isLaptop } = useWindowDimensions();
   const queryClient = useQueryClient();
   const [selectedFile, setSelectedFile] = useState<SelectedWorkingFile | null>(
@@ -189,7 +191,7 @@ export const ChangesScreen: React.FC = () => {
                 : "bg-transparent text-secondary font-normal"
             )}
           >
-            Tệp đã đổi ({status ? status.staged.length + status.unstaged.length + status.untracked.length : 0})
+            Tệp đã đổi ({status ? status.staged.length + status.unstaged.length + status.untracked.length + (status.conflicted?.length || 0) : 0})
           </button>
           <button
             type="button"
@@ -226,7 +228,8 @@ export const ChangesScreen: React.FC = () => {
             <div className="flex-1 min-h-0 overflow-y-auto">
               <StagingFileList
                 repoPath={currentRepo.path}
-                status={status || { staged: [], unstaged: [], untracked: [] }}
+                status={status || { staged: [], unstaged: [], untracked: [], conflicted: [] }}
+                conflicted={status?.conflicted || []}
                 selectedFile={selectedFile}
                 onSelectFile={handleSelectFile}
                 onStageFile={handleStageFile}
@@ -234,6 +237,7 @@ export const ChangesScreen: React.FC = () => {
                 onStageAll={handleStageAll}
                 onUnstageAll={handleUnstageAll}
                 onDiscardFile={handleDiscardFile}
+                onOpenConflictResolver={(filePath) => openConflictResolver(filePath)}
               />
             </div>
 

@@ -10,8 +10,12 @@ export interface SelectedWorkingFile {
 }
 
 export interface StagingFileListProps {
-  repoPath: string;
-  status: RepoStatusResult;
+  repoPath?: string;
+  status?: RepoStatusResult;
+  staged?: StatusFileItem[];
+  unstaged?: StatusFileItem[];
+  untracked?: StatusFileItem[];
+  conflicted?: StatusFileItem[];
   selectedFile: SelectedWorkingFile | null;
   onSelectFile: (file: SelectedWorkingFile) => void;
   onStageFile: (filePath: string) => void;
@@ -19,10 +23,17 @@ export interface StagingFileListProps {
   onStageAll: () => void;
   onUnstageAll: () => void;
   onDiscardFile: (filePath: string) => void;
+  onOpenConflictResolver?: (filePath: string) => void;
 }
 
 const getStatusBadge = (status: FileStatus | "Untracked") => {
   switch (status) {
+    case "Conflicted":
+      return {
+        label: "C",
+        className: "bg-diff-remove-bg text-diff-remove-text",
+        title: "Conflicted / Xung đột",
+      };
     case "Modified":
       return {
         label: "M",
@@ -59,6 +70,10 @@ const getStatusBadge = (status: FileStatus | "Untracked") => {
 
 export const StagingFileList: React.FC<StagingFileListProps> = ({
   status,
+  staged,
+  unstaged,
+  untracked,
+  conflicted,
   selectedFile,
   onSelectFile,
   onStageFile,
@@ -66,12 +81,14 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
   onStageAll,
   onUnstageAll,
   onDiscardFile,
+  onOpenConflictResolver,
 }) => {
   const [discardTarget, setDiscardTarget] = useState<string | null>(null);
 
-  const stagedFiles = status.staged || [];
-  const unstagedFiles = status.unstaged || [];
-  const untrackedFiles = status.untracked || [];
+  const stagedFiles = staged ?? status?.staged ?? [];
+  const unstagedFiles = unstaged ?? status?.unstaged ?? [];
+  const untrackedFiles = untracked ?? status?.untracked ?? [];
+  const conflictedFiles = conflicted ?? status?.conflicted ?? [];
   const changesFiles: Array<StatusFileItem & { isUntracked?: boolean }> = [
     ...unstagedFiles,
     ...untrackedFiles.map((u) => ({ ...u, isUntracked: true })),
@@ -170,6 +187,53 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
           )}
         </div>
       </div>
+
+      {/* CONFLICTED SECTION */}
+      {conflictedFiles.length > 0 && (
+        <div className="border-b border-border-subtle flex flex-col bg-diff-remove-bg/30 text-diff-remove-text border-diff-remove-text/30">
+          <div className="flex items-center justify-between px-3 py-2 bg-diff-remove-bg/40 text-xs font-semibold tracking-[0.5px]">
+            <div className="flex items-center gap-1.5">
+              <AlertCircle size={13} className="text-diff-remove-text" />
+              <span>TỆP XUNG ĐỘT ({conflictedFiles.length})</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col">
+            {conflictedFiles.map((file) => {
+              return (
+                <div
+                  key={`conflicted-${file.path}`}
+                  className="flex items-center justify-between px-3 py-1.5 transition-colors duration-fast ease-macos hover:bg-diff-remove-bg/40"
+                >
+                  <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap flex-1 min-w-0">
+                    <AlertCircle size={13} className="shrink-0 text-diff-remove-text" />
+                    <span
+                      className="text-xs overflow-hidden text-ellipsis font-medium text-diff-remove-text"
+                      title={file.path}
+                    >
+                      {file.path}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      data-testid={`resolve-conflict-${file.path}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenConflictResolver?.(file.path);
+                      }}
+                      className="flex items-center gap-1 px-2 py-0.5 bg-diff-remove-text text-white rounded-sm text-xs font-medium cursor-pointer hover:opacity-90 transition-opacity"
+                    >
+                      Giải quyết
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* CHANGES SECTION */}
       <div className="flex flex-col flex-1">
