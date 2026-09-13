@@ -15,7 +15,7 @@ describe("invokeCommand M2.1 methods in browser environment", () => {
     expect(diff).toBeDefined();
     expect(diff.file_path).toBe("file.ts");
     expect(diff.hunks.length).toBeGreaterThan(0);
-    expect(diff.hunks[0].lines.length).toBeGreaterThan(0);
+    expect(diff.hunks[0]!.lines.length).toBeGreaterThan(0);
   });
 
   it("stageFile resolves without error in browser mock", async () => {
