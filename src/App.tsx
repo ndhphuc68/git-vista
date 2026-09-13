@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Titlebar } from "./components/Titlebar";
 import { ControlsBar } from "./components/ControlsBar";
@@ -14,6 +14,7 @@ import { useViewStore } from "./store/useViewStore";
 import { useLayoutStore } from "./store/useLayoutStore";
 import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
 import { CreateBranchModal } from "./components/sidebar/CreateBranchModal";
+import { ConflictResolverScreen } from "./components/conflict/ConflictResolverScreen";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,7 +43,7 @@ const RepoContent: React.FC<RepoContentProps> = ({
   setIsGlobalCreateBranchOpen,
 }) => {
   const queryClient = useQueryClient();
-  const { activeScreen, setActiveScreen } = useViewStore();
+  const { activeScreen, setActiveScreen, activeConflictFile, closeConflictResolver } = useViewStore();
 
   const { data: repoState } = useQuery({
     queryKey: ["repo_state", currentRepo.path],
@@ -71,7 +72,27 @@ const RepoContent: React.FC<RepoContentProps> = ({
         onNavigateToChanges={() => setActiveScreen("changes")}
       />
       <div className="flex-1 min-h-0 h-full w-full overflow-hidden flex flex-col">
-        {activeScreen === "history" ? <Shell /> : <ChangesScreen />}
+        {activeScreen === "history" ? (
+          <Shell />
+        ) : activeScreen === "conflict" && activeConflictFile ? (
+          <ConflictResolverScreen
+            filePath={activeConflictFile}
+            repoPath={currentRepo.path}
+            onBack={closeConflictResolver}
+            onSaveAndStage={async (content) => {
+              await invokeCommand.resolveConflictFile(
+                currentRepo.path,
+                activeConflictFile,
+                content,
+                true
+              );
+              closeConflictResolver();
+              queryClient.invalidateQueries();
+            }}
+          />
+        ) : (
+          <ChangesScreen />
+        )}
       </div>
       <CreateBranchModal
         isOpen={isGlobalCreateBranchOpen}

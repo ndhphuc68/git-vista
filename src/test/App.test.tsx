@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { App } from "../App";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { useRepoStore } from "../store/useRepoStore";
+import { useViewStore } from "../store/useViewStore";
 
 describe("Visual Git Client - M1 App Shell", () => {
   beforeEach(() => {
@@ -75,5 +76,25 @@ describe("Visual Git Client - M1 App Shell", () => {
 
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
     expect(useSettingsStore.getState().theme).toBe("dark");
+  });
+
+  it("hiển thị ConflictResolverScreen khi activeScreen là conflict và activeConflictFile được chọn", async () => {
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("project-v3")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText("project-v3"));
+
+    await waitFor(() => {
+      expect(useRepoStore.getState().currentRepo).not.toBeNull();
+    });
+
+    useViewStore.getState().openConflictResolver("src/main.rs");
+
+    await waitFor(() => {
+      expect(screen.getByText("src/main.rs")).toBeInTheDocument();
+      expect(screen.getByText(/CỦA BẠN/i)).toBeInTheDocument();
+    });
   });
 });
