@@ -1,0 +1,121 @@
+import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { StagingFileList } from "../components/changes/StagingFileList";
+
+describe("StagingFileList & DiscardConfirmModal", () => {
+  const mockProps = {
+    repoPath: "/test/repo",
+    status: {
+      staged: [
+        { path: "src/staged1.ts", status: "Modified" as const, is_staged: true, old_path: null },
+      ],
+      unstaged: [
+        { path: "src/unstaged1.ts", status: "Modified" as const, is_staged: false, old_path: null },
+      ],
+      untracked: [
+        { path: "src/untracked1.ts", status: "New" as const, is_staged: false, old_path: null },
+      ],
+    },
+    selectedFile: null,
+    onSelectFile: vi.fn(),
+    onStageFile: vi.fn(),
+    onUnstageFile: vi.fn(),
+    onStageAll: vi.fn(),
+    onUnstageAll: vi.fn(),
+    onDiscardFile: vi.fn(),
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("renders staged and changes sections with correct counts", () => {
+    render(<StagingFileList {...mockProps} />);
+
+    expect(screen.getByText(/STAGED \(1\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/CHANGES \(2\)/i)).toBeInTheDocument();
+    expect(screen.getByText("src/staged1.ts")).toBeInTheDocument();
+    expect(screen.getByText("src/unstaged1.ts")).toBeInTheDocument();
+    expect(screen.getByText("src/untracked1.ts")).toBeInTheDocument();
+  });
+
+  it("calls onSelectFile when a file is clicked", () => {
+    render(<StagingFileList {...mockProps} />);
+
+    fireEvent.click(screen.getByText("src/staged1.ts"));
+    expect(mockProps.onSelectFile).toHaveBeenCalledWith({
+      path: "src/staged1.ts",
+      is_staged: true,
+    });
+
+    fireEvent.click(screen.getByText("src/unstaged1.ts"));
+    expect(mockProps.onSelectFile).toHaveBeenCalledWith({
+      path: "src/unstaged1.ts",
+      is_staged: false,
+    });
+  });
+
+  it("calls onStageFile and onUnstageFile when stage/unstage buttons are clicked", () => {
+    render(<StagingFileList {...mockProps} />);
+
+    const unstageBtn = screen.getByTestId("unstage-file-src/staged1.ts");
+    fireEvent.click(unstageBtn);
+    expect(mockProps.onUnstageFile).toHaveBeenCalledWith("src/staged1.ts");
+
+    const stageBtn = screen.getByTestId("stage-file-src/unstaged1.ts");
+    fireEvent.click(stageBtn);
+    expect(mockProps.onStageFile).toHaveBeenCalledWith("src/unstaged1.ts");
+  });
+
+  it("calls onStageAll and onUnstageAll when header buttons are clicked", () => {
+    render(<StagingFileList {...mockProps} />);
+
+    const unstageAllBtn = screen.getByTestId("unstage-all-button");
+    fireEvent.click(unstageAllBtn);
+    expect(mockProps.onUnstageAll).toHaveBeenCalled();
+
+    const stageAllBtn = screen.getByTestId("stage-all-button");
+    fireEvent.click(stageAllBtn);
+    expect(mockProps.onStageAll).toHaveBeenCalled();
+  });
+
+  it("opens DiscardConfirmModal and calls onDiscardFile on confirmation", () => {
+    render(<StagingFileList {...mockProps} />);
+
+    const discardBtn = screen.getByTestId("discard-file-src/unstaged1.ts");
+    fireEvent.click(discardBtn);
+
+    // Modal should be open with warning
+    expect(
+      screen.getByRole("heading", { name: /Huỷ thay đổi \/ Discard Changes/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Các thay đổi trong file này sẽ bị huỷ vĩnh viễn/i)
+    ).toBeInTheDocument();
+
+    // Confirm discard
+    const confirmBtn = screen.getByTestId("confirm-discard-button");
+    fireEvent.click(confirmBtn);
+
+    expect(mockProps.onDiscardFile).toHaveBeenCalledWith("src/unstaged1.ts");
+    // Modal should close
+    expect(
+      screen.queryByText(/Các thay đổi trong file này sẽ bị huỷ vĩnh viễn/i)
+    ).not.toBeInTheDocument();
+  });
+
+  it("cancels discard without calling onDiscardFile", () => {
+    render(<StagingFileList {...mockProps} />);
+
+    const discardBtn = screen.getByTestId("discard-file-src/unstaged1.ts");
+    fireEvent.click(discardBtn);
+
+    const cancelBtn = screen.getByTestId("cancel-discard-button");
+    fireEvent.click(cancelBtn);
+
+    expect(mockProps.onDiscardFile).not.toHaveBeenCalled();
+    expect(
+      screen.queryByText(/Các thay đổi trong file này sẽ bị huỷ vĩnh viễn/i)
+    ).not.toBeInTheDocument();
+  });
+});
