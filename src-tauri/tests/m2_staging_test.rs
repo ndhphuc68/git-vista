@@ -5,7 +5,8 @@ use std::fs;
 use tempfile::TempDir;
 use visual_git_lib::read::status::{get_repo_status, FileStatus};
 use visual_git_lib::write::staging::{
-    discard_file_changes, stage_all, stage_file, unstage_all, unstage_file,
+    discard_file_changes, stage_all, stage_file, stage_hunk, stage_lines, unstage_all,
+    unstage_file,
 };
 
 #[test]
@@ -215,4 +216,260 @@ fn test_unstage_all_nested_files() {
     assert!(status_unstaged.untracked.iter().any(|item| item.path == "nested/dir/file.txt"));
     assert!(status_unstaged.unstaged.iter().any(|item| item.path == "file1.txt"));
 }
+
+#[test]
+fn test_stage_single_hunk() {
+    let fixture = TestRepoFixture::new();
+    let repo_path = fixture.path();
+    // Create a file with two distinct hunks separated by 20 lines of context
+    let mut content = String::from("top hunk line 1\n");
+    for i in 0..20 {
+        content.push_str(&format!("context line {}\n", i));
+    }
+    content.push_str("bottom hunk line 1\n");
+    fs::write(repo_path.join("file1.txt"), &content).unwrap();
+
+    // Commit initial state
+    let repo = Repository::open(repo_path).unwrap();
+    let head = repo.head().unwrap().peel_to_commit().unwrap();
+    let mut index = repo.index().unwrap();
+    index.add_path(std::path::Path::new("file1.txt")).unwrap();
+    index.write().unwrap();
+    common::fixtures::commit_index(&repo, "Commit initial file1.txt", &[&head]).unwrap();
+
+    // Modify both hunks
+    let modified = content
+        .replace("top hunk line 1", "TOP MODIFIED")
+        .replace("bottom hunk line 1", "BOTTOM MODIFIED");
+    fs::write(repo_path.join("file1.txt"), modified).unwrap();
+
+    // Stage only hunk 0
+    stage_hunk(repo_path, "file1.txt", 0, false).expect("stage hunk 0");
+
+    let status = get_repo_status(repo_path).unwrap();
+    assert_eq!(status.staged.len(), 1);
+    assert_eq!(status.unstaged.len(), 1); // still has hunk 1 unstaged!
+
+    // Verify staged diff has only hunk 0 (TOP MODIFIED)
+    let staged_diff =
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "file1.txt", true).unwrap();
+    assert_eq!(staged_diff.hunks.len(), 1);
+    assert!(staged_diff.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.content.contains("TOP MODIFIED")));
+    assert!(!staged_diff.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.content.contains("BOTTOM MODIFIED")));
+
+    // Verify unstaged diff has only hunk 1 (BOTTOM MODIFIED)
+    let unstaged_diff =
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "file1.txt", false).unwrap();
+    assert_eq!(unstaged_diff.hunks.len(), 1);
+    assert!(unstaged_diff.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.content.contains("BOTTOM MODIFIED")));
+    assert!(!unstaged_diff.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.content.contains("TOP MODIFIED")));
+}
+
+#[test]
+fn test_unstage_single_hunk() {
+    let fixture = TestRepoFixture::new();
+    let repo_path = fixture.path();
+    let mut content = String::from("top hunk line 1\n");
+    for i in 0..20 {
+        content.push_str(&format!("context line {}\n", i));
+    }
+    content.push_str("bottom hunk line 1\n");
+    fs::write(repo_path.join("file1.txt"), &content).unwrap();
+
+    let repo = Repository::open(repo_path).unwrap();
+    let head = repo.head().unwrap().peel_to_commit().unwrap();
+    let mut index = repo.index().unwrap();
+    index.add_path(std::path::Path::new("file1.txt")).unwrap();
+    index.write().unwrap();
+    common::fixtures::commit_index(&repo, "Commit initial file1.txt", &[&head]).unwrap();
+
+    // Modify both hunks and stage all
+    let modified = content
+        .replace("top hunk line 1", "TOP MODIFIED")
+        .replace("bottom hunk line 1", "BOTTOM MODIFIED");
+    fs::write(repo_path.join("file1.txt"), modified).unwrap();
+    stage_file(repo_path, "file1.txt").unwrap();
+
+    let status = get_repo_status(repo_path).unwrap();
+    assert_eq!(status.staged.len(), 1);
+    assert_eq!(status.unstaged.len(), 0);
+
+    // Unstage hunk 0 (is_staged = true)
+    stage_hunk(repo_path, "file1.txt", 0, true).expect("unstage hunk 0");
+
+    let status = get_repo_status(repo_path).unwrap();
+    assert_eq!(status.staged.len(), 1);
+    assert_eq!(status.unstaged.len(), 1);
+
+    // Staged diff should only have BOTTOM MODIFIED
+    let staged_diff =
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "file1.txt", true).unwrap();
+    assert_eq!(staged_diff.hunks.len(), 1);
+    assert!(staged_diff.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.content.contains("BOTTOM MODIFIED")));
+    assert!(!staged_diff.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.content.contains("TOP MODIFIED")));
+
+    // Unstaged diff should only have TOP MODIFIED
+    let unstaged_diff =
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "file1.txt", false).unwrap();
+    assert_eq!(unstaged_diff.hunks.len(), 1);
+    assert!(unstaged_diff.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.content.contains("TOP MODIFIED")));
+    assert!(!unstaged_diff.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.content.contains("BOTTOM MODIFIED")));
+}
+
+#[test]
+fn test_stage_lines() {
+    let fixture = TestRepoFixture::new();
+    let repo_path = fixture.path();
+    let content = "header\nfooter\n";
+    fs::write(repo_path.join("lines.txt"), content).unwrap();
+
+    let repo = Repository::open(repo_path).unwrap();
+    let head = repo.head().unwrap().peel_to_commit().unwrap();
+    let mut index = repo.index().unwrap();
+    index.add_path(std::path::Path::new("lines.txt")).unwrap();
+    index.write().unwrap();
+    common::fixtures::commit_index(&repo, "Commit initial lines.txt", &[&head]).unwrap();
+
+    // Modify file: add line A and line B between header and footer
+    let modified = "header\nline A\nline B\nfooter\n";
+    fs::write(repo_path.join("lines.txt"), modified).unwrap();
+
+    // In unstaged diff:
+    // header (idx 0, context)
+    // line A (idx 1, add)
+    // line B (idx 2, add)
+    // footer (idx 3, context)
+    let unstaged_diff =
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", false).unwrap();
+    assert_eq!(unstaged_diff.hunks.len(), 1);
+    assert_eq!(unstaged_diff.hunks[0].lines.len(), 4);
+    assert_eq!(unstaged_diff.hunks[0].lines[1].content.trim(), "line A");
+    assert_eq!(unstaged_diff.hunks[0].lines[2].content.trim(), "line B");
+
+    // Stage only line A (index 1)
+    stage_lines(repo_path, "lines.txt", 0, &[1], false).expect("stage line A");
+
+    let status = get_repo_status(repo_path).unwrap();
+    assert_eq!(status.staged.len(), 1);
+    assert_eq!(status.unstaged.len(), 1);
+
+    // Staged diff should only have line A
+    let staged_diff =
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", true).unwrap();
+    assert_eq!(staged_diff.hunks.len(), 1);
+    assert!(staged_diff.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.content.trim() == "line A"));
+    assert!(!staged_diff.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.content.trim() == "line B"));
+
+    // Unstaged diff should now only have line B as added line
+    let unstaged_diff_after =
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", false).unwrap();
+    assert_eq!(unstaged_diff_after.hunks.len(), 1);
+    assert!(unstaged_diff_after.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.line_type == "add" && l.content.trim() == "line B"));
+    assert!(!unstaged_diff_after.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.line_type == "add" && l.content.trim() == "line A"));
+}
+
+#[test]
+fn test_unstage_lines() {
+    let fixture = TestRepoFixture::new();
+    let repo_path = fixture.path();
+    let content = "header\nfooter\n";
+    fs::write(repo_path.join("lines.txt"), content).unwrap();
+
+    let repo = Repository::open(repo_path).unwrap();
+    let head = repo.head().unwrap().peel_to_commit().unwrap();
+    let mut index = repo.index().unwrap();
+    index.add_path(std::path::Path::new("lines.txt")).unwrap();
+    index.write().unwrap();
+    common::fixtures::commit_index(&repo, "Commit initial lines.txt", &[&head]).unwrap();
+
+    // Modify file and stage all
+    let modified = "header\nline A\nline B\nfooter\n";
+    fs::write(repo_path.join("lines.txt"), modified).unwrap();
+    stage_file(repo_path, "lines.txt").unwrap();
+
+    let status = get_repo_status(repo_path).unwrap();
+    assert_eq!(status.staged.len(), 1);
+    assert_eq!(status.unstaged.len(), 0);
+
+    // Staged diff:
+    // header (idx 0, context)
+    // line A (idx 1, add)
+    // line B (idx 2, add)
+    // footer (idx 3, context)
+    let staged_diff =
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", true).unwrap();
+    assert_eq!(staged_diff.hunks.len(), 1);
+    assert_eq!(staged_diff.hunks[0].lines[1].content.trim(), "line A");
+    assert_eq!(staged_diff.hunks[0].lines[2].content.trim(), "line B");
+
+    // Unstage only line A (index 1, is_staged = true)
+    stage_lines(repo_path, "lines.txt", 0, &[1], true).expect("unstage line A");
+
+    let status_after = get_repo_status(repo_path).unwrap();
+    assert_eq!(status_after.staged.len(), 1);
+    assert_eq!(status_after.unstaged.len(), 1);
+
+    // Staged diff should only have line B as added line
+    let staged_diff_after =
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", true).unwrap();
+    assert_eq!(staged_diff_after.hunks.len(), 1);
+    assert!(staged_diff_after.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.line_type == "add" && l.content.trim() == "line B"));
+    assert!(!staged_diff_after.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.line_type == "add" && l.content.trim() == "line A"));
+
+    // Unstaged diff should only have line A as added line
+    let unstaged_diff_after =
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", false).unwrap();
+    assert_eq!(unstaged_diff_after.hunks.len(), 1);
+    assert!(unstaged_diff_after.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.line_type == "add" && l.content.trim() == "line A"));
+    assert!(!unstaged_diff_after.hunks[0]
+        .lines
+        .iter()
+        .any(|l| l.line_type == "add" && l.content.trim() == "line B"));
+}
+
 
