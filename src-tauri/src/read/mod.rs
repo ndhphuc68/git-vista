@@ -5,11 +5,13 @@
 pub mod branches;
 pub mod diff;
 pub mod graph;
+pub mod state;
 pub mod status;
 
 pub use branches::*;
 pub use diff::*;
 pub use graph::*;
+pub use state::*;
 pub use status::*;
 
 use crate::error::AppError;
