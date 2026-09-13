@@ -22,27 +22,52 @@ pub struct RepoHeadInfo {
     pub branch_name: Option<String>,
     pub head_commit_id: Option<String>,
     pub is_detached: bool,
+    pub ahead: u32,
+    pub behind: u32,
+    pub upstream: Option<String>,
 }
 
 /// Lấy thông tin HEAD hiện tại của repository
 pub fn get_head_info<P: AsRef<Path>>(repo_path: P) -> Result<RepoHeadInfo, AppError> {
     let repo = git2::Repository::open(repo_path.as_ref())?;
-    
+
     if repo.is_empty()? {
         return Ok(RepoHeadInfo {
             branch_name: None,
             head_commit_id: None,
             is_detached: false,
+            ahead: 0,
+            behind: 0,
+            upstream: None,
         });
     }
 
     let head = repo.head()?;
     let is_detached = repo.head_detached()?;
-    let branch_name = if is_detached {
-        None
-    } else {
-        head.shorthand().map(|s| s.to_string())
-    };
+    let mut branch_name = None;
+    let mut ahead = 0u32;
+    let mut behind = 0u32;
+    let mut upstream = None;
+
+    if !is_detached {
+        if let Some(shorthand) = head.shorthand() {
+            branch_name = Some(shorthand.to_string());
+            if let Ok(local_branch) = repo.find_branch(shorthand, git2::BranchType::Local) {
+                if let Ok(upstream_branch) = local_branch.upstream() {
+                    upstream = upstream_branch.name().ok().flatten().map(|s| s.to_string());
+                    if let (Some(local_oid), Some(upstream_oid)) = (
+                        local_branch.get().target(),
+                        upstream_branch.get().target(),
+                    ) {
+                        if let Ok((a, b)) = repo.graph_ahead_behind(local_oid, upstream_oid) {
+                            ahead = a as u32;
+                            behind = b as u32;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     let head_commit_id = head.target().map(|oid| oid.to_string());
 
@@ -50,6 +75,9 @@ pub fn get_head_info<P: AsRef<Path>>(repo_path: P) -> Result<RepoHeadInfo, AppEr
         branch_name,
         head_commit_id,
         is_detached,
+        ahead,
+        behind,
+        upstream,
     })
 }
 

@@ -10,6 +10,8 @@ pub struct BranchItem {
     pub is_head: bool,
     pub target_commit_id: String,
     pub upstream: Option<String>,
+    pub ahead: u32,
+    pub behind: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -38,16 +40,31 @@ pub fn list_repo_branches<P: AsRef<Path>>(repo_path: P) -> Result<BranchListResu
                 if let Ok(Some(name)) = branch.name() {
                     let is_head = branch.is_head();
                     let target = branch.get().target().map(|o| o.to_string()).unwrap_or_default();
-                    let upstream = branch
-                        .upstream()
-                        .ok()
-                        .and_then(|u| u.name().ok().flatten().map(|s| s.to_string()));
+                    
+                    let mut ahead = 0u32;
+                    let mut behind = 0u32;
+                    let mut upstream = None;
+
+                    if let Ok(upstream_branch) = branch.upstream() {
+                        upstream = upstream_branch.name().ok().flatten().map(|s| s.to_string());
+                        if let (Some(local_oid), Some(upstream_oid)) = (
+                            branch.get().target(),
+                            upstream_branch.get().target(),
+                        ) {
+                            if let Ok((a, b)) = repo.graph_ahead_behind(local_oid, upstream_oid) {
+                                ahead = a as u32;
+                                behind = b as u32;
+                            }
+                        }
+                    }
 
                     local.push(BranchItem {
                         name: name.to_string(),
                         is_head,
                         target_commit_id: target,
                         upstream,
+                        ahead,
+                        behind,
                     });
                 }
             }
@@ -65,6 +82,8 @@ pub fn list_repo_branches<P: AsRef<Path>>(repo_path: P) -> Result<BranchListResu
                         is_head: false,
                         target_commit_id: target,
                         upstream: None,
+                        ahead: 0,
+                        behind: 0,
                     });
                 }
             }
