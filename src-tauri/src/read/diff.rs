@@ -27,7 +27,7 @@ pub struct CommitDetails {
     pub total_deletions: u32,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq)]
 pub struct DiffLine {
     pub line_type: String,
     pub content: String,
@@ -35,7 +35,7 @@ pub struct DiffLine {
     pub new_lineno: Option<u32>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq)]
 pub struct DiffHunk {
     pub header: String,
     pub old_start: u32,
@@ -45,7 +45,7 @@ pub struct DiffHunk {
     pub lines: Vec<DiffLine>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq)]
 pub struct FileDiffResult {
     pub file_path: String,
     pub status: String,
@@ -189,6 +189,15 @@ pub fn get_file_diff<P: AsRef<Path>>(
 
     let diff = repo.diff_tree_to_tree(parent_tree.as_ref(), Some(&commit_tree), Some(&mut opts))?;
 
+    let result = parse_diff_to_file_diff_result(&diff, target_path)?;
+    set_cached_diff(cache_key, result.clone());
+    Ok(result)
+}
+
+pub fn parse_diff_to_file_diff_result(
+    diff: &git2::Diff,
+    file_path: &str,
+) -> Result<FileDiffResult, AppError> {
     let mut hunks: Vec<DiffHunk> = Vec::new();
     let mut additions: u32 = 0;
     let mut deletions: u32 = 0;
@@ -196,7 +205,7 @@ pub fn get_file_diff<P: AsRef<Path>>(
 
     if let Some(delta) = diff.deltas().next() {
         status = match delta.status() {
-            Delta::Added => "added",
+            Delta::Added | Delta::Untracked => "added",
             Delta::Deleted => "deleted",
             Delta::Renamed => "renamed",
             _ => "modified",
@@ -250,14 +259,11 @@ pub fn get_file_diff<P: AsRef<Path>>(
         true
     })?;
 
-    let result = FileDiffResult {
-        file_path: target_path.to_string(),
+    Ok(FileDiffResult {
+        file_path: file_path.to_string(),
         status,
         hunks,
         additions,
         deletions,
-    };
-
-    set_cached_diff(cache_key, result.clone());
-    Ok(result)
+    })
 }

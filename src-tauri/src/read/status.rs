@@ -1,5 +1,6 @@
 use crate::error::AppError;
-use git2::{Repository, StatusOptions};
+use crate::read::diff::{parse_diff_to_file_diff_result, FileDiffResult};
+use git2::{DiffOptions, Repository, StatusOptions};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::path::Path;
@@ -59,24 +60,30 @@ pub fn get_repo_status<P: AsRef<Path>>(repo_path: P) -> Result<RepoStatusResult,
                 | git2::Status::INDEX_RENAMED
                 | git2::Status::INDEX_TYPECHANGE,
         ) {
-            let (status, old_path) = if s.contains(git2::Status::INDEX_NEW) {
-                (FileStatus::New, None)
-            } else if s.contains(git2::Status::INDEX_DELETED) {
-                (FileStatus::Deleted, None)
-            } else if s.contains(git2::Status::INDEX_RENAMED) {
-                let old = entry
-                    .head_to_index()
-                    .and_then(|delta| delta.old_file().path())
+            let (status, current_path, old_path) = if s.contains(git2::Status::INDEX_RENAMED) {
+                let delta = entry.head_to_index();
+                let old = delta
+                    .as_ref()
+                    .and_then(|d| d.old_file().path())
                     .map(|p| p.to_string_lossy().to_string());
-                (FileStatus::Renamed, old)
+                let new = delta
+                    .as_ref()
+                    .and_then(|d| d.new_file().path())
+                    .map(|p| p.to_string_lossy().to_string())
+                    .unwrap_or_else(|| path.clone());
+                (FileStatus::Renamed, new, old)
+            } else if s.contains(git2::Status::INDEX_NEW) {
+                (FileStatus::New, path.clone(), None)
+            } else if s.contains(git2::Status::INDEX_DELETED) {
+                (FileStatus::Deleted, path.clone(), None)
             } else if s.contains(git2::Status::INDEX_TYPECHANGE) {
-                (FileStatus::Typechange, None)
+                (FileStatus::Typechange, path.clone(), None)
             } else {
-                (FileStatus::Modified, None)
+                (FileStatus::Modified, path.clone(), None)
             };
 
             staged.push(StatusFileItem {
-                path: path.clone(),
+                path: current_path,
                 status,
                 is_staged: true,
                 old_path,
@@ -100,22 +107,28 @@ pub fn get_repo_status<P: AsRef<Path>>(repo_path: P) -> Result<RepoStatusResult,
                 | git2::Status::WT_RENAMED
                 | git2::Status::WT_TYPECHANGE,
         ) {
-            let (status, old_path) = if s.contains(git2::Status::WT_DELETED) {
-                (FileStatus::Deleted, None)
-            } else if s.contains(git2::Status::WT_RENAMED) {
-                let old = entry
-                    .index_to_workdir()
-                    .and_then(|delta| delta.old_file().path())
+            let (status, current_path, old_path) = if s.contains(git2::Status::WT_RENAMED) {
+                let delta = entry.index_to_workdir();
+                let old = delta
+                    .as_ref()
+                    .and_then(|d| d.old_file().path())
                     .map(|p| p.to_string_lossy().to_string());
-                (FileStatus::Renamed, old)
+                let new = delta
+                    .as_ref()
+                    .and_then(|d| d.new_file().path())
+                    .map(|p| p.to_string_lossy().to_string())
+                    .unwrap_or_else(|| path.clone());
+                (FileStatus::Renamed, new, old)
+            } else if s.contains(git2::Status::WT_DELETED) {
+                (FileStatus::Deleted, path.clone(), None)
             } else if s.contains(git2::Status::WT_TYPECHANGE) {
-                (FileStatus::Typechange, None)
+                (FileStatus::Typechange, path.clone(), None)
             } else {
-                (FileStatus::Modified, None)
+                (FileStatus::Modified, path.clone(), None)
             };
 
             unstaged.push(StatusFileItem {
-                path,
+                path: current_path,
                 status,
                 is_staged: false,
                 old_path,
@@ -129,3 +142,33 @@ pub fn get_repo_status<P: AsRef<Path>>(repo_path: P) -> Result<RepoStatusResult,
         untracked,
     })
 }
+
+/// Lấy diff của một file trong working tree (staged hoặc unstaged)
+pub fn get_working_file_diff<P: AsRef<Path>>(
+    repo_path: P,
+    file_path: &str,
+    is_staged: bool,
+) -> Result<FileDiffResult, AppError> {
+    let repo = Repository::open(repo_path.as_ref())?;
+    let index = repo.index()?;
+
+    let normalized_path = file_path.replace('\\', "/");
+    let mut diff_opts = DiffOptions::new();
+    diff_opts.pathspec(&normalized_path);
+
+    let diff = if is_staged {
+        let head_tree = match repo.head() {
+            Ok(head_ref) => head_ref.peel_to_tree().ok(),
+            Err(_) => None,
+        };
+        repo.diff_tree_to_index(head_tree.as_ref(), Some(&index), Some(&mut diff_opts))?
+    } else {
+        diff_opts.include_untracked(true);
+        diff_opts.recurse_untracked_dirs(true);
+        diff_opts.show_untracked_content(true);
+        repo.diff_index_to_workdir(Some(&index), Some(&mut diff_opts))?
+    };
+
+    parse_diff_to_file_diff_result(&diff, file_path)
+}
+
