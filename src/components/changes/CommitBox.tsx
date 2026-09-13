@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import clsx from "clsx";
 import { GitCommit, AlertCircle, RefreshCw } from "lucide-react";
 
 export interface CommitBoxProps {
@@ -71,39 +72,28 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--space-2)",
-        padding: "var(--space-3)",
-        backgroundColor: "var(--bg-surface)",
-        borderTop: "1px solid var(--border-subtle)",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <GitCommit size={14} color="var(--accent)" />
-          <span style={{ fontSize: "var(--font-size-xs)", fontWeight: 600, color: "var(--text-secondary)" }}>
+    <div className="flex flex-col gap-2 p-3 bg-surface border-t border-border-subtle">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <GitCommit size={14} className="text-accent" />
+          <span className="text-xs font-semibold text-secondary">
             COMMIT
           </span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <div className="flex items-center gap-1.5">
           <span
-            style={{
-              fontSize: "11px",
-              fontFamily: "var(--font-mono)",
-              color: isOver72 ? "var(--diff-remove-text)" : "var(--text-secondary)",
-              fontWeight: isOver72 ? 600 : 400,
-            }}
+            className={clsx(
+              "text-[11px] font-mono",
+              isOver72 ? "text-diff-remove-text font-semibold" : "text-secondary font-normal"
+            )}
           >
             {summary.length}/72
           </span>
         </div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+      <div className="flex flex-col gap-1">
         <input
           type="text"
           data-testid="commit-summary-input"
@@ -111,30 +101,14 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
           onChange={(e) => setSummary(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Tiêu đề commit (ngắn gọn, dưới 72 ký tự)..."
-          style={{
-            width: "100%",
-            padding: "6px 8px",
-            backgroundColor: "var(--bg-window)",
-            border: isOver72 ? "1px solid var(--diff-remove-text)" : "1px solid var(--border-subtle)",
-            borderRadius: "var(--radius-sm)",
-            fontSize: "var(--font-size-xs)",
-            color: "var(--text-primary)",
-            outline: "none",
-            boxSizing: "border-box",
-          }}
+          className={clsx(
+            "w-full px-2 py-1.5 bg-window rounded-sm text-xs text-primary outline-none box-border transition-colors",
+            isOver72 ? "border border-diff-remove-text focus:border-diff-remove-text" : "border border-border-subtle focus:border-accent"
+          )}
         />
 
         {isOver72 && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              color: "var(--diff-remove-text)",
-              fontSize: "10px",
-              marginTop: "2px",
-            }}
-          >
+          <div className="flex items-center gap-1 text-diff-remove-text text-[10px] mt-0.5">
             <AlertCircle size={11} />
             <span>Vượt quá 72 ký tự khuyến nghị</span>
           </div>
@@ -148,51 +122,22 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
         onKeyDown={handleKeyDown}
         placeholder="Mô tả chi tiết (tuỳ chọn)..."
         rows={3}
-        style={{
-          width: "100%",
-          padding: "6px 8px",
-          backgroundColor: "var(--bg-window)",
-          border: "1px solid var(--border-subtle)",
-          borderRadius: "var(--radius-sm)",
-          fontSize: "var(--font-size-xs)",
-          color: "var(--text-primary)",
-          resize: "vertical",
-          outline: "none",
-          fontFamily: "inherit",
-          boxSizing: "border-box",
-        }}
+        className="w-full px-2 py-1.5 bg-window border border-border-subtle focus:border-accent rounded-sm text-xs text-primary resize-y outline-none font-inherit box-border transition-colors"
       />
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginTop: "2px",
-        }}
-      >
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            fontSize: "var(--font-size-xs)",
-            color: "var(--text-primary)",
-            cursor: "pointer",
-            userSelect: "none",
-          }}
-        >
+      <div className="flex items-center justify-between mt-0.5">
+        <label className="flex items-center gap-1.5 text-xs text-primary cursor-pointer select-none">
           <input
             type="checkbox"
             data-testid="amend-checkbox"
             checked={isAmend}
             onChange={handleAmendToggle}
-            style={{ cursor: "pointer" }}
+            className="cursor-pointer"
           />
           <span>Amend (Sửa commit gần nhất)</span>
         </label>
 
-        <span style={{ fontSize: "10px", color: "var(--text-tertiary)" }}>
+        <span className="text-[10px] text-tertiary">
           {shortcutHint}
         </span>
       </div>
@@ -202,27 +147,16 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
         data-testid="commit-button"
         disabled={!canCommit}
         onClick={handleSubmit}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "6px",
-          width: "100%",
-          padding: "7px 12px",
-          backgroundColor: canCommit ? "var(--accent)" : "var(--bg-window)",
-          color: canCommit ? "var(--accent-contrast)" : "var(--text-tertiary)",
-          border: "1px solid",
-          borderColor: canCommit ? "var(--accent)" : "var(--border-subtle)",
-          borderRadius: "var(--radius-sm)",
-          fontSize: "var(--font-size-xs)",
-          fontWeight: 600,
-          cursor: canCommit ? "pointer" : "not-allowed",
-          transition: "all var(--duration-fast) var(--ease-macos)",
-        }}
+        className={clsx(
+          "flex items-center justify-center gap-1.5 w-full py-2 px-3 border rounded-sm text-xs font-semibold transition-all duration-150 ease-macos",
+          canCommit
+            ? "bg-accent text-accent-contrast border-accent cursor-pointer hover:bg-accent-hover active:scale-[0.99]"
+            : "bg-window text-tertiary border-border-subtle cursor-not-allowed"
+        )}
       >
         {submitting || isLoading ? (
           <>
-            <RefreshCw size={13} className="spin" />
+            <RefreshCw size={13} className="animate-spin" />
             <span>Đang lưu...</span>
           </>
         ) : isAmend ? (

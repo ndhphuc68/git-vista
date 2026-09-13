@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Minus, FileCode, AlertTriangle, Layers } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
@@ -32,16 +33,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
 
   if (isLoading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          color: "var(--text-secondary)",
-          fontSize: "var(--font-size-xs)",
-        }}
-      >
+      <div className="flex items-center justify-center h-full text-secondary text-xs">
         Đang đọc diff...
       </div>
     );
@@ -49,19 +41,8 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
 
   if (isError || !diff) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          gap: "8px",
-          color: "var(--text-tertiary)",
-          fontSize: "var(--font-size-xs)",
-        }}
-      >
-        <AlertTriangle size={18} color="var(--diff-remove-text)" />
+      <div className="flex flex-col items-center justify-center h-full gap-2 text-tertiary text-xs">
+        <AlertTriangle size={18} className="text-diff-remove-text" />
         <span>Không thể đọc diff cho tệp này.</span>
       </div>
     );
@@ -71,19 +52,8 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
 
   if (isBinary) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          gap: "8px",
-          color: "var(--text-secondary)",
-          fontSize: "var(--font-size-xs)",
-        }}
-      >
-        <FileCode size={24} color="var(--text-tertiary)" />
+      <div className="flex flex-col items-center justify-center h-full gap-2 text-secondary text-xs">
+        <FileCode size={24} className="text-tertiary" />
         <span>Tệp nhị phân - không thể hiển thị diff</span>
       </div>
     );
@@ -91,16 +61,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
 
   if (diff.hunks.length === 0) {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          color: "var(--text-tertiary)",
-          fontSize: "var(--font-size-xs)",
-        }}
-      >
+      <div className="flex items-center justify-center h-full text-tertiary text-xs">
         Không có thay đổi nội dung
       </div>
     );
@@ -110,78 +71,34 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
   const totalDels = diff.deletions;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        width: "100%",
-        backgroundColor: "var(--bg-surface)",
-        overflow: "auto",
-      }}
-    >
+    <div className="flex flex-col h-full w-full bg-surface overflow-auto">
       {/* File Diff Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "8px 16px",
-          backgroundColor: "var(--bg-window)",
-          borderBottom: "1px solid var(--border-subtle)",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          gap: "8px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            minWidth: 0,
-            flexShrink: 1,
-          }}
-        >
+      <div className="flex items-center justify-between px-4 py-2 bg-window border-b border-border-subtle sticky top-0 z-10 gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1 shrink">
           <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              padding: "2px 6px",
-              borderRadius: "var(--radius-sm)",
-              backgroundColor: isStaged ? "var(--accent-subtle)" : "var(--bg-surface)",
-              color: isStaged ? "var(--accent)" : "var(--text-secondary)",
-              border: isStaged ? "1px solid var(--accent)" : "1px solid var(--border-subtle)",
-              fontSize: "10px",
-              fontWeight: 600,
-              flexShrink: 0,
-            }}
+            className={clsx(
+              "inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-semibold shrink-0",
+              isStaged
+                ? "bg-accent-subtle text-accent border border-accent"
+                : "bg-surface text-secondary border border-border-subtle"
+            )}
           >
             {isStaged ? "STAGED" : "UNSTAGED"}
           </span>
           <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "var(--font-size-xs)",
-              fontWeight: 600,
-              color: "var(--text-primary)",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
+            className="font-mono text-xs font-semibold text-primary overflow-hidden text-ellipsis whitespace-nowrap"
             title={diff.file_path}
           >
             {diff.file_path}
           </span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "var(--font-size-xs)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontWeight: 600 }}>
-            <span style={{ color: "var(--diff-add-text)" }}>+{totalAdds}</span>
-            <span style={{ color: "var(--diff-remove-text)" }}>-{totalDels}</span>
+        <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-1.5 font-semibold">
+            <span className="text-diff-add-text">+{totalAdds}</span>
+            <span className="text-diff-remove-text">-{totalDels}</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--text-secondary)" }}>
+          <div className="flex items-center gap-1 text-secondary">
             <Layers size={13} />
             <span>{diff.hunks.length} {diff.hunks.length === 1 ? "hunk" : "hunks"}</span>
           </div>
@@ -189,32 +106,11 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
       </div>
 
       {/* Hunks list */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          fontFamily: "var(--font-mono)",
-          fontSize: "12px",
-          overflowX: "auto",
-        }}
-      >
+      <div className="flex flex-col font-mono text-xs overflow-x-auto">
         {diff.hunks.map((hunk, hIdx) => (
-          <div key={`hunk-${hIdx}`} style={{ marginBottom: "16px" }}>
+          <div key={`hunk-${hIdx}`} className="mb-4">
             {/* Hunk Header */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                backgroundColor: "var(--accent-subtle)",
-                color: "var(--accent)",
-                padding: "4px 12px",
-                fontSize: "11px",
-                fontWeight: 600,
-                borderTop: "1px solid var(--border-subtle)",
-                borderBottom: "1px solid var(--border-subtle)",
-              }}
-            >
+            <div className="flex items-center justify-between bg-accent-subtle text-accent px-3 py-1 text-[11px] font-semibold border-y border-border-subtle">
               <span>{hunk.header}</span>
 
               {isStaged ? (
@@ -222,19 +118,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
                   type="button"
                   data-testid={`unstage-hunk-${hIdx}`}
                   onClick={() => onUnstageHunk(hIdx)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                    padding: "2px 8px",
-                    backgroundColor: "var(--bg-surface)",
-                    border: "1px solid var(--border-subtle)",
-                    borderRadius: "var(--radius-sm)",
-                    color: "var(--text-primary)",
-                    fontSize: "11px",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                  }}
+                  className="flex items-center gap-1 px-2 py-0.5 bg-surface border border-border-subtle rounded-sm text-primary text-xs font-medium cursor-pointer hover:bg-surface-hover transition-colors"
                   title="Bỏ đánh dấu đoạn này (Unstage Hunk)"
                 >
                   <Minus size={11} />
@@ -245,19 +129,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
                   type="button"
                   data-testid={`stage-hunk-${hIdx}`}
                   onClick={() => onStageHunk(hIdx)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px",
-                    padding: "2px 8px",
-                    backgroundColor: "var(--accent)",
-                    border: "1px solid var(--accent)",
-                    borderRadius: "var(--radius-sm)",
-                    color: "var(--accent-contrast)",
-                    fontSize: "11px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                  }}
+                  className="flex items-center gap-1 px-2 py-0.5 bg-accent border border-accent rounded-sm text-accent-contrast text-xs font-semibold cursor-pointer hover:bg-accent-hover transition-colors"
                   title="Đánh dấu đoạn này (Stage Hunk)"
                 >
                   <Plus size={11} />
@@ -279,114 +151,64 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
                   key={lineKey}
                   onMouseEnter={() => setHoveredLineKey(lineKey)}
                   onMouseLeave={() => setHoveredLineKey(null)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    backgroundColor: isAdd
-                      ? "var(--diff-add-bg)"
+                  className={clsx(
+                    "flex items-center py-px leading-5 whitespace-pre min-w-max w-full",
+                    isAdd
+                      ? "bg-diff-add-bg text-diff-add-text"
                       : isDel
-                      ? "var(--diff-remove-bg)"
-                      : "transparent",
-                    color: isAdd
-                      ? "var(--diff-add-text)"
-                      : isDel
-                      ? "var(--diff-remove-text)"
-                      : "var(--text-primary)",
-                    padding: "1px 0",
-                    lineHeight: "20px",
-                    whiteSpace: "pre",
-                    minWidth: "max-content",
-                    width: "100%",
-                  }}
+                      ? "bg-diff-remove-bg text-diff-remove-text"
+                      : "bg-transparent text-primary"
+                  )}
                 >
                   {/* Sticky Line Number Gutter */}
                   <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      position: "sticky",
-                      left: 0,
-                      zIndex: 2,
-                      backgroundColor: isAdd
-                        ? "var(--diff-add-bg)"
+                    className={clsx(
+                      "flex items-center sticky left-0 z-2 shrink-0",
+                      isAdd
+                        ? "bg-diff-add-bg"
                         : isDel
-                        ? "var(--diff-remove-bg)"
-                        : "var(--bg-surface)",
-                      flexShrink: 0,
-                    }}
+                        ? "bg-diff-remove-bg"
+                        : "bg-surface"
+                    )}
                   >
                     {/* Old Line Number */}
-                    <span
-                      style={{
-                        width: "44px",
-                        color: "var(--text-tertiary)",
-                        userSelect: "none",
-                        textAlign: "right",
-                        paddingRight: "8px",
-                        flexShrink: 0,
-                      }}
-                    >
+                    <span className="w-11 text-tertiary select-none text-right pr-2 shrink-0">
                       {line.old_lineno ?? ""}
                     </span>
 
                     {/* New Line Number */}
-                    <span
-                      style={{
-                        width: "44px",
-                        color: "var(--text-tertiary)",
-                        userSelect: "none",
-                        textAlign: "right",
-                        paddingRight: "8px",
-                        flexShrink: 0,
-                      }}
-                    >
+                    <span className="w-11 text-tertiary select-none text-right pr-2 shrink-0">
                       {line.new_lineno ?? ""}
                     </span>
 
                     {/* Origin Sign (+, -, ' ') */}
                     <span
-                      style={{
-                        width: "20px",
-                        userSelect: "none",
-                        textAlign: "center",
-                        fontWeight: isModifiedLine ? 700 : 400,
-                        flexShrink: 0,
-                      }}
+                      className={clsx(
+                        "w-5 select-none text-center shrink-0",
+                        isModifiedLine ? "font-bold" : "font-normal"
+                      )}
                     >
                       {isAdd ? "+" : isDel ? "-" : " "}
                     </span>
                   </div>
 
                   {/* Line Content */}
-                  <span style={{ flex: 1, minWidth: 0, paddingRight: "16px" }}>{line.content}</span>
+                  <span className="flex-1 min-w-0 pr-4">{line.content}</span>
 
                   {/* Line-level Staging Action Button */}
                   {isModifiedLine && (
                     <div
-                      style={{
-                        padding: "0 8px",
-                        opacity: isHovered ? 1 : 0.4,
-                        transition: "opacity var(--duration-fast) var(--ease-macos)",
-                        flexShrink: 0,
-                      }}
+                      className={clsx(
+                        "px-2 shrink-0 transition-opacity duration-150 ease-macos",
+                        isHovered ? "opacity-100" : "opacity-40"
+                      )}
                     >
                       {isStaged ? (
                         <button
                           type="button"
                           data-testid={`unstage-line-${hIdx}-${lIdx}`}
                           onClick={() => onUnstageLines(hIdx, [lIdx])}
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "2px",
-                            padding: "1px 6px",
-                            backgroundColor: "var(--bg-surface)",
-                            border: "1px solid var(--border-subtle)",
-                            borderRadius: "var(--radius-sm)",
-                            color: "var(--text-secondary)",
-                            fontSize: "10px",
-                            cursor: "pointer",
-                          }}
+                          className="inline-flex items-center gap-0.5 px-1.5 py-px bg-surface border border-border-subtle rounded-sm text-secondary text-[10px] cursor-pointer hover:bg-surface-hover hover:text-primary transition-colors"
                           title="Bỏ đánh dấu dòng này"
                         >
                           <Minus size={10} />
@@ -397,18 +219,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
                           type="button"
                           data-testid={`stage-line-${hIdx}-${lIdx}`}
                           onClick={() => onStageLines(hIdx, [lIdx])}
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "2px",
-                            padding: "1px 6px",
-                            backgroundColor: "var(--accent)",
-                            border: "1px solid var(--accent)",
-                            borderRadius: "var(--radius-sm)",
-                            color: "var(--accent-contrast)",
-                            fontSize: "10px",
-                            cursor: "pointer",
-                          }}
+                          className="inline-flex items-center gap-0.5 px-1.5 py-px bg-accent border border-accent rounded-sm text-accent-contrast text-[10px] cursor-pointer hover:bg-accent-hover transition-colors"
                           title="Đánh dấu dòng này"
                         >
                           <Plus size={10} />

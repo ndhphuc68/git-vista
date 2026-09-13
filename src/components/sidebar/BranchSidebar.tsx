@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import clsx from "clsx";
 import { GitBranch, Globe, Tag, ChevronDown, ChevronRight, Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
@@ -30,67 +31,28 @@ export const BranchSidebar: React.FC = () => {
   );
 
   return (
-    <aside
-      style={{
-        backgroundColor: "var(--bg-surface)",
-        borderRight: "1px solid var(--border-subtle)",
-        width: "240px",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        overflowY: "auto",
-      }}
-    >
-      <div style={{ padding: "var(--space-2) var(--space-3)", borderBottom: "1px solid var(--border-subtle)" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            backgroundColor: "var(--bg-window)",
-            borderRadius: "var(--radius-sm)",
-            padding: "4px 8px",
-            border: "1px solid var(--border-subtle)",
-          }}
-        >
-          <Search size={12} color="var(--text-tertiary)" />
+    <aside className="bg-surface border-r border-border-subtle w-60 shrink-0 h-full flex flex-col overflow-y-auto">
+      <div className="px-3 py-2 border-b border-border-subtle">
+        <div className="flex items-center gap-1.5 bg-window rounded-sm px-2 py-1 border border-border-subtle">
+          <Search size={12} className="text-tertiary shrink-0" />
           <input
             type="text"
             placeholder="Tìm nhánh..."
             aria-label="Tìm nhánh"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{
-              background: "transparent",
-              border: "none",
-              outline: "none",
-              fontSize: "var(--font-size-xs)",
-              color: "var(--text-primary)",
-              width: "100%",
-            }}
+            className="bg-transparent border-0 outline-none text-xs text-primary w-full"
           />
         </div>
       </div>
 
-      <div style={{ padding: "var(--space-2)", display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
+      <div className="p-2 flex flex-col gap-3">
         <div>
           <button
             onClick={() => setLocalOpen(!localOpen)}
             aria-expanded={localOpen}
             aria-label="Nhánh cục bộ"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              width: "100%",
-              padding: "4px",
-              background: "transparent",
-              border: "none",
-              color: "var(--text-secondary)",
-              fontWeight: 600,
-              fontSize: "var(--font-size-xs)",
-              cursor: "pointer",
-            }}
+            className="flex items-center gap-1 w-full p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
           >
             {localOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
             <GitBranch size={13} />
@@ -98,7 +60,7 @@ export const BranchSidebar: React.FC = () => {
           </button>
 
           {localOpen && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "2px", marginTop: "4px" }}>
+            <div className="flex flex-col gap-0.5 mt-1">
               {localBranches.map((branch) => {
                 const isSelected = selectedBranch === branch.name;
                 return (
@@ -106,36 +68,27 @@ export const BranchSidebar: React.FC = () => {
                     key={branch.name}
                     onClick={() => setSelectedBranch(branch.name)}
                     aria-selected={isSelected}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      padding: "4px 8px",
-                      borderRadius: "var(--radius-sm)",
-                      border: "none",
-                      backgroundColor: isSelected ? "var(--accent-subtle)" : "transparent",
-                      color: isSelected ? "var(--accent)" : "var(--text-primary)",
-                      fontWeight: branch.is_head || isSelected ? 600 : 400,
-                      fontSize: "var(--font-size-xs)",
-                      cursor: "pointer",
-                      textAlign: "left",
-                      minHeight: "26px",
-                    }}
+                    className={clsx(
+                      "flex items-center gap-1.5 px-2 py-1 rounded-sm border-0 cursor-pointer text-left min-h-[26px] text-xs",
+                      isSelected
+                        ? "bg-accent-subtle text-accent font-semibold"
+                        : "bg-transparent text-primary hover:bg-surface-hover font-normal",
+                      branch.is_head && "font-semibold"
+                    )}
                   >
                     <span
-                      style={{
-                        width: "6px",
-                        height: "6px",
-                        borderRadius: "50%",
-                        backgroundColor: branch.is_head ? "var(--accent)" : "transparent",
-                        border: branch.is_head ? "none" : "1px solid var(--text-tertiary)",
-                      }}
+                      className={clsx(
+                        "w-1.5 h-1.5 rounded-full shrink-0",
+                        branch.is_head
+                          ? "bg-accent"
+                          : "border border-tertiary bg-transparent"
+                      )}
                     />
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <span className="overflow-hidden text-ellipsis whitespace-nowrap">
                       {branch.name}
                     </span>
                     {branch.is_head && (
-                      <span style={{ fontSize: "10px", color: "var(--accent)", marginLeft: "auto" }}>HEAD</span>
+                      <span className="text-[10px] text-accent ml-auto">HEAD</span>
                     )}
                   </button>
                 );
@@ -149,19 +102,7 @@ export const BranchSidebar: React.FC = () => {
             onClick={() => setRemoteOpen(!remoteOpen)}
             aria-expanded={remoteOpen}
             aria-label="Nhánh máy chủ"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              width: "100%",
-              padding: "4px",
-              background: "transparent",
-              border: "none",
-              color: "var(--text-secondary)",
-              fontWeight: 600,
-              fontSize: "var(--font-size-xs)",
-              cursor: "pointer",
-            }}
+            className="flex items-center gap-1 w-full p-1 bg-transparent border-0 text-secondary font-semibold text-xs cursor-pointer"
           >
             {remoteOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
             <Globe size={13} />
@@ -169,25 +110,14 @@ export const BranchSidebar: React.FC = () => {
           </button>
 
           {remoteOpen && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "2px", marginTop: "4px" }}>
+            <div className="flex flex-col gap-0.5 mt-1">
               {remoteBranches.map((branch) => (
                 <div
                   key={branch.name}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "4px 8px",
-                    borderRadius: "var(--radius-sm)",
-                    color: "var(--text-secondary)",
-                    fontSize: "var(--font-size-xs)",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-sm text-secondary text-xs overflow-hidden text-ellipsis whitespace-nowrap"
                 >
-                  <Globe size={11} color="var(--text-tertiary)" />
-                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <Globe size={11} className="text-tertiary shrink-0" />
+                  <span className="overflow-hidden text-ellipsis whitespace-nowrap">
                     {branch.name}
                   </span>
                 </div>
@@ -201,19 +131,7 @@ export const BranchSidebar: React.FC = () => {
             onClick={() => setTagsOpen(!tagsOpen)}
             aria-expanded={tagsOpen}
             aria-label="Tags"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              width: "100%",
-              padding: "4px",
-              background: "transparent",
-              border: "none",
-              color: "var(--text-secondary)",
-              fontWeight: 600,
-              fontSize: "var(--font-size-xs)",
-              cursor: "pointer",
-            }}
+            className="flex items-center gap-1 w-full p-1 bg-transparent border-0 text-secondary font-semibold text-xs cursor-pointer"
           >
             {tagsOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
             <Tag size={13} />
@@ -221,15 +139,11 @@ export const BranchSidebar: React.FC = () => {
           </button>
 
           {tagsOpen && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "2px", marginTop: "4px" }}>
+            <div className="flex flex-col gap-0.5 mt-1">
               {tags.map((tag) => (
                 <div
                   key={tag}
-                  style={{
-                    padding: "4px 8px",
-                    fontSize: "var(--font-size-xs)",
-                    color: "var(--text-secondary)",
-                  }}
+                  className="px-2 py-1 text-xs text-secondary"
                 >
                   {tag}
                 </div>

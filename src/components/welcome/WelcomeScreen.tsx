@@ -75,43 +75,18 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   return (
     <div
       data-testid="welcome-screen"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        height: "100%",
-        width: "100%",
-        backgroundColor: "var(--bg-window)",
-        overflowY: "auto",
-        padding: "var(--space-6) var(--space-4)",
-      }}
+      className="flex flex-col items-center h-full w-full bg-window overflow-y-auto px-4 py-6"
     >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "580px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "var(--space-5)",
-          margin: "auto 0",
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
+      <div className="w-full max-w-145 flex flex-col gap-5 my-auto">
+        <div className="text-center">
           <FolderGit2
             size={48}
-            color="var(--accent)"
-            style={{ marginBottom: "var(--space-3)" }}
+            className="text-accent mb-3 mx-auto"
           />
-          <h1 style={{ fontSize: "var(--font-size-xl)", fontWeight: 700 }}>
+          <h1 className="text-xl font-bold">
             Visual Git Client
           </h1>
-          <p
-            style={{
-              color: "var(--text-secondary)",
-              fontSize: "var(--font-size-sm)",
-              marginTop: "4px",
-            }}
-          >
+          <p className="text-secondary text-xs mt-1">
             Trực quan hoá lịch sử Git nhanh và mượt mà
           </p>
         </div>
@@ -119,31 +94,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         {error && (
           <div
             role="alert"
-            style={{
-              padding: "var(--space-3) var(--space-4)",
-              backgroundColor: "var(--diff-del-bg)",
-              color: "var(--diff-del-text)",
-              borderRadius: "var(--radius-md)",
-              fontSize: "var(--font-size-xs)",
-              border: "1px solid var(--diff-del-border)",
-              display: "flex",
-              alignItems: "center",
-              gap: "var(--space-2)",
-            }}
+            className="px-4 py-3 bg-diff-remove-bg text-diff-remove-text rounded-md text-[11px] border border-diff-remove-border flex items-center gap-2"
           >
             <AlertCircle size={16} className="shrink-0" />
-            <span style={{ flex: 1 }}>{error}</span>
+            <span className="flex-1">{error}</span>
             <button
               onClick={() => setError(null)}
               aria-label="Đóng thông báo"
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "var(--diff-del-text)",
-                fontWeight: 700,
-                fontSize: "14px",
-              }}
+              className="bg-transparent border-0 cursor-pointer text-diff-remove-text font-bold text-sm"
             >
               ✕
             </button>
@@ -152,50 +110,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
         <button
           onClick={handleOpenFolder}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "var(--space-2)",
-            padding: "var(--space-3) var(--space-4)",
-            backgroundColor: "var(--accent)",
-            color: "var(--accent-contrast)",
-            borderRadius: "var(--radius-lg)",
-            fontWeight: 600,
-            fontSize: "var(--font-size-sm)",
-            cursor: "pointer",
-            border: "none",
-            boxShadow: "var(--shadow-md)",
-            minHeight: "40px",
-          }}
+          className="flex items-center justify-center gap-2 px-4 py-3 bg-accent text-accent-contrast rounded-lg font-semibold text-xs cursor-pointer border-0 shadow-md min-h-[40px] hover:bg-accent-hover active:scale-[0.99] transition-all"
         >
           <FolderOpen size={18} />
           <span>Mở thư mục...</span>
         </button>
 
-        <div
-          style={{
-            backgroundColor: "var(--bg-surface)",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: "var(--radius-lg)",
-            padding: "var(--space-4)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--space-3)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              color: "var(--text-secondary)",
-              fontSize: "var(--font-size-xs)",
-              fontWeight: 600,
-              textTransform: "uppercase",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <div className="bg-surface border border-border-subtle rounded-lg p-4 flex flex-col gap-3 shadow-sm">
+          <div className="flex items-center justify-between text-secondary text-xs font-semibold uppercase tracking-wider">
+            <div className="flex items-center gap-1.5">
               <Clock size={13} />
               <span>
                 Repository gần đây {recents.length > 0 && `(${recents.length})`}
@@ -207,25 +130,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                 type="button"
                 data-testid="clear-recents-btn"
                 onClick={handleClearRecents}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  color: "var(--text-tertiary)",
-                  fontSize: "11px",
-                  cursor: "pointer",
-                  background: "none",
-                  border: "none",
-                  padding: "2px 6px",
-                  borderRadius: "var(--radius-sm)",
-                  transition: "color var(--duration-fast) var(--ease-macos)",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.color = "var(--text-primary)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.color = "var(--text-tertiary)")
-                }
+                className="flex items-center gap-1 text-tertiary text-xs cursor-pointer bg-transparent border-0 px-1.5 py-0.5 rounded-sm hover:text-primary transition-colors"
                 title="Xoá toàn bộ lịch sử repository gần đây"
               >
                 <Trash2 size={11} />
@@ -235,128 +140,41 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           </div>
 
           {isLoading ? (
-            <p
-              style={{
-                fontSize: "var(--font-size-xs)",
-                color: "var(--text-tertiary)",
-              }}
-            >
+            <p className="text-[11px] text-tertiary">
               Đang tải...
             </p>
           ) : recents.length === 0 ? (
-            <p
-              style={{
-                fontSize: "var(--font-size-xs)",
-                color: "var(--text-tertiary)",
-              }}
-            >
+            <p className="text-[11px] text-tertiary">
               Chưa có repository nào gần đây.
             </p>
           ) : (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--space-1)",
-                maxHeight: "260px",
-                overflowY: "auto",
-                paddingRight: "2px",
-              }}
-            >
+            <div className="flex flex-col gap-1 max-h-[260px] overflow-y-auto pr-0.5">
               {recents.map((item) => (
                 <div
                   key={item.path}
                   onClick={() => handleOpenRecent(item.path)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "var(--space-2) var(--space-3)",
-                    backgroundColor: "transparent",
-                    border: "none",
-                    borderRadius: "var(--radius-md)",
-                    cursor: "pointer",
-                    color: "var(--text-primary)",
-                    gap: "8px",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.backgroundColor =
-                      "var(--bg-surface-hover)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.backgroundColor = "transparent")
-                  }
+                  className="flex items-center justify-between px-3 py-2 bg-transparent rounded-md cursor-pointer text-primary gap-2 hover:bg-surface-hover transition-colors"
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      minWidth: 0,
-                      flex: 1,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontWeight: 600,
-                        fontSize: "var(--font-size-sm)",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="font-semibold text-xs overflow-hidden text-ellipsis whitespace-nowrap">
                       {item.name}
                     </span>
-                    <span
-                      style={{
-                        fontSize: "var(--font-size-xs)",
-                        color: "var(--text-tertiary)",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <span className="text-[11px] text-tertiary overflow-hidden text-ellipsis whitespace-nowrap">
                       {item.path}
                     </span>
                   </div>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      flexShrink: 0,
-                    }}
-                  >
+                  <div className="flex items-center gap-1 shrink-0">
                     <button
                       type="button"
                       data-testid={`remove-recent-${item.path}`}
                       onClick={(e) => handleRemoveRecent(e, item.path)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: "20px",
-                        height: "20px",
-                        borderRadius: "var(--radius-sm)",
-                        background: "none",
-                        border: "none",
-                        color: "var(--text-tertiary)",
-                        cursor: "pointer",
-                        opacity: 0.6,
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = "1";
-                        e.currentTarget.style.color = "var(--diff-remove-text)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = "0.6";
-                        e.currentTarget.style.color = "var(--text-tertiary)";
-                      }}
+                      className="flex items-center justify-center w-5 h-5 rounded-sm bg-transparent border-0 text-tertiary cursor-pointer opacity-60 hover:opacity-100 hover:text-diff-remove-text transition-all"
                       title="Xoá repo này khỏi danh sách"
                     >
                       <X size={12} />
                     </button>
-                    <ArrowRight size={14} color="var(--text-secondary)" />
+                    <ArrowRight size={14} className="text-secondary" />
                   </div>
                 </div>
               ))}

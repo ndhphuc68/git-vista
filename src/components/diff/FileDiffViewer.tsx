@@ -1,4 +1,5 @@
 import React from "react";
+import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
 import { invokeCommand } from "../../ipc/client";
 
@@ -15,34 +16,18 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
   });
 
   if (isLoading) {
-    return <div style={{ padding: "var(--space-3)", color: "var(--text-secondary)", fontSize: "var(--font-size-xs)" }}>Đang đọc diff...</div>;
+    return <div className="p-3 text-secondary text-xs">Đang đọc diff...</div>;
   }
 
   if (!diff || diff.hunks.length === 0) {
-    return <div style={{ padding: "var(--space-3)", color: "var(--text-tertiary)", fontSize: "var(--font-size-xs)" }}>Không có thay đổi văn bản cho file này.</div>;
+    return <div className="p-3 text-tertiary text-xs">Không có thay đổi văn bản cho file này.</div>;
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        fontFamily: "var(--font-mono)",
-        fontSize: "12px",
-        overflowX: "auto",
-      }}
-    >
+    <div className="flex flex-col font-mono text-xs overflow-x-auto">
       {diff.hunks.map((hunk, hIdx) => (
-        <div key={hIdx} style={{ marginBottom: "var(--space-2)" }}>
-          <div
-            style={{
-              backgroundColor: "var(--accent-subtle)",
-              color: "var(--accent)",
-              padding: "2px 8px",
-              fontSize: "11px",
-              fontWeight: 600,
-            }}
-          >
+        <div key={hIdx} className="mb-2 rounded-sm overflow-hidden border border-border-subtle">
+          <div className="bg-accent-subtle text-accent px-2 py-0.5 text-xs font-semibold">
             {hunk.header}
           </div>
 
@@ -53,49 +38,25 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
             return (
               <div
                 key={lIdx}
-                style={{
-                  display: "flex",
-                  backgroundColor: isAdd
-                    ? "var(--diff-add-bg)"
+                className={clsx(
+                  "flex px-1 py-0.5 leading-5 whitespace-pre",
+                  isAdd
+                    ? "bg-diff-add-bg text-diff-add-text"
                     : isDel
-                    ? "var(--diff-remove-bg)"
-                    : "transparent",
-                  color: isAdd
-                    ? "var(--diff-add-text)"
-                    : isDel
-                    ? "var(--diff-remove-text)"
-                    : "var(--text-primary)",
-                  padding: "1px 4px",
-                  lineHeight: "18px",
-                  whiteSpace: "pre",
-                }}
+                    ? "bg-diff-remove-bg text-diff-remove-text"
+                    : "bg-transparent text-primary"
+                )}
               >
-                <span
-                  style={{
-                    width: "36px",
-                    color: "var(--text-tertiary)",
-                    userSelect: "none",
-                    textAlign: "right",
-                    paddingRight: "8px",
-                  }}
-                >
+                <span className="w-9 text-tertiary select-none text-right pr-2 shrink-0">
                   {line.old_lineno ?? ""}
                 </span>
-                <span
-                  style={{
-                    width: "36px",
-                    color: "var(--text-tertiary)",
-                    userSelect: "none",
-                    textAlign: "right",
-                    paddingRight: "8px",
-                  }}
-                >
+                <span className="w-9 text-tertiary select-none text-right pr-2 shrink-0">
                   {line.new_lineno ?? ""}
                 </span>
-                <span style={{ width: "16px", userSelect: "none", textAlign: "center" }}>
+                <span className="w-4 select-none text-center shrink-0">
                   {isAdd ? "+" : isDel ? "-" : " "}
                 </span>
-                <span>{line.content}</span>
+                <span className="flex-1 min-w-0">{line.content}</span>
               </div>
             );
           })}

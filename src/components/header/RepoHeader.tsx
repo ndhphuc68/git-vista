@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import clsx from "clsx";
 import {
   FolderGit2,
   GitBranch,
@@ -90,48 +91,18 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
   return (
     <header
       data-testid="repo-header"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 var(--space-3)",
-        backgroundColor: "var(--bg-surface)",
-        borderBottom: "1px solid var(--border-subtle)",
-        height: "44px",
-        minHeight: "44px",
-        maxHeight: "44px",
-        flexShrink: 0,
-        gap: "var(--space-2)",
-        overflow: "hidden",
-      }}
+      className="flex items-center justify-between px-3 bg-surface border-b border-border-subtle h-[44px] min-h-[44px] max-h-[44px] shrink-0 gap-2 overflow-hidden"
     >
       {/* Left section: Sidebar toggle, Back, Repo info */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          minWidth: 0,
-          flexShrink: 1,
-        }}
-      >
+      <div className="flex items-center gap-2 min-w-0 flex-1 shrink">
         <button
           type="button"
           data-testid="toggle-sidebar"
           onClick={toggleSidebar}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "28px",
-            height: "28px",
-            backgroundColor: sidebarOpen ? "var(--accent-subtle)" : "transparent",
-            color: sidebarOpen ? "var(--accent)" : "var(--text-secondary)",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: "var(--radius-sm)",
-            cursor: "pointer",
-            flexShrink: 0,
-          }}
+          className={clsx(
+            "flex items-center justify-center w-7 h-7 border border-border-subtle rounded-sm cursor-pointer shrink-0",
+            sidebarOpen ? "bg-accent-subtle text-accent" : "bg-transparent text-secondary"
+          )}
           title={`Bật/tắt thanh bên (${shortcutSidebar})`}
         >
           <PanelLeft size={14} />
@@ -139,43 +110,20 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
 
         <button
           onClick={onBackToWelcome}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "4px",
-            padding: "3px 6px",
-            backgroundColor: "transparent",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: "var(--radius-sm)",
-            color: "var(--text-secondary)",
-            fontSize: "var(--font-size-xs)",
-            cursor: "pointer",
-            flexShrink: 0,
-          }}
+          className="flex items-center gap-1 px-2 py-1 bg-surface border border-border-subtle rounded-sm text-secondary text-xs cursor-pointer shrink-0 hover:bg-surface-hover hover:text-primary transition-colors"
           title="Đổi repository"
         >
           <ArrowLeft size={12} />
           {!isMobile && <span>Kho</span>}
         </button>
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            minWidth: 0,
-          }}
-        >
-          <FolderGit2 size={16} color="var(--accent)" style={{ flexShrink: 0 }} />
+        <div className="flex items-center gap-1.5 min-w-0">
+          <FolderGit2 size={16} className="text-accent shrink-0" />
           <span
-            style={{
-              fontWeight: 600,
-              fontSize: "var(--font-size-sm)",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              maxWidth: isMobile ? "100px" : "180px",
-            }}
+            className={clsx(
+              "font-semibold text-xs overflow-hidden text-ellipsis whitespace-nowrap text-primary",
+              isMobile ? "max-w-[100px]" : "max-w-[180px]"
+            )}
             title={currentRepo.name}
           >
             {currentRepo.name}
@@ -184,32 +132,14 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
 
         {currentRepo.head_branch && (
           <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              padding: "2px 6px",
-              backgroundColor: "var(--accent-subtle)",
-              color: "var(--accent)",
-              borderRadius: "var(--radius-full)",
-              fontSize: "var(--font-size-xs)",
-              fontWeight: 500,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              maxWidth: isMobile ? "70px" : "130px",
-              flexShrink: 1,
-            }}
+            className={clsx(
+              "flex items-center gap-1 px-2 py-0.5 bg-accent-subtle text-accent rounded-full text-xs font-medium overflow-hidden text-ellipsis whitespace-nowrap shrink",
+              isMobile ? "max-w-[70px]" : "max-w-[130px]"
+            )}
             title={`Branch: ${currentRepo.head_branch}`}
           >
-            <GitBranch size={11} style={{ flexShrink: 0 }} />
-            <span
-              style={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
+            <GitBranch size={11} className="shrink-0" />
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap">
               {currentRepo.head_branch}
             </span>
           </div>
@@ -220,16 +150,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
       <div
         role="tablist"
         aria-label="Màn hình làm việc"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "2px",
-          backgroundColor: "var(--bg-window)",
-          padding: "2px",
-          borderRadius: "var(--radius-md)",
-          border: "1px solid var(--border-subtle)",
-          flexShrink: 0,
-        }}
+        className="flex items-center gap-0.5 bg-window p-0.5 rounded-md border border-border-subtle shrink-0"
       >
         <button
           type="button"
@@ -237,32 +158,18 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
           aria-selected={isHistoryActive}
           data-testid="tab-history"
           onClick={() => setActiveScreen("history")}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "5px",
-            padding: "3px 8px",
-            backgroundColor: isHistoryActive ? "var(--accent-subtle)" : "transparent",
-            color: isHistoryActive ? "var(--text-primary)" : "var(--text-secondary)",
-            border: isHistoryActive ? "1px solid var(--accent)" : "1px solid transparent",
-            borderRadius: "var(--radius-sm)",
-            fontSize: "var(--font-size-xs)",
-            fontWeight: isHistoryActive ? 600 : 500,
-            cursor: "pointer",
-            transition: "all var(--duration-fast) var(--ease-macos)",
-          }}
+          className={clsx(
+            "flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-xs cursor-pointer transition-all duration-150 ease-macos",
+            isHistoryActive
+              ? "bg-surface text-primary border border-accent shadow-sm font-semibold"
+              : "bg-transparent text-secondary border border-transparent hover:text-primary font-medium"
+          )}
           title={`History (${shortcutLabel1})`}
         >
-          <History size={13} color={isHistoryActive ? "var(--accent)" : "currentColor"} />
+          <History size={13} className={isHistoryActive ? "text-accent" : "text-current"} />
           <span>{t.screens.history}</span>
           {!isMobile && (
-            <span
-              style={{
-                fontSize: "10px",
-                opacity: 0.7,
-                marginLeft: "2px",
-              }}
-            >
+            <span className="text-[10px] opacity-70 ml-0.5">
               {shortcutLabel1}
             </span>
           )}
@@ -274,52 +181,25 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
           aria-selected={isChangesActive}
           data-testid="tab-changes"
           onClick={() => setActiveScreen("changes")}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "5px",
-            padding: "3px 8px",
-            backgroundColor: isChangesActive ? "var(--accent-subtle)" : "transparent",
-            color: isChangesActive ? "var(--text-primary)" : "var(--text-secondary)",
-            border: isChangesActive ? "1px solid var(--accent)" : "1px solid transparent",
-            borderRadius: "var(--radius-sm)",
-            fontSize: "var(--font-size-xs)",
-            fontWeight: isChangesActive ? 600 : 500,
-            cursor: "pointer",
-            transition: "all var(--duration-fast) var(--ease-macos)",
-          }}
+          className={clsx(
+            "flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-xs cursor-pointer transition-all duration-150 ease-macos",
+            isChangesActive
+              ? "bg-surface text-primary border border-accent shadow-sm font-semibold"
+              : "bg-transparent text-secondary border border-transparent hover:text-primary font-medium"
+          )}
           title={`Changes (${shortcutLabel2})`}
         >
-          <FileDiff size={13} color={isChangesActive ? "var(--accent)" : "currentColor"} />
+          <FileDiff size={13} className={isChangesActive ? "text-accent" : "text-current"} />
           <span>{t.screens.changes}</span>
           {!isMobile && (
-            <span
-              style={{
-                fontSize: "10px",
-                opacity: 0.7,
-                marginLeft: "2px",
-              }}
-            >
+            <span className="text-[10px] opacity-70 ml-0.5">
               {shortcutLabel2}
             </span>
           )}
           {totalChanges > 0 && (
             <span
               data-testid="changes-badge"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "0 5px",
-                minWidth: "16px",
-                height: "16px",
-                borderRadius: "var(--radius-full)",
-                fontSize: "10px",
-                fontWeight: 600,
-                backgroundColor: "var(--accent)",
-                color: "var(--accent-contrast)",
-                lineHeight: 1,
-              }}
+              className="inline-flex items-center justify-center px-1.5 min-w-[16px] h-4 rounded-full text-[10px] font-semibold bg-accent text-accent-contrast leading-none"
             >
               {totalChanges}
             </span>
@@ -328,30 +208,15 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
       </div>
 
       {/* Right section: ControlsBar toggle, DetailPanel toggle, Refresh */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-          flexShrink: 0,
-        }}
-      >
+      <div className="flex items-center gap-1.5 shrink-0">
         <button
           type="button"
           data-testid="toggle-controls"
           onClick={toggleControls}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "4px",
-            padding: "3px 6px",
-            backgroundColor: controlsOpen ? "var(--accent-subtle)" : "transparent",
-            color: controlsOpen ? "var(--accent)" : "var(--text-secondary)",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: "var(--radius-sm)",
-            fontSize: "var(--font-size-xs)",
-            cursor: "pointer",
-          }}
+          className={clsx(
+            "flex items-center gap-1 px-2 py-1 border border-border-subtle rounded-sm text-xs cursor-pointer transition-colors",
+            controlsOpen ? "bg-accent-subtle text-accent font-medium" : "bg-surface text-secondary hover:text-primary hover:bg-surface-hover"
+          )}
           title="Bật/tắt thanh công cụ"
         >
           <SlidersHorizontal size={12} />
@@ -363,18 +228,10 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
             type="button"
             data-testid="toggle-detail-panel"
             onClick={toggleDetailPanel}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "28px",
-              height: "28px",
-              backgroundColor: detailPanelOpen ? "var(--accent-subtle)" : "transparent",
-              color: detailPanelOpen ? "var(--accent)" : "var(--text-secondary)",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: "var(--radius-sm)",
-              cursor: "pointer",
-            }}
+            className={clsx(
+              "flex items-center justify-center w-7 h-7 border border-border-subtle rounded-sm cursor-pointer transition-colors",
+              detailPanelOpen ? "bg-accent-subtle text-accent font-medium" : "bg-surface text-secondary hover:text-primary hover:bg-surface-hover"
+            )}
             title="Bật/tắt chi tiết commit"
           >
             <PanelRight size={14} />
@@ -383,18 +240,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
 
         <button
           onClick={() => queryClient.invalidateQueries()}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "4px",
-            padding: "3px 6px",
-            backgroundColor: "transparent",
-            border: "none",
-            borderRadius: "var(--radius-sm)",
-            color: "var(--text-secondary)",
-            fontSize: "var(--font-size-xs)",
-            cursor: "pointer",
-          }}
+          className="flex items-center gap-1 px-2 py-1 bg-surface border border-border-subtle rounded-sm text-secondary text-xs cursor-pointer hover:bg-surface-hover hover:text-primary transition-colors"
           title="Tải lại dữ liệu repo"
         >
           <RefreshCw size={12} />

@@ -1,4 +1,5 @@
 import React, { useRef, useMemo } from "react";
+import clsx from "clsx";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
@@ -53,13 +54,7 @@ export const CommitGraph: React.FC = () => {
   return (
     <div
       ref={parentRef}
-      style={{
-        height: "100%",
-        width: "100%",
-        overflowY: "auto",
-        backgroundColor: "var(--bg-surface)",
-        position: "relative",
-      }}
+      className="h-full w-full overflow-y-auto bg-surface relative"
       onScroll={(e) => {
         const target = e.currentTarget;
         if (
@@ -74,9 +69,8 @@ export const CommitGraph: React.FC = () => {
       <div
         style={{
           height: `${rowVirtualizer.getTotalSize()}px`,
-          width: "100%",
-          position: "relative",
         }}
+        className="w-full relative"
       >
         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
           const commit = commits[virtualRow.index];
@@ -110,34 +104,15 @@ export const CommitGraph: React.FC = () => {
                 }
               }}
               style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
                 height: `${virtualRow.size}px`,
                 transform: `translateY(${virtualRow.start}px)`,
-                display: "flex",
-                alignItems: "center",
-                gap: "var(--space-2)",
-                padding: "0 var(--space-3)",
-                backgroundColor: isSelected ? "var(--accent-subtle)" : "transparent",
-                borderBottom: "1px solid var(--border-subtle)",
-                cursor: "pointer",
-                fontSize: "var(--font-size-xs)",
-                outline: "none",
               }}
-              onMouseEnter={(e) => {
-                if (!isSelected) e.currentTarget.style.backgroundColor = "var(--bg-surface-hover)";
-              }}
-              onMouseLeave={(e) => {
-                if (!isSelected) e.currentTarget.style.backgroundColor = "transparent";
-              }}
-              onFocus={(e) => {
-                if (!isSelected) e.currentTarget.style.backgroundColor = "var(--bg-surface-hover)";
-              }}
-              onBlur={(e) => {
-                if (!isSelected) e.currentTarget.style.backgroundColor = "transparent";
-              }}
+              className={clsx(
+                "absolute top-0 left-0 w-full flex items-center gap-2 px-3 border-b border-border-subtle cursor-pointer text-xs outline-none transition-colors",
+                isSelected
+                  ? "bg-accent-subtle"
+                  : "bg-transparent hover:bg-surface-hover focus:bg-surface-hover"
+              )}
             >
               <GraphSvgLane
                 col={commit.col}
@@ -149,44 +124,31 @@ export const CommitGraph: React.FC = () => {
               {commit.refs.map((r, i) => (
                 <span
                   key={i}
-                  style={{
-                    backgroundColor: r.ref_type === "head" ? "var(--accent)" : "var(--border-strong)",
-                    color: r.ref_type === "head" ? "var(--accent-contrast)" : "var(--text-primary)",
-                    padding: "1px 5px",
-                    borderRadius: "var(--radius-full)",
-                    fontSize: "10px",
-                    fontWeight: 600,
-                  }}
+                  className={clsx(
+                    "px-1.5 py-0.5 rounded-full text-[10px] font-semibold shrink-0",
+                    r.ref_type === "head"
+                      ? "bg-accent text-accent-contrast"
+                      : "bg-border-strong text-primary"
+                  )}
                 >
                   {r.name}
                 </span>
               ))}
 
               <span
-                style={{
-                  fontWeight: isSelected ? 600 : 400,
-                  color: isSelected ? "var(--accent)" : "var(--text-primary)",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  flex: 1,
-                }}
+                className={clsx(
+                  "whitespace-nowrap overflow-hidden text-ellipsis flex-1",
+                  isSelected ? "font-semibold text-accent" : "font-normal text-primary"
+                )}
               >
                 {commit.summary}
               </span>
 
-              <span style={{ color: "var(--text-secondary)", fontSize: "11px", whiteSpace: "nowrap" }}>
+              <span className="text-secondary text-[11px] whitespace-nowrap">
                 {commit.author_name}
               </span>
 
-              <span
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  color: "var(--text-tertiary)",
-                  fontSize: "11px",
-                  whiteSpace: "nowrap",
-                }}
-              >
+              <span className="font-mono text-tertiary text-[11px] whitespace-nowrap">
                 {commit.short_id}
               </span>
             </div>

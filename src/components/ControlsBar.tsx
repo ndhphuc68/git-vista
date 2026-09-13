@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import clsx from "clsx";
 import {
   Sun,
   Moon,
@@ -66,124 +67,38 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
   return (
     <div
       data-testid="controls-bar"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "var(--bg-surface)",
-        borderBottom: "1px solid var(--border-subtle)",
-        transition: "background-color var(--duration-normal) var(--ease-macos)",
-        flexShrink: 0,
-      }}
+      className="flex flex-col bg-surface border-b border-border-subtle transition-colors duration-200 ease-macos shrink-0"
     >
       {/* Top Compact Controls Row */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "4px 12px",
-          minHeight: "36px",
-          gap: "8px",
-          overflowX: "auto",
-          whiteSpace: "nowrap",
-        }}
-      >
+      <div className="flex items-center justify-between px-3 py-1 min-h-[36px] gap-2 overflow-x-auto whitespace-nowrap">
         {/* Left: Quick Actions */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            flexShrink: 0,
-          }}
-        >
-          <button
-            style={{
-              padding: "3px 8px",
-              borderRadius: "var(--radius-sm)",
-              backgroundColor: "var(--accent)",
-              color: "var(--accent-contrast)",
-              fontSize: "var(--font-size-xs)",
-              fontWeight: 500,
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              cursor: "pointer",
-            }}
-          >
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button className="px-2.5 py-1 rounded-sm bg-accent text-accent-contrast text-xs font-medium flex items-center gap-1 cursor-pointer hover:bg-accent-hover active:scale-[0.98] transition-all">
             <RefreshCw size={11} />
             <span>{actions.fetch}</span>
           </button>
-          <button
-            style={{
-              padding: "3px 8px",
-              borderRadius: "var(--radius-sm)",
-              backgroundColor: "var(--bg-surface-hover)",
-              color: "var(--text-primary)",
-              border: "1px solid var(--border-subtle)",
-              fontSize: "var(--font-size-xs)",
-              fontWeight: 500,
-              cursor: "pointer",
-            }}
-          >
+          <button className="px-2.5 py-1 rounded-sm bg-surface text-primary border border-border-subtle text-xs font-medium cursor-pointer hover:bg-surface-hover active:scale-[0.98] transition-all">
             ↓ {actions.pull}
           </button>
-          <button
-            style={{
-              padding: "3px 8px",
-              borderRadius: "var(--radius-sm)",
-              backgroundColor: "var(--bg-surface-hover)",
-              color: "var(--text-primary)",
-              border: "1px solid var(--border-subtle)",
-              fontSize: "var(--font-size-xs)",
-              fontWeight: 500,
-              cursor: "pointer",
-            }}
-          >
+          <button className="px-2.5 py-1 rounded-sm bg-surface text-primary border border-border-subtle text-xs font-medium cursor-pointer hover:bg-surface-hover active:scale-[0.98] transition-all">
             ↑ {actions.push}
           </button>
         </div>
 
         {/* Right: Switchers & DevTools Toggle */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            flexShrink: 0,
-          }}
-        >
+        <div className="flex items-center gap-2 shrink-0">
           {/* Theme Switcher */}
-          <div
-            style={{
-              display: "inline-flex",
-              backgroundColor: "var(--bg-window)",
-              padding: "2px",
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--border-subtle)",
-            }}
-          >
+          <div className="inline-flex bg-window p-0.5 rounded-md border border-border-subtle">
             {(["light", "dark", "system"] as Theme[]).map((tVal) => (
               <button
                 key={tVal}
                 onClick={() => setTheme(tVal)}
-                style={{
-                  padding: "2px 6px",
-                  borderRadius: "var(--radius-sm)",
-                  fontSize: "var(--font-size-xs)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "3px",
-                  backgroundColor:
-                    theme === tVal ? "var(--bg-surface)" : "transparent",
-                  color:
-                    theme === tVal
-                      ? "var(--text-primary)"
-                      : "var(--text-secondary)",
-                  boxShadow: theme === tVal ? "var(--shadow-sm)" : "none",
-                  fontWeight: theme === tVal ? 600 : 400,
-                  cursor: "pointer",
-                }}
+                className={clsx(
+                  "px-1.5 py-0.5 rounded-sm text-xs flex items-center gap-1 cursor-pointer transition-colors",
+                  theme === tVal
+                    ? "bg-surface text-primary shadow-sm font-semibold"
+                    : "bg-transparent text-secondary hover:text-primary font-normal"
+                )}
                 title={`Theme: ${tVal}`}
               >
                 {tVal === "light" && <Sun size={11} />}
@@ -203,20 +118,10 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
           {/* Colorblind Toggle */}
           <button
             onClick={() => setColorblind(!colorblind)}
-            style={{
-              padding: "3px 6px",
-              borderRadius: "var(--radius-md)",
-              fontSize: "var(--font-size-xs)",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              border: "1px solid var(--border-subtle)",
-              backgroundColor: colorblind
-                ? "var(--accent-subtle)"
-                : "var(--bg-window)",
-              color: colorblind ? "var(--accent)" : "var(--text-secondary)",
-              cursor: "pointer",
-            }}
+            className={clsx(
+              "px-1.5 py-0.5 rounded-md text-xs flex items-center gap-1 border border-border-subtle cursor-pointer transition-colors",
+              colorblind ? "bg-accent-subtle text-accent font-medium" : "bg-window text-secondary hover:text-primary"
+            )}
             title={t.settings.colorblind}
           >
             <Eye size={11} />
@@ -226,36 +131,17 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
           </button>
 
           {/* Language Switcher */}
-          <div
-            style={{
-              display: "inline-flex",
-              backgroundColor: "var(--bg-window)",
-              padding: "2px",
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--border-subtle)",
-            }}
-          >
+          <div className="inline-flex bg-window p-0.5 rounded-md border border-border-subtle">
             {(["vi", "en"] as Locale[]).map((loc) => (
               <button
                 key={loc}
                 onClick={() => setLocale(loc)}
-                style={{
-                  padding: "2px 6px",
-                  borderRadius: "var(--radius-sm)",
-                  fontSize: "var(--font-size-xs)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "2px",
-                  backgroundColor:
-                    locale === loc ? "var(--bg-surface)" : "transparent",
-                  color:
-                    locale === loc
-                      ? "var(--text-primary)"
-                      : "var(--text-secondary)",
-                  boxShadow: locale === loc ? "var(--shadow-sm)" : "none",
-                  fontWeight: locale === loc ? 600 : 400,
-                  cursor: "pointer",
-                }}
+                className={clsx(
+                  "px-1.5 py-0.5 rounded-sm text-xs flex items-center gap-0.5 cursor-pointer transition-colors",
+                  locale === loc
+                    ? "bg-surface text-primary shadow-sm font-semibold"
+                    : "bg-transparent text-secondary hover:text-primary font-normal"
+                )}
               >
                 <Languages size={11} />
                 <span>{loc.toUpperCase()}</span>
@@ -266,18 +152,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
           {/* Git Mode Switcher */}
           <button
             onClick={() => setMode(mode === "simple" ? "advanced" : "simple")}
-            style={{
-              padding: "3px 6px",
-              borderRadius: "var(--radius-md)",
-              fontSize: "var(--font-size-xs)",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              border: "1px solid var(--border-subtle)",
-              backgroundColor: "var(--bg-window)",
-              color: "var(--text-primary)",
-              cursor: "pointer",
-            }}
+            className="px-1.5 py-0.5 rounded-md text-xs flex items-center gap-1 border border-border-subtle bg-window text-primary cursor-pointer hover:bg-surface-hover transition-colors"
           >
             <Terminal size={11} />
             <span>
@@ -290,20 +165,10 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
             type="button"
             data-testid="toggle-devtools"
             onClick={toggleDevTools}
-            style={{
-              padding: "3px 6px",
-              borderRadius: "var(--radius-md)",
-              fontSize: "var(--font-size-xs)",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              border: "1px solid var(--border-subtle)",
-              backgroundColor: devToolsOpen
-                ? "var(--accent-subtle)"
-                : "var(--bg-window)",
-              color: devToolsOpen ? "var(--accent)" : "var(--text-secondary)",
-              cursor: "pointer",
-            }}
+            className={clsx(
+              "px-1.5 py-0.5 rounded-md text-xs flex items-center gap-1 border border-border-subtle cursor-pointer transition-colors",
+              devToolsOpen ? "bg-accent-subtle text-accent font-medium" : "bg-window text-secondary hover:text-primary"
+            )}
             title="Công cụ nhà phát triển & IPC"
           >
             <Cpu size={11} />
@@ -317,85 +182,36 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
       {devToolsOpen && (
         <div
           data-testid="devtools-drawer"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "4px 12px",
-            backgroundColor: "var(--bg-window)",
-            borderTop: "1px solid var(--border-subtle)",
-            fontSize: "var(--font-size-xs)",
-            gap: "var(--space-3)",
-            flexWrap: "wrap",
-          }}
+          className="flex items-center justify-between px-3 py-1 bg-window border-t border-border-subtle text-xs gap-3 flex-wrap"
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "var(--space-2)",
-              flex: 1,
-              minWidth: 0,
-              overflow: "hidden",
-            }}
-          >
+          <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
             <button
               onClick={handleTestIpc}
               disabled={loading}
-              style={{
-                padding: "2px 8px",
-                backgroundColor: "var(--accent)",
-                color: "var(--accent-contrast)",
-                borderRadius: "var(--radius-sm)",
-                fontWeight: 500,
-                fontSize: "var(--font-size-xs)",
-                cursor: "pointer",
-                flexShrink: 0,
-              }}
+              className="px-2 py-0.5 bg-accent text-accent-contrast rounded-sm font-medium text-xs cursor-pointer shrink-0 disabled:opacity-50 hover:bg-accent-hover active:scale-[0.98] transition-all"
             >
               {loading ? "Đang gọi..." : t.ipc.testButton}
             </button>
 
             <button
               onClick={handleSimulateRepoChange}
-              style={{
-                padding: "2px 8px",
-                backgroundColor: "var(--bg-surface)",
-                color: "var(--text-primary)",
-                border: "1px solid var(--border-subtle)",
-                borderRadius: "var(--radius-sm)",
-                fontWeight: 500,
-                fontSize: "var(--font-size-xs)",
-                cursor: "pointer",
-                flexShrink: 0,
-              }}
+              className="px-2 py-0.5 bg-surface text-primary border border-border-subtle rounded-sm font-medium text-xs cursor-pointer shrink-0 hover:bg-surface-hover active:scale-[0.98] transition-all"
             >
               {t.ipc.triggerEvent}
             </button>
 
             <span
-              style={{
-                color: "var(--text-secondary)",
-                fontStyle: pingResult ? "normal" : "italic",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
+              className={clsx(
+                "text-secondary overflow-hidden text-ellipsis whitespace-nowrap",
+                !pingResult && "italic"
+              )}
             >
               {pingResult ? pingResult : "Chưa kiểm tra IPC"}
             </span>
           </div>
 
           {sysInfo && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "var(--space-2)",
-                color: "var(--text-tertiary)",
-                flexShrink: 0,
-              }}
-            >
+            <div className="flex items-center gap-2 text-tertiary shrink-0">
               <Cpu size={12} />
               <span>
                 OS: {sysInfo.os} ({sysInfo.arch})
@@ -408,15 +224,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
           )}
 
           {lastEvent && (
-            <span
-              style={{
-                backgroundColor: "var(--accent-subtle)",
-                color: "var(--accent)",
-                padding: "2px 6px",
-                borderRadius: "var(--radius-sm)",
-                flexShrink: 0,
-              }}
-            >
+            <span className="bg-accent-subtle text-accent px-1.5 py-0.5 rounded-sm shrink-0">
               Event: {lastEvent.reason}
             </span>
           )}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import clsx from "clsx";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText } from "lucide-react";
 import { useRepoStore } from "../../store/useRepoStore";
@@ -56,16 +57,7 @@ export const ChangesScreen: React.FC = () => {
 
   if (!currentRepo) {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          color: "var(--text-tertiary)",
-          fontSize: "var(--font-size-xs)",
-        }}
-      >
+      <div className="flex items-center justify-center h-full text-tertiary text-xs">
         Chưa mở kho mã nguồn
       </div>
     );
@@ -176,54 +168,24 @@ export const ChangesScreen: React.FC = () => {
   return (
     <main
       data-testid="changes-screen-main"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        flex: 1,
-        minHeight: 0,
-        height: "100%",
-        width: "100%",
-        overflow: "hidden",
-        backgroundColor: "var(--bg-surface)",
-      }}
+      className="flex flex-col flex-1 min-h-0 h-full w-full overflow-hidden bg-surface"
     >
       {/* Mobile view switcher tab */}
       {isMobile && (
         <div
           data-testid="mobile-changes-switcher"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            padding: "4px 8px",
-            backgroundColor: "var(--bg-window)",
-            borderBottom: "1px solid var(--border-subtle)",
-            gap: "4px",
-            flexShrink: 0,
-          }}
+          className="flex items-center p-1 bg-window border-b border-border-subtle gap-1 shrink-0"
         >
           <button
             type="button"
             data-testid="mobile-tab-files"
             onClick={() => setActiveChangesView("files")}
-            style={{
-              flex: 1,
-              padding: "4px 8px",
-              borderRadius: "var(--radius-sm)",
-              fontSize: "var(--font-size-xs)",
-              fontWeight: activeChangesView === "files" ? 600 : 400,
-              backgroundColor:
-                activeChangesView === "files"
-                  ? "var(--bg-surface)"
-                  : "transparent",
-              color:
-                activeChangesView === "files"
-                  ? "var(--text-primary)"
-                  : "var(--text-secondary)",
-              boxShadow:
-                activeChangesView === "files" ? "var(--shadow-sm)" : "none",
-              cursor: "pointer",
-              textAlign: "center",
-            }}
+            className={clsx(
+              "flex-1 py-1 px-2 rounded-sm text-xs cursor-pointer text-center",
+              activeChangesView === "files"
+                ? "bg-surface text-primary shadow-sm font-semibold"
+                : "bg-transparent text-secondary font-normal"
+            )}
           >
             Tệp đã đổi ({status ? status.staged.length + status.unstaged.length + status.untracked.length : 0})
           </button>
@@ -231,25 +193,12 @@ export const ChangesScreen: React.FC = () => {
             type="button"
             data-testid="mobile-tab-diff"
             onClick={() => setActiveChangesView("diff")}
-            style={{
-              flex: 1,
-              padding: "4px 8px",
-              borderRadius: "var(--radius-sm)",
-              fontSize: "var(--font-size-xs)",
-              fontWeight: activeChangesView === "diff" ? 600 : 400,
-              backgroundColor:
-                activeChangesView === "diff"
-                  ? "var(--bg-surface)"
-                  : "transparent",
-              color:
-                activeChangesView === "diff"
-                  ? "var(--text-primary)"
-                  : "var(--text-secondary)",
-              boxShadow:
-                activeChangesView === "diff" ? "var(--shadow-sm)" : "none",
-              cursor: "pointer",
-              textAlign: "center",
-            }}
+            className={clsx(
+              "flex-1 py-1 px-2 rounded-sm text-xs cursor-pointer text-center",
+              activeChangesView === "diff"
+                ? "bg-surface text-primary shadow-sm font-semibold"
+                : "bg-transparent text-secondary font-normal"
+            )}
           >
             Xem Diff
           </button>
@@ -257,34 +206,22 @@ export const ChangesScreen: React.FC = () => {
       )}
 
       {/* Main Content Area */}
-      <div
-        style={{
-          display: "flex",
-          flex: 1,
-          minHeight: 0,
-          height: "100%",
-          width: "100%",
-          overflow: "hidden",
-        }}
-      >
+      <div className="flex flex-1 min-h-0 h-full w-full overflow-hidden">
         {/* Left Sidebar: Staging File List + Commit Box */}
         {showSidebar && (
           <section
             aria-label="Danh sách thay đổi và lưu commit"
             data-testid="changes-sidebar"
-            style={{
-              width: isMobile ? "100%" : isLaptop ? "280px" : "320px",
-              minWidth: isMobile ? "100%" : "260px",
-              maxWidth: isMobile ? "100%" : "380px",
-              display: "flex",
-              flexDirection: "column",
-              height: "100%",
-              borderRight: isMobile ? "none" : "1px solid var(--border-subtle)",
-              backgroundColor: "var(--bg-surface)",
-              flexShrink: 0,
-            }}
+            className={clsx(
+              isMobile
+                ? "w-full min-w-full max-w-full border-r-0"
+                : isLaptop
+                ? "w-70 min-w-65 max-w-95 border-r border-border-subtle"
+                : "w-80 min-w-65 max-w-95 border-r border-border-subtle",
+              "flex flex-col h-full bg-surface shrink-0"
+            )}
           >
-            <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+            <div className="flex-1 min-h-0 overflow-y-auto">
               <StagingFileList
                 repoPath={currentRepo.path}
                 status={status || { staged: [], unstaged: [], untracked: [] }}
@@ -298,7 +235,7 @@ export const ChangesScreen: React.FC = () => {
               />
             </div>
 
-            <div style={{ flexShrink: 0 }}>
+            <div className="shrink-0">
               <CommitBox
                 repoPath={currentRepo.path}
                 stagedCount={stagedCount}
@@ -313,14 +250,7 @@ export const ChangesScreen: React.FC = () => {
           <section
             aria-label="Xem chi tiết thay đổi diff"
             data-testid="changes-diff-viewer"
-            style={{
-              flex: 1,
-              height: "100%",
-              minWidth: 0,
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-            }}
+            className="flex-1 h-full min-w-0 flex flex-col overflow-hidden"
           >
             {selectedFile ? (
               <InteractiveDiffViewer
@@ -333,19 +263,8 @@ export const ChangesScreen: React.FC = () => {
                 onUnstageLines={handleUnstageLines}
               />
             ) : (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "100%",
-                  gap: "12px",
-                  color: "var(--text-tertiary)",
-                  fontSize: "var(--font-size-sm)",
-                }}
-              >
-                <FileText size={36} color="var(--text-tertiary)" />
+              <div className="flex flex-col items-center justify-center h-full gap-3 text-tertiary text-xs text-center p-4">
+                <FileText size={36} className="text-tertiary" />
                 <span>
                   Chọn một file từ danh sách bên trái để xem diff và đánh dấu
                   thay đổi.

@@ -1,4 +1,5 @@
 import React from "react";
+import clsx from "clsx";
 import { BranchSidebar } from "./sidebar/BranchSidebar";
 import { CommitGraph } from "./graph/CommitGraph";
 import { CommitDetailPanel } from "./diff/CommitDetailPanel";
@@ -12,17 +13,7 @@ export const Shell: React.FC = () => {
   return (
     <main
       data-testid="shell-main"
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        flex: 1,
-        minHeight: 0,
-        height: "100%",
-        width: "100%",
-        backgroundColor: "var(--bg-window)",
-        overflow: "hidden",
-        position: "relative",
-      }}
+      className="flex flex-row flex-1 min-h-0 h-full w-full bg-window overflow-hidden relative"
     >
       {/* Branch Sidebar */}
       {sidebarOpen && (
@@ -31,30 +22,15 @@ export const Shell: React.FC = () => {
             <div
               data-testid="sidebar-backdrop"
               onClick={toggleSidebar}
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: "rgba(0, 0, 0, 0.4)",
-                zIndex: 25,
-              }}
+              className="absolute inset-0 bg-black/40 z-20"
             />
           )}
           <div
             data-testid="shell-sidebar-container"
-            style={{
-              position: isMobile ? "absolute" : "relative",
-              top: 0,
-              left: 0,
-              bottom: 0,
-              zIndex: isMobile ? 30 : 1,
-              width: "240px",
-              height: "100%",
-              flexShrink: 0,
-              boxShadow: isMobile ? "var(--shadow-lg)" : "none",
-            }}
+            className={clsx(
+              isMobile ? "absolute inset-y-0 left-0 z-30 shadow-lg" : "relative z-1",
+              "w-60 h-full shrink-0"
+            )}
           >
             <BranchSidebar />
           </div>
@@ -64,14 +40,7 @@ export const Shell: React.FC = () => {
       {/* Center: Commit Graph */}
       <div
         data-testid="shell-graph-container"
-        style={{
-          flex: 1,
-          minWidth: 0,
-          height: "100%",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-        }}
+        className="flex-1 min-w-0 h-full overflow-hidden flex flex-col"
       >
         <CommitGraph />
       </div>
@@ -80,17 +49,12 @@ export const Shell: React.FC = () => {
       {detailPanelOpen && (
         <div
           data-testid="shell-detail-container"
-          style={{
-            width: isMobile ? "100%" : "380px",
-            minWidth: isMobile ? "100%" : "280px",
-            maxWidth: isMobile ? "100%" : "420px",
-            height: "100%",
-            flexShrink: 0,
-            borderLeft: isMobile ? "none" : "1px solid var(--border-subtle)",
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
-          }}
+          className={clsx(
+            isMobile
+              ? "w-full min-w-full max-w-full border-l-0"
+              : "w-95 min-w-70 max-w-105 border-l border-border-subtle",
+            "h-full shrink-0 overflow-hidden flex flex-col bg-surface"
+          )}
         >
           <CommitDetailPanel />
         </div>

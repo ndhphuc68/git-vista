@@ -51,31 +51,13 @@ export const App: React.FC = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          height: "100vh",
-          width: "100vw",
-          overflow: "hidden",
-        }}
-      >
+      <div className="flex flex-col h-screen w-screen overflow-hidden">
         <Titlebar />
         {currentRepo ? (
           <>
             {controlsOpen && <ControlsBar lastEvent={lastEvent} />}
             <RepoHeader onBackToWelcome={clearRepo} />
-            <div
-              style={{
-                flex: 1,
-                minHeight: 0,
-                height: "100%",
-                width: "100%",
-                overflow: "hidden",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
+            <div className="flex-1 min-h-0 h-full w-full overflow-hidden flex flex-col">
               {activeScreen === "history" ? <Shell /> : <ChangesScreen />}
             </div>
           </>

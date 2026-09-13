@@ -29,11 +29,10 @@ export const GraphSvgLane: React.FC<GraphSvgLaneProps> = ({ col, colorIndex, lin
 
   return (
     <svg
+      className="shrink-0 overflow-visible"
       style={{
         width: `${width}px`,
         height: `${ROW_HEIGHT}px`,
-        flexShrink: 0,
-        overflow: "visible",
       }}
     >
       {lines.map((edge, idx) => {
@@ -81,7 +80,7 @@ export const GraphSvgLane: React.FC<GraphSvgLaneProps> = ({ col, colorIndex, lin
       })}
 
       <circle cx={nodeX} cy={nodeY} r={4.5} fill={nodeColor} />
-      <circle cx={nodeX} cy={nodeY} r={2} fill="var(--bg-surface)" />
+      <circle cx={nodeX} cy={nodeY} r={2} className="fill-surface" />
     </svg>
   );
 };
