@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import clsx from "clsx";
 import {
   FolderGit2,
@@ -10,14 +10,20 @@ import {
   PanelLeft,
   PanelRight,
   SlidersHorizontal,
+  ArrowDown,
+  ArrowUp,
 } from "lucide-react";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import { useTranslation } from "../../i18n";
-import { invokeCommand } from "../../ipc/client";
+import { invokeCommand, listenToTaskProgress } from "../../ipc/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  RemoteProgressBanner,
+  RemoteTaskState,
+} from "../common/RemoteProgressBanner";
 
 interface RepoHeaderProps {
   onBackToWelcome: () => void;
@@ -43,6 +49,108 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
     queryFn: () => invokeCommand.getRepoStatus(currentRepo!.path),
     enabled: Boolean(currentRepo?.path),
   });
+
+  const { data: headInfo } = useQuery({
+    queryKey: ["repoHeadInfo", currentRepo?.path],
+    queryFn: () => invokeCommand.getRepoHeadInfo(currentRepo!.path),
+    enabled: Boolean(currentRepo?.path),
+  });
+
+  const [activeRemoteTask, setActiveRemoteTask] = useState<RemoteTaskState | null>(null);
+  const [isRemotePending, setIsRemotePending] = useState(false);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    listenToTaskProgress((payload) => {
+      setActiveRemoteTask((prev) => {
+        if (!prev || prev.taskId !== payload.task_id) return prev;
+        return {
+          ...prev,
+          progressPercent: payload.progress_percent,
+          statusText: payload.status_text,
+        };
+      });
+    }).then((fn) => {
+      unlisten = fn;
+    });
+
+    return () => {
+      if (unlisten) unlisten();
+    };
+  }, []);
+
+  const handleFetch = async () => {
+    if (!currentRepo || isRemotePending) return;
+    const taskId = `task-fetch-${Date.now()}`;
+    setActiveRemoteTask({
+      taskId,
+      title: "Đang Fetch từ remote",
+      statusText: "Bắt đầu...",
+      progressPercent: 0,
+    });
+    setIsRemotePending(true);
+    try {
+      await invokeCommand.fetchRepo(currentRepo.path, undefined, false, taskId);
+      queryClient.invalidateQueries();
+    } catch (err) {
+      console.error("Fetch failed", err);
+    } finally {
+      setIsRemotePending(false);
+      setTimeout(() => setActiveRemoteTask(null), 1000);
+    }
+  };
+
+  const handlePull = async () => {
+    if (!currentRepo || isRemotePending) return;
+    const taskId = `task-pull-${Date.now()}`;
+    setActiveRemoteTask({
+      taskId,
+      title: "Đang kéo dữ liệu (Pull)",
+      statusText: "Bắt đầu...",
+      progressPercent: 0,
+    });
+    setIsRemotePending(true);
+    try {
+      await invokeCommand.pullRepo(currentRepo.path, undefined, undefined, undefined, taskId);
+      queryClient.invalidateQueries();
+    } catch (err) {
+      console.error("Pull failed", err);
+    } finally {
+      setIsRemotePending(false);
+      setTimeout(() => setActiveRemoteTask(null), 1000);
+    }
+  };
+
+  const handlePush = async () => {
+    if (!currentRepo || isRemotePending) return;
+    const taskId = `task-push-${Date.now()}`;
+    const setUpstream = !headInfo?.upstream;
+    setActiveRemoteTask({
+      taskId,
+      title: "Đang đẩy dữ liệu (Push)",
+      statusText: "Bắt đầu...",
+      progressPercent: 0,
+    });
+    setIsRemotePending(true);
+    try {
+      await invokeCommand.pushRepo(currentRepo.path, undefined, undefined, setUpstream, false, taskId);
+      queryClient.invalidateQueries();
+    } catch (err) {
+      console.error("Push failed", err);
+    } finally {
+      setIsRemotePending(false);
+      setTimeout(() => setActiveRemoteTask(null), 1000);
+    }
+  };
+
+  const handleCancelTask = async (taskId: string) => {
+    try {
+      await invokeCommand.cancelRemoteTask(taskId);
+    } finally {
+      setActiveRemoteTask(null);
+      setIsRemotePending(false);
+    }
+  };
 
   const isMac =
     typeof navigator !== "undefined" &&
@@ -85,14 +193,18 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
   const untrackedCount = repoStatus?.untracked?.length ?? 0;
   const totalChanges = stagedCount + unstagedCount + untrackedCount;
 
+  const aheadCount = headInfo?.ahead ?? 0;
+  const behindCount = headInfo?.behind ?? 0;
+
   const isHistoryActive = activeScreen === "history";
   const isChangesActive = activeScreen === "changes";
 
   return (
-    <header
-      data-testid="repo-header"
-      className="flex items-center justify-between px-3 bg-surface border-b border-border-subtle h-[44px] min-h-[44px] max-h-[44px] shrink-0 gap-2 overflow-hidden"
-    >
+    <>
+      <header
+        data-testid="repo-header"
+        className="flex items-center justify-between px-3 bg-surface border-b border-border-subtle h-[44px] min-h-[44px] max-h-[44px] shrink-0 gap-2 overflow-hidden"
+      >
       {/* Left section: Sidebar toggle, Back, Repo info */}
       <div className="flex items-center gap-2 min-w-0 flex-1 shrink">
         <button
@@ -144,6 +256,63 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
             </span>
           </div>
         )}
+
+        {/* Remote Operations: Fetch, Pull, Push */}
+        <div className="flex items-center gap-1 shrink-0 ml-1">
+          <button
+            type="button"
+            data-testid="btn-fetch"
+            onClick={handleFetch}
+            disabled={isRemotePending}
+            className="flex items-center gap-1 px-2 py-1 bg-surface border border-border-subtle rounded-sm text-secondary hover:text-primary hover:bg-surface-hover text-xs cursor-pointer transition-colors disabled:opacity-50"
+            title="Fetch từ remote"
+          >
+            <RefreshCw size={11} className={isRemotePending && activeRemoteTask?.title.includes("Fetch") ? "animate-spin" : ""} />
+            {!isMobile && <span>Fetch</span>}
+          </button>
+
+          <button
+            type="button"
+            data-testid="btn-pull"
+            onClick={handlePull}
+            disabled={isRemotePending}
+            className="flex items-center gap-1 px-2 py-1 bg-surface border border-border-subtle rounded-sm text-secondary hover:text-primary hover:bg-surface-hover text-xs cursor-pointer transition-colors disabled:opacity-50"
+            title="Pull commit mới từ remote"
+          >
+            <ArrowDown size={11} />
+            {!isMobile && <span>Pull</span>}
+            {behindCount > 0 && (
+              <span
+                data-testid="behind-badge"
+                className="inline-flex items-center justify-center px-1.5 min-w-[15px] h-3.5 rounded-full text-[10px] font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30 leading-none"
+                title={`${behindCount} commit cần pull`}
+              >
+                {behindCount}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            data-testid="btn-push"
+            onClick={handlePush}
+            disabled={isRemotePending}
+            className="flex items-center gap-1 px-2 py-1 bg-surface border border-border-subtle rounded-sm text-secondary hover:text-primary hover:bg-surface-hover text-xs cursor-pointer transition-colors disabled:opacity-50"
+            title={headInfo?.upstream ? "Push commit lên remote" : "Push và thiết lập upstream lên remote"}
+          >
+            <ArrowUp size={11} />
+            {!isMobile && <span>Push</span>}
+            {aheadCount > 0 && (
+              <span
+                data-testid="ahead-badge"
+                className="inline-flex items-center justify-center px-1.5 min-w-[15px] h-3.5 rounded-full text-[10px] font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30 leading-none"
+                title={`${aheadCount} commit cần push`}
+              >
+                {aheadCount}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Center section: Screen switcher tabs */}
@@ -248,5 +417,10 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
         </button>
       </div>
     </header>
-  );
+    <RemoteProgressBanner
+      task={activeRemoteTask}
+      onCancel={handleCancelTask}
+    />
+  </>
+);
 };

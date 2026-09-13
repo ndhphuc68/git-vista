@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RepoHeader } from "../components/header/RepoHeader";
 import { useRepoStore } from "../store/useRepoStore";
@@ -254,4 +254,61 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
     fireEvent(window, eventCmdB);
     expect(eventCmdB.defaultPrevented).toBe(true);
   });
+
+  it("renders Fetch, Pull, Push controls and triggers operations", async () => {
+    vi.spyOn(invokeCommand, "getRepoStatus").mockResolvedValue({
+      staged: [],
+      unstaged: [],
+      untracked: [],
+    });
+    vi.spyOn(invokeCommand, "getRepoHeadInfo").mockResolvedValue({
+      branch_name: "main",
+      head_commit_id: "abc1234",
+      is_detached: false,
+      ahead: 3,
+      behind: 2,
+      upstream: "origin/main",
+    });
+
+    const fetchSpy = vi.spyOn(invokeCommand, "fetchRepo").mockResolvedValue("Fetch ok");
+    const pullSpy = vi.spyOn(invokeCommand, "pullRepo").mockResolvedValue("Pull ok");
+    const pushSpy = vi.spyOn(invokeCommand, "pushRepo").mockResolvedValue("Push ok");
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <RepoHeader onBackToWelcome={mockOnBackToWelcome} />
+      </QueryClientProvider>
+    );
+
+    const fetchBtn = await screen.findByTestId("btn-fetch");
+    const pullBtn = await screen.findByTestId("btn-pull");
+    const pushBtn = await screen.findByTestId("btn-push");
+
+    expect(fetchBtn).toBeInTheDocument();
+    expect(pullBtn).toBeInTheDocument();
+    expect(pushBtn).toBeInTheDocument();
+
+    // Verify badges
+    const aheadBadge = await screen.findByTestId("ahead-badge");
+    const behindBadge = await screen.findByTestId("behind-badge");
+    expect(aheadBadge).toHaveTextContent("3");
+    expect(behindBadge).toHaveTextContent("2");
+
+    // Click operations
+    await act(async () => {
+      fireEvent.click(fetchBtn);
+    });
+    expect(fetchSpy).toHaveBeenCalled();
+
+    await act(async () => {
+      fireEvent.click(pullBtn);
+    });
+    expect(pullSpy).toHaveBeenCalled();
+
+    await act(async () => {
+      fireEvent.click(pushBtn);
+    });
+    expect(pushSpy).toHaveBeenCalled();
+  });
 });
+
