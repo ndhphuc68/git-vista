@@ -4,6 +4,7 @@ import { App } from "../App";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { useRepoStore } from "../store/useRepoStore";
 import { useViewStore } from "../store/useViewStore";
+import { useCommandPaletteStore } from "../store/useCommandPaletteStore";
 
 describe("Visual Git Client - M1 App Shell", () => {
   beforeEach(() => {
@@ -14,6 +15,7 @@ describe("Visual Git Client - M1 App Shell", () => {
     settings.setLocale("vi");
     settings.setMode("simple");
     useRepoStore.getState().clearRepo();
+    useCommandPaletteStore.getState().close();
   });
 
   it("hiển thị WelcomeScreen khi chưa có repo nào được chọn", () => {
@@ -95,6 +97,26 @@ describe("Visual Git Client - M1 App Shell", () => {
     await waitFor(() => {
       expect(screen.getByText("src/main.rs")).toBeInTheDocument();
       expect(screen.getByText(/CỦA BẠN/i)).toBeInTheDocument();
+    });
+  });
+
+  it("mở Command Palette khi bấm Ctrl+K", async () => {
+    render(<App />);
+
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText(/Tìm kiếm lệnh/i)).toBeInTheDocument();
+    });
+  });
+
+  it("mở Bảng phím tắt khi bấm phím ?", async () => {
+    render(<App />);
+
+    fireEvent.keyDown(window, { key: "?" });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Bảng phím tắt/i)).toBeInTheDocument();
     });
   });
 });

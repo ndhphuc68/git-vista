@@ -12,10 +12,15 @@ import { RepoSummary } from "./ipc/bindings";
 import { useRepoStore } from "./store/useRepoStore";
 import { useViewStore } from "./store/useViewStore";
 import { useLayoutStore } from "./store/useLayoutStore";
+import { useSettingsStore } from "./store/useSettingsStore";
 import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
 import { CreateBranchModal } from "./components/sidebar/CreateBranchModal";
 import { ConflictResolverScreen } from "./components/conflict/ConflictResolverScreen";
 import { ToastContainer } from "./components/toast/ToastContainer";
+import { CommandPalette } from "./components/palette/CommandPalette";
+import { ShortcutsHelpModal } from "./components/shortcuts/ShortcutsHelpModal";
+import { useCommandPaletteStore } from "./store/useCommandPaletteStore";
+import { CommandContext } from "./utils/commandRegistry";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -108,18 +113,50 @@ const RepoContent: React.FC<RepoContentProps> = ({
 export const App: React.FC = () => {
   const [lastEvent, setLastEvent] = useState<RepoChangedPayload | null>(null);
   const [isGlobalCreateBranchOpen, setIsGlobalCreateBranchOpen] = useState(false);
+  const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const { currentRepo, setRepo, clearRepo } = useRepoStore();
   const { controlsOpen } = useLayoutStore();
+  const { setActiveScreen } = useViewStore();
+  const { resolvedTheme, setTheme, mode, setMode } = useSettingsStore();
+  const { open: openCommandPalette, close: closeCommandPalette } = useCommandPaletteStore();
+
+  const handleToggleTheme = () => {
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  };
+
+  const handleToggleMode = () => {
+    setMode(mode === "simple" ? "advanced" : "simple");
+  };
 
   useGlobalShortcuts({
     onOpenCreateBranch: () => {
       if (currentRepo) setIsGlobalCreateBranchOpen(true);
     },
+    onOpenCommandPalette: () => {
+      openCommandPalette();
+    },
+    onOpenShortcutsHelp: () => {
+      setIsShortcutsHelpOpen(true);
+    },
+    onToggleTheme: handleToggleTheme,
     onEscape: () => {
       setIsGlobalCreateBranchOpen(false);
+      setIsShortcutsHelpOpen(false);
+      closeCommandPalette();
     },
     enabled: true,
   });
+
+  const commandContext: CommandContext = {
+    repoPath: currentRepo?.path,
+    navigate: (screen) => setActiveScreen(screen),
+    openCreateBranch: () => {
+      if (currentRepo) setIsGlobalCreateBranchOpen(true);
+    },
+    openShortcutsHelp: () => setIsShortcutsHelpOpen(true),
+    toggleTheme: handleToggleTheme,
+    toggleMode: handleToggleMode,
+  };
 
   useEffect(() => {
     let unlistenFn: (() => void) | undefined;
@@ -161,6 +198,11 @@ export const App: React.FC = () => {
           <WelcomeScreen onSelectRepo={setRepo} />
         )}
         <ToastContainer />
+        <CommandPalette context={commandContext} />
+        <ShortcutsHelpModal
+          isOpen={isShortcutsHelpOpen}
+          onClose={() => setIsShortcutsHelpOpen(false)}
+        />
       </div>
     </QueryClientProvider>
   );

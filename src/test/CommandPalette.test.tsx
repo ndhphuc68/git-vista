@@ -1,6 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import React from "react";
 import { CommandPalette } from "../components/palette/CommandPalette";
 import { useCommandPaletteStore } from "../store/useCommandPaletteStore";
 import { CommandContext } from "../utils/commandRegistry";
