@@ -34,9 +34,9 @@ pub fn create_commit<P: AsRef<Path>>(
     let tree = repo.find_tree(tree_oid)?;
 
     let new_commit_id = if amend {
-        create_backup_ref(repo_path.as_ref(), "amend")?;
         let head = repo.head()?;
         let head_commit = head.peel_to_commit()?;
+        create_backup_ref(&repo, "amend", head_commit.id())?;
         head_commit.amend(
             Some("HEAD"),
             Some(&sig),
