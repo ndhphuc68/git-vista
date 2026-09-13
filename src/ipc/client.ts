@@ -321,6 +321,54 @@ export const invokeCommand = {
     const { invoke } = await import("@tauri-apps/api/core");
     return await invoke<CommitDetails>("create_commit", { repoPath, summary, description, amend });
   },
+
+  createBranch: async (
+    repoPath: string,
+    name: string,
+    targetCommit?: string | null,
+    checkout?: boolean
+  ): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("create_branch", { repoPath, name, targetCommit, checkout });
+  },
+
+  checkoutBranch: async (
+    repoPath: string,
+    branchName: string
+  ): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("checkout_branch", { repoPath, branchName });
+  },
+
+  renameBranch: async (
+    repoPath: string,
+    oldName: string,
+    newName: string
+  ): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("rename_branch", { repoPath, oldName, newName });
+  },
+
+  deleteBranch: async (
+    repoPath: string,
+    branchName: string,
+    force?: boolean
+  ): Promise<string> => {
+    if (!isTauri()) {
+      return `refs/gitui-backup/delete-branch-${branchName}-${Date.now()}`;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<string>("delete_branch", { repoPath, branchName, force });
+  },
 };
 
 export async function listenToRepoChanged(
