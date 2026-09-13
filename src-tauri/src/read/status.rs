@@ -12,6 +12,7 @@ pub enum FileStatus {
     Deleted,
     Renamed,
     Typechange,
+    Conflicted,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq)]
@@ -27,6 +28,7 @@ pub struct RepoStatusResult {
     pub staged: Vec<StatusFileItem>,
     pub unstaged: Vec<StatusFileItem>,
     pub untracked: Vec<StatusFileItem>,
+    pub conflicted: Vec<StatusFileItem>,
 }
 
 /// Lấy danh sách trạng thái làm việc (staged, unstaged, untracked) của repository
@@ -44,6 +46,7 @@ pub fn get_repo_status<P: AsRef<Path>>(repo_path: P) -> Result<RepoStatusResult,
     let mut staged = Vec::new();
     let mut unstaged = Vec::new();
     let mut untracked = Vec::new();
+    let mut conflicted = Vec::new();
 
     for entry in statuses.iter() {
         let s = entry.status();
@@ -51,6 +54,16 @@ pub fn get_repo_status<P: AsRef<Path>>(repo_path: P) -> Result<RepoStatusResult,
             Some(p) => p.to_string(),
             None => continue,
         };
+
+        if s.contains(git2::Status::CONFLICTED) {
+            conflicted.push(StatusFileItem {
+                path: path.clone(),
+                status: FileStatus::Conflicted,
+                is_staged: false,
+                old_path: None,
+            });
+            continue;
+        }
 
         // 1. Phân loại Staged (INDEX_*)
         if s.intersects(
@@ -140,6 +153,7 @@ pub fn get_repo_status<P: AsRef<Path>>(repo_path: P) -> Result<RepoStatusResult,
         staged,
         unstaged,
         untracked,
+        conflicted,
     })
 }
 
