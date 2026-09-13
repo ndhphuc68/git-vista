@@ -144,7 +144,7 @@ export interface FileDiffResult {
   deletions: number;
 }
 
-export type FileStatus = "Modified" | "New" | "Deleted" | "Renamed" | "Typechange";
+export type FileStatus = "Modified" | "New" | "Deleted" | "Renamed" | "Typechange" | "Conflicted";
 
 export interface StatusFileItem {
   path: string;
@@ -157,6 +157,7 @@ export interface RepoStatusResult {
   staged: StatusFileItem[];
   unstaged: StatusFileItem[];
   untracked: StatusFileItem[];
+  conflicted: StatusFileItem[];
 }
 
 export interface StashItem {
@@ -184,6 +185,23 @@ export interface RebaseResult {
   success: boolean;
   status: string;
   output: string;
+}
+
+export interface ConflictHunk {
+  id: string;
+  is_conflict: boolean;
+  content: string | null;
+  ours: string | null;
+  theirs: string | null;
+  base: string | null;
+  ours_label: string | null;
+  theirs_label: string | null;
+}
+
+export interface ConflictFileData {
+  file_path: string;
+  total_conflicts: number;
+  hunks: ConflictHunk[];
 }
 
 

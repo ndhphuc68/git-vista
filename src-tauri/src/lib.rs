@@ -53,7 +53,9 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         merge_branch,
         rebase_branch,
         abort_in_progress,
-        continue_in_progress
+        continue_in_progress,
+        get_conflict_file_data,
+        resolve_conflict_file
     ])
 }
 

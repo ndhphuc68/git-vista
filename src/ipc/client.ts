@@ -16,6 +16,8 @@ import {
   RepoStateInfo,
   MergeResult,
   RebaseResult,
+  ConflictHunk,
+  ConflictFileData,
 } from "./bindings";
 
 let mockStashes: StashItem[] = [
@@ -224,6 +226,7 @@ export const invokeCommand = {
         untracked: [
           { path: "src/untracked.ts", status: "New", is_staged: false, old_path: null },
         ],
+        conflicted: [],
       };
     }
     const { invoke } = await import("@tauri-apps/api/core");
@@ -598,6 +601,60 @@ export const invokeCommand = {
     const { invoke } = await import("@tauri-apps/api/core");
     return await invoke("continue_in_progress", { repoPath, operation });
   },
+
+  getConflictFileData: async (
+    repoPath: string,
+    filePath: string
+  ): Promise<ConflictFileData> => {
+    if (!isTauri()) {
+      return {
+        file_path: filePath,
+        total_conflicts: 1,
+        hunks: [
+          {
+            id: "hunk_0",
+            is_conflict: false,
+            content: "// Header code\n",
+            ours: null,
+            theirs: null,
+            base: null,
+            ours_label: null,
+            theirs_label: null,
+          },
+          {
+            id: "hunk_1",
+            is_conflict: true,
+            content: null,
+            ours: "console.log('ours');\n",
+            theirs: "console.log('theirs');\n",
+            base: null,
+            ours_label: "HEAD",
+            theirs_label: "feature",
+          },
+        ],
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<ConflictFileData>("get_conflict_file_data", { repoPath, filePath });
+  },
+
+  resolveConflictFile: async (
+    repoPath: string,
+    filePath: string,
+    resolvedContent: string,
+    autoStage?: boolean
+  ): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("resolve_conflict_file", {
+      repoPath,
+      filePath,
+      resolvedContent,
+      autoStage,
+    });
+  },
 };
 
 export async function listenToRepoChanged(
@@ -650,5 +707,7 @@ export type {
   RepoStateInfo,
   MergeResult,
   RebaseResult,
+  ConflictHunk,
+  ConflictFileData,
 };
 
