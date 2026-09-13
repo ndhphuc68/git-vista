@@ -10,6 +10,8 @@ import { listenToRepoChanged, RepoChangedPayload } from "./ipc/client";
 import { useRepoStore } from "./store/useRepoStore";
 import { useViewStore } from "./store/useViewStore";
 import { useLayoutStore } from "./store/useLayoutStore";
+import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
+import { CreateBranchModal } from "./components/sidebar/CreateBranchModal";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,9 +24,20 @@ const queryClient = new QueryClient({
 
 export const App: React.FC = () => {
   const [lastEvent, setLastEvent] = useState<RepoChangedPayload | null>(null);
+  const [isGlobalCreateBranchOpen, setIsGlobalCreateBranchOpen] = useState(false);
   const { currentRepo, setRepo, clearRepo } = useRepoStore();
   const { activeScreen } = useViewStore();
   const { controlsOpen } = useLayoutStore();
+
+  useGlobalShortcuts({
+    onOpenCreateBranch: () => {
+      if (currentRepo) setIsGlobalCreateBranchOpen(true);
+    },
+    onEscape: () => {
+      setIsGlobalCreateBranchOpen(false);
+    },
+    enabled: true,
+  });
 
   useEffect(() => {
     let unlistenFn: (() => void) | undefined;
@@ -60,6 +73,12 @@ export const App: React.FC = () => {
             <div className="flex-1 min-h-0 h-full w-full overflow-hidden flex flex-col">
               {activeScreen === "history" ? <Shell /> : <ChangesScreen />}
             </div>
+            <CreateBranchModal
+              isOpen={isGlobalCreateBranchOpen}
+              onClose={() => setIsGlobalCreateBranchOpen(false)}
+              repoPath={currentRepo.path}
+              onSuccess={() => queryClient.invalidateQueries()}
+            />
           </>
         ) : (
           <WelcomeScreen onSelectRepo={setRepo} />
