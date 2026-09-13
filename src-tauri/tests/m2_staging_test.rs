@@ -186,3 +186,33 @@ fn test_unstage_unborn_head() {
     assert_eq!(status_after_unstage_all.staged.len(), 0);
     assert_eq!(status_after_unstage_all.untracked.len(), 1);
 }
+
+#[test]
+fn test_unstage_all_nested_files() {
+    let fixture = TestRepoFixture::new();
+    let repo_path = fixture.path();
+
+    // Create nested file structure
+    let nested_dir = repo_path.join("nested").join("dir");
+    fs::create_dir_all(&nested_dir).unwrap();
+    let nested_file = nested_dir.join("file.txt");
+    fs::write(&nested_file, "nested content").unwrap();
+
+    // Also modify a root file
+    fs::write(repo_path.join("file1.txt"), "modified root").unwrap();
+
+    // Stage all (including nested file)
+    stage_all(repo_path).expect("stage_all should stage nested file");
+    let status_staged = get_repo_status(repo_path).unwrap();
+    assert_eq!(status_staged.staged.len(), 2);
+    assert!(status_staged.staged.iter().any(|item| item.path == "nested/dir/file.txt"));
+    assert!(status_staged.staged.iter().any(|item| item.path == "file1.txt"));
+
+    // Unstage all
+    unstage_all(repo_path).expect("unstage_all should unstage nested file");
+    let status_unstaged = get_repo_status(repo_path).unwrap();
+    assert_eq!(status_unstaged.staged.len(), 0);
+    assert!(status_unstaged.untracked.iter().any(|item| item.path == "nested/dir/file.txt"));
+    assert!(status_unstaged.unstaged.iter().any(|item| item.path == "file1.txt"));
+}
+

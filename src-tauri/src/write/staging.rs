@@ -80,7 +80,7 @@ pub fn unstage_all<P: AsRef<Path>>(repo_path: P) -> Result<(), AppError> {
     let head_commit = repo.head().ok().and_then(|h| h.peel_to_commit().ok());
 
     if let Some(commit) = head_commit {
-        repo.reset_default(Some(commit.as_object()), &["*"])?;
+        repo.reset(commit.as_object(), git2::ResetType::Mixed, None)?;
     } else {
         let mut index = repo.index()?;
         index.clear()?;
