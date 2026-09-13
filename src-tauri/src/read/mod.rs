@@ -3,12 +3,14 @@
 //! Có thể gọi song song từ nhiều thread mà không cần khoá.
 
 pub mod branches;
+pub mod conflict;
 pub mod diff;
 pub mod graph;
 pub mod state;
 pub mod status;
 
 pub use branches::*;
+pub use conflict::*;
 pub use diff::*;
 pub use graph::*;
 pub use state::*;

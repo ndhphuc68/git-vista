@@ -3,8 +3,11 @@
 
 pub mod branch;
 pub mod commit;
+pub mod conflict;
 pub mod staging;
 pub mod stash;
+
+pub use conflict::*;
 
 use crate::error::AppError;
 use std::path::Path;
