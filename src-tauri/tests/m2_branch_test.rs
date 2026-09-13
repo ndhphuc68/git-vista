@@ -83,3 +83,72 @@ fn test_safe_checkout_clean_and_conflict() {
         err_str
     );
 }
+
+#[test]
+fn test_rename_branch() {
+    let fixture = TestRepoFixture::new();
+    let repo_path = fixture.path();
+
+    create_branch(repo_path, "feature/old-name", None, false).unwrap();
+    visual_git_lib::write::branch::rename_branch(repo_path, "feature/old-name", "feature/new-name")
+        .expect("rename should succeed");
+
+    let repo = fixture.repo();
+    assert!(repo.find_branch("feature/old-name", git2::BranchType::Local).is_err());
+    let new_branch = repo.find_branch("feature/new-name", git2::BranchType::Local).expect("new branch exists");
+    assert_eq!(new_branch.name().unwrap().unwrap(), "feature/new-name");
+}
+
+#[test]
+fn test_delete_head_branch_forbidden() {
+    let fixture = TestRepoFixture::new();
+    let repo_path = fixture.path();
+
+    let head_branch = fixture.repo().head().unwrap().shorthand().unwrap().to_string();
+    let err = visual_git_lib::write::branch::delete_branch(repo_path, &head_branch, false).unwrap_err();
+    assert!(err.to_string().contains("Không thể xoá nhánh đang được chọn (HEAD)"));
+}
+
+#[test]
+fn test_delete_merged_branch() {
+    let fixture = TestRepoFixture::new();
+    let repo_path = fixture.path();
+
+    create_branch(repo_path, "feature/merged-branch", None, false).unwrap();
+    let backup_ref = visual_git_lib::write::branch::delete_branch(repo_path, "feature/merged-branch", false)
+        .expect("delete merged branch should succeed");
+
+    assert!(backup_ref.starts_with("refs/gitui-backup/delete-branch-"));
+    let repo = fixture.repo();
+    assert!(repo.find_branch("feature/merged-branch", git2::BranchType::Local).is_err());
+    assert!(repo.find_reference(&backup_ref).is_ok(), "backup ref must exist");
+}
+
+#[test]
+fn test_delete_unmerged_branch_requires_force() {
+    let fixture = TestRepoFixture::new();
+    let repo_path = fixture.path();
+
+    create_branch(repo_path, "feature/unmerged", None, true).unwrap();
+    let file2_path = repo_path.join("file2.txt");
+    fs::write(&file2_path, "content on unmerged branch\n").unwrap();
+    visual_git_lib::write::staging::stage_all(repo_path).unwrap();
+    visual_git_lib::write::commit::create_commit(repo_path, "Unmerged commit", None, false).unwrap();
+
+    // Switch back to master
+    checkout_branch(repo_path, "master").unwrap();
+
+    // Attempt delete without force
+    let err = visual_git_lib::write::branch::delete_branch(repo_path, "feature/unmerged", false).unwrap_err();
+    assert!(err.to_string().contains("UNMERGED_BRANCH"));
+
+    // Attempt delete with force = true
+    let backup_ref = visual_git_lib::write::branch::delete_branch(repo_path, "feature/unmerged", true)
+        .expect("force delete unmerged branch should succeed");
+
+    assert!(backup_ref.starts_with("refs/gitui-backup/delete-branch-"));
+    let repo = fixture.repo();
+    assert!(repo.find_branch("feature/unmerged", git2::BranchType::Local).is_err());
+    assert!(repo.find_reference(&backup_ref).is_ok(), "backup ref must exist");
+}
+

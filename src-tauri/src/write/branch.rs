@@ -75,3 +75,79 @@ pub fn checkout_branch<P: AsRef<Path>>(repo_path: P, branch_name: &str) -> Resul
 
     Ok(())
 }
+
+/// Đổi tên nhánh local
+pub fn rename_branch<P: AsRef<Path>>(
+    repo_path: P,
+    old_name: &str,
+    new_name: &str,
+) -> Result<(), AppError> {
+    let trimmed_new = new_name.trim();
+    validate_branch_name(trimmed_new)?;
+
+    let repo = Repository::open(repo_path.as_ref())?;
+    let mut branch = repo.find_branch(old_name.trim(), BranchType::Local)?;
+    branch.rename(trimmed_new, false)?;
+
+    Ok(())
+}
+
+/// Xoá nhánh an toàn: kiểm tra HEAD, kiểm tra merged, tạo backup ref
+pub fn delete_branch<P: AsRef<Path>>(
+    repo_path: P,
+    branch_name: &str,
+    force: bool,
+) -> Result<String, AppError> {
+    let trimmed = branch_name.trim();
+    let repo = Repository::open(repo_path.as_ref())?;
+
+    // 1. Kiểm tra HEAD
+    if let Ok(head) = repo.head() {
+        if head.shorthand() == Some(trimmed) {
+            return Err(AppError::InvalidOperation(
+                "Không thể xoá nhánh đang được chọn (HEAD)".into(),
+            ));
+        }
+    }
+
+    let mut branch = repo.find_branch(trimmed, BranchType::Local)?;
+    let branch_commit = branch.get().peel_to_commit()?;
+
+    // 2. Kiểm tra merged
+    if !force {
+        if let Ok(head) = repo.head() {
+            if let Ok(head_commit) = head.peel_to_commit() {
+                let is_merged = head_commit.id() == branch_commit.id()
+                    || repo
+                        .graph_descendant_of(head_commit.id(), branch_commit.id())
+                        .unwrap_or(false);
+                if !is_merged {
+                    return Err(AppError::InvalidOperation(
+                        "UNMERGED_BRANCH: Nhánh này chứa các commit chưa được gộp vào HEAD.".into(),
+                    ));
+                }
+            }
+        }
+    }
+
+    // 3. Tạo backup ref trước khi xoá (mục 6.4)
+    let sanitized_name = trimmed.replace('/', "-");
+    let backup_action = format!("delete-branch-{}", sanitized_name);
+    let timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_err(|e| AppError::InvalidOperation(e.to_string()))?
+        .as_secs();
+    let backup_ref_name = format!("refs/gitui-backup/{}-{}", backup_action, timestamp);
+    repo.reference(
+        &backup_ref_name,
+        branch_commit.id(),
+        false,
+        "Backup before branch deletion",
+    )?;
+
+    // 4. Xoá nhánh
+    branch.delete()?;
+
+    Ok(backup_ref_name)
+}
+
