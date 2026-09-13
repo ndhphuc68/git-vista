@@ -59,3 +59,27 @@ fn test_ahead_behind_calculation() {
     assert_eq!(master_branch.ahead, 2);
     assert_eq!(master_branch.behind, 0);
 }
+
+#[test]
+fn test_parse_git_progress_line() {
+    use visual_git_lib::exec::parse_git_progress_line;
+
+    let line1 = "Counting objects: 100% (50/50), done.";
+    let parsed1 = parse_git_progress_line(line1).expect("parse line1");
+    assert_eq!(parsed1.0, 100);
+    assert!(parsed1.1.contains("Counting objects"));
+
+    let line2 = "Receiving objects:  45% (450/1000)";
+    let parsed2 = parse_git_progress_line(line2).expect("parse line2");
+    assert_eq!(parsed2.0, 45);
+    assert!(parsed2.1.contains("Receiving objects"));
+
+    let line3 = "Resolving deltas:   5% (5/100)";
+    let parsed3 = parse_git_progress_line(line3).expect("parse line3");
+    assert_eq!(parsed3.0, 5);
+    assert!(parsed3.1.contains("Resolving deltas"));
+
+    let non_progress = "To https://github.com/user/repo.git";
+    assert!(parse_git_progress_line(non_progress).is_none());
+}
+
