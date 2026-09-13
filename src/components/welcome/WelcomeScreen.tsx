@@ -1,5 +1,5 @@
-import React from "react";
-import { FolderGit2, FolderOpen, Clock, ArrowRight } from "lucide-react";
+import React, { useState } from "react";
+import { FolderGit2, FolderOpen, Clock, ArrowRight, AlertCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { invokeCommand } from "../../ipc/client";
 import { RepoSummary } from "../../ipc/bindings";
@@ -9,22 +9,34 @@ interface WelcomeScreenProps {
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRepo }) => {
+  const [error, setError] = useState<string | null>(null);
+
   const { data: recents = [], isLoading } = useQuery({
     queryKey: ["recent-repos"],
     queryFn: () => invokeCommand.getRecentRepos(),
   });
 
   const handleOpenFolder = async () => {
-    const path = await invokeCommand.selectRepoFolder();
-    if (path) {
-      const summary = await invokeCommand.openRepository(path);
-      onSelectRepo(summary);
+    try {
+      setError(null);
+      const path = await invokeCommand.selectRepoFolder();
+      if (path) {
+        const summary = await invokeCommand.openRepository(path);
+        onSelectRepo(summary);
+      }
+    } catch (err: any) {
+      setError(err?.message || "Không thể mở repository. Vui lòng kiểm tra đường dẫn hợp lệ.");
     }
   };
 
   const handleOpenRecent = async (path: string) => {
-    const summary = await invokeCommand.openRepository(path);
-    onSelectRepo(summary);
+    try {
+      setError(null);
+      const summary = await invokeCommand.openRepository(path);
+      onSelectRepo(summary);
+    } catch (err: any) {
+      setError(err?.message || `Không thể mở repository tại: ${path}`);
+    }
   };
 
   return (
@@ -56,6 +68,40 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRepo }) =>
             Trực quan hoá lịch sử Git nhanh và mượt mà
           </p>
         </div>
+
+        {error && (
+          <div
+            role="alert"
+            style={{
+              padding: "var(--space-3) var(--space-4)",
+              backgroundColor: "var(--diff-del-bg)",
+              color: "var(--diff-del-text)",
+              borderRadius: "var(--radius-md)",
+              fontSize: "var(--font-size-xs)",
+              border: "1px solid var(--diff-del-border)",
+              display: "flex",
+              alignItems: "center",
+              gap: "var(--space-2)",
+            }}
+          >
+            <AlertCircle size={16} className="shrink-0" />
+            <span style={{ flex: 1 }}>{error}</span>
+            <button
+              onClick={() => setError(null)}
+              aria-label="Đóng thông báo"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "var(--diff-del-text)",
+                fontWeight: 700,
+                fontSize: "14px",
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         <button
           onClick={handleOpenFolder}

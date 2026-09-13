@@ -57,6 +57,7 @@ export const BranchSidebar: React.FC = () => {
           <input
             type="text"
             placeholder="Tìm nhánh..."
+            aria-label="Tìm nhánh"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{
@@ -75,6 +76,8 @@ export const BranchSidebar: React.FC = () => {
         <div>
           <button
             onClick={() => setLocalOpen(!localOpen)}
+            aria-expanded={localOpen}
+            aria-label="Nhánh cục bộ"
             style={{
               display: "flex",
               alignItems: "center",
@@ -102,6 +105,7 @@ export const BranchSidebar: React.FC = () => {
                   <button
                     key={branch.name}
                     onClick={() => setSelectedBranch(branch.name)}
+                    aria-selected={isSelected}
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -143,6 +147,8 @@ export const BranchSidebar: React.FC = () => {
         <div>
           <button
             onClick={() => setRemoteOpen(!remoteOpen)}
+            aria-expanded={remoteOpen}
+            aria-label="Nhánh máy chủ"
             style={{
               display: "flex",
               alignItems: "center",
@@ -175,8 +181,12 @@ export const BranchSidebar: React.FC = () => {
                     borderRadius: "var(--radius-sm)",
                     color: "var(--text-secondary)",
                     fontSize: "var(--font-size-xs)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
                   }}
                 >
+                  <Globe size={11} color="var(--text-tertiary)" />
                   <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {branch.name}
                   </span>
@@ -189,6 +199,8 @@ export const BranchSidebar: React.FC = () => {
         <div>
           <button
             onClick={() => setTagsOpen(!tagsOpen)}
+            aria-expanded={tagsOpen}
+            aria-label="Tags"
             style={{
               display: "flex",
               alignItems: "center",

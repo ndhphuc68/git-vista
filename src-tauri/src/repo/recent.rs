@@ -18,7 +18,7 @@ pub struct RecentRepoStore {
 
 impl RecentRepoStore {
     pub fn new() -> Self {
-        let dir = dirs_fallback();
+        let dir = app_data_dir();
         let _ = fs::create_dir_all(&dir);
         Self {
             storage_file: dir.join("recent_repos.json"),
@@ -63,7 +63,36 @@ impl RecentRepoStore {
     }
 }
 
-fn dirs_fallback() -> PathBuf {
+fn app_data_dir() -> PathBuf {
+    #[cfg(target_os = "windows")]
+    {
+        if let Some(local_app_data) = std::env::var_os("LOCALAPPDATA").or_else(|| std::env::var_os("APPDATA")) {
+            return PathBuf::from(local_app_data).join("visual_git_client");
+        }
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        if let Some(home) = std::env::var_os("HOME") {
+            return PathBuf::from(home)
+                .join("Library")
+                .join("Application Support")
+                .join("visual_git_client");
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        if let Some(xdg) = std::env::var_os("XDG_DATA_HOME") {
+            return PathBuf::from(xdg).join("visual_git_client");
+        } else if let Some(home) = std::env::var_os("HOME") {
+            return PathBuf::from(home)
+                .join(".local")
+                .join("share")
+                .join("visual_git_client");
+        }
+    }
+
     std::env::temp_dir().join("visual_git_client_data")
 }
 

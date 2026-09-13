@@ -3,6 +3,7 @@ import { Translations } from "./vi";
 export const en: Translations = {
   appTitle: "Visual Git",
   m0Badge: "Milestone M0: Foundation Shell",
+  m1Badge: "Milestone M1: Git Viewer",
   screens: {
     welcome: "Welcome",
     changes: "Changes",

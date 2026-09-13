@@ -3,7 +3,7 @@ use git2::{Delta, DiffFormat, DiffOptions, Oid, Repository};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::collections::HashMap;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -54,19 +54,37 @@ pub struct FileDiffResult {
     pub deletions: u32,
 }
 
-static DIFF_CACHE: Mutex<Option<HashMap<(String, String), FileDiffResult>>> = Mutex::new(None);
-
-fn get_cached_diff(key: &(String, String)) -> Option<FileDiffResult> {
-    let lock = DIFF_CACHE.lock().unwrap();
-    lock.as_ref().and_then(|map| map.get(key).cloned())
+struct BoundedDiffCache {
+    map: HashMap<(PathBuf, String, String), FileDiffResult>,
+    order: Vec<(PathBuf, String, String)>,
 }
 
-fn set_cached_diff(key: (String, String), result: FileDiffResult) {
+const MAX_CACHE_ENTRIES: usize = 500;
+static DIFF_CACHE: Mutex<Option<BoundedDiffCache>> = Mutex::new(None);
+
+fn get_cached_diff(key: &(PathBuf, String, String)) -> Option<FileDiffResult> {
+    let lock = DIFF_CACHE.lock().unwrap();
+    lock.as_ref().and_then(|cache| cache.map.get(key).cloned())
+}
+
+fn set_cached_diff(key: (PathBuf, String, String), result: FileDiffResult) {
     let mut lock = DIFF_CACHE.lock().unwrap();
-    if lock.is_none() {
-        *lock = Some(HashMap::new());
+    let cache = lock.get_or_insert_with(|| BoundedDiffCache {
+        map: HashMap::new(),
+        order: Vec::new(),
+    });
+
+    if cache.map.len() >= MAX_CACHE_ENTRIES && !cache.map.contains_key(&key) {
+        if !cache.order.is_empty() {
+            let oldest = cache.order.remove(0);
+            cache.map.remove(&oldest);
+        }
     }
-    lock.as_mut().unwrap().insert(key, result);
+
+    if !cache.map.contains_key(&key) {
+        cache.order.push(key.clone());
+    }
+    cache.map.insert(key, result);
 }
 
 pub fn get_commit_info<P: AsRef<Path>>(
@@ -89,8 +107,7 @@ pub fn get_commit_info<P: AsRef<Path>>(
     let mut total_additions: u32 = 0;
     let mut total_deletions: u32 = 0;
 
-    let deltas: Vec<_> = diff.deltas().collect();
-    for (idx, delta) in deltas.into_iter().enumerate() {
+    for (idx, delta) in diff.deltas().enumerate() {
         let path = delta
             .new_file()
             .path()
@@ -105,13 +122,13 @@ pub fn get_commit_info<P: AsRef<Path>>(
             _ => "modified",
         };
 
-        let mut patch = git2::Patch::from_diff(&diff, idx)?;
         let mut additions: u32 = 0;
         let mut deletions: u32 = 0;
-        if let Some(ref mut p) = patch {
-            let (_, adds, dels) = p.line_stats()?;
-            additions = adds as u32;
-            deletions = dels as u32;
+        if let Ok(Some(patch)) = git2::Patch::from_diff(&diff, idx) {
+            if let Ok((_, adds, dels)) = patch.line_stats() {
+                additions = adds as u32;
+                deletions = dels as u32;
+            }
         }
 
         total_additions += additions;
@@ -150,7 +167,8 @@ pub fn get_file_diff<P: AsRef<Path>>(
     commit_id_str: &str,
     target_path: &str,
 ) -> Result<FileDiffResult, AppError> {
-    let cache_key = (commit_id_str.to_string(), target_path.to_string());
+    let repo_buf = repo_path.as_ref().to_path_buf();
+    let cache_key = (repo_buf, commit_id_str.to_string(), target_path.to_string());
     if let Some(cached) = get_cached_diff(&cache_key) {
         return Ok(cached);
     }
@@ -206,26 +224,28 @@ pub fn get_file_diff<P: AsRef<Path>>(
         }
 
         let origin = line.origin();
-        let line_type = match origin {
-            '+' => {
-                additions += 1;
-                "add"
-            }
-            '-' => {
-                deletions += 1;
-                "delete"
-            }
-            _ => "context",
-        };
+        if origin == '+' || origin == '-' || origin == ' ' {
+            let line_type = match origin {
+                '+' => {
+                    additions += 1;
+                    "add"
+                }
+                '-' => {
+                    deletions += 1;
+                    "delete"
+                }
+                _ => "context",
+            };
 
-        let content = String::from_utf8_lossy(line.content()).to_string();
-        if let Some(h) = hunks.last_mut() {
-            h.lines.push(DiffLine {
-                line_type: line_type.to_string(),
-                content,
-                old_lineno: line.old_lineno(),
-                new_lineno: line.new_lineno(),
-            });
+            let content = String::from_utf8_lossy(line.content()).to_string();
+            if let Some(h) = hunks.last_mut() {
+                h.lines.push(DiffLine {
+                    line_type: line_type.to_string(),
+                    content,
+                    old_lineno: line.old_lineno(),
+                    new_lineno: line.new_lineno(),
+                });
+            }
         }
         true
     })?;

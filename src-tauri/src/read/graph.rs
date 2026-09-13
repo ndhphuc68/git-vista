@@ -83,15 +83,22 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
 
     let mut revwalk = repo.revwalk()?;
     revwalk.set_sorting(Sort::TOPOLOGICAL | Sort::TIME)?;
-    revwalk.push_glob("refs/heads/*").or_else(|_| revwalk.push_head())?;
+    let _ = revwalk.push_head();
+    let _ = revwalk.push_glob("refs/heads/*");
+    let _ = revwalk.push_glob("refs/remotes/*");
 
     let all_oids: Vec<Oid> = revwalk.filter_map(|r| r.ok()).collect();
     let total_count = all_oids.len();
 
+    let end = (offset + limit).min(total_count);
+    let mut page_commits = Vec::with_capacity(if offset < total_count { end - offset } else { 0 });
     let mut active_lanes: Vec<Option<Oid>> = Vec::new();
-    let mut all_nodes = Vec::with_capacity(total_count);
 
-    for oid in &all_oids {
+    for (idx, oid) in all_oids.iter().enumerate() {
+        if idx >= end {
+            break;
+        }
+
         let commit = repo.find_commit(*oid)?;
         let parent_oids: Vec<Oid> = commit.parent_ids().collect();
 
@@ -113,36 +120,55 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
         let color_index = col % NUM_COLORS;
         let mut edges = Vec::new();
 
-        // Pass-through lines from earlier lanes
-        for (i, slot) in active_lanes.iter().enumerate() {
-            if i != col && slot.is_some() {
-                edges.push(GraphEdge {
-                    from_col: i as u32,
-                    to_col: i as u32,
-                    edge_type: "straight".to_string(),
-                    color_index: (i % NUM_COLORS) as u32,
-                });
+        // 2. Converge other lanes that track this commit (merges / branch convergence)
+        for j in 0..active_lanes.len() {
+            if j != col && active_lanes[j].as_ref() == Some(oid) {
+                if idx >= offset {
+                    edges.push(GraphEdge {
+                        from_col: j as u32,
+                        to_col: col as u32,
+                        edge_type: "merge".to_string(),
+                        color_index: (j % NUM_COLORS) as u32,
+                    });
+                }
+                active_lanes[j] = None;
+            }
+        }
+
+        // 3. Pass-through lines from earlier lanes
+        if idx >= offset {
+            for (i, slot) in active_lanes.iter().enumerate() {
+                if i != col && slot.is_some() {
+                    edges.push(GraphEdge {
+                        from_col: i as u32,
+                        to_col: i as u32,
+                        edge_type: "straight".to_string(),
+                        color_index: (i % NUM_COLORS) as u32,
+                    });
+                }
             }
         }
 
         // Connect to parents
         if let Some(first_parent) = parent_oids.first() {
             active_lanes[col] = Some(*first_parent);
-            edges.push(GraphEdge {
-                from_col: col as u32,
-                to_col: col as u32,
-                edge_type: "straight".to_string(),
-                color_index: color_index as u32,
-            });
+            if idx >= offset {
+                edges.push(GraphEdge {
+                    from_col: col as u32,
+                    to_col: col as u32,
+                    edge_type: "straight".to_string(),
+                    color_index: color_index as u32,
+                });
+            }
 
             // Extra merge parents
             for extra_parent in parent_oids.iter().skip(1) {
                 let to_col = match active_lanes.iter().position(|s| s.as_ref() == Some(extra_parent)) {
-                    Some(idx) => idx,
+                    Some(slot_idx) => slot_idx,
                     None => match active_lanes.iter().position(|s| s.is_none()) {
-                        Some(idx) => {
-                            active_lanes[idx] = Some(*extra_parent);
-                            idx
+                        Some(slot_idx) => {
+                            active_lanes[slot_idx] = Some(*extra_parent);
+                            slot_idx
                         }
                         None => {
                             active_lanes.push(Some(*extra_parent));
@@ -150,12 +176,14 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
                         }
                     },
                 };
-                edges.push(GraphEdge {
-                    from_col: col as u32,
-                    to_col: to_col as u32,
-                    edge_type: "fork".to_string(),
-                    color_index: (to_col % NUM_COLORS) as u32,
-                });
+                if idx >= offset {
+                    edges.push(GraphEdge {
+                        from_col: col as u32,
+                        to_col: to_col as u32,
+                        edge_type: "fork".to_string(),
+                        color_index: (to_col % NUM_COLORS) as u32,
+                    });
+                }
             }
         } else {
             // Root commit (no parents)
@@ -167,38 +195,36 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
             active_lanes.pop();
         }
 
-        let summary = commit.summary().unwrap_or("No message").to_string();
-        let author = commit.author();
-        let author_name = author.name().unwrap_or("Unknown").to_string();
-        let author_email = author.email().unwrap_or("").to_string();
-        let timestamp_sec = commit.time().seconds() as f64;
-        let parent_ids: Vec<String> = parent_oids.iter().map(|p| p.to_string()).collect();
+        // Only instantiate full commit metadata for requested slice
+        if idx >= offset {
+            let summary = commit.summary().unwrap_or("No message").to_string();
+            let author = commit.author();
+            let author_name = author.name().unwrap_or("Unknown").to_string();
+            let author_email = author.email().unwrap_or("").to_string();
+            let timestamp_sec = commit.time().seconds() as f64;
+            let parent_ids: Vec<String> = parent_oids.iter().map(|p| p.to_string()).collect();
 
-        let badges = ref_map.remove(oid).unwrap_or_default();
-        let hex = oid.to_string();
-        let short_id = hex.chars().take(7).collect();
+            let badges = ref_map.remove(oid).unwrap_or_default();
+            let hex = oid.to_string();
+            let short_id = hex.chars().take(7).collect();
 
-        all_nodes.push(GraphCommitNode {
-            id: hex,
-            short_id,
-            summary,
-            author_name,
-            author_email,
-            timestamp_sec,
-            parent_ids,
-            col: col as u32,
-            color_index: color_index as u32,
-            lines: edges,
-            refs: badges,
-        });
+            page_commits.push(GraphCommitNode {
+                id: hex,
+                short_id,
+                summary,
+                author_name,
+                author_email,
+                timestamp_sec,
+                parent_ids,
+                col: col as u32,
+                color_index: color_index as u32,
+                lines: edges,
+                refs: badges,
+            });
+        }
     }
 
-    let end = (offset + limit).min(total_count);
-    let commits = if offset < total_count {
-        all_nodes[offset..end].to_vec()
-    } else {
-        Vec::new()
-    };
+    let commits = page_commits;
     let has_more = end < total_count;
 
     Ok(CommitGraphPage {

@@ -2,11 +2,13 @@ import React from "react";
 import { GitBranch, GitGraph, Sparkles } from "lucide-react";
 import { useTranslation } from "../i18n";
 import { useSettingsStore } from "../store/useSettingsStore";
+import { useRepoStore } from "../store/useRepoStore";
 
 export const Titlebar: React.FC = () => {
   const { t } = useTranslation();
   const mode = useSettingsStore((s) => s.mode);
   const resolvedTheme = useSettingsStore((s) => s.resolvedTheme);
+  const currentRepo = useRepoStore((s) => s.currentRepo);
 
   return (
     <header
@@ -34,7 +36,7 @@ export const Titlebar: React.FC = () => {
         }}
       >
         <GitGraph size={16} color="var(--accent)" />
-        <span>{t.appTitle}</span>
+        <span>{currentRepo ? currentRepo.name : t.appTitle}</span>
         <span
           style={{
             fontSize: "var(--font-size-xs)",
@@ -45,7 +47,7 @@ export const Titlebar: React.FC = () => {
             fontWeight: 500,
           }}
         >
-          {t.m0Badge}
+          {t.m1Badge}
         </span>
       </div>
 
@@ -61,7 +63,7 @@ export const Titlebar: React.FC = () => {
       >
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
           <GitBranch size={13} />
-          <span>repo: project-v3</span>
+          <span>{currentRepo ? currentRepo.path : t.appTitle}</span>
         </div>
       </div>
 

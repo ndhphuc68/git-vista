@@ -1,6 +1,7 @@
 export const vi = {
   appTitle: "Visual Git",
   m0Badge: "Mốc M0: Khung nền tảng",
+  m1Badge: "Mốc M1.1: Trực quan hoá Git",
   screens: {
     welcome: "Chào mừng",
     changes: "Thay đổi",

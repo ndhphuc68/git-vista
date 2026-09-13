@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useMemo } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
@@ -30,6 +30,18 @@ export const CommitGraph: React.FC = () => {
   });
 
   const commits = data ? data.pages.flatMap((page) => page.commits) : [];
+
+  const maxCols = useMemo(() => {
+    let max = 3;
+    for (const c of commits) {
+      if (c.col + 2 > max) max = c.col + 2;
+      for (const l of c.lines) {
+        if (l.from_col + 2 > max) max = l.from_col + 2;
+        if (l.to_col + 2 > max) max = l.to_col + 2;
+      }
+    }
+    return max;
+  }, [commits]);
 
   const rowVirtualizer = useVirtualizer({
     count: commits.length,
@@ -74,7 +86,29 @@ export const CommitGraph: React.FC = () => {
           return (
             <div
               key={commit.id}
+              role="button"
+              tabIndex={0}
+              aria-selected={isSelected}
+              aria-label={`Commit ${commit.short_id}: ${commit.summary}`}
               onClick={() => setSelectedCommit(commit.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelectedCommit(commit.id);
+                } else if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  const nextCommit = commits[virtualRow.index + 1];
+                  if (nextCommit) {
+                    setSelectedCommit(nextCommit.id);
+                  }
+                } else if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  const prevCommit = commits[virtualRow.index - 1];
+                  if (prevCommit) {
+                    setSelectedCommit(prevCommit.id);
+                  }
+                }
+              }}
               style={{
                 position: "absolute",
                 top: 0,
@@ -90,6 +124,7 @@ export const CommitGraph: React.FC = () => {
                 borderBottom: "1px solid var(--border-subtle)",
                 cursor: "pointer",
                 fontSize: "var(--font-size-xs)",
+                outline: "none",
               }}
               onMouseEnter={(e) => {
                 if (!isSelected) e.currentTarget.style.backgroundColor = "var(--bg-surface-hover)";
@@ -97,8 +132,19 @@ export const CommitGraph: React.FC = () => {
               onMouseLeave={(e) => {
                 if (!isSelected) e.currentTarget.style.backgroundColor = "transparent";
               }}
+              onFocus={(e) => {
+                if (!isSelected) e.currentTarget.style.backgroundColor = "var(--bg-surface-hover)";
+              }}
+              onBlur={(e) => {
+                if (!isSelected) e.currentTarget.style.backgroundColor = "transparent";
+              }}
             >
-              <GraphSvgLane col={commit.col} colorIndex={commit.color_index} lines={commit.lines} />
+              <GraphSvgLane
+                col={commit.col}
+                colorIndex={commit.color_index}
+                lines={commit.lines}
+                maxCols={maxCols}
+              />
 
               {commit.refs.map((r, i) => (
                 <span

@@ -23,6 +23,7 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     let unlistenFn: (() => void) | undefined;
+    let cancelled = false;
 
     listenToRepoChanged((payload) => {
       console.log("🔔 [Event] repo-changed payload:", payload);
@@ -30,10 +31,15 @@ export const App: React.FC = () => {
       // Invalidate queries khi repo thay đổi theo mục 4.4 của spec
       queryClient.invalidateQueries();
     }).then((unlisten) => {
-      unlistenFn = unlisten;
+      if (cancelled) {
+        unlisten();
+      } else {
+        unlistenFn = unlisten;
+      }
     });
 
     return () => {
+      cancelled = true;
       if (unlistenFn) unlistenFn();
     };
   }, []);

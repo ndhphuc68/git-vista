@@ -17,17 +17,20 @@ interface GraphSvgLaneProps {
   col: number;
   colorIndex: number;
   lines: GraphEdge[];
+  maxCols?: number;
 }
 
-export const GraphSvgLane: React.FC<GraphSvgLaneProps> = ({ col, colorIndex, lines }) => {
+export const GraphSvgLane: React.FC<GraphSvgLaneProps> = ({ col, colorIndex, lines, maxCols }) => {
   const nodeX = col * COL_WIDTH + COL_WIDTH / 2;
   const nodeY = ROW_HEIGHT / 2;
   const nodeColor = LANE_COLORS[colorIndex % LANE_COLORS.length];
+  const laneCols = maxCols ? Math.max(maxCols, col + 1, 3) : Math.max(col + 2, 3);
+  const width = laneCols * COL_WIDTH;
 
   return (
     <svg
       style={{
-        width: `${Math.max(col + 2, 3) * COL_WIDTH}px`,
+        width: `${width}px`,
         height: `${ROW_HEIGHT}px`,
         flexShrink: 0,
         overflow: "visible",
@@ -52,10 +55,24 @@ export const GraphSvgLane: React.FC<GraphSvgLaneProps> = ({ col, colorIndex, lin
           );
         }
 
+        if (edge.edge_type === "merge") {
+          // Upper parent lane (at y=0) curves into the current node (at nodeY)
+          return (
+            <path
+              key={idx}
+              d={`M ${x1} 0 C ${x1} ${nodeY / 2}, ${x2} ${nodeY / 2}, ${x2} ${nodeY}`}
+              fill="none"
+              stroke={strokeColor}
+              strokeWidth={2}
+            />
+          );
+        }
+
+        // Fork curve: from current node down to child branch lane
         return (
           <path
             key={idx}
-            d={`M ${x1} ${nodeY} C ${x1} ${ROW_HEIGHT}, ${x2} 0, ${x2} ${ROW_HEIGHT}`}
+            d={`M ${x1} ${nodeY} C ${x1} ${(nodeY + ROW_HEIGHT) / 2}, ${x2} ${(nodeY + ROW_HEIGHT) / 2}, ${x2} ${ROW_HEIGHT}`}
             fill="none"
             stroke={strokeColor}
             strokeWidth={2}

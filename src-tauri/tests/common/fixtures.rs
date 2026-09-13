@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use git2::{Commit, IndexAddOption, Oid, Repository, Signature};
 use std::fs::{self, File};
 use std::io::Write;

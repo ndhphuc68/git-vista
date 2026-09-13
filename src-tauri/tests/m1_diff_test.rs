@@ -24,4 +24,11 @@ fn test_commit_details_and_file_diff() {
     assert_eq!(diff.file_path, changed_file.path);
     assert!(!diff.hunks.is_empty());
     assert!(diff.hunks[0].lines.iter().any(|l| l.line_type == "add"));
+
+    // Verify that hunk header lines (e.g. @@ ... @@) are NOT duplicated into diff lines
+    for hunk in &diff.hunks {
+        for line in &hunk.lines {
+            assert!(!line.content.starts_with("@@"), "Hunk header line must not be duplicated into diff lines: {}", line.content);
+        }
+    }
 }
