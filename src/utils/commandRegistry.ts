@@ -37,7 +37,7 @@ export function getAppCommands(context: CommandContext): CommandItem[] {
   const commands: CommandItem[] = [
     {
       id: "nav-history",
-      title: "Xem lịch sử commit",
+      title: "Chuyển sang Lịch sử commit",
       description: "Chuyển sang màn hình xem lịch sử commit và cây nhánh",
       category: "navigation",
       shortcut: "Ctrl+1",
