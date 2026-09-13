@@ -15,6 +15,7 @@ import { useLayoutStore } from "./store/useLayoutStore";
 import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
 import { CreateBranchModal } from "./components/sidebar/CreateBranchModal";
 import { ConflictResolverScreen } from "./components/conflict/ConflictResolverScreen";
+import { ToastContainer } from "./components/toast/ToastContainer";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -159,6 +160,7 @@ export const App: React.FC = () => {
         ) : (
           <WelcomeScreen onSelectRepo={setRepo} />
         )}
+        <ToastContainer />
       </div>
     </QueryClientProvider>
   );
