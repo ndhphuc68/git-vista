@@ -15,6 +15,7 @@ describe("StagingFileList & DiscardConfirmModal", () => {
       untracked: [
         { path: "src/untracked1.ts", status: "New" as const, is_staged: false, old_path: null },
       ],
+      conflicted: [],
     },
     selectedFile: null,
     onSelectFile: vi.fn(),

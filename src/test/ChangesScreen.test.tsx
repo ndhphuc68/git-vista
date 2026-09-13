@@ -38,6 +38,7 @@ describe("ChangesScreen", () => {
       { path: "src/unstaged.ts", status: "Modified" as const, is_staged: false, old_path: null },
     ],
     untracked: [],
+    conflicted: [],
   };
 
   const mockDiff = {

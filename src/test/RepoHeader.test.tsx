@@ -41,6 +41,7 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
       staged: [],
       unstaged: [],
       untracked: [],
+      conflicted: [],
     });
 
     render(
@@ -67,6 +68,7 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
       staged: [],
       unstaged: [],
       untracked: [],
+      conflicted: [],
     });
 
     render(
@@ -84,6 +86,7 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
       staged: [],
       unstaged: [],
       untracked: [],
+      conflicted: [],
     });
 
     render(
@@ -117,6 +120,7 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
       untracked: [
         { path: "untracked.txt", status: "New", is_staged: false, old_path: null },
       ],
+      conflicted: [],
     });
 
     render(
@@ -137,6 +141,7 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
       staged: [],
       unstaged: [],
       untracked: [],
+      conflicted: [],
     });
 
     render(
@@ -177,6 +182,7 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
       staged: [],
       unstaged: [],
       untracked: [],
+      conflicted: [],
     });
 
     const { unmount } = render(
@@ -211,6 +217,7 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
       staged: [],
       unstaged: [],
       untracked: [],
+      conflicted: [],
     });
 
     render(
@@ -237,6 +244,7 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
       staged: [],
       unstaged: [],
       untracked: [],
+      conflicted: [],
     });
 
     render(
@@ -260,6 +268,7 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
       staged: [],
       unstaged: [],
       untracked: [],
+      conflicted: [],
     });
     vi.spyOn(invokeCommand, "getRepoHeadInfo").mockResolvedValue({
       branch_name: "main",
