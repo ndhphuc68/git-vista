@@ -15,6 +15,8 @@ import {
   Archive,
   Play,
   PlayCircle,
+  GitMerge,
+  GitCommit,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
@@ -26,6 +28,8 @@ import { RenameBranchModal } from "./RenameBranchModal";
 import { DeleteBranchModal } from "./DeleteBranchModal";
 import { CheckoutConflictModal } from "./CheckoutConflictModal";
 import { StashDiffView } from "../stash/StashDiffView";
+import { MergeBranchModal } from "../merge/MergeBranchModal";
+import { RebaseBranchModal } from "../merge/RebaseBranchModal";
 
 export const BranchSidebar: React.FC = () => {
   const { currentRepo, selectedBranch, setSelectedBranch } = useRepoStore();
@@ -43,6 +47,8 @@ export const BranchSidebar: React.FC = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [renameBranchName, setRenameBranchName] = useState<string | null>(null);
   const [deleteBranchName, setDeleteBranchName] = useState<string | null>(null);
+  const [mergeModal, setMergeModal] = useState<{ targetBranch: string } | null>(null);
+  const [rebaseModal, setRebaseModal] = useState<{ upstreamBranch: string } | null>(null);
   const [conflictInfo, setConflictInfo] = useState<{
     targetBranch: string;
     errorMessage: string;
@@ -67,6 +73,25 @@ export const BranchSidebar: React.FC = () => {
     queryFn: () => invokeCommand.getBranches(currentRepo!.path),
     enabled: Boolean(currentRepo),
   });
+
+  const { data: repoStatus } = useQuery({
+    queryKey: ["repo_status", currentRepo?.path],
+    queryFn: () => invokeCommand.getRepoStatus(currentRepo!.path),
+    enabled: Boolean(currentRepo),
+  });
+
+  const hasUncommittedChanges = Boolean(
+    repoStatus &&
+      (repoStatus.staged.length > 0 ||
+        repoStatus.unstaged.length > 0 ||
+        repoStatus.untracked.length > 0)
+  );
+
+  const currentBranchName =
+    branchData?.current_branch ||
+    branchData?.local.find((b) => b.is_head)?.name ||
+    selectedBranch ||
+    "main";
 
   const { data: stashes = [] } = useQuery({
     queryKey: ["stashes", currentRepo?.path],
@@ -267,14 +292,40 @@ export const BranchSidebar: React.FC = () => {
                             onClick={(e) => e.stopPropagation()}
                           >
                             {!branch.is_head && (
-                              <button
-                                type="button"
-                                onClick={() => handleCheckout(branch.name)}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
-                              >
-                                <Check size={13} className="text-accent" />
-                                <span>Chuyển tới nhánh này</span>
-                              </button>
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCheckout(branch.name)}
+                                  className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                                >
+                                  <Check size={13} className="text-accent" />
+                                  <span>Chuyển tới nhánh này</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setMenuBranch(null);
+                                    setMergeModal({ targetBranch: branch.name });
+                                  }}
+                                  className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                                >
+                                  <GitMerge size={13} className="text-secondary" />
+                                  <span>Gộp vào nhánh hiện tại...</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setMenuBranch(null);
+                                    setRebaseModal({ upstreamBranch: branch.name });
+                                  }}
+                                  className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                                >
+                                  <GitCommit size={13} className="text-secondary" />
+                                  <span>Rebase nhánh hiện tại lên đây...</span>
+                                </button>
+                              </>
                             )}
 
                             <button
@@ -483,10 +534,49 @@ export const BranchSidebar: React.FC = () => {
       <CheckoutConflictModal
         isOpen={Boolean(conflictInfo)}
         onClose={() => setConflictInfo(null)}
+        repoPath={currentRepo.path}
         targetBranch={conflictInfo?.targetBranch || ""}
         errorMessage={conflictInfo?.errorMessage || ""}
         onNavigateToChanges={() => setActiveScreen("changes")}
+        onSuccess={invalidateRepo}
       />
+
+      {mergeModal && (
+        <MergeBranchModal
+          isOpen={true}
+          onClose={() => setMergeModal(null)}
+          currentBranch={currentBranchName}
+          targetBranch={mergeModal.targetBranch}
+          hasUncommittedChanges={hasUncommittedChanges}
+          onMerge={async (noFf) => {
+            const res = await invokeCommand.mergeBranch(
+              currentRepo.path,
+              mergeModal.targetBranch,
+              noFf
+            );
+            invalidateRepo();
+            return res;
+          }}
+        />
+      )}
+
+      {rebaseModal && (
+        <RebaseBranchModal
+          isOpen={true}
+          onClose={() => setRebaseModal(null)}
+          currentBranch={currentBranchName}
+          upstreamBranch={rebaseModal.upstreamBranch}
+          hasUncommittedChanges={hasUncommittedChanges}
+          onRebase={async () => {
+            const res = await invokeCommand.rebaseBranch(
+              currentRepo.path,
+              rebaseModal.upstreamBranch
+            );
+            invalidateRepo();
+            return res;
+          }}
+        />
+      )}
     </>
   );
 };

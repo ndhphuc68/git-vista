@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
-import { AlertTriangle, X, ArrowRight } from "lucide-react";
+﻿import React, { useState, useEffect } from "react";
+import { AlertTriangle, X, ArrowRight, Archive } from "lucide-react";
+import { invokeCommand } from "../../ipc/client";
 
 export interface CheckoutConflictModalProps {
   isOpen: boolean;
@@ -7,6 +8,8 @@ export interface CheckoutConflictModalProps {
   targetBranch: string;
   errorMessage: string;
   onNavigateToChanges: () => void;
+  repoPath?: string;
+  onSuccess?: () => void;
 }
 
 export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
@@ -15,7 +18,12 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
   targetBranch,
   errorMessage,
   onNavigateToChanges,
+  repoPath,
+  onSuccess,
 }) => {
+  const [isStashing, setIsStashing] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -30,7 +38,35 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (isOpen) {
+      setIsStashing(false);
+      setActionError(null);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
+
+  const handleStashAndCheckout = async () => {
+    if (!repoPath) return;
+    setIsStashing(true);
+    setActionError(null);
+    try {
+      await invokeCommand.saveStash(
+        repoPath,
+        `Tự động lưu trước khi chuyển sang ${targetBranch}`,
+        true
+      );
+      await invokeCommand.checkoutBranch(repoPath, targetBranch);
+      onClose();
+      onSuccess?.();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setActionError(`Lỗi khi Stash & chuyển nhánh: ${msg}`);
+    } finally {
+      setIsStashing(false);
+    }
+  };
 
   return (
     <div
@@ -72,8 +108,14 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
             {errorMessage.replace("CHECKOUT_CONFLICT: ", "")}
           </div>
 
+          {actionError && (
+            <div className="p-2.5 bg-diff-remove-bg border border-diff-remove-text/30 rounded-sm text-diff-remove-text text-xs">
+              {actionError}
+            </div>
+          )}
+
           <p className="text-[11px] text-secondary leading-normal m-0">
-            Để tiếp tục chuyển nhánh một cách an toàn, bạn nên chuyển sang màn hình <strong>Thay đổi (Changes)</strong> để thực hiện commit hoặc hoàn tác các file trên trước.
+            Để tiếp tục chuyển nhánh một cách an toàn, bạn có thể lưu tạm các thay đổi vào Stash hoặc chuyển sang màn hình <strong>Thay đổi (Changes)</strong> để commit.
           </p>
         </div>
 
@@ -81,17 +123,30 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-1.5 bg-transparent border border-border-subtle rounded-sm text-xs font-medium text-primary cursor-pointer hover:bg-surface-hover transition-colors"
+            disabled={isStashing}
+            className="px-3 py-1.5 bg-transparent border border-border-subtle rounded-sm text-xs font-medium text-primary cursor-pointer hover:bg-surface-hover transition-colors disabled:opacity-50"
           >
             Đóng
           </button>
+          {repoPath && (
+            <button
+              type="button"
+              onClick={handleStashAndCheckout}
+              disabled={isStashing}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-hover border border-border-subtle text-primary rounded-sm text-xs font-semibold cursor-pointer hover:bg-border-subtle active:scale-[0.98] transition-all disabled:opacity-50"
+            >
+              <Archive size={13} className="text-accent" />
+              <span>{isStashing ? "Đang lưu & chuyển..." : "Lưu tạm (Stash) rồi chuyển nhánh"}</span>
+            </button>
+          )}
           <button
             type="button"
+            disabled={isStashing}
             onClick={() => {
               onClose();
               onNavigateToChanges();
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white border-none rounded-sm text-xs font-semibold cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white border-none rounded-sm text-xs font-semibold cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <span>Đến màn hình Thay đổi</span>
             <ArrowRight size={13} />

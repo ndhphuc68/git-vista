@@ -1,6 +1,7 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+﻿import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { CheckoutConflictModal } from "../components/sidebar/CheckoutConflictModal";
+import { invokeCommand } from "../ipc/client";
 
 describe("CheckoutConflictModal", () => {
   it("does not render when isOpen is false", () => {
@@ -38,5 +39,38 @@ describe("CheckoutConflictModal", () => {
 
     expect(onClose).toHaveBeenCalled();
     expect(onNavigateToChanges).toHaveBeenCalled();
+  });
+
+  it("renders stash and checkout button and handles stash-and-checkout action", async () => {
+    const saveStashSpy = vi.spyOn(invokeCommand, "saveStash").mockResolvedValue("stash123");
+    const checkoutBranchSpy = vi.spyOn(invokeCommand, "checkoutBranch").mockResolvedValue(undefined);
+    const onClose = vi.fn();
+    const onSuccess = vi.fn();
+
+    render(
+      <CheckoutConflictModal
+        isOpen={true}
+        onClose={onClose}
+        repoPath="/test/repo"
+        targetBranch="feature/next"
+        errorMessage="CHECKOUT_CONFLICT: file1.txt"
+        onNavigateToChanges={vi.fn()}
+        onSuccess={onSuccess}
+      />
+    );
+
+    const stashBtn = screen.getByRole("button", { name: /lưu tạm \(stash\) rồi chuyển nhánh/i });
+    expect(stashBtn).toBeInTheDocument();
+    fireEvent.click(stashBtn);
+
+    await waitFor(() => {
+      expect(saveStashSpy).toHaveBeenCalledWith("/test/repo", expect.stringContaining("feature/next"), true);
+      expect(checkoutBranchSpy).toHaveBeenCalledWith("/test/repo", "feature/next");
+      expect(onClose).toHaveBeenCalled();
+      expect(onSuccess).toHaveBeenCalled();
+    });
+
+    saveStashSpy.mockRestore();
+    checkoutBranchSpy.mockRestore();
   });
 });
