@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import clsx from "clsx";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText } from "lucide-react";
+import { FileText, Archive } from "lucide-react";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
@@ -9,6 +9,7 @@ import { invokeCommand } from "../../ipc/client";
 import { StagingFileList, SelectedWorkingFile } from "./StagingFileList";
 import { CommitBox } from "./CommitBox";
 import { InteractiveDiffViewer } from "./InteractiveDiffViewer";
+import { CreateStashModal } from "../stash/CreateStashModal";
 
 export const ChangesScreen: React.FC = () => {
   const { currentRepo } = useRepoStore();
@@ -19,6 +20,7 @@ export const ChangesScreen: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<SelectedWorkingFile | null>(
     null
   );
+  const [showCreateStash, setShowCreateStash] = useState(false);
 
   const { data: status } = useQuery({
     queryKey: ["repoStatus", currentRepo?.path],
@@ -242,6 +244,18 @@ export const ChangesScreen: React.FC = () => {
                 onCommit={handleCommit}
               />
             </div>
+
+            {/* Stash quick-save button */}
+            <div className="shrink-0 px-3 py-2 border-t border-border-subtle">
+              <button
+                type="button"
+                onClick={() => setShowCreateStash(true)}
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-transparent border border-border-subtle rounded-sm text-xs text-secondary hover:text-primary hover:bg-surface-hover cursor-pointer transition-colors"
+              >
+                <Archive size={12} />
+                <span>Luu Stash</span>
+              </button>
+            </div>
           </section>
         )}
 
@@ -274,6 +288,18 @@ export const ChangesScreen: React.FC = () => {
           </section>
         )}
       </div>
+
+      <CreateStashModal
+        isOpen={showCreateStash}
+        onClose={() => setShowCreateStash(false)}
+        repoPath={currentRepo.path}
+        onSaveStash={async (message, includeUntracked) => {
+          const id = await invokeCommand.saveStash(currentRepo.path, message, includeUntracked);
+          queryClient.invalidateQueries({ queryKey: ["stashes", currentRepo.path] });
+          setShowCreateStash(false);
+          return id;
+        }}
+      />
     </main>
   );
 };

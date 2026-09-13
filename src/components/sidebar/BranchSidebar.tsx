@@ -12,15 +12,20 @@ import {
   Check,
   Edit3,
   Trash2,
+  Archive,
+  Play,
+  PlayCircle,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { invokeCommand } from "../../ipc/client";
+import { StashItem } from "../../ipc/bindings";
 import { CreateBranchModal } from "./CreateBranchModal";
 import { RenameBranchModal } from "./RenameBranchModal";
 import { DeleteBranchModal } from "./DeleteBranchModal";
 import { CheckoutConflictModal } from "./CheckoutConflictModal";
+import { StashDiffView } from "../stash/StashDiffView";
 
 export const BranchSidebar: React.FC = () => {
   const { currentRepo, selectedBranch, setSelectedBranch } = useRepoStore();
@@ -31,6 +36,8 @@ export const BranchSidebar: React.FC = () => {
   const [localOpen, setLocalOpen] = useState(true);
   const [remoteOpen, setRemoteOpen] = useState(true);
   const [tagsOpen, setTagsOpen] = useState(false);
+  const [stashOpen, setStashOpen] = useState(false);
+  const [selectedStash, setSelectedStash] = useState<StashItem | null>(null);
 
   // Modal states
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -61,6 +68,12 @@ export const BranchSidebar: React.FC = () => {
     enabled: Boolean(currentRepo),
   });
 
+  const { data: stashes = [] } = useQuery({
+    queryKey: ["stashes", currentRepo?.path],
+    queryFn: () => invokeCommand.getStashes(currentRepo!.path),
+    enabled: !!currentRepo?.path,
+  });
+
   if (!currentRepo) return null;
 
   const invalidateRepo = () => {
@@ -86,6 +99,42 @@ export const BranchSidebar: React.FC = () => {
       } else {
         alert(`Không thể chuyển nhánh: ${msg}`);
       }
+    }
+  };
+
+  const invalidateStashes = () => {
+    queryClient.invalidateQueries({ queryKey: ["stashes", currentRepo.path] });
+  };
+
+  const handleApplyStash = async (index: number) => {
+    try {
+      await invokeCommand.applyStash(currentRepo.path, index);
+      invalidateStashes();
+      queryClient.invalidateQueries({ queryKey: ["repoStatus", currentRepo.path] });
+    } catch (err: unknown) {
+      alert(`Khong the ap dung stash: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
+
+  const handlePopStash = async (index: number) => {
+    try {
+      await invokeCommand.popStash(currentRepo.path, index);
+      invalidateStashes();
+      queryClient.invalidateQueries({ queryKey: ["repoStatus", currentRepo.path] });
+      setSelectedStash(null);
+    } catch (err: unknown) {
+      alert(`Khong the pop stash: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
+
+  const handleDropStash = async (index: number) => {
+    if (!window.confirm("Xoa stash nay?")) return;
+    try {
+      await invokeCommand.dropStash(currentRepo.path, index);
+      invalidateStashes();
+      setSelectedStash(null);
+    } catch (err: unknown) {
+      alert(`Khong the xoa stash: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -319,8 +368,93 @@ export const BranchSidebar: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* STASH */}
+          <div>
+            <button
+              onClick={() => setStashOpen(!stashOpen)}
+              aria-expanded={stashOpen}
+              aria-label="Stash"
+              className="flex items-center gap-1 w-full p-1 bg-transparent border-0 text-secondary font-semibold text-xs cursor-pointer"
+            >
+              {stashOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+              <Archive size={13} />
+              <span>STASH ({stashes.length})</span>
+            </button>
+
+            {stashOpen && (
+              <div className="flex flex-col gap-0.5 mt-1">
+                {stashes.length === 0 ? (
+                  <div className="px-2 py-1 text-xs text-tertiary italic">
+                    Khong co stash nao.
+                  </div>
+                ) : (
+                  stashes.map((item) => (
+                    <div
+                      key={item.index}
+                      className={clsx(
+                        "group flex items-center justify-between rounded-sm px-2 py-1 cursor-pointer text-xs transition-colors",
+                        selectedStash?.index === item.index
+                          ? "bg-accent-subtle text-accent font-semibold"
+                          : "bg-transparent text-primary hover:bg-surface-hover"
+                      )}
+                      onClick={() => setSelectedStash(item)}
+                    >
+                      <span className="truncate">
+                        stash@{"{"}
+                        {item.index}
+                        {"}"}: {item.message.substring(0, 40)}
+                      </span>
+                      <div
+                        className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          type="button"
+                          title="Ap dung (Apply)"
+                          onClick={() => handleApplyStash(item.index)}
+                          className="p-0.5 bg-transparent border-0 text-secondary hover:text-accent cursor-pointer rounded-sm"
+                        >
+                          <Play size={11} />
+                        </button>
+                        <button
+                          type="button"
+                          title="Ap dung & Xoa (Pop)"
+                          onClick={() => handlePopStash(item.index)}
+                          className="p-0.5 bg-transparent border-0 text-secondary hover:text-accent cursor-pointer rounded-sm"
+                        >
+                          <PlayCircle size={11} />
+                        </button>
+                        <button
+                          type="button"
+                          title="Xoa Stash (Drop)"
+                          onClick={() => handleDropStash(item.index)}
+                          className="p-0.5 bg-transparent border-0 text-secondary hover:text-diff-remove-text cursor-pointer rounded-sm"
+                        >
+                          <Trash2 size={11} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </aside>
+
+      {/* Stash diff panel (shown beside sidebar when stash is selected) */}
+      {selectedStash && (
+        <aside className="bg-surface border-r border-border-subtle w-72 shrink-0 h-full flex flex-col overflow-y-auto">
+          <StashDiffView
+            stashItem={selectedStash}
+            repoPath={currentRepo.path}
+            onApply={handleApplyStash}
+            onPop={handlePopStash}
+            onDrop={handleDropStash}
+          />
+        </aside>
+      )}
 
       {/* MODALS */}
       <CreateBranchModal
