@@ -4,6 +4,7 @@
 pub mod branch;
 pub mod commit;
 pub mod staging;
+pub mod stash;
 
 use crate::error::AppError;
 use std::path::Path;
