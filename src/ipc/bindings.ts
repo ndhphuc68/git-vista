@@ -159,3 +159,31 @@ export interface RepoStatusResult {
   untracked: StatusFileItem[];
 }
 
+export interface StashItem {
+  index: number;
+  message: string;
+  commit_id: string;
+  created_at: number;
+}
+
+export interface RepoStateInfo {
+  state: string;
+  is_in_progress: boolean;
+  head_name: string;
+  target_name: string | null;
+  conflict_count: number;
+}
+
+export interface MergeResult {
+  success: boolean;
+  status: string;
+  output: string;
+}
+
+export interface RebaseResult {
+  success: boolean;
+  status: string;
+  output: string;
+}
+
+

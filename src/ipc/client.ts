@@ -12,7 +12,20 @@ import {
   FileStatus,
   StatusFileItem,
   RepoStatusResult,
+  StashItem,
+  RepoStateInfo,
+  MergeResult,
+  RebaseResult,
 } from "./bindings";
+
+let mockStashes: StashItem[] = [
+  {
+    index: 0,
+    message: "WIP on main: initial work",
+    commit_id: "stash1234567890",
+    created_at: Math.floor(Date.now() / 1000) - 3600,
+  },
+];
 
 // Helper kiểm tra môi trường chạy có phải trong Tauri runtime không
 export const isTauri = (): boolean => {
@@ -464,6 +477,127 @@ export const invokeCommand = {
     const { invoke } = await import("@tauri-apps/api/core");
     return await invoke("set_repo_pull_rebase", { repoPath, rebase });
   },
+
+  getStashes: async (repoPath: string): Promise<StashItem[]> => {
+    if (!isTauri()) {
+      return [...mockStashes];
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<StashItem[]>("get_stashes", { repoPath });
+  },
+
+  saveStash: async (
+    repoPath: string,
+    message?: string | null,
+    includeUntracked?: boolean
+  ): Promise<string> => {
+    if (!isTauri()) {
+      const commitId = `mockstash${Date.now()}`;
+      const newStash: StashItem = {
+        index: 0,
+        message: message || "WIP on current branch",
+        commit_id: commitId,
+        created_at: Math.floor(Date.now() / 1000),
+      };
+      mockStashes = [newStash, ...mockStashes.map((s, idx) => ({ ...s, index: idx + 1 }))];
+      return commitId;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<string>("save_stash", { repoPath, message, includeUntracked });
+  },
+
+  applyStash: async (repoPath: string, index: number): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("apply_stash", { repoPath, index });
+  },
+
+  popStash: async (repoPath: string, index: number): Promise<void> => {
+    if (!isTauri()) {
+      mockStashes = mockStashes.filter((s) => s.index !== index).map((s, idx) => ({ ...s, index: idx }));
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("pop_stash", { repoPath, index });
+  },
+
+  dropStash: async (repoPath: string, index: number): Promise<void> => {
+    if (!isTauri()) {
+      mockStashes = mockStashes.filter((s) => s.index !== index).map((s, idx) => ({ ...s, index: idx }));
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("drop_stash", { repoPath, index });
+  },
+
+  getRepoState: async (repoPath: string): Promise<RepoStateInfo> => {
+    if (!isTauri()) {
+      return {
+        state: "clean",
+        is_in_progress: false,
+        head_name: "main",
+        target_name: null,
+        conflict_count: 0,
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<RepoStateInfo>("get_repo_state", { repoPath });
+  },
+
+  mergeBranch: async (
+    repoPath: string,
+    targetBranch: string,
+    noFf?: boolean
+  ): Promise<MergeResult> => {
+    if (!isTauri()) {
+      return {
+        success: true,
+        status: "Merged",
+        output: `Merged branch ${targetBranch} into HEAD`,
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<MergeResult>("merge_branch", { repoPath, targetBranch, noFf });
+  },
+
+  rebaseBranch: async (
+    repoPath: string,
+    upstreamBranch: string
+  ): Promise<RebaseResult> => {
+    if (!isTauri()) {
+      return {
+        success: true,
+        status: "Success",
+        output: `Successfully rebased and updated refs/heads/main`,
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<RebaseResult>("rebase_branch", { repoPath, upstreamBranch });
+  },
+
+  abortInProgress: async (
+    repoPath: string,
+    operation: string
+  ): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("abort_in_progress", { repoPath, operation });
+  },
+
+  continueInProgress: async (
+    repoPath: string,
+    operation: string
+  ): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("continue_in_progress", { repoPath, operation });
+  },
 };
 
 export async function listenToRepoChanged(
@@ -512,5 +646,9 @@ export type {
   FileStatus,
   StatusFileItem,
   RepoStatusResult,
+  StashItem,
+  RepoStateInfo,
+  MergeResult,
+  RebaseResult,
 };
 
