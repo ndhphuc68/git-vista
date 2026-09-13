@@ -113,48 +113,24 @@ fn append_patch_line(patch_lines: &mut String, prefix: char, content: &str) {
     }
 }
 
-/// Stage a specific hunk of a file (forward if is_staged == false, reverse if is_staged == true).
-pub fn stage_hunk<P: AsRef<Path>>(
+fn apply_selected_lines<P: AsRef<Path>>(
     repo_path: P,
     file_path: &str,
-    hunk_index: u32,
-    is_staged: bool,
-) -> Result<(), AppError> {
-    let repo_path_ref = repo_path.as_ref();
-    let file_diff =
-        crate::read::status::get_working_file_diff(repo_path_ref, file_path, is_staged)?;
-    let hunk = file_diff
-        .hunks
-        .get(hunk_index as usize)
-        .ok_or_else(|| AppError::InvalidOperation(format!("Hunk index {} out of range", hunk_index)))?;
-
-    let all_line_indices: Vec<u32> = (0..hunk.lines.len() as u32).collect();
-    stage_lines(
-        repo_path_ref,
-        file_path,
-        hunk_index,
-        &all_line_indices,
-        is_staged,
-    )
-}
-
-/// Stage specific lines within a hunk of a file.
-pub fn stage_lines<P: AsRef<Path>>(
-    repo_path: P,
-    file_path: &str,
-    hunk_index: u32,
+    hunk: &crate::read::diff::DiffHunk,
     line_indices: &[u32],
     is_staged: bool,
 ) -> Result<(), AppError> {
-    let repo_path_ref = repo_path.as_ref();
-    let repo = Repository::open(repo_path_ref)?;
-    let file_diff =
-        crate::read::status::get_working_file_diff(repo_path_ref, file_path, is_staged)?;
-    let hunk = file_diff
-        .hunks
-        .get(hunk_index as usize)
-        .ok_or_else(|| AppError::InvalidOperation(format!("Hunk index {} out of range", hunk_index)))?;
+    for &idx in line_indices {
+        if idx as usize >= hunk.lines.len() {
+            return Err(AppError::InvalidOperation(format!(
+                "Line index {} out of range (hunk has {} lines)",
+                idx,
+                hunk.lines.len()
+            )));
+        }
+    }
 
+    let repo = Repository::open(repo_path.as_ref())?;
     let selected_set: HashSet<u32> = line_indices.iter().copied().collect();
     let normalized_path = file_path.replace('\\', "/");
 
@@ -235,11 +211,14 @@ pub fn stage_lines<P: AsRef<Path>>(
         return Ok(());
     }
 
-    let (patch_old_start, patch_new_start) = if !is_staged {
+    let (patch_old_start, mut patch_new_start) = if !is_staged {
         (hunk.old_start, hunk.old_start)
     } else {
         (hunk.new_start, hunk.new_start)
     };
+    if patch_new_lines > 0 && patch_new_start == 0 {
+        patch_new_start = 1;
+    }
 
     let patch_header = format!(
         "diff --git a/{path} b/{path}\n--- a/{path}\n+++ b/{path}\n@@ -{},{} +{},{} @@\n",
@@ -250,14 +229,62 @@ pub fn stage_lines<P: AsRef<Path>>(
         path = normalized_path
     );
 
-    let full_patch = format!("{}{}", patch_header, patch_lines);
-
-    let diff = Diff::from_buffer(full_patch.as_bytes())?;
+    let diff = Diff::from_buffer(format!("{}{}", patch_header, patch_lines).as_bytes())?;
     repo.apply(&diff, ApplyLocation::Index, None)?;
 
     let mut index = repo.index()?;
     index.write()?;
 
     Ok(())
+}
+
+/// Stage a specific hunk of a file (forward if is_staged == false, reverse if is_staged == true).
+pub fn stage_hunk<P: AsRef<Path>>(
+    repo_path: P,
+    file_path: &str,
+    hunk_index: u32,
+    is_staged: bool,
+) -> Result<(), AppError> {
+    let repo_path_ref = repo_path.as_ref();
+    let file_diff =
+        crate::read::status::get_working_file_diff(repo_path_ref, file_path, is_staged)?;
+    let hunk = file_diff
+        .hunks
+        .get(hunk_index as usize)
+        .ok_or_else(|| AppError::InvalidOperation(format!("Hunk index {} out of range", hunk_index)))?;
+
+    let all_line_indices: Vec<u32> = (0..hunk.lines.len() as u32).collect();
+    apply_selected_lines(
+        repo_path_ref,
+        file_path,
+        hunk,
+        &all_line_indices,
+        is_staged,
+    )
+}
+
+/// Stage specific lines within a hunk of a file.
+pub fn stage_lines<P: AsRef<Path>>(
+    repo_path: P,
+    file_path: &str,
+    hunk_index: u32,
+    line_indices: &[u32],
+    is_staged: bool,
+) -> Result<(), AppError> {
+    let repo_path_ref = repo_path.as_ref();
+    let file_diff =
+        crate::read::status::get_working_file_diff(repo_path_ref, file_path, is_staged)?;
+    let hunk = file_diff
+        .hunks
+        .get(hunk_index as usize)
+        .ok_or_else(|| AppError::InvalidOperation(format!("Hunk index {} out of range", hunk_index)))?;
+
+    apply_selected_lines(
+        repo_path_ref,
+        file_path,
+        hunk,
+        line_indices,
+        is_staged,
+    )
 }
 
