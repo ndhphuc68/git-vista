@@ -25,6 +25,36 @@ pub fn commit_index<'a>(
     repo.commit(Some("HEAD"), &sig, &sig, message, &tree, parents)
 }
 
+pub struct TestRepoFixture {
+    pub dir: TempDir,
+    pub repo: Repository,
+}
+
+impl TestRepoFixture {
+    pub fn new() -> Self {
+        let (dir, repo) = create_clean_repo().expect("Failed to create clean repo");
+        let file_path = dir.path().join("file1.txt");
+        fs::write(&file_path, "initial content for file1\n").expect("Failed to write file1.txt");
+        let mut index = repo.index().expect("Failed to get index");
+        index.add_path(Path::new("file1.txt")).expect("Failed to add file1.txt");
+        index.write().expect("Failed to write index");
+        {
+            let head = repo.head().expect("Failed to get HEAD").peel_to_commit().expect("Failed to peel HEAD");
+            commit_index(&repo, "Add file1.txt", &[&head]).expect("Failed to commit file1.txt");
+        }
+
+        Self { dir, repo }
+    }
+
+    pub fn path(&self) -> &Path {
+        self.dir.path()
+    }
+
+    pub fn repo(&self) -> &Repository {
+        &self.repo
+    }
+}
+
 /// 1. Tạo repo tạm sạch với 1 commit ban đầu
 pub fn create_clean_repo() -> Result<(TempDir, Repository), Box<dyn std::error::Error>> {
     let dir = TempDir::new()?;
