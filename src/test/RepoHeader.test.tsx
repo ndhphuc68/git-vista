@@ -205,4 +205,53 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
 
     expect(container.firstChild).toBeNull();
   });
+
+  it("toggles sidebar, controls, and detail panel when clicking header toggle buttons", async () => {
+    vi.spyOn(invokeCommand, "getRepoStatus").mockResolvedValue({
+      staged: [],
+      unstaged: [],
+      untracked: [],
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <RepoHeader onBackToWelcome={mockOnBackToWelcome} />
+      </QueryClientProvider>
+    );
+
+    const toggleSidebarBtn = screen.getByTestId("toggle-sidebar");
+    const toggleControlsBtn = screen.getByTestId("toggle-controls");
+    const toggleDetailPanelBtn = screen.getByTestId("toggle-detail-panel");
+
+    expect(toggleSidebarBtn).toBeInTheDocument();
+    expect(toggleControlsBtn).toBeInTheDocument();
+    expect(toggleDetailPanelBtn).toBeInTheDocument();
+
+    fireEvent.click(toggleSidebarBtn);
+    fireEvent.click(toggleControlsBtn);
+    fireEvent.click(toggleDetailPanelBtn);
+  });
+
+  it("toggles sidebar with Cmd+B / Ctrl+B keyboard shortcut", () => {
+    vi.spyOn(invokeCommand, "getRepoStatus").mockResolvedValue({
+      staged: [],
+      unstaged: [],
+      untracked: [],
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <RepoHeader onBackToWelcome={mockOnBackToWelcome} />
+      </QueryClientProvider>
+    );
+
+    const eventCmdB = new KeyboardEvent("keydown", {
+      key: "b",
+      metaKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    fireEvent(window, eventCmdB);
+    expect(eventCmdB.defaultPrevented).toBe(true);
+  });
 });

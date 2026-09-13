@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ChangesScreen } from "../components/changes/ChangesScreen";
 import { useRepoStore } from "../store/useRepoStore";
+import { useLayoutStore } from "../store/useLayoutStore";
 import { invokeCommand } from "../ipc/client";
 
 describe("ChangesScreen", () => {
@@ -18,6 +19,13 @@ describe("ChangesScreen", () => {
       is_bare: false,
       head_branch: "main",
       head_commit_id: "abc1234",
+    });
+    useLayoutStore.setState({
+      sidebarOpen: true,
+      detailPanelOpen: true,
+      controlsOpen: true,
+      devToolsOpen: false,
+      activeChangesView: "split",
     });
     vi.clearAllMocks();
   });
@@ -134,6 +142,24 @@ describe("ChangesScreen", () => {
         undefined,
         false
       );
+    });
+  });
+
+  it("hides sidebar when sidebarOpen is false", async () => {
+    useLayoutStore.setState({ sidebarOpen: false });
+
+    vi.spyOn(invokeCommand, "getRepoStatus").mockResolvedValue(mockStatus);
+    vi.spyOn(invokeCommand, "getWorkingFileDiff").mockResolvedValue(mockDiff);
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ChangesScreen />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("changes-sidebar")).not.toBeInTheDocument();
+      expect(screen.getByTestId("changes-diff-viewer")).toBeInTheDocument();
     });
   });
 });

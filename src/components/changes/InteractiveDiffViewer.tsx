@@ -117,7 +117,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
         height: "100%",
         width: "100%",
         backgroundColor: "var(--bg-surface)",
-        overflowY: "auto",
+        overflow: "auto",
       }}
     >
       {/* File Diff Header */}
@@ -132,9 +132,18 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
           position: "sticky",
           top: 0,
           zIndex: 10,
+          gap: "8px",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            minWidth: 0,
+            flexShrink: 1,
+          }}
+        >
           <span
             style={{
               display: "inline-flex",
@@ -146,6 +155,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
               border: isStaged ? "1px solid var(--accent)" : "1px solid var(--border-subtle)",
               fontSize: "10px",
               fontWeight: 600,
+              flexShrink: 0,
             }}
           >
             {isStaged ? "STAGED" : "UNSTAGED"}
@@ -156,7 +166,11 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
               fontSize: "var(--font-size-xs)",
               fontWeight: 600,
               color: "var(--text-primary)",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
+            title={diff.file_path}
           >
             {diff.file_path}
           </span>
@@ -281,51 +295,70 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
                     padding: "1px 0",
                     lineHeight: "20px",
                     whiteSpace: "pre",
+                    minWidth: "max-content",
+                    width: "100%",
                   }}
                 >
-                  {/* Old Line Number */}
-                  <span
+                  {/* Sticky Line Number Gutter */}
+                  <div
                     style={{
-                      width: "44px",
-                      color: "var(--text-tertiary)",
-                      userSelect: "none",
-                      textAlign: "right",
-                      paddingRight: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      position: "sticky",
+                      left: 0,
+                      zIndex: 2,
+                      backgroundColor: isAdd
+                        ? "var(--diff-add-bg)"
+                        : isDel
+                        ? "var(--diff-remove-bg)"
+                        : "var(--bg-surface)",
                       flexShrink: 0,
                     }}
                   >
-                    {line.old_lineno ?? ""}
-                  </span>
+                    {/* Old Line Number */}
+                    <span
+                      style={{
+                        width: "44px",
+                        color: "var(--text-tertiary)",
+                        userSelect: "none",
+                        textAlign: "right",
+                        paddingRight: "8px",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {line.old_lineno ?? ""}
+                    </span>
 
-                  {/* New Line Number */}
-                  <span
-                    style={{
-                      width: "44px",
-                      color: "var(--text-tertiary)",
-                      userSelect: "none",
-                      textAlign: "right",
-                      paddingRight: "8px",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {line.new_lineno ?? ""}
-                  </span>
+                    {/* New Line Number */}
+                    <span
+                      style={{
+                        width: "44px",
+                        color: "var(--text-tertiary)",
+                        userSelect: "none",
+                        textAlign: "right",
+                        paddingRight: "8px",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {line.new_lineno ?? ""}
+                    </span>
 
-                  {/* Origin Sign (+, -, ' ') */}
-                  <span
-                    style={{
-                      width: "20px",
-                      userSelect: "none",
-                      textAlign: "center",
-                      fontWeight: isModifiedLine ? 700 : 400,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {isAdd ? "+" : isDel ? "-" : " "}
-                  </span>
+                    {/* Origin Sign (+, -, ' ') */}
+                    <span
+                      style={{
+                        width: "20px",
+                        userSelect: "none",
+                        textAlign: "center",
+                        fontWeight: isModifiedLine ? 700 : 400,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {isAdd ? "+" : isDel ? "-" : " "}
+                    </span>
+                  </div>
 
                   {/* Line Content */}
-                  <span style={{ flex: 1, overflowX: "hidden" }}>{line.content}</span>
+                  <span style={{ flex: 1, minWidth: 0, paddingRight: "16px" }}>{line.content}</span>
 
                   {/* Line-level Staging Action Button */}
                   {isModifiedLine && (

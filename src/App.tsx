@@ -9,6 +9,7 @@ import { ChangesScreen } from "./components/changes/ChangesScreen";
 import { listenToRepoChanged, RepoChangedPayload } from "./ipc/client";
 import { useRepoStore } from "./store/useRepoStore";
 import { useViewStore } from "./store/useViewStore";
+import { useLayoutStore } from "./store/useLayoutStore";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,6 +24,7 @@ export const App: React.FC = () => {
   const [lastEvent, setLastEvent] = useState<RepoChangedPayload | null>(null);
   const { currentRepo, setRepo, clearRepo } = useRepoStore();
   const { activeScreen } = useViewStore();
+  const { controlsOpen } = useLayoutStore();
 
   useEffect(() => {
     let unlistenFn: (() => void) | undefined;
@@ -61,9 +63,21 @@ export const App: React.FC = () => {
         <Titlebar />
         {currentRepo ? (
           <>
-            <ControlsBar lastEvent={lastEvent} />
+            {controlsOpen && <ControlsBar lastEvent={lastEvent} />}
             <RepoHeader onBackToWelcome={clearRepo} />
-            {activeScreen === "history" ? <Shell /> : <ChangesScreen />}
+            <div
+              style={{
+                flex: 1,
+                minHeight: 0,
+                height: "100%",
+                width: "100%",
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              {activeScreen === "history" ? <Shell /> : <ChangesScreen />}
+            </div>
           </>
         ) : (
           <WelcomeScreen onSelectRepo={setRepo} />
