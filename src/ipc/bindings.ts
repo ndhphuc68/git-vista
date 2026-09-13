@@ -139,3 +139,18 @@ export interface FileDiffResult {
   deletions: number;
 }
 
+export type FileStatus = "Modified" | "New" | "Deleted" | "Renamed" | "Typechange";
+
+export interface StatusFileItem {
+  path: string;
+  status: FileStatus;
+  is_staged: boolean;
+  old_path: string | null;
+}
+
+export interface RepoStatusResult {
+  staged: StatusFileItem[];
+  unstaged: StatusFileItem[];
+  untracked: StatusFileItem[];
+}
+

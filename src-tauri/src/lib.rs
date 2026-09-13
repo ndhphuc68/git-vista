@@ -21,7 +21,17 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         get_branches,
         get_commit_graph,
         get_commit_details,
-        get_commit_file_diff
+        get_commit_file_diff,
+        get_repo_status,
+        get_working_file_diff,
+        stage_file,
+        unstage_file,
+        stage_all,
+        unstage_all,
+        discard_file_changes,
+        stage_hunk,
+        stage_lines,
+        create_commit
     ])
 }
 

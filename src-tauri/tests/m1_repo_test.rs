@@ -1,7 +1,7 @@
 mod common;
 
 use common::fixtures::create_clean_repo;
-use visual_git_lib::commands::{get_recent_repos, open_repository};
+use visual_git_lib::commands::{get_recent_repos, open_repository_internal as open_repository};
 
 #[test]
 fn test_open_repository_and_recent_tracking() {
