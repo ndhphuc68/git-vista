@@ -5,8 +5,10 @@ import { ControlsBar } from "./components/ControlsBar";
 import { Shell } from "./components/Shell";
 import { WelcomeScreen } from "./components/welcome/WelcomeScreen";
 import { RepoHeader } from "./components/header/RepoHeader";
+import { ChangesScreen } from "./components/changes/ChangesScreen";
 import { listenToRepoChanged, RepoChangedPayload } from "./ipc/client";
 import { useRepoStore } from "./store/useRepoStore";
+import { useViewStore } from "./store/useViewStore";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,6 +22,7 @@ const queryClient = new QueryClient({
 export const App: React.FC = () => {
   const [lastEvent, setLastEvent] = useState<RepoChangedPayload | null>(null);
   const { currentRepo, setRepo, clearRepo } = useRepoStore();
+  const { activeScreen } = useViewStore();
 
   useEffect(() => {
     let unlistenFn: (() => void) | undefined;
@@ -60,7 +63,7 @@ export const App: React.FC = () => {
           <>
             <ControlsBar lastEvent={lastEvent} />
             <RepoHeader onBackToWelcome={clearRepo} />
-            <Shell />
+            {activeScreen === "history" ? <Shell /> : <ChangesScreen />}
           </>
         ) : (
           <WelcomeScreen onSelectRepo={setRepo} />
