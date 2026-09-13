@@ -655,6 +655,50 @@ export const invokeCommand = {
       autoStage,
     });
   },
+
+  undoCommit: async (repoPath: string): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("undo_commit", { repoPath });
+  },
+
+  undoDeleteBranch: async (
+    repoPath: string,
+    branchName: string,
+    commitId: string
+  ): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("undo_delete_branch", { repoPath, branchName, commitId });
+  },
+
+  undoDiscardFile: async (
+    repoPath: string,
+    filePath: string,
+    backupContent: string
+  ): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("undo_discard_file", { repoPath, filePath, backupContent });
+  },
+
+  undoDropStash: async (
+    repoPath: string,
+    stashCommitId: string,
+    message: string
+  ): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("undo_drop_stash", { repoPath, stashCommitId, message });
+  },
 };
 
 export async function listenToRepoChanged(
