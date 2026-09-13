@@ -1,6 +1,8 @@
 //! Module `exec`: Nơi duy nhất được phép spawn process thực thi `git` CLI (push, pull, fetch, rebase, merge).
 //! Đảm bảo thừa hưởng credentials, SSH agent, hook, và xử lý timeout/cancel tập trung.
 
+pub mod remote;
+
 use crate::error::AppError;
 use std::collections::HashMap;
 use std::path::Path;
