@@ -7,6 +7,7 @@ import { useRepoStore } from "../store/useRepoStore";
 export const Titlebar: React.FC = () => {
   const { t } = useTranslation();
   const mode = useSettingsStore((s) => s.mode);
+  const setMode = useSettingsStore((s) => s.setMode);
   const resolvedTheme = useSettingsStore((s) => s.resolvedTheme);
   const currentRepo = useRepoStore((s) => s.currentRepo);
 
@@ -40,10 +41,15 @@ export const Titlebar: React.FC = () => {
         data-tauri-no-drag
         className="flex items-center gap-2"
       >
-        <span className="text-xs px-2 py-0.5 rounded-sm border border-border-subtle bg-window text-secondary inline-flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => setMode(mode === "simple" ? "advanced" : "simple")}
+          className="text-xs px-2 py-0.5 rounded-sm border border-border-subtle bg-window text-secondary hover:text-primary hover:border-accent inline-flex items-center gap-1 cursor-pointer transition-colors"
+          title="Chuyển đổi chế độ Git (Simple / Advanced)"
+        >
           <Sparkles size={11} className="text-accent" />
           {mode === "simple" ? "Chế độ: Đơn giản" : "Mode: Advanced"}
-        </span>
+        </button>
         <span className="text-xs px-1.5 py-0.5 rounded-sm bg-window border border-border-subtle text-tertiary font-mono">
           {resolvedTheme.toUpperCase()}
         </span>

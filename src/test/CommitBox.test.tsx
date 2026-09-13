@@ -2,11 +2,14 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { CommitBox } from "../components/changes/CommitBox";
 
+import { useSettingsStore } from "../store/useSettingsStore";
+
 describe("CommitBox", () => {
   const mockOnCommit = vi.fn().mockResolvedValue(undefined);
 
   beforeEach(() => {
     vi.clearAllMocks();
+    useSettingsStore.getState().setMode("advanced");
   });
 
   it("renders summary input, description textarea, character counter, and commit button", () => {

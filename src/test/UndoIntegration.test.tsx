@@ -26,7 +26,7 @@ describe("Undo & Toast Integration", () => {
     const summaryInput = screen.getByPlaceholderText(/Tiêu đề commit/i);
     fireEvent.change(summaryInput, { target: { value: "feat: new feature" } });
 
-    const commitBtn = screen.getByRole("button", { name: /Commit/i });
+    const commitBtn = screen.getByRole("button", { name: /Commit|Lưu thay đổi/i });
     fireEvent.click(commitBtn);
 
     await waitFor(() => {

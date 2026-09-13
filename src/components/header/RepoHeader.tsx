@@ -41,7 +41,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
     toggleControls,
   } = useLayoutStore();
   const { isMobile } = useWindowDimensions();
-  const { t } = useTranslation();
+  const { t, mode } = useTranslation();
   const queryClient = useQueryClient();
 
   const { data: repoStatus } = useQuery({
@@ -268,7 +268,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
             title="Fetch từ remote"
           >
             <RefreshCw size={11} className={isRemotePending && activeRemoteTask?.title.includes("Fetch") ? "animate-spin" : ""} />
-            {!isMobile && <span>Fetch</span>}
+            {!isMobile && <span>{mode === "simple" ? "Lấy về" : "Fetch"}</span>}
           </button>
 
           <button
@@ -280,7 +280,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
             title="Pull commit mới từ remote"
           >
             <ArrowDown size={11} />
-            {!isMobile && <span>Pull</span>}
+            {!isMobile && <span>{mode === "simple" ? "Kéo về" : "Pull"}</span>}
             {behindCount > 0 && (
               <span
                 data-testid="behind-badge"
@@ -301,7 +301,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
             title={headInfo?.upstream ? "Push commit lên remote" : "Push và thiết lập upstream lên remote"}
           >
             <ArrowUp size={11} />
-            {!isMobile && <span>Push</span>}
+            {!isMobile && <span>{mode === "simple" ? "Đẩy lên" : "Push"}</span>}
             {aheadCount > 0 && (
               <span
                 data-testid="ahead-badge"

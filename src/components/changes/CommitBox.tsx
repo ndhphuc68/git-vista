@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { GitCommit, AlertCircle, RefreshCw } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
 import { useToastStore } from "../../store/useToastStore";
+import { useSettingsStore } from "../../store/useSettingsStore";
 import { mapGitError } from "../../utils/errorMapping";
 
 export interface CommitBoxProps {
@@ -26,6 +27,7 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
   const [description, setDescription] = useState("");
   const [isAmend, setIsAmend] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const mode = useSettingsStore((s) => s.mode);
 
   const isMac =
     typeof navigator !== "undefined" &&
@@ -162,7 +164,11 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
             onChange={handleAmendToggle}
             className="cursor-pointer"
           />
-          <span>Amend (Sửa commit gần nhất)</span>
+          <span>
+            {mode === "simple"
+              ? "Sửa commit vừa tạo"
+              : "Amend (Sửa commit gần nhất)"}
+          </span>
         </label>
 
         <span className="text-[10px] text-tertiary">
@@ -188,9 +194,13 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
             <span>Đang lưu...</span>
           </>
         ) : isAmend ? (
-          <span>Amend Commit</span>
+          <span>{mode === "simple" ? "Sửa commit trước" : "Amend Commit"}</span>
         ) : (
-          <span>Commit ({stagedCount} files)</span>
+          <span>
+            {mode === "simple"
+              ? `Lưu thay đổi (${stagedCount} tệp)`
+              : `Commit (${stagedCount} files)`}
+          </span>
         )}
       </button>
     </div>
