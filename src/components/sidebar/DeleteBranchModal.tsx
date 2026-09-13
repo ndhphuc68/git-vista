@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, X, AlertTriangle, AlertCircle, Loader2, ShieldCheck } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
+import { useToastStore } from "../../store/useToastStore";
+import { mapGitError } from "../../utils/errorMapping";
 
 export interface DeleteBranchModalProps {
   isOpen: boolean;
   onClose: () => void;
   repoPath: string;
   branchName: string;
+  targetCommitId?: string;
   onSuccess?: (backupRef: string) => void;
 }
 
@@ -15,6 +18,7 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
   onClose,
   repoPath,
   branchName,
+  targetCommitId,
   onSuccess,
 }) => {
   const [loading, setLoading] = useState(false);
@@ -51,6 +55,16 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
 
     try {
       const backupRef = await invokeCommand.deleteBranch(repoPath, branchName, force);
+      if (targetCommitId) {
+        useToastStore.getState().showToast({
+          message: `Đã xoá nhánh ${branchName}`,
+          type: "success",
+          durationMs: 10000,
+          undoAction: async () => {
+            await invokeCommand.undoDeleteBranch(repoPath, branchName, targetCommitId);
+          },
+        });
+      }
       if (onSuccess) onSuccess(backupRef);
       onClose();
     } catch (err: unknown) {
@@ -59,6 +73,7 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
         setIsUnmerged(true);
       } else {
         setError(msg || "Không thể xoá nhánh");
+        useToastStore.getState().showError(mapGitError(err));
       }
     } finally {
       setLoading(false);

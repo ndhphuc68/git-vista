@@ -23,6 +23,8 @@ import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { invokeCommand } from "../../ipc/client";
 import { StashItem } from "../../ipc/bindings";
+import { useToastStore } from "../../store/useToastStore";
+import { mapGitError } from "../../utils/errorMapping";
 import { CreateBranchModal } from "./CreateBranchModal";
 import { RenameBranchModal } from "./RenameBranchModal";
 import { DeleteBranchModal } from "./DeleteBranchModal";
@@ -46,7 +48,10 @@ export const BranchSidebar: React.FC = () => {
   // Modal states
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [renameBranchName, setRenameBranchName] = useState<string | null>(null);
-  const [deleteBranchName, setDeleteBranchName] = useState<string | null>(null);
+  const [deleteBranchInfo, setDeleteBranchInfo] = useState<{
+    name: string;
+    commitId: string;
+  } | null>(null);
   const [mergeModal, setMergeModal] = useState<{ targetBranch: string } | null>(null);
   const [rebaseModal, setRebaseModal] = useState<{ upstreamBranch: string } | null>(null);
   const [conflictInfo, setConflictInfo] = useState<{
@@ -154,12 +159,28 @@ export const BranchSidebar: React.FC = () => {
 
   const handleDropStash = async (index: number) => {
     if (!window.confirm("Xoa stash nay?")) return;
+    const stashToDrop = stashes[index];
     try {
       await invokeCommand.dropStash(currentRepo.path, index);
       invalidateStashes();
       setSelectedStash(null);
+      if (stashToDrop) {
+        useToastStore.getState().showToast({
+          message: `Đã xoá stash@{${index}}`,
+          type: "success",
+          durationMs: 10000,
+          undoAction: async () => {
+            await invokeCommand.undoDropStash(
+              currentRepo.path,
+              stashToDrop.commit_id,
+              stashToDrop.message
+            );
+            invalidateStashes();
+          },
+        });
+      }
     } catch (err: unknown) {
-      alert(`Khong the xoa stash: ${err instanceof Error ? err.message : String(err)}`);
+      useToastStore.getState().showError(mapGitError(err));
     }
   };
 
@@ -345,7 +366,10 @@ export const BranchSidebar: React.FC = () => {
                                 type="button"
                                 onClick={() => {
                                   setMenuBranch(null);
-                                  setDeleteBranchName(branch.name);
+                                  setDeleteBranchInfo({
+                                    name: branch.name,
+                                    commitId: branch.target_commit_id,
+                                  });
                                 }}
                                 className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-diff-remove-text hover:bg-diff-remove-bg cursor-pointer text-left w-full transition-colors"
                               >
@@ -524,10 +548,11 @@ export const BranchSidebar: React.FC = () => {
       />
 
       <DeleteBranchModal
-        isOpen={Boolean(deleteBranchName)}
-        onClose={() => setDeleteBranchName(null)}
+        isOpen={Boolean(deleteBranchInfo)}
+        onClose={() => setDeleteBranchInfo(null)}
         repoPath={currentRepo.path}
-        branchName={deleteBranchName || ""}
+        branchName={deleteBranchInfo?.name || ""}
+        targetCommitId={deleteBranchInfo?.commitId}
         onSuccess={invalidateRepo}
       />
 

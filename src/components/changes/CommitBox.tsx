@@ -1,19 +1,25 @@
 import React, { useState } from "react";
 import clsx from "clsx";
 import { GitCommit, AlertCircle, RefreshCw } from "lucide-react";
+import { invokeCommand } from "../../ipc/client";
+import { useToastStore } from "../../store/useToastStore";
+import { mapGitError } from "../../utils/errorMapping";
 
 export interface CommitBoxProps {
   repoPath: string;
   stagedCount: number;
   lastCommitMessage?: string;
-  onCommit: (summary: string, description?: string, amend?: boolean) => Promise<void>;
+  onCommit?: (summary: string, description?: string, amend?: boolean) => Promise<void>;
+  onSuccess?: () => void;
   isLoading?: boolean;
 }
 
 export const CommitBox: React.FC<CommitBoxProps> = ({
+  repoPath,
   stagedCount,
   lastCommitMessage,
   onCommit,
+  onSuccess,
   isLoading = false,
 }) => {
   const [summary, setSummary] = useState("");
@@ -51,14 +57,36 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
 
     try {
       setSubmitting(true);
-      await onCommit(
-        summary.trim(),
-        description.trim() ? description.trim() : undefined,
-        isAmend
-      );
+      if (onCommit) {
+        await onCommit(
+          summary.trim(),
+          description.trim() ? description.trim() : undefined,
+          isAmend
+        );
+      } else {
+        await invokeCommand.createCommit(
+          repoPath,
+          summary.trim(),
+          description.trim() ? description.trim() : undefined,
+          isAmend
+        );
+      }
+
+      useToastStore.getState().showToast({
+        message: isAmend ? "Đã sửa commit (Amend)" : "Đã tạo commit",
+        type: "success",
+        durationMs: 10000,
+        undoAction: async () => {
+          await invokeCommand.undoCommit(repoPath);
+        },
+      });
+
       setSummary("");
       setDescription("");
       setIsAmend(false);
+      if (onSuccess) onSuccess();
+    } catch (err: unknown) {
+      useToastStore.getState().showError(mapGitError(err));
     } finally {
       setSubmitting(false);
     }

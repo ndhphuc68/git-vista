@@ -1,4 +1,4 @@
-﻿import { create } from "zustand";
+import { create } from "zustand";
 import { flushSync } from "react-dom";
 import { FriendlyError } from "../utils/errorMapping";
 
@@ -22,6 +22,7 @@ export interface ToastState {
   showError: (
     errorOrOptions:
       | string
+      | FriendlyError
       | {
           title?: string;
           message?: string;
@@ -79,7 +80,17 @@ export const useToastStore = create<ToastState>((set, get) => ({
       });
     }
 
-    const { title, message, rawError, friendlyError } = errorOrOptions;
+    const friendlyError =
+      "friendlyError" in errorOrOptions && errorOrOptions.friendlyError
+        ? errorOrOptions.friendlyError
+        : "actionHint" in errorOrOptions
+        ? (errorOrOptions as FriendlyError)
+        : undefined;
+
+    const title = "title" in errorOrOptions ? errorOrOptions.title : undefined;
+    const message = "message" in errorOrOptions ? errorOrOptions.message : undefined;
+    const rawError = "rawError" in errorOrOptions ? errorOrOptions.rawError : undefined;
+
     const effectiveTitle = title || friendlyError?.title;
     const effectiveMessage =
       message || friendlyError?.message || effectiveTitle || rawError || "Có lỗi xảy ra";

@@ -7,6 +7,8 @@ import { useLayoutStore } from "../../store/useLayoutStore";
 import { useViewStore } from "../../store/useViewStore";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import { invokeCommand } from "../../ipc/client";
+import { useToastStore } from "../../store/useToastStore";
+import { mapGitError } from "../../utils/errorMapping";
 import { StagingFileList, SelectedWorkingFile } from "./StagingFileList";
 import { CommitBox } from "./CommitBox";
 import { InteractiveDiffViewer } from "./InteractiveDiffViewer";
@@ -99,8 +101,12 @@ export const ChangesScreen: React.FC = () => {
   };
 
   const handleDiscardFile = async (filePath: string) => {
-    await invokeCommand.discardFileChanges(currentRepo.path, filePath);
-    await queryClient.invalidateQueries();
+    try {
+      await invokeCommand.discardFileChanges(currentRepo.path, filePath);
+      await queryClient.invalidateQueries();
+    } catch (err: unknown) {
+      useToastStore.getState().showError(mapGitError(err));
+    }
   };
 
   const handleStageHunk = async (hunkIndex: number) => {
