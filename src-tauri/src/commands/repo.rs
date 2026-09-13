@@ -56,6 +56,20 @@ pub fn get_recent_repos() -> Result<Vec<RecentRepoEntry>, AppError> {
 
 #[tauri::command]
 #[specta::specta]
+pub fn clear_recent_repos() -> Result<(), AppError> {
+    with_manager(|m| m.clear_recent());
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn remove_recent_repo(path: String) -> Result<(), AppError> {
+    with_manager(|m| m.remove_recent(&path));
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub fn select_repo_folder() -> Result<Option<String>, AppError> {
     let picked = rfd::FileDialog::new()
         .set_title("Chọn thư mục Git Repository")

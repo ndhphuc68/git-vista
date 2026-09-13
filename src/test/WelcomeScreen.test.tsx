@@ -26,4 +26,40 @@ describe("WelcomeScreen", () => {
       expect(onSelect).toHaveBeenCalled();
     });
   });
+
+  it("calls clearRecentRepos when clicking clear button", async () => {
+    const { invokeCommand } = await import("../ipc/client");
+    const clearSpy = vi.spyOn(invokeCommand, "clearRecentRepos").mockResolvedValue(undefined);
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <WelcomeScreen onSelectRepo={vi.fn()} />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("clear-recents-btn")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("clear-recents-btn"));
+    expect(clearSpy).toHaveBeenCalled();
+  });
+
+  it("calls removeRecentRepo when clicking remove button on a repo item", async () => {
+    const { invokeCommand } = await import("../ipc/client");
+    const removeSpy = vi.spyOn(invokeCommand, "removeRecentRepo").mockResolvedValue(undefined);
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <WelcomeScreen onSelectRepo={vi.fn()} />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("remove-recent-d:/project-v3")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("remove-recent-d:/project-v3"));
+    expect(removeSpy).toHaveBeenCalledWith("d:/project-v3");
+  });
 });

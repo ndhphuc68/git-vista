@@ -61,6 +61,22 @@ impl RecentRepoStore {
         fs::write(&self.storage_file, json).map_err(AppError::from)?;
         Ok(())
     }
+
+    pub fn clear(&self) -> Result<(), AppError> {
+        if self.storage_file.exists() {
+            let _ = fs::remove_file(&self.storage_file);
+        }
+        Ok(())
+    }
+
+    pub fn remove(&self, path: &str) -> Result<(), AppError> {
+        let mut list = self.list();
+        list.retain(|item| item.path != path);
+        let json = serde_json::to_string_pretty(&list)
+            .map_err(|e| AppError::Io(e.to_string()))?;
+        fs::write(&self.storage_file, json).map_err(AppError::from)?;
+        Ok(())
+    }
 }
 
 fn app_data_dir() -> PathBuf {

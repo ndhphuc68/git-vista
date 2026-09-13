@@ -94,6 +94,18 @@ export const invokeCommand = {
     return await invoke<RecentRepoEntry[]>("get_recent_repos");
   },
 
+  clearRecentRepos: async (): Promise<void> => {
+    if (!isTauri()) return;
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("clear_recent_repos");
+  },
+
+  removeRecentRepo: async (path: string): Promise<void> => {
+    if (!isTauri()) return;
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("remove_recent_repo", { path });
+  },
+
   selectRepoFolder: async (): Promise<string | null> => {
     if (!isTauri()) return "d:/project-v3";
     const { invoke } = await import("@tauri-apps/api/core");

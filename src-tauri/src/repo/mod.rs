@@ -99,6 +99,14 @@ impl RepoManager {
     pub fn list_recent(&self) -> Vec<RecentRepoEntry> {
         self.recent_store.list()
     }
+
+    pub fn clear_recent(&self) {
+        let _ = self.recent_store.clear();
+    }
+
+    pub fn remove_recent(&self, path: &str) {
+        let _ = self.recent_store.remove(path);
+    }
 }
 
 impl Default for RepoManager {
