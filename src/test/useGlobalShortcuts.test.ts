@@ -40,4 +40,92 @@ describe("useGlobalShortcuts", () => {
     });
     expect(onOpenCreateBranch).toHaveBeenCalled();
   });
+
+  it("triggers onOpenCommandPalette on Ctrl+K", () => {
+    const onOpenCommandPalette = vi.fn();
+    renderHook(() => useGlobalShortcuts({ onOpenCommandPalette }));
+
+    act(() => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true })
+      );
+    });
+    expect(onOpenCommandPalette).toHaveBeenCalledTimes(1);
+  });
+
+  it("triggers onOpenShortcutsHelp on ? and Ctrl+/", () => {
+    const onOpenShortcutsHelp = vi.fn();
+    renderHook(() => useGlobalShortcuts({ onOpenShortcutsHelp }));
+
+    // Press ?
+    act(() => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "?", bubbles: true })
+      );
+    });
+    expect(onOpenShortcutsHelp).toHaveBeenCalledTimes(1);
+
+    // Press Ctrl+/
+    act(() => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "/", ctrlKey: true, bubbles: true })
+      );
+    });
+    expect(onOpenShortcutsHelp).toHaveBeenCalledTimes(2);
+  });
+
+  it("triggers onToggleTheme on Ctrl+T", () => {
+    const onToggleTheme = vi.fn();
+    renderHook(() => useGlobalShortcuts({ onToggleTheme }));
+
+    act(() => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "t", ctrlKey: true, bubbles: true })
+      );
+    });
+    expect(onToggleTheme).toHaveBeenCalledTimes(1);
+  });
+
+  it("triggers onEscape on Escape", () => {
+    const onEscape = vi.fn();
+    renderHook(() => useGlobalShortcuts({ onEscape }));
+
+    act(() => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+      );
+    });
+    expect(onEscape).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores shortcuts when focus is inside input/textarea", () => {
+    const onOpenCommandPalette = vi.fn();
+    renderHook(() => useGlobalShortcuts({ onOpenCommandPalette }));
+
+    const input = document.createElement("input");
+    document.body.appendChild(input);
+
+    act(() => {
+      input.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true })
+      );
+    });
+    expect(onOpenCommandPalette).not.toHaveBeenCalled();
+
+    document.body.removeChild(input);
+  });
+
+  it("does not trigger callbacks when enabled is false", () => {
+    const onOpenCommandPalette = vi.fn();
+    renderHook(() =>
+      useGlobalShortcuts({ onOpenCommandPalette, enabled: false })
+    );
+
+    act(() => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true })
+      );
+    });
+    expect(onOpenCommandPalette).not.toHaveBeenCalled();
+  });
 });
