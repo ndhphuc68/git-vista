@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useSettingsStore } from "../store/useSettingsStore";
-import { Titlebar } from "../components/Titlebar";
+import { ControlsBar } from "../components/ControlsBar";
 import { CommitBox } from "../components/changes/CommitBox";
 
 describe("Simple vs Advanced Mode", () => {
@@ -9,15 +9,15 @@ describe("Simple vs Advanced Mode", () => {
     useSettingsStore.getState().setMode("simple");
   });
 
-  it("Titlebar toggles mode on click", () => {
-    render(<Titlebar />);
+  it("ControlsBar toggles mode on click", () => {
+    render(<ControlsBar lastEvent={null} />);
 
-    const modeBtn = screen.getByRole("button", { name: /Chế độ|Mode/i });
-    expect(modeBtn).toHaveTextContent(/Đơn giản/i);
+    const modeBtn = screen.getByRole("button", { name: /Simple|Đơn giản/i });
+    expect(modeBtn).toHaveTextContent(/Simple|Đơn giản/i);
 
     fireEvent.click(modeBtn);
     expect(useSettingsStore.getState().mode).toBe("advanced");
-    expect(modeBtn).toHaveTextContent(/Advanced/i);
+    expect(modeBtn).toHaveTextContent(/Advanced|Nâng cao/i);
   });
 
   it("CommitBox adapts button and checkbox text according to mode", () => {

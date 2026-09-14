@@ -32,8 +32,8 @@ describe("CloneModal", () => {
     );
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByLabelText(/URL kho chứa/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Thư mục đích/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/URL kho chứa|Repository URL/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Thư mục đích|Target Directory/i)).toBeInTheDocument();
   });
 
   it("auto-suggests target directory when URL is entered", () => {
@@ -45,12 +45,12 @@ describe("CloneModal", () => {
       />
     );
 
-    const urlInput = screen.getByLabelText(/URL kho chứa/i);
+    const urlInput = screen.getByLabelText(/URL kho chứa|Repository URL/i);
     fireEvent.change(urlInput, {
       target: { value: "https://github.com/owner/cool-project.git" },
     });
 
-    const dirInput = screen.getByLabelText(/Thư mục đích/i) as HTMLInputElement;
+    const dirInput = screen.getByLabelText(/Thư mục đích|Target Directory/i) as HTMLInputElement;
     expect(dirInput.value).toContain("cool-project");
   });
 
@@ -65,11 +65,11 @@ describe("CloneModal", () => {
       />
     );
 
-    const browseBtn = screen.getByRole("button", { name: /chọn thư mục/i });
+    const browseBtn = screen.getByRole("button", { name: /chọn thư mục|browse folder/i });
     fireEvent.click(browseBtn);
 
     await waitFor(() => {
-      const dirInput = screen.getByLabelText(/Thư mục đích/i) as HTMLInputElement;
+      const dirInput = screen.getByLabelText(/Thư mục đích|Target Directory/i) as HTMLInputElement;
       expect(dirInput.value).toContain("D:/Projects");
     });
   });
@@ -92,12 +92,12 @@ describe("CloneModal", () => {
       />
     );
 
-    const urlInput = screen.getByLabelText(/URL kho chứa/i);
+    const urlInput = screen.getByLabelText(/URL kho chứa|Repository URL/i);
     fireEvent.change(urlInput, {
       target: { value: "https://github.com/owner/my-app.git" },
     });
 
-    const dirInput = screen.getByLabelText(/Thư mục đích/i);
+    const dirInput = screen.getByLabelText(/Thư mục đích|Target Directory/i);
     fireEvent.change(dirInput, {
       target: { value: "D:/Projects/my-app" },
     });
@@ -125,7 +125,7 @@ describe("CloneModal", () => {
       />
     );
 
-    const cancelBtn = screen.getByRole("button", { name: /huỷ/i });
+    const cancelBtn = screen.getByRole("button", { name: /huỷ|cancel/i });
     fireEvent.click(cancelBtn);
 
     expect(mockOnClose).toHaveBeenCalled();

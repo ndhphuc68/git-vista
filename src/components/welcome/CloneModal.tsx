@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { FolderOpen, X, Download, AlertCircle, Loader2 } from "lucide-react";
 import { invokeCommand, listenToTaskProgress } from "../../ipc/client";
 import { RepoSummary } from "../../ipc/bindings";
+import { useTranslation } from "../../i18n";
 
 export interface CloneModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export const CloneModal: React.FC<CloneModalProps> = ({
   onClose,
   onCloneSuccess,
 }) => {
+  const { t } = useTranslation();
   const [url, setUrl] = useState("");
   const [targetDir, setTargetDir] = useState("");
   const [baseDir, setBaseDir] = useState("");
@@ -113,7 +115,7 @@ export const CloneModal: React.FC<CloneModalProps> = ({
     if (isCloning && activeTaskIdRef.current) {
       await invokeCommand.cancelRemoteTask(activeTaskIdRef.current);
       setIsCloning(false);
-      setError("Đã huỷ thao tác clone.");
+      setError(t.cloneModal.cancelError);
     } else {
       onClose();
     }
@@ -126,7 +128,7 @@ export const CloneModal: React.FC<CloneModalProps> = ({
     setError(null);
     setIsCloning(true);
     setProgressPercent(0);
-    setStatusText("Đang khởi tạo clone...");
+    setStatusText(t.cloneModal.initStatus);
 
     const taskId = `task-clone-${Date.now()}`;
     activeTaskIdRef.current = taskId;
@@ -140,7 +142,7 @@ export const CloneModal: React.FC<CloneModalProps> = ({
       setError(
         typeof err === "string"
           ? err
-          : err?.message || "Không thể clone kho chứa từ URL này. Vui lòng kiểm tra lại."
+          : err?.message || t.cloneModal.defaultError
       );
     } finally {
       setIsCloning(false);
@@ -155,29 +157,29 @@ export const CloneModal: React.FC<CloneModalProps> = ({
       aria-labelledby="clone-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in"
     >
-      <div className="relative w-full max-w-md rounded-xl border border-border-subtle bg-surface p-6 shadow-2xl transition-all">
+      <div className="relative w-full max-w-lg rounded-2xl border border-border-subtle bg-surface p-6 sm:p-7 shadow-2xl transition-all">
         {/* Close Button */}
         <button
           type="button"
           onClick={handleCancel}
           disabled={isCloning}
-          className="absolute top-4 right-4 text-tertiary hover:text-primary p-1 rounded-sm cursor-pointer disabled:opacity-50 transition-colors"
-          aria-label="Đóng"
+          className="absolute top-4 right-4 text-tertiary hover:text-primary p-1.5 rounded-lg cursor-pointer disabled:opacity-50 transition-colors"
+          aria-label={t.cloneModal.close}
         >
-          <X size={16} />
+          <X size={18} />
         </button>
 
         {/* Modal Header */}
-        <div className="flex items-center gap-3 mb-5">
-          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-accent-subtle text-accent">
-            <Download size={20} />
+        <div className="flex items-center gap-3.5 mb-6">
+          <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-accent-subtle text-accent">
+            <Download size={22} />
           </div>
           <div>
-            <h2 id="clone-modal-title" className="text-base font-bold text-primary">
-              Clone Repository
+            <h2 id="clone-modal-title" className="text-lg font-bold text-primary">
+              {t.cloneModal.title}
             </h2>
-            <p className="text-xs text-secondary mt-0.5">
-              Tải toàn bộ lịch sử kho chứa từ xa về máy tính
+            <p className="text-xs sm:text-sm text-secondary mt-0.5">
+              {t.cloneModal.desc}
             </p>
           </div>
         </div>
@@ -186,21 +188,21 @@ export const CloneModal: React.FC<CloneModalProps> = ({
         {error && (
           <div
             role="alert"
-            className="mb-4 px-3.5 py-2.5 bg-diff-remove-bg text-diff-remove-text rounded-md text-xs border border-diff-remove-border flex items-start gap-2"
+            className="mb-5 px-4 py-3 bg-diff-remove-bg text-diff-remove-text rounded-xl text-xs sm:text-sm border border-diff-remove-border flex items-start gap-2.5"
           >
-            <AlertCircle size={15} className="shrink-0 mt-0.5" />
+            <AlertCircle size={17} className="shrink-0 mt-0.5" />
             <span className="flex-1 leading-relaxed">{error}</span>
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5">
           <div>
             <label
               htmlFor="clone-url"
-              className="block text-xs font-semibold text-primary mb-1.5"
+              className="block text-xs sm:text-sm font-semibold text-primary mb-1.5"
             >
-              URL kho chứa (Git URL)
+              {t.cloneModal.urlLabel}
             </label>
             <input
               ref={urlInputRef}
@@ -210,17 +212,17 @@ export const CloneModal: React.FC<CloneModalProps> = ({
               disabled={isCloning}
               value={url}
               onChange={handleUrlChange}
-              placeholder="https://github.com/user/repo.git hoặc git@github.com:..."
-              className="w-full px-3 py-2 text-xs bg-window border border-border-subtle rounded-md text-primary placeholder-tertiary focus:outline-none focus:border-accent disabled:opacity-50 font-mono"
+              placeholder={t.cloneModal.urlPlaceholder}
+              className="w-full px-3.5 py-2 text-xs sm:text-sm bg-window border border-border-subtle rounded-lg text-primary placeholder-tertiary focus:outline-none focus:border-accent disabled:opacity-50 font-mono"
             />
           </div>
 
           <div>
             <label
               htmlFor="clone-target-dir"
-              className="block text-xs font-semibold text-primary mb-1.5"
+              className="block text-xs sm:text-sm font-semibold text-primary mb-1.5"
             >
-              Thư mục đích trên máy
+              {t.cloneModal.targetDirLabel}
             </label>
             <div className="flex gap-2">
               <input
@@ -230,28 +232,28 @@ export const CloneModal: React.FC<CloneModalProps> = ({
                 disabled={isCloning}
                 value={targetDir}
                 onChange={(e) => setTargetDir(e.target.value)}
-                placeholder="Đường dẫn thư mục lưu repo..."
-                className="flex-1 px-3 py-2 text-xs bg-window border border-border-subtle rounded-md text-primary placeholder-tertiary focus:outline-none focus:border-accent disabled:opacity-50 font-mono"
+                placeholder={t.cloneModal.targetDirPlaceholder}
+                className="flex-1 px-3.5 py-2 text-xs sm:text-sm bg-window border border-border-subtle rounded-lg text-primary placeholder-tertiary focus:outline-none focus:border-accent disabled:opacity-50 font-mono"
               />
               <button
                 type="button"
                 onClick={handleSelectFolder}
                 disabled={isCloning}
-                className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-secondary hover:text-primary bg-window border border-border-subtle hover:bg-surface-hover rounded-md transition-colors disabled:opacity-50 cursor-pointer shrink-0"
+                className="flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-medium text-secondary hover:text-primary bg-window border border-border-subtle hover:bg-surface-hover rounded-lg transition-colors disabled:opacity-50 cursor-pointer shrink-0"
               >
-                <FolderOpen size={14} />
-                <span>Chọn thư mục</span>
+                <FolderOpen size={16} />
+                <span>{t.cloneModal.selectFolder}</span>
               </button>
             </div>
           </div>
 
           {/* Progress Bar (during cloning) */}
           {isCloning && (
-            <div className="mt-1 p-3 rounded-lg bg-window border border-border-subtle">
-              <div className="flex items-center justify-between text-xs mb-1.5">
-                <span className="flex items-center gap-1.5 text-secondary">
-                  <Loader2 size={13} className="animate-spin text-accent" />
-                  <span>Đang clone kho chứa...</span>
+            <div className="mt-1 p-3.5 rounded-xl bg-window border border-border-subtle">
+              <div className="flex items-center justify-between text-xs sm:text-sm mb-2">
+                <span className="flex items-center gap-2 text-secondary">
+                  <Loader2 size={15} className="animate-spin text-accent" />
+                  <span>{t.cloneModal.cloning}</span>
                 </span>
                 <span className="font-mono font-medium text-accent">
                   {progressPercent}%
@@ -262,7 +264,7 @@ export const CloneModal: React.FC<CloneModalProps> = ({
                 aria-valuenow={progressPercent}
                 aria-valuemin={0}
                 aria-valuemax={100}
-                className="h-1.5 w-full bg-surface rounded-full overflow-hidden"
+                className="h-2 w-full bg-surface rounded-full overflow-hidden"
               >
                 <div
                   className="h-full bg-accent transition-all duration-300 ease-out"
@@ -270,7 +272,7 @@ export const CloneModal: React.FC<CloneModalProps> = ({
                 />
               </div>
               {statusText && (
-                <p className="mt-1.5 text-[11px] text-tertiary truncate font-mono">
+                <p className="mt-2 text-xs text-tertiary truncate font-mono">
                   {statusText}
                 </p>
               )}
@@ -278,26 +280,26 @@ export const CloneModal: React.FC<CloneModalProps> = ({
           )}
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-2 mt-2 pt-2 border-t border-border-subtle">
+          <div className="flex items-center justify-end gap-2.5 mt-2 pt-3 border-t border-border-subtle">
             <button
               type="button"
               onClick={handleCancel}
-              className="px-3.5 py-1.5 text-xs font-medium text-secondary hover:text-primary bg-transparent hover:bg-surface-hover border border-border-subtle rounded-md transition-colors cursor-pointer"
+              className="px-4 py-2 text-xs sm:text-sm font-medium text-secondary hover:text-primary bg-transparent hover:bg-surface-hover border border-border-subtle rounded-lg transition-colors cursor-pointer"
             >
-              Huỷ
+              {t.cloneModal.cancel}
             </button>
             <button
               type="submit"
               disabled={!url.trim() || !targetDir.trim() || isCloning}
-              className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-accent-contrast bg-accent hover:bg-accent-hover active:scale-[0.99] rounded-md transition-all shadow-sm disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2 text-xs sm:text-sm font-semibold text-accent-contrast bg-accent hover:bg-accent-hover active:scale-[0.99] rounded-lg transition-all shadow-sm disabled:opacity-50 cursor-pointer"
             >
               {isCloning ? (
                 <>
-                  <Loader2 size={13} className="animate-spin" />
-                  <span>Đang clone...</span>
+                  <Loader2 size={15} className="animate-spin" />
+                  <span>{t.cloneModal.cloning}</span>
                 </>
               ) : (
-                <span>Clone</span>
+                <span>{t.cloneModal.clone}</span>
               )}
             </button>
           </div>

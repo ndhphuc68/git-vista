@@ -32,11 +32,14 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
   // Đọc thiết lập ban đầu từ localStorage nếu có
   const savedTheme = (typeof localStorage !== "undefined" && (localStorage.getItem("theme") as Theme)) || "system";
   const savedColorblind = typeof localStorage !== "undefined" && localStorage.getItem("colorblind") === "true";
-  const savedLocale = (typeof localStorage !== "undefined" && (localStorage.getItem("locale") as Locale)) || "vi";
+  const savedLocale = (typeof localStorage !== "undefined" && (localStorage.getItem("locale") as Locale)) || "en";
   const savedMode = (typeof localStorage !== "undefined" && (localStorage.getItem("mode") as AppMode)) || "simple";
 
   const resolved = savedTheme === "system" ? getSystemTheme() : savedTheme;
   applyThemeAttributes(resolved, savedColorblind);
+  if (typeof document !== "undefined") {
+    document.documentElement.setAttribute("lang", savedLocale);
+  }
 
   // Lắng nghe sự thay đổi của OS theme nếu đang ở chế độ system
   if (typeof window !== "undefined") {
@@ -73,6 +76,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
 
     setLocale: (locale: Locale) => {
       if (typeof localStorage !== "undefined") localStorage.setItem("locale", locale);
+      if (typeof document !== "undefined") document.documentElement.setAttribute("lang", locale);
       set({ locale });
     },
 

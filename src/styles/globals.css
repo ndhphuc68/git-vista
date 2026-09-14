@@ -89,10 +89,13 @@
   pre,
   input,
   textarea,
-  [data-selectable="true"] {
+  [data-selectable="true"],
+  .font-mono {
     user-select: text;
     -webkit-user-select: text;
     font-family: var(--font-mono);
+    font-feature-settings: "calt" 1, "liga" 1;
+    font-variant-ligatures: contextual;
   }
 
   button {

@@ -15,7 +15,7 @@ describe("WelcomeScreen", () => {
     );
 
     expect(screen.getByText("GitVista")).toBeInTheDocument();
-    expect(screen.getByText("Mở thư mục...")).toBeInTheDocument();
+    expect(screen.getByText(/Open Folder\.\.\.|Mở thư mục\.\.\./i)).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByText("project-v3")).toBeInTheDocument();
@@ -63,7 +63,7 @@ describe("WelcomeScreen", () => {
     expect(removeSpy).toHaveBeenCalledWith("d:/project-v3");
   });
 
-  it("opens CloneModal when clicking Clone kho chứa... button", async () => {
+  it("opens CloneModal when clicking Clone button", async () => {
     render(
       <QueryClientProvider client={queryClient}>
         <WelcomeScreen onSelectRepo={vi.fn()} />
@@ -78,5 +78,85 @@ describe("WelcomeScreen", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText("Clone Repository")).toBeInTheDocument();
   });
+
+  it("filters recent repos list when typing in search input", async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <WelcomeScreen onSelectRepo={vi.fn()} />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("project-v3")).toBeInTheDocument();
+    });
+
+    const searchInput = screen.getByPlaceholderText(/Filter repositories|Lọc dự án/i);
+    expect(searchInput).toBeInTheDocument();
+
+    // Type non-matching search term
+    fireEvent.change(searchInput, { target: { value: "non-existent-repo" } });
+    expect(screen.queryByText("project-v3")).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/No repositories found matching|Không tìm thấy dự án nào/i)
+    ).toBeInTheDocument();
+
+    // Type matching search term
+    fireEvent.change(searchInput, { target: { value: "project" } });
+    expect(screen.getByText("project-v3")).toBeInTheDocument();
+  });
+
+  it("handles Ctrl+O and Ctrl+N shortcuts on WelcomeScreen", async () => {
+    const { invokeCommand } = await import("../ipc/client");
+    const selectFolderSpy = vi
+      .spyOn(invokeCommand, "selectRepoFolder")
+      .mockResolvedValue(null);
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <WelcomeScreen onSelectRepo={vi.fn()} />
+      </QueryClientProvider>
+    );
+
+    // Press Ctrl+O
+    fireEvent.keyDown(window, { key: "o", ctrlKey: true });
+    expect(selectFolderSpy).toHaveBeenCalled();
+
+    // Press Ctrl+N -> opens Clone Modal
+    fireEvent.keyDown(window, { key: "n", ctrlKey: true });
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("supports switching languages dynamically between EN and VI", async () => {
+    const { useSettingsStore } = await import("../store/useSettingsStore");
+    const { rerender } = render(
+      <QueryClientProvider client={queryClient}>
+        <WelcomeScreen onSelectRepo={vi.fn()} />
+      </QueryClientProvider>
+    );
+
+    // Default English
+    useSettingsStore.getState().setLocale("en");
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <WelcomeScreen onSelectRepo={vi.fn()} />
+      </QueryClientProvider>
+    );
+    expect(screen.getByText("Open Folder...")).toBeInTheDocument();
+    expect(screen.getByText("Recent Repositories")).toBeInTheDocument();
+
+    // Switch to Vietnamese
+    useSettingsStore.getState().setLocale("vi");
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <WelcomeScreen onSelectRepo={vi.fn()} />
+      </QueryClientProvider>
+    );
+    expect(screen.getByText("Mở thư mục...")).toBeInTheDocument();
+    expect(screen.getByText("Dự án gần đây")).toBeInTheDocument();
+
+    // Reset back to English
+    useSettingsStore.getState().setLocale("en");
+  });
 });
+
 

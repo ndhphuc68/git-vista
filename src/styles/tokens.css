@@ -7,14 +7,14 @@
 :root {
   /* Typography */
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", Inter, sans-serif;
-  --font-mono: "SF Mono", "Cascadia Code", "JetBrains Mono", monospace;
+  --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code", monospace;
 
-  --font-size-xs: 11px;
-  --font-size-sm: 12px;
-  --font-size-base: 13px; /* Cỡ nền desktop chuẩn */
-  --font-size-md: 15px;
-  --font-size-lg: 17px;
-  --font-size-xl: 22px;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px; /* Cỡ nền desktop chuẩn rõ nét */
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 24px;
 
   --line-height-tight: 1.25;
   --line-height-normal: 1.45;

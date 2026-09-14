@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Titlebar } from "./components/Titlebar";
 import { ControlsBar } from "./components/ControlsBar";
 import { Shell } from "./components/Shell";
 import { WelcomeScreen } from "./components/welcome/WelcomeScreen";
@@ -184,7 +183,6 @@ export const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="flex flex-col h-screen w-screen overflow-hidden">
-        <Titlebar />
         {currentRepo ? (
           <RepoContent
             currentRepo={currentRepo}
