@@ -30,7 +30,7 @@ pub fn list_repo_branches<P: AsRef<Path>>(repo_path: P) -> Result<BranchListResu
     let current_branch = if is_detached {
         None
     } else {
-        repo.head().ok().and_then(|h| h.shorthand().map(|s| s.to_string()))
+        repo.head().ok().and_then(|h| h.shorthand().ok().map(|s| s.to_string()))
     };
 
     let mut local = Vec::new();
@@ -88,7 +88,7 @@ pub fn list_repo_branches<P: AsRef<Path>>(repo_path: P) -> Result<BranchListResu
 
     let mut tags = Vec::new();
     if let Ok(tag_names) = repo.tag_names(None) {
-        for t in tag_names.iter().flatten() {
+        for t in tag_names.iter().flatten().flatten() {
             tags.push(t.to_string());
         }
     }

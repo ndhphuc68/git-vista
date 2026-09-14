@@ -59,7 +59,7 @@ fn test_get_commit_graph_merge_topology() {
     idx.write().unwrap();
     let c3_oid = idx.write_tree().unwrap();
     let tree3 = repo.find_tree(c3_oid).unwrap();
-    let c3 = repo.commit(feature_branch.get_mut().name(), &sig, &sig, "commit 3 on feature", &tree3, &[&c2_commit]).unwrap();
+    let c3 = repo.commit(feature_branch.get_mut().name().ok(), &sig, &sig, "commit 3 on feature", &tree3, &[&c2_commit]).unwrap();
     let c3_commit = repo.find_commit(c3).unwrap();
 
     // Commit 4 on master

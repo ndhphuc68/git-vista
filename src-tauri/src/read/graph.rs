@@ -197,7 +197,12 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
 
         // Only instantiate full commit metadata for requested slice
         if idx >= offset {
-            let summary = commit.summary().unwrap_or("No message").to_string();
+            let summary = commit
+                .summary()
+                .ok()
+                .flatten()
+                .unwrap_or("No message")
+                .to_string();
             let author = commit.author();
             let author_name = author.name().unwrap_or("Unknown").to_string();
             let author_email = author.email().unwrap_or("").to_string();

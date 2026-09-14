@@ -50,7 +50,7 @@ impl RepoManager {
 
         if let Ok(head) = repo.head() {
             if head.is_branch() {
-                head_branch = head.shorthand().map(|s| s.to_string());
+                head_branch = head.shorthand().ok().map(|s| s.to_string());
             }
             head_commit_id = head.target().map(|oid| oid.to_string());
         }

@@ -51,8 +51,8 @@ pub fn get_repo_status<P: AsRef<Path>>(repo_path: P) -> Result<RepoStatusResult,
     for entry in statuses.iter() {
         let s = entry.status();
         let path = match entry.path() {
-            Some(p) => p.to_string(),
-            None => continue,
+            Ok(p) => p.to_string(),
+            Err(_) => continue,
         };
 
         if s.contains(git2::Status::CONFLICTED) {

@@ -103,7 +103,7 @@ pub fn delete_branch<P: AsRef<Path>>(
 
     // 1. Kiểm tra HEAD
     if let Ok(head) = repo.head() {
-        if head.shorthand() == Some(trimmed) {
+        if head.shorthand().ok() == Some(trimmed) {
             return Err(AppError::InvalidOperation(
                 "Không thể xoá nhánh đang được chọn (HEAD)".into(),
             ));

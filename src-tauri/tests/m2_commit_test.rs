@@ -162,7 +162,7 @@ fn test_amend_commit_with_backup_ref() {
     let mut backup_refs = Vec::new();
     for r in repo.references().unwrap() {
         let reference = r.unwrap();
-        if let Some(name) = reference.name() {
+        if let Ok(name) = reference.name() {
             if name.starts_with("refs/gitui-backup/amend-") {
                 backup_refs.push((name.to_string(), reference.target().unwrap()));
             }

@@ -26,7 +26,7 @@ pub fn prune_expired_backups(repo: &Repository, max_age_days: u64) -> Result<usi
 
     let refs = repo.references_glob("refs/gitui-backup/*")?;
     for mut r in refs.flatten() {
-        if let Some(name) = r.name() {
+        if let Ok(name) = r.name() {
             if let Some(timestamp_str) = name.rsplit('-').next() {
                 if let Ok(ts) = timestamp_str.parse::<u64>() {
                     if now.saturating_sub(ts) >= max_age_secs {

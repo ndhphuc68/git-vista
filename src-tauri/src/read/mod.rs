@@ -54,7 +54,7 @@ pub fn get_head_info<P: AsRef<Path>>(repo_path: P) -> Result<RepoHeadInfo, AppEr
     let mut upstream = None;
 
     if !is_detached {
-        if let Some(shorthand) = head.shorthand() {
+        if let Ok(shorthand) = head.shorthand() {
             branch_name = Some(shorthand.to_string());
             if let Ok(local_branch) = repo.find_branch(shorthand, git2::BranchType::Local) {
                 if let Ok(upstream_branch) = local_branch.upstream() {
