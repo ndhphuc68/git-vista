@@ -74,11 +74,9 @@ fn set_cached_diff(key: (PathBuf, String, String), result: FileDiffResult) {
         order: Vec::new(),
     });
 
-    if cache.map.len() >= MAX_CACHE_ENTRIES && !cache.map.contains_key(&key) {
-        if !cache.order.is_empty() {
-            let oldest = cache.order.remove(0);
-            cache.map.remove(&oldest);
-        }
+    if cache.map.len() >= MAX_CACHE_ENTRIES && !cache.map.contains_key(&key) && !cache.order.is_empty() {
+        let oldest = cache.order.remove(0);
+        cache.map.remove(&oldest);
     }
 
     if !cache.map.contains_key(&key) {

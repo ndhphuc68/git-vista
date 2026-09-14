@@ -1,4 +1,4 @@
-﻿use crate::error::AppError;
+use crate::error::AppError;
 use git2::{Oid, Repository};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -25,15 +25,13 @@ pub fn prune_expired_backups(repo: &Repository, max_age_days: u64) -> Result<usi
     let mut pruned = 0;
 
     let refs = repo.references_glob("refs/gitui-backup/*")?;
-    for reference in refs {
-        if let Ok(mut r) = reference {
-            if let Some(name) = r.name() {
-                if let Some(timestamp_str) = name.rsplit('-').next() {
-                    if let Ok(ts) = timestamp_str.parse::<u64>() {
-                        if now.saturating_sub(ts) >= max_age_secs {
-                            let _ = r.delete();
-                            pruned += 1;
-                        }
+    for mut r in refs.flatten() {
+        if let Some(name) = r.name() {
+            if let Some(timestamp_str) = name.rsplit('-').next() {
+                if let Ok(ts) = timestamp_str.parse::<u64>() {
+                    if now.saturating_sub(ts) >= max_age_secs {
+                        let _ = r.delete();
+                        pruned += 1;
                     }
                 }
             }

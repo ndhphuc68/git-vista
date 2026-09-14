@@ -16,6 +16,12 @@ pub struct RecentRepoStore {
     storage_file: PathBuf,
 }
 
+impl Default for RecentRepoStore {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl RecentRepoStore {
     pub fn new() -> Self {
         let dir = app_data_dir();

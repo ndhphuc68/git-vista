@@ -175,11 +175,11 @@ fn test_remote_operations_lifecycle() {
     // 7. Test set_repo_pull_rebase
     set_repo_pull_rebase(&repo_b_path, true).expect("set pull.rebase true");
     let config = git2::Repository::open(&repo_b_path).unwrap().config().unwrap();
-    assert_eq!(config.get_bool("pull.rebase").unwrap(), true);
+    assert!(config.get_bool("pull.rebase").unwrap());
 
     set_repo_pull_rebase(&repo_b_path, false).expect("set pull.rebase false");
     let config2 = git2::Repository::open(&repo_b_path).unwrap().config().unwrap();
-    assert_eq!(config2.get_bool("pull.rebase").unwrap(), false);
+    assert!(!config2.get_bool("pull.rebase").unwrap());
 }
 
 #[test]

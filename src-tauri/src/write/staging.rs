@@ -35,7 +35,7 @@ pub fn unstage_file<P: AsRef<Path>>(repo_path: P, file_path: &str) -> Result<(),
     let head_commit = repo.head().ok().and_then(|h| h.peel_to_commit().ok());
 
     if let Some(commit) = head_commit {
-        repo.reset_default(Some(commit.as_object()), &[&normalized_path])?;
+        repo.reset_default(Some(commit.as_object()), [&normalized_path])?;
     } else {
         let mut index = repo.index()?;
         index.remove_path(Path::new(&normalized_path))?;
@@ -149,12 +149,10 @@ fn apply_selected_lines<P: AsRef<Path>>(
                     patch_old_lines += 1;
                     patch_new_lines += 1;
                 }
-                "add" => {
-                    if is_selected {
-                        append_patch_line(&mut patch_lines, '+', &line.content);
-                        patch_new_lines += 1;
-                        has_changes = true;
-                    }
+                "add" if is_selected => {
+                    append_patch_line(&mut patch_lines, '+', &line.content);
+                    patch_new_lines += 1;
+                    has_changes = true;
                 }
                 "delete" => {
                     if is_selected {
@@ -194,13 +192,11 @@ fn apply_selected_lines<P: AsRef<Path>>(
                         patch_new_lines += 1;
                     }
                 }
-                "delete" => {
-                    if is_selected {
-                        // Selected delete will be reverted (restored to index)
-                        append_patch_line(&mut patch_lines, '+', &line.content);
-                        patch_new_lines += 1;
-                        has_changes = true;
-                    }
+                "delete" if is_selected => {
+                    // Selected delete will be reverted (restored to index)
+                    append_patch_line(&mut patch_lines, '+', &line.content);
+                    patch_new_lines += 1;
+                    has_changes = true;
                 }
                 _ => {}
             }

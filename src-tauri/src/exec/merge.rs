@@ -69,7 +69,7 @@ pub fn git_rebase<P: AsRef<Path>>(
 ) -> Result<RebaseResult, AppError> {
     let mut cmd = Command::new("git");
     cmd.current_dir(repo_path.as_ref())
-        .args(&["rebase", upstream_branch]);
+        .args(["rebase", upstream_branch]);
 
     let output = cmd.output().map_err(|e| AppError::Io(e.to_string()))?;
     let stdout = String::from_utf8_lossy(&output.stdout).to_string();
@@ -110,7 +110,7 @@ pub fn git_abort_operation<P: AsRef<Path>>(repo_path: P, operation: &str) -> Res
 
     let output = Command::new("git")
         .current_dir(repo_path.as_ref())
-        .args(&[op, "--abort"])
+        .args([op, "--abort"])
         .output()
         .map_err(|e| AppError::Io(e.to_string()))?;
 
@@ -130,7 +130,7 @@ pub fn git_continue_operation<P: AsRef<Path>>(repo_path: P, operation: &str) -> 
 
     let output = Command::new("git")
         .current_dir(repo_path.as_ref())
-        .args(&[op, "--continue"])
+        .args([op, "--continue"])
         .output()
         .map_err(|e| AppError::Io(e.to_string()))?;
 

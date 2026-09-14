@@ -1,4 +1,4 @@
-﻿use std::fs;
+use std::fs;
 use std::process::Command;
 use visual_git_lib::read::conflict::get_conflict_file_data;
 use visual_git_lib::read::status::get_repo_status;
@@ -29,7 +29,7 @@ fn create_conflict_repo() -> (tempfile::TempDir, String) {
     fs::write(p.join("app.txt"), "common header\nmain line\ncommon footer\n").unwrap();
     run(&["commit", "-am", "main change"]);
 
-    let _ = Command::new("git").current_dir(p).args(&["merge", "feature"]).output().unwrap();
+    let _ = Command::new("git").current_dir(p).args(["merge", "feature"]).output().unwrap();
 
     let path_str = dir.path().to_str().unwrap().to_string();
     (dir, path_str)

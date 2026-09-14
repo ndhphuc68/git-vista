@@ -121,8 +121,8 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
         let mut edges = Vec::new();
 
         // 2. Converge other lanes that track this commit (merges / branch convergence)
-        for j in 0..active_lanes.len() {
-            if j != col && active_lanes[j].as_ref() == Some(oid) {
+        for (j, slot) in active_lanes.iter_mut().enumerate() {
+            if j != col && slot.as_ref() == Some(oid) {
                 if idx >= offset {
                     edges.push(GraphEdge {
                         from_col: j as u32,
@@ -131,7 +131,7 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
                         color_index: (j % NUM_COLORS) as u32,
                     });
                 }
-                active_lanes[j] = None;
+                *slot = None;
             }
         }
 

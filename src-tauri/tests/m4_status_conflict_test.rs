@@ -1,4 +1,4 @@
-﻿use std::fs;
+use std::fs;
 use std::process::Command;
 use visual_git_lib::read::status::{get_repo_status, FileStatus};
 
@@ -28,7 +28,7 @@ fn create_conflict_repo() -> (tempfile::TempDir, String) {
     run(&["commit", "-am", "main commit"]);
 
     // Merge gây conflict (không assert success)
-    let _ = Command::new("git").current_dir(p).args(&["merge", "feature"]).output().unwrap();
+    let _ = Command::new("git").current_dir(p).args(["merge", "feature"]).output().unwrap();
 
     let path_str = dir.path().to_str().unwrap().to_string();
     (dir, path_str)

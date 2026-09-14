@@ -18,12 +18,12 @@ fn test_get_repo_status_classifies_files() {
     assert_eq!(status.unstaged.len(), 1);
     assert_eq!(status.unstaged[0].path, "file1.txt");
     assert_eq!(status.unstaged[0].status, FileStatus::Modified);
-    assert_eq!(status.unstaged[0].is_staged, false);
+    assert!(!status.unstaged[0].is_staged);
 
     assert_eq!(status.untracked.len(), 1);
     assert_eq!(status.untracked[0].path, "untracked.txt");
     assert_eq!(status.untracked[0].status, FileStatus::New);
-    assert_eq!(status.untracked[0].is_staged, false);
+    assert!(!status.untracked[0].is_staged);
 
     assert_eq!(status.staged.len(), 0);
 }
@@ -51,11 +51,11 @@ fn test_get_repo_status_staged_changes() {
     
     let file1_staged = status.staged.iter().find(|item| item.path == "file1.txt").unwrap();
     assert_eq!(file1_staged.status, FileStatus::Modified);
-    assert_eq!(file1_staged.is_staged, true);
+    assert!(file1_staged.is_staged);
 
     let new_staged = status.staged.iter().find(|item| item.path == "staged_new.txt").unwrap();
     assert_eq!(new_staged.status, FileStatus::New);
-    assert_eq!(new_staged.is_staged, true);
+    assert!(new_staged.is_staged);
 
     assert_eq!(status.unstaged.len(), 0);
     assert_eq!(status.untracked.len(), 0);
@@ -80,12 +80,12 @@ fn test_get_repo_status_staged_and_unstaged_simultaneous() {
     assert_eq!(status.staged.len(), 1);
     assert_eq!(status.staged[0].path, "file1.txt");
     assert_eq!(status.staged[0].status, FileStatus::Modified);
-    assert_eq!(status.staged[0].is_staged, true);
+    assert!(status.staged[0].is_staged);
 
     assert_eq!(status.unstaged.len(), 1);
     assert_eq!(status.unstaged[0].path, "file1.txt");
     assert_eq!(status.unstaged[0].status, FileStatus::Modified);
-    assert_eq!(status.unstaged[0].is_staged, false);
+    assert!(!status.unstaged[0].is_staged);
 }
 
 #[test]
@@ -203,7 +203,7 @@ fn test_get_repo_status_deleted_and_renamed() {
     assert_eq!(status.unstaged.len(), 1);
     assert_eq!(status.unstaged[0].path, "file1.txt");
     assert_eq!(status.unstaged[0].status, FileStatus::Deleted);
-    assert_eq!(status.unstaged[0].is_staged, false);
+    assert!(!status.unstaged[0].is_staged);
 
     // 2. Stage deletion
     let mut index = repo.index().unwrap();
@@ -214,7 +214,7 @@ fn test_get_repo_status_deleted_and_renamed() {
     assert_eq!(status.staged.len(), 1);
     assert_eq!(status.staged[0].path, "file1.txt");
     assert_eq!(status.staged[0].status, FileStatus::Deleted);
-    assert_eq!(status.staged[0].is_staged, true);
+    assert!(status.staged[0].is_staged);
 
     // 3. Stage rename: write to file2.txt and remove file1.txt from index with same content
     // Reset back to clean first by checking out
@@ -234,5 +234,5 @@ fn test_get_repo_status_deleted_and_renamed() {
     assert_eq!(staged_item.path, "file2.txt");
     assert_eq!(staged_item.status, FileStatus::Renamed);
     assert_eq!(staged_item.old_path.as_deref(), Some("file1.txt"));
-    assert_eq!(staged_item.is_staged, true);
+    assert!(staged_item.is_staged);
 }
