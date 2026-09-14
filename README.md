@@ -1,17 +1,17 @@
-# Visual Git Client
+# GitVista
 
 A fast, keyboard-driven Git GUI built with Tauri v2, Rust, and React.
 
 ## Features
 
-- ?? **Commit Graph** — Visual branch/merge history with fast libgit2 rendering
-- ? **Staging & Commits** — Stage files, write commits, view diffs
-- ?? **Undo System** — Undo recent commits, branch deletes, file discards, and stash drops with backup refs
-- ?? **Toast Notifications** — Friendly Vietnamese error messages with 10-second undo window
-- ?? **Simple & Advanced Mode** — Toggle between beginner-friendly (Vietnamese labels) and full Git terminology
-- ?? **Keyboard Shortcuts** — Full keyboard-driven workflow with command palette
-- ?? **Branch Management** — Create, switch, delete branches with stash support
-- ?? **Production Bundles** — Native installers for Windows (NSIS), macOS (DMG), and Linux (deb/AppImage)
+- ?? **Commit Graph** ï¿½ Visual branch/merge history with fast libgit2 rendering
+- ? **Staging & Commits** ï¿½ Stage files, write commits, view diffs
+- ?? **Undo System** ï¿½ Undo recent commits, branch deletes, file discards, and stash drops with backup refs
+- ?? **Toast Notifications** ï¿½ Friendly Vietnamese error messages with 10-second undo window
+- ?? **Simple & Advanced Mode** ï¿½ Toggle between beginner-friendly (Vietnamese labels) and full Git terminology
+- ?? **Keyboard Shortcuts** ï¿½ Full keyboard-driven workflow with command palette
+- ?? **Branch Management** ï¿½ Create, switch, delete branches with stash support
+- ?? **Production Bundles** ï¿½ Native installers for Windows (NSIS), macOS (DMG), and Linux (deb/AppImage)
 
 ## Quick Start
 

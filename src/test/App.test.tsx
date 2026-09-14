@@ -21,7 +21,7 @@ describe("Visual Git Client - M1 App Shell", () => {
   it("hiển thị WelcomeScreen khi chưa có repo nào được chọn", () => {
     render(<App />);
 
-    expect(screen.getByText("Visual Git Client")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "GitVista" })).toBeInTheDocument();
     expect(screen.getByText("Mở thư mục...")).toBeInTheDocument();
   });
 

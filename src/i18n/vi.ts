@@ -1,5 +1,5 @@
 export const vi = {
-  appTitle: "Visual Git",
+  appTitle: "GitVista",
   m0Badge: "Mốc M0: Khung nền tảng",
   m1Badge: "Mốc M1.1: Trực quan hoá Git",
   screens: {

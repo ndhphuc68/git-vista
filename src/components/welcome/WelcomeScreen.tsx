@@ -87,7 +87,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             className="text-accent mb-3 mx-auto"
           />
           <h1 className="text-xl font-bold">
-            Visual Git Client
+            GitVista
           </h1>
           <p className="text-secondary text-xs mt-1">
             Trực quan hoá lịch sử Git nhanh và mượt mà

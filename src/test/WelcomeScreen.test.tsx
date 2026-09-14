@@ -14,7 +14,7 @@ describe("WelcomeScreen", () => {
       </QueryClientProvider>
     );
 
-    expect(screen.getByText("Visual Git Client")).toBeInTheDocument();
+    expect(screen.getByText("GitVista")).toBeInTheDocument();
     expect(screen.getByText("Mở thư mục...")).toBeInTheDocument();
 
     await waitFor(() => {
