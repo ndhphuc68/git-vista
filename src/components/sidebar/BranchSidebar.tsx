@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ChevronRight,
   Search,
+  X,
   Plus,
   MoreVertical,
   Check,
@@ -587,17 +588,41 @@ export const BranchSidebar: React.FC = () => {
   return (
     <>
       <aside className="bg-surface border-r border-border-subtle w-full shrink-0 h-full flex flex-col overflow-y-auto">
-        <div className="px-3 py-2 border-b border-border-subtle">
-          <div className="flex items-center gap-1.5 bg-window rounded-sm px-2 py-1 border border-border-subtle">
-            <Search size={12} className="text-tertiary shrink-0" />
+        <div className="px-3 py-2 border-b border-border-subtle bg-surface">
+          <div className="group relative flex items-center gap-2 bg-window/80 hover:bg-window focus-within:bg-surface focus-within:ring-2 focus-within:ring-accent/20 border border-border-subtle focus-within:border-accent rounded-md px-2.5 py-1.5 transition-all duration-150 shadow-2xs">
+            <Search
+              size={13}
+              className="text-tertiary group-focus-within:text-accent shrink-0 transition-colors"
+            />
             <input
               type="text"
               placeholder="Tìm nhánh..."
               aria-label="Tìm nhánh"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-transparent border-0 outline-none text-xs text-primary w-full"
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setSearch("");
+                  e.currentTarget.blur();
+                }
+              }}
+              className="bg-transparent border-0 outline-none focus:outline-none focus:ring-0 focus-visible:outline-none text-xs text-primary placeholder:text-tertiary w-full leading-normal selection:bg-accent/20"
             />
+            {search ? (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                aria-label="Xoá tìm kiếm"
+                title="Xoá tìm kiếm (Esc)"
+                className="p-0.5 -mr-1 text-tertiary hover:text-primary hover:bg-surface-hover rounded-full cursor-pointer transition-colors flex items-center justify-center border-0 bg-transparent"
+              >
+                <X size={12} />
+              </button>
+            ) : (
+              <kbd className="hidden group-hover:inline-block group-focus-within:hidden text-[10px] font-mono text-tertiary/70 bg-surface border border-border-subtle/80 rounded px-1.5 py-0.2 select-none pointer-events-none transition-opacity">
+                /
+              </kbd>
+            )}
           </div>
         </div>
 
