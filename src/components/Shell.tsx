@@ -4,11 +4,18 @@ import { BranchSidebar } from "./sidebar/BranchSidebar";
 import { CommitGraph } from "./graph/CommitGraph";
 import { CommitDetailPanel } from "./diff/CommitDetailPanel";
 import { useLayoutStore } from "../store/useLayoutStore";
+import { useRepoStore } from "../store/useRepoStore";
 import { useWindowDimensions } from "../hooks/useWindowDimensions";
 
 export const Shell: React.FC = () => {
-  const { sidebarOpen, detailPanelOpen, toggleSidebar } = useLayoutStore();
+  const { sidebarOpen, detailPanelOpen, toggleSidebar, setDetailPanelOpen } = useLayoutStore();
+  const { setSelectedCommit } = useRepoStore();
   const { isMobile } = useWindowDimensions();
+
+  const handleCloseDetail = () => {
+    setDetailPanelOpen(false);
+    setSelectedCommit(null);
+  };
 
   return (
     <main
@@ -45,19 +52,24 @@ export const Shell: React.FC = () => {
         <CommitGraph />
       </div>
 
-      {/* Right: Commit Detail Panel */}
+      {/* Right: Commit Detail 3/4 Slide-in Drawer with Backdrop */}
       {detailPanelOpen && (
-        <div
-          data-testid="shell-detail-container"
-          className={clsx(
-            isMobile
-              ? "w-full min-w-full max-w-full border-l-0"
-              : "w-95 min-w-70 max-w-105 border-l border-border-subtle",
-            "h-full shrink-0 overflow-hidden flex flex-col bg-surface"
-          )}
-        >
-          <CommitDetailPanel />
-        </div>
+        <>
+          <div
+            data-testid="detail-backdrop"
+            onClick={handleCloseDetail}
+            className="absolute inset-0 bg-black/30 backdrop-blur-[2px] z-30 transition-opacity duration-300"
+          />
+          <div
+            data-testid="shell-detail-container"
+            className={clsx(
+              "absolute top-0 right-0 bottom-0 z-40 bg-surface border-l border-border-subtle shadow-2xl transition-transform duration-300 ease-out flex flex-col overflow-hidden",
+              isMobile ? "w-full max-w-full" : "w-3/4 max-w-[85vw]"
+            )}
+          >
+            <CommitDetailPanel onClose={handleCloseDetail} />
+          </div>
+        </>
       )}
     </main>
   );

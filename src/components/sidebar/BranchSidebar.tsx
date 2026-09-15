@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import clsx from "clsx";
 import {
   GitBranch,
@@ -17,12 +17,13 @@ import {
   PlayCircle,
   GitMerge,
   GitCommit,
+  Folder,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { invokeCommand } from "../../ipc/client";
-import { StashItem } from "../../ipc/bindings";
+import { StashItem, BranchItem } from "../../ipc/bindings";
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
 import { CreateBranchModal } from "./CreateBranchModal";
@@ -32,6 +33,72 @@ import { CheckoutConflictModal } from "./CheckoutConflictModal";
 import { StashDiffView } from "../stash/StashDiffView";
 import { MergeBranchModal } from "../merge/MergeBranchModal";
 import { RebaseBranchModal } from "../merge/RebaseBranchModal";
+
+export interface BranchTreeNode {
+  isFolder: boolean;
+  name: string;
+  fullPath: string;
+  branch?: BranchItem;
+  children: BranchTreeNode[];
+}
+
+export function buildBranchTree(branches: BranchItem[]): BranchTreeNode[] {
+  const root: BranchTreeNode[] = [];
+
+  for (const b of branches) {
+    const parts = b.name.split("/");
+    if (parts.length === 1) {
+      root.push({
+        isFolder: false,
+        name: b.name,
+        fullPath: b.name,
+        branch: b,
+        children: [],
+      });
+      continue;
+    }
+
+    let currentLevel = root;
+    let currentPath = "";
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (!part) continue;
+      currentPath = currentPath ? `${currentPath}/${part}` : part;
+      const isLast = i === parts.length - 1;
+
+      if (isLast) {
+        currentLevel.push({
+          isFolder: false,
+          name: part,
+          fullPath: b.name,
+          branch: b,
+          children: [],
+        });
+      } else {
+        let folderNode: BranchTreeNode | undefined = currentLevel.find((n) => n.isFolder && n.name === part);
+        if (!folderNode) {
+          const newFolder: BranchTreeNode = {
+            isFolder: true,
+            name: part,
+            fullPath: currentPath,
+            children: [],
+          };
+          currentLevel.push(newFolder);
+          folderNode = newFolder;
+        }
+        currentLevel = folderNode.children;
+      }
+    }
+  }
+
+  return root;
+}
+
+export function countBranchesInNode(node: BranchTreeNode): number {
+  if (!node.isFolder) return 1;
+  return node.children.reduce((acc, child) => acc + countBranchesInNode(child), 0);
+}
 
 export const BranchSidebar: React.FC = () => {
   const { currentRepo, selectedBranch, setSelectedBranch } = useRepoStore();
@@ -194,6 +261,196 @@ export const BranchSidebar: React.FC = () => {
     t.toLowerCase().includes(search.toLowerCase())
   );
 
+  const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
+
+  const toggleFolder = (folderPath: string) => {
+    setExpandedFolders((prev) => ({
+      ...prev,
+      [folderPath]: prev[folderPath] === false ? true : false,
+    }));
+  };
+
+  const branchTree = useMemo(() => buildBranchTree(localBranches), [localBranches]);
+
+  const renderTreeNode = (node: BranchTreeNode) => {
+    if (node.isFolder) {
+      const isExpanded = search.trim() !== "" || expandedFolders[node.fullPath] !== false;
+      const count = countBranchesInNode(node);
+
+      return (
+        <div key={node.fullPath} className="flex flex-col mt-0.5">
+          <button
+            type="button"
+            onClick={() => toggleFolder(node.fullPath)}
+            className="flex items-center justify-between px-2 py-1 rounded-sm hover:bg-surface-hover text-primary font-semibold text-xs cursor-pointer border-0 bg-transparent text-left group transition-colors"
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <span className="text-secondary group-hover:text-primary">
+                {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+              </span>
+              <Folder size={13} className="text-amber-500 shrink-0 fill-amber-500/20" />
+              <span className="truncate">{node.name}</span>
+            </div>
+            <span className="text-[10px] font-mono text-tertiary px-1.5 bg-surface-hover rounded-full">
+              {count}
+            </span>
+          </button>
+
+          {isExpanded && (
+            <div className="tree-guide border-l border-border-subtle ml-3 pl-2 flex flex-col gap-0.5 mt-0.5">
+              {node.children.map((child) => renderTreeNode(child))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const branch = node.branch!;
+    const isSelected = selectedBranch === branch.name;
+    const isMenuOpen = menuBranch === branch.name;
+
+    return (
+      <div
+        key={branch.name}
+        className="group relative flex items-center justify-between rounded-sm"
+        onContextMenu={(e) => {
+          e.preventDefault();
+          setMenuBranch(branch.name);
+        }}
+      >
+        <button
+          onClick={() => setSelectedBranch(branch.name)}
+          onDoubleClick={() => {
+            if (!branch.is_head) handleCheckout(branch.name);
+          }}
+          aria-selected={isSelected}
+          className={clsx(
+            "flex-1 flex items-center gap-1.5 px-2 py-1 rounded-sm border-0 cursor-pointer text-left min-h-[26px] text-xs transition-colors overflow-hidden",
+            isSelected
+              ? "bg-accent-subtle text-accent font-semibold"
+              : "bg-transparent text-primary hover:bg-surface-hover font-normal",
+            branch.is_head && "font-semibold"
+          )}
+          title={
+            branch.is_head
+              ? `${branch.name} (HEAD)`
+              : `Nhấn đúp để chuyển sang nhánh ${branch.name}`
+          }
+        >
+          <span
+            className={clsx(
+              "w-1.5 h-1.5 rounded-full shrink-0",
+              branch.is_head
+                ? "bg-accent"
+                : "border border-tertiary bg-transparent"
+            )}
+          />
+          <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+            {node.name}
+          </span>
+          {branch.is_head && (
+            <span className="text-[10px] text-accent ml-auto shrink-0 px-1 py-0.2 bg-accent/10 rounded-xs font-semibold">
+              HEAD
+            </span>
+          )}
+        </button>
+
+        {/* Three dots menu button */}
+        <div className="relative shrink-0 flex items-center pr-1">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuBranch(isMenuOpen ? null : branch.name);
+            }}
+            aria-label={`Menu thao tác nhánh ${branch.name}`}
+            className={clsx(
+              "p-1 bg-transparent border-0 text-secondary hover:text-primary hover:bg-surface-hover rounded-sm cursor-pointer transition-opacity",
+              isMenuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus:opacity-100"
+            )}
+          >
+            <MoreVertical size={13} />
+          </button>
+
+          {/* Dropdown Action Menu */}
+          {isMenuOpen && (
+            <div
+              ref={menuRef}
+              className="absolute right-0 top-full mt-1 w-44 bg-surface border border-border-subtle rounded-md shadow-xl py-1 z-50 text-xs flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {!branch.is_head && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleCheckout(branch.name)}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                  >
+                    <Check size={13} className="text-accent" />
+                    <span>Chuyển tới nhánh này</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuBranch(null);
+                      setMergeModal({ targetBranch: branch.name });
+                    }}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                  >
+                    <GitMerge size={13} className="text-secondary" />
+                    <span>Gộp vào nhánh hiện tại...</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuBranch(null);
+                      setRebaseModal({ upstreamBranch: branch.name });
+                    }}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                  >
+                    <GitCommit size={13} className="text-secondary" />
+                    <span>Rebase nhánh hiện tại lên đây...</span>
+                  </button>
+                </>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuBranch(null);
+                  setRenameBranchName(branch.name);
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+              >
+                <Edit3 size={13} className="text-secondary" />
+                <span>Đổi tên...</span>
+              </button>
+
+              {!branch.is_head && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuBranch(null);
+                    setDeleteBranchInfo({
+                      name: branch.name,
+                      commitId: branch.target_commit_id,
+                    });
+                  }}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-diff-remove-text hover:bg-diff-remove-bg cursor-pointer text-left w-full transition-colors"
+                >
+                  <Trash2 size={13} />
+                  <span>Xoá nhánh...</span>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       <aside className="bg-surface border-r border-border-subtle w-60 shrink-0 h-full flex flex-col overflow-y-auto">
@@ -238,151 +495,7 @@ export const BranchSidebar: React.FC = () => {
 
             {localOpen && (
               <div className="flex flex-col gap-0.5 mt-1">
-                {localBranches.map((branch) => {
-                  const isSelected = selectedBranch === branch.name;
-                  const isMenuOpen = menuBranch === branch.name;
-
-                  return (
-                    <div
-                      key={branch.name}
-                      className="group relative flex items-center justify-between rounded-sm"
-                      onContextMenu={(e) => {
-                        e.preventDefault();
-                        setMenuBranch(branch.name);
-                      }}
-                    >
-                      <button
-                        onClick={() => setSelectedBranch(branch.name)}
-                        onDoubleClick={() => {
-                          if (!branch.is_head) handleCheckout(branch.name);
-                        }}
-                        aria-selected={isSelected}
-                        className={clsx(
-                          "flex-1 flex items-center gap-1.5 px-2 py-1 rounded-sm border-0 cursor-pointer text-left min-h-[26px] text-xs transition-colors overflow-hidden",
-                          isSelected
-                            ? "bg-accent-subtle text-accent font-semibold"
-                            : "bg-transparent text-primary hover:bg-surface-hover font-normal",
-                          branch.is_head && "font-semibold"
-                        )}
-                        title={
-                          branch.is_head
-                            ? `${branch.name} (HEAD)`
-                            : `Nhấn đúp để chuyển sang nhánh ${branch.name}`
-                        }
-                      >
-                        <span
-                          className={clsx(
-                            "w-1.5 h-1.5 rounded-full shrink-0",
-                            branch.is_head
-                              ? "bg-accent"
-                              : "border border-tertiary bg-transparent"
-                          )}
-                        />
-                        <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-                          {branch.name}
-                        </span>
-                        {branch.is_head && (
-                          <span className="text-[10px] text-accent ml-auto shrink-0 px-1 py-0.2 bg-accent/10 rounded-xs font-semibold">
-                            HEAD
-                          </span>
-                        )}
-                      </button>
-
-                      {/* Three dots menu button */}
-                      <div className="relative shrink-0 flex items-center pr-1">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setMenuBranch(isMenuOpen ? null : branch.name);
-                          }}
-                          aria-label={`Menu thao tác nhánh ${branch.name}`}
-                          className={clsx(
-                            "p-1 bg-transparent border-0 text-secondary hover:text-primary hover:bg-surface-hover rounded-sm cursor-pointer transition-opacity",
-                            isMenuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus:opacity-100"
-                          )}
-                        >
-                          <MoreVertical size={13} />
-                        </button>
-
-                        {/* Dropdown Action Menu */}
-                        {isMenuOpen && (
-                          <div
-                            ref={menuRef}
-                            className="absolute right-0 top-full mt-1 w-44 bg-surface border border-border-subtle rounded-md shadow-xl py-1 z-50 text-xs flex flex-col"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {!branch.is_head && (
-                              <>
-                                <button
-                                  type="button"
-                                  onClick={() => handleCheckout(branch.name)}
-                                  className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
-                                >
-                                  <Check size={13} className="text-accent" />
-                                  <span>Chuyển tới nhánh này</span>
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setMenuBranch(null);
-                                    setMergeModal({ targetBranch: branch.name });
-                                  }}
-                                  className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
-                                >
-                                  <GitMerge size={13} className="text-secondary" />
-                                  <span>Gộp vào nhánh hiện tại...</span>
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setMenuBranch(null);
-                                    setRebaseModal({ upstreamBranch: branch.name });
-                                  }}
-                                  className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
-                                >
-                                  <GitCommit size={13} className="text-secondary" />
-                                  <span>Rebase nhánh hiện tại lên đây...</span>
-                                </button>
-                              </>
-                            )}
-
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setMenuBranch(null);
-                                setRenameBranchName(branch.name);
-                              }}
-                              className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
-                            >
-                              <Edit3 size={13} className="text-secondary" />
-                              <span>Đổi tên...</span>
-                            </button>
-
-                            {!branch.is_head && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setMenuBranch(null);
-                                  setDeleteBranchInfo({
-                                    name: branch.name,
-                                    commitId: branch.target_commit_id,
-                                  });
-                                }}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-diff-remove-text hover:bg-diff-remove-bg cursor-pointer text-left w-full transition-colors"
-                              >
-                                <Trash2 size={13} />
-                                <span>Xoá nhánh...</span>
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                {branchTree.map((node) => renderTreeNode(node))}
               </div>
             )}
           </div>

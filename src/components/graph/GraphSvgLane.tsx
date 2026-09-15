@@ -10,34 +10,47 @@ const LANE_COLORS = [
   "#16A085",
 ];
 
-const COL_WIDTH = 14;
-const ROW_HEIGHT = 28;
+const DEFAULT_COL_WIDTH = 16;
+const DEFAULT_ROW_HEIGHT = 32;
 
 interface GraphSvgLaneProps {
   col: number;
   colorIndex: number;
   lines: GraphEdge[];
   maxCols?: number;
+  isHead?: boolean;
+  isMerge?: boolean;
+  rowHeight?: number;
+  colWidth?: number;
 }
 
-export const GraphSvgLane: React.FC<GraphSvgLaneProps> = ({ col, colorIndex, lines, maxCols }) => {
-  const nodeX = col * COL_WIDTH + COL_WIDTH / 2;
-  const nodeY = ROW_HEIGHT / 2;
+export const GraphSvgLane: React.FC<GraphSvgLaneProps> = ({
+  col,
+  colorIndex,
+  lines,
+  maxCols,
+  isHead = false,
+  isMerge = false,
+  rowHeight = DEFAULT_ROW_HEIGHT,
+  colWidth = DEFAULT_COL_WIDTH,
+}) => {
+  const nodeX = col * colWidth + colWidth / 2;
+  const nodeY = rowHeight / 2;
   const nodeColor = LANE_COLORS[colorIndex % LANE_COLORS.length];
   const laneCols = maxCols ? Math.max(maxCols, col + 1, 3) : Math.max(col + 2, 3);
-  const width = laneCols * COL_WIDTH;
+  const width = laneCols * colWidth;
 
   return (
     <svg
       className="shrink-0 overflow-visible"
       style={{
         width: `${width}px`,
-        height: `${ROW_HEIGHT}px`,
+        height: `${rowHeight}px`,
       }}
     >
       {lines.map((edge, idx) => {
-        const x1 = edge.from_col * COL_WIDTH + COL_WIDTH / 2;
-        const x2 = edge.to_col * COL_WIDTH + COL_WIDTH / 2;
+        const x1 = edge.from_col * colWidth + colWidth / 2;
+        const x2 = edge.to_col * colWidth + colWidth / 2;
         const strokeColor = LANE_COLORS[edge.color_index % LANE_COLORS.length];
 
         if (edge.edge_type === "straight") {
@@ -47,9 +60,9 @@ export const GraphSvgLane: React.FC<GraphSvgLaneProps> = ({ col, colorIndex, lin
               x1={x1}
               y1={0}
               x2={x2}
-              y2={ROW_HEIGHT}
+              y2={rowHeight}
               stroke={strokeColor}
-              strokeWidth={2}
+              strokeWidth={2.2}
             />
           );
         }
@@ -59,10 +72,10 @@ export const GraphSvgLane: React.FC<GraphSvgLaneProps> = ({ col, colorIndex, lin
           return (
             <path
               key={idx}
-              d={`M ${x1} 0 C ${x1} ${nodeY / 2}, ${x2} ${nodeY / 2}, ${x2} ${nodeY}`}
+              d={`M ${x1} 0 C ${x1} ${nodeY * 0.75}, ${x2} ${nodeY * 0.75}, ${x2} ${nodeY}`}
               fill="none"
               stroke={strokeColor}
-              strokeWidth={2}
+              strokeWidth={2.2}
             />
           );
         }
@@ -71,16 +84,33 @@ export const GraphSvgLane: React.FC<GraphSvgLaneProps> = ({ col, colorIndex, lin
         return (
           <path
             key={idx}
-            d={`M ${x1} ${nodeY} C ${x1} ${(nodeY + ROW_HEIGHT) / 2}, ${x2} ${(nodeY + ROW_HEIGHT) / 2}, ${x2} ${ROW_HEIGHT}`}
+            d={`M ${x1} ${nodeY} C ${x1} ${(nodeY + rowHeight) / 2}, ${x2} ${(nodeY + rowHeight) / 2}, ${x2} ${rowHeight}`}
             fill="none"
             stroke={strokeColor}
-            strokeWidth={2}
+            strokeWidth={2.2}
           />
         );
       })}
 
-      <circle cx={nodeX} cy={nodeY} r={4.5} fill={nodeColor} />
-      <circle cx={nodeX} cy={nodeY} r={2} className="fill-surface" />
+      {isHead ? (
+        <g>
+          <circle cx={nodeX} cy={nodeY} r={8} fill={nodeColor} opacity={0.25} />
+          <circle cx={nodeX} cy={nodeY} r={5.5} fill={nodeColor} />
+          <circle cx={nodeX} cy={nodeY} r={2.5} className="fill-surface" />
+          <circle cx={nodeX} cy={nodeY} r={1.2} fill={nodeColor} />
+        </g>
+      ) : isMerge ? (
+        <g>
+          <circle cx={nodeX} cy={nodeY} r={6.5} fill={nodeColor} />
+          <circle cx={nodeX} cy={nodeY} r={4} className="fill-surface" />
+          <circle cx={nodeX} cy={nodeY} r={2} fill={nodeColor} />
+        </g>
+      ) : (
+        <g>
+          <circle cx={nodeX} cy={nodeY} r={4.5} fill={nodeColor} />
+          <circle cx={nodeX} cy={nodeY} r={2} className="fill-surface" />
+        </g>
+      )}
     </svg>
   );
 };
