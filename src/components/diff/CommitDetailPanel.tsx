@@ -1,6 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import clsx from "clsx";
-import { GitCommit, FileText, Check, Copy, X } from "lucide-react";
+import {
+  GitCommit,
+  Check,
+  Copy,
+  X,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Folder,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
@@ -11,14 +20,79 @@ interface CommitDetailPanelProps {
   onClose?: () => void;
 }
 
+export function splitFilePath(fullPath: string): { dir: string; fileName: string } {
+  const lastSlash = fullPath.lastIndexOf("/");
+  if (lastSlash === -1) {
+    return { dir: "", fileName: fullPath };
+  }
+  return {
+    dir: fullPath.slice(0, lastSlash + 1),
+    fileName: fullPath.slice(lastSlash + 1),
+  };
+}
+
+export function getFileStatusMeta(status: string) {
+  const s = (status || "").toUpperCase();
+  if (s.startsWith("A") || s === "ADDED") {
+    return {
+      code: "A",
+      label: "Thêm mới",
+      badgeClass:
+        "bg-diff-add-bg text-diff-add-text border-diff-add-border font-bold",
+    };
+  }
+  if (s.startsWith("D") || s === "DELETED") {
+    return {
+      code: "D",
+      label: "Đã xoá",
+      badgeClass:
+        "bg-diff-remove-bg text-diff-remove-text border-diff-remove-border font-bold",
+    };
+  }
+  if (s.startsWith("R") || s === "RENAMED") {
+    return {
+      code: "R",
+      label: "Đổi tên",
+      badgeClass:
+        "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 border-purple-300 dark:border-purple-800 font-bold",
+    };
+  }
+  return {
+    code: "M",
+    label: "Sửa đổi",
+    badgeClass:
+      "bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border-amber-300 dark:border-amber-800 font-bold",
+  };
+}
+
 export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose }) => {
-  const { currentRepo, selectedCommitId, setSelectedCommit, selectedFilePath, setSelectedFile } = useRepoStore();
+  const {
+    currentRepo,
+    selectedCommitId,
+    setSelectedCommit,
+    selectedFilePath,
+    setSelectedFile,
+  } = useRepoStore();
   const { setDetailPanelOpen } = useLayoutStore();
+
   const [copiedSha, setCopiedSha] = useState(false);
+  const [copiedFilePath, setCopiedFilePath] = useState(false);
+  const [fileFilter, setFileFilter] = useState("");
+
+  const [filesWidth, setFilesWidth] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem("git-vista:commit-detail-files-width");
+      const parsed = saved ? parseInt(saved, 10) : 340;
+      return isNaN(parsed) || parsed < 260 || parsed > 600 ? 340 : parsed;
+    } catch {
+      return 340;
+    }
+  });
 
   const { data: details, isLoading } = useQuery({
     queryKey: ["commit-details", currentRepo?.path, selectedCommitId],
-    queryFn: () => invokeCommand.getCommitDetails(currentRepo!.path, selectedCommitId!),
+    queryFn: () =>
+      invokeCommand.getCommitDetails(currentRepo!.path, selectedCommitId!),
     enabled: Boolean(currentRepo && selectedCommitId),
   });
 
@@ -54,47 +128,144 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
     setTimeout(() => setCopiedSha(false), 2000);
   };
 
+  const handleCopyFilePath = (path: string) => {
+    navigator.clipboard.writeText(path);
+    setCopiedFilePath(true);
+    setTimeout(() => setCopiedFilePath(false), 2000);
+  };
+
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = filesWidth;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const delta = moveEvent.clientX - startX;
+      const newWidth = Math.min(Math.max(startWidth + delta, 260), 600);
+      setFilesWidth(newWidth);
+      try {
+        localStorage.setItem(
+          "git-vista:commit-detail-files-width",
+          String(newWidth)
+        );
+      } catch {
+        // ignore
+      }
+    };
+
+    const handleMouseUp = () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+  };
+
+  // Commit message subject and body
+  const { subject, body } = useMemo(() => {
+    if (!details?.full_message) return { subject: "", body: "" };
+    const lines = details.full_message.split("\n");
+    const subject = lines[0] || "";
+    const body = lines.slice(1).join("\n").trim();
+    return { subject, body };
+  }, [details?.full_message]);
+
+  // Filtered files list
+  const filteredFiles = useMemo(() => {
+    if (!details?.files) return [];
+    if (!fileFilter.trim()) return details.files;
+    const query = fileFilter.toLowerCase();
+    return details.files.filter((f) => f.path.toLowerCase().includes(query));
+  }, [details?.files, fileFilter]);
+
+  // Navigation between files
+  const currentFileIndex = useMemo(() => {
+    if (!details?.files || !selectedFilePath) return -1;
+    return details.files.findIndex((f) => f.path === selectedFilePath);
+  }, [details?.files, selectedFilePath]);
+
+  const selectedFile = useMemo(() => {
+    if (!details?.files || !selectedFilePath) return null;
+    return details.files.find((f) => f.path === selectedFilePath) || null;
+  }, [details?.files, selectedFilePath]);
+
+  const hasPrev = currentFileIndex > 0;
+  const hasNext =
+    currentFileIndex >= 0 && currentFileIndex < (details?.files.length ?? 0) - 1;
+
+  const handlePrevFile = () => {
+    const prevFile = details?.files[currentFileIndex - 1];
+    if (hasPrev && prevFile) {
+      setSelectedFile(prevFile.path);
+    }
+  };
+
+  const handleNextFile = () => {
+    const nextFile = details?.files[currentFileIndex + 1];
+    if (hasNext && nextFile) {
+      setSelectedFile(nextFile.path);
+    }
+  };
+
   if (!selectedCommitId) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-tertiary text-xs gap-2 p-6">
-        <GitCommit size={24} className="opacity-40" />
-        <span>Chọn một commit để xem chi tiết và diff</span>
+        <GitCommit size={28} className="opacity-40" />
+        <span className="font-medium">Chọn một commit để xem chi tiết và diff</span>
       </div>
     );
   }
 
   if (isLoading || !details) {
     return (
-      <div className="p-6 text-secondary text-xs flex items-center gap-2">
-        <div className="w-3.5 h-3.5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-        <span>Đang tải thông tin commit...</span>
+      <div className="p-8 text-secondary text-xs flex items-center justify-center gap-3 h-full">
+        <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+        <span className="font-medium">Đang tải thông tin commit...</span>
       </div>
     );
   }
 
+  const selectedFileMeta = selectedFile ? getFileStatusMeta(selectedFile.status) : null;
+  const selectedPathParts = selectedFile ? splitFilePath(selectedFile.path) : null;
+
   return (
     <div className="flex flex-col h-full w-full bg-surface overflow-hidden select-none">
-      {/* Drawer Header Bar */}
-      <div className="h-12 px-4 border-b border-border-subtle bg-window flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span className="p-1 rounded-md bg-accent/10 text-accent shrink-0">
-            <GitCommit size={16} />
+      {/* Top Drawer Header Bar */}
+      <div className="h-13 px-4 border-b border-border-subtle bg-window flex items-center justify-between shrink-0 shadow-2xs">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="p-1.5 rounded-md bg-accent/10 text-accent shrink-0 ring-1 ring-accent/20">
+            <GitCommit size={17} />
           </span>
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="font-bold text-sm text-primary">Chi tiết Commit</span>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="font-bold text-sm text-primary tracking-tight">
+              Chi tiết Commit
+            </span>
             <button
               type="button"
               onClick={() => handleCopySha(details.id)}
-              className="flex items-center gap-1 font-mono text-xs px-2 py-0.5 rounded-md bg-surface border border-border-subtle hover:bg-surface-hover text-accent font-semibold cursor-pointer transition-colors"
+              className="flex items-center gap-1.5 font-mono text-xs px-2 py-0.5 rounded-md bg-surface border border-border-subtle hover:bg-surface-hover text-accent font-semibold cursor-pointer transition-colors shadow-2xs"
               title="Nhấp để sao chép mã SHA đầy đủ"
             >
               <span>{details.id.substring(0, 7)}</span>
-              {copiedSha ? <Check size={11} className="text-diff-add-text" /> : <Copy size={11} />}
+              {copiedSha ? (
+                <Check size={12} className="text-diff-add-text" />
+              ) : (
+                <Copy size={12} />
+              )}
             </button>
             <span className="text-tertiary text-xs">|</span>
-            <div className="flex items-center gap-1.5 text-xs font-mono font-semibold">
-              <span className="text-diff-add-text">{`+${details.total_additions}`}</span>
-              <span className="text-diff-remove-text">{`-${details.total_deletions}`}</span>
+            <div className="flex items-center gap-2 text-xs font-mono font-semibold">
+              <span className="px-1.5 py-0.5 rounded bg-diff-add-bg text-diff-add-text border border-diff-add-border">
+                {`+${details.total_additions}`}
+              </span>
+              <span className="px-1.5 py-0.5 rounded bg-diff-remove-bg text-diff-remove-text border border-diff-remove-border">
+                {`-${details.total_deletions}`}
+              </span>
             </div>
           </div>
         </div>
@@ -105,7 +276,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
             onClick={handleClose}
             aria-label="Đóng chi tiết commit"
             title="Đóng chi tiết commit (Phím Esc)"
-            className="px-2.5 py-1 rounded-md bg-surface-hover hover:bg-border-subtle text-secondary hover:text-primary text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors border border-border-subtle"
+            className="px-2.5 py-1 rounded-md bg-surface hover:bg-surface-hover active:bg-surface-active text-secondary hover:text-primary text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors border border-border-subtle shadow-2xs"
           >
             <span>Đóng</span>
             <kbd className="text-[10px] font-mono text-tertiary bg-window px-1 rounded border border-border-subtle">
@@ -119,76 +290,252 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
       {/* 2-Column Split: Left = Files & Info, Right = Diff Viewer */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Column: Commit Summary & File List */}
-        <div className="w-64 border-r border-border-subtle bg-window flex flex-col shrink-0 overflow-hidden">
+        <div
+          style={{ width: `${filesWidth}px` }}
+          className="border-r border-border-subtle bg-window flex flex-col shrink-0 overflow-hidden"
+        >
           {/* Commit Message & Author Card */}
-          <div className="p-3 border-b border-border-subtle bg-surface flex flex-col gap-2">
-            <h3 className="text-xs font-semibold text-primary leading-snug break-words">
-              {details.full_message}
+          <div className="p-3.5 border-b border-border-subtle bg-surface flex flex-col gap-2.5 shadow-2xs">
+            {/* Subject */}
+            <h3 className="text-xs font-bold text-primary leading-snug break-words">
+              {subject || details.full_message}
             </h3>
 
-            <div className="flex items-center gap-2 pt-1 text-secondary text-[11px] border-t border-border-subtle">
-              <div className="w-5 h-5 rounded-full bg-accent text-accent-contrast font-bold flex items-center justify-center text-[10px] shrink-0">
+            {/* Optional body */}
+            {body && (
+              <p className="text-[11px] text-secondary leading-relaxed max-h-24 overflow-y-auto whitespace-pre-wrap bg-window/50 p-2 rounded border border-border-subtle">
+                {body}
+              </p>
+            )}
+
+            {/* Author info */}
+            <div className="flex items-center gap-2.5 pt-2 text-secondary text-[11px] border-t border-border-subtle">
+              <div className="w-6 h-6 rounded-full bg-accent text-accent-contrast font-bold flex items-center justify-center text-[11px] shrink-0 ring-1 ring-border-subtle">
                 {details.author_name.charAt(0).toUpperCase()}
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="font-semibold text-primary truncate leading-tight">
                   {details.author_name}
                 </span>
-                <span className="text-tertiary text-[10px] truncate leading-tight">
+                <span className="text-tertiary text-[10px] truncate leading-tight font-mono">
                   {new Date(details.author_timestamp_sec * 1000).toLocaleString()}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Files List Header */}
-          <div className="px-3 py-2 border-b border-border-subtle bg-window flex items-center justify-between text-[11px] font-bold text-secondary uppercase tracking-wider">
-            <span>CÁC TỆP THAY ĐỔI ({details.files.length})</span>
+          {/* Files List Header with Search Filter */}
+          <div className="p-2 border-b border-border-subtle bg-window flex flex-col gap-1.5">
+            <div className="flex items-center justify-between text-[11px] font-bold text-secondary tracking-wide uppercase px-1">
+              <span>CÁC TỆP THAY ĐỔI</span>
+              <span className="text-tertiary font-mono text-[10px] font-normal lowercase">
+                {fileFilter ? `${filteredFiles.length} / ${details.files.length} tệp` : `${details.files.length} tệp`}
+              </span>
+            </div>
+
+            {/* Search input */}
+            <div className="relative flex items-center">
+              <Search
+                size={12}
+                className="absolute left-2.5 text-tertiary pointer-events-none"
+              />
+              <input
+                type="text"
+                value={fileFilter}
+                onChange={(e) => setFileFilter(e.target.value)}
+                placeholder="Lọc tệp thay đổi..."
+                className="w-full pl-7 pr-7 py-1 text-xs rounded-md bg-surface border border-border-subtle text-primary placeholder:text-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
+              />
+              {fileFilter && (
+                <button
+                  type="button"
+                  onClick={() => setFileFilter("")}
+                  className="absolute right-2 text-tertiary hover:text-primary cursor-pointer"
+                  title="Xóa bộ lọc"
+                >
+                  <X size={12} />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Files List */}
           <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
-            {details.files.map((file) => {
-              const isSelected = selectedFilePath === file.path;
-              return (
-                <button
-                  key={file.path}
-                  type="button"
-                  onClick={() => setSelectedFile(file.path)}
-                  className={clsx(
-                    "flex items-center justify-between p-2 rounded-md text-xs cursor-pointer transition-colors text-left w-full border",
-                    isSelected
-                      ? "bg-accent-subtle border-accent text-accent font-semibold shadow-2xs"
-                      : "bg-surface border-border-subtle hover:bg-surface-hover text-primary font-normal"
-                  )}
-                >
-                  <div className="flex items-center gap-1.5 truncate">
-                    <FileText size={12} className={clsx("shrink-0", isSelected ? "text-accent" : "text-secondary")} />
-                    <span className="truncate">{file.path}</span>
-                  </div>
-                  <div className="flex items-center gap-1 font-mono text-[10px] shrink-0 ml-1">
-                    <span className="text-diff-add-text font-semibold">{`+${file.additions}`}</span>
-                    <span className="text-diff-remove-text font-semibold">{`-${file.deletions}`}</span>
-                  </div>
-                </button>
-              );
-            })}
+            {filteredFiles.length === 0 ? (
+              <div className="py-6 text-center text-xs text-tertiary">
+                Không tìm thấy tệp phù hợp
+              </div>
+            ) : (
+              filteredFiles.map((file) => {
+                const isSelected = selectedFilePath === file.path;
+                const statusMeta = getFileStatusMeta(file.status);
+                const { dir, fileName } = splitFilePath(file.path);
+
+                return (
+                  <button
+                    key={file.path}
+                    type="button"
+                    onClick={() => setSelectedFile(file.path)}
+                    title={file.path}
+                    className={clsx(
+                      "group flex items-center justify-between p-2 rounded-md text-xs cursor-pointer transition-all text-left w-full border relative",
+                      isSelected
+                        ? "bg-accent-subtle/80 border-accent/80 text-primary font-semibold shadow-2xs ring-1 ring-accent/30"
+                        : "bg-surface border-border-subtle hover:bg-surface-hover text-primary font-normal"
+                    )}
+                  >
+                    {/* Left Active Indicator Bar */}
+                    {isSelected && (
+                      <div className="absolute left-0 top-1 bottom-1 w-1 bg-accent rounded-r" />
+                    )}
+
+                    <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
+                      {/* Status Badge */}
+                      <span
+                        className={clsx(
+                          "w-4 h-4 rounded text-[9px] flex items-center justify-center shrink-0 border uppercase font-mono",
+                          statusMeta.badgeClass
+                        )}
+                        title={statusMeta.label}
+                      >
+                        {statusMeta.code}
+                      </span>
+
+                      {/* File Name & Path Details */}
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <span className="font-semibold text-primary truncate leading-tight">
+                          {fileName}
+                        </span>
+                        {dir && (
+                          <span className="text-[10px] text-tertiary truncate leading-tight font-mono">
+                            {dir}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Additions / Deletions Stats */}
+                    <div className="flex items-center gap-1 font-mono text-[10px] shrink-0">
+                      <span className="text-diff-add-text font-semibold">
+                        {`+${file.additions}`}
+                      </span>
+                      <span className="text-diff-remove-text font-semibold">
+                        {`-${file.deletions}`}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
 
-        {/* Right Column: Code Diff Viewer */}
-        <div className="flex-1 flex flex-col bg-surface overflow-hidden">
-          {selectedFilePath && currentRepo ? (
-            <div className="flex-1 overflow-y-auto p-2">
-              <FileDiffViewer
-                repoPath={currentRepo.path}
-                commitId={selectedCommitId}
-                filePath={selectedFilePath}
-              />
-            </div>
+        {/* Resizer Handle */}
+        <div
+          onMouseDown={handleResizeMouseDown}
+          onDoubleClick={() => setFilesWidth(340)}
+          className="w-1 hover:w-1.5 -mr-0.5 h-full cursor-col-resize z-10 transition-all group shrink-0 relative select-none hover:bg-accent active:bg-accent border-r border-border-subtle hover:border-accent"
+          title="Kéo để thay đổi chiều rộng cột tệp (Nhấp đúp để đặt lại 340px)"
+        >
+          <div className="w-full h-full" />
+        </div>
+
+        {/* Right Column: Code Diff Viewer with Sticky File Header */}
+        <div className="flex-1 flex flex-col bg-surface overflow-hidden min-w-0">
+          {selectedFile && currentRepo ? (
+            <>
+              {/* Sticky File Header */}
+              <div className="h-11 px-4 border-b border-border-subtle bg-window flex items-center justify-between shrink-0 shadow-2xs">
+                {/* Left: Status badge, directory breadcrumb, file name, copy button */}
+                <div className="flex items-center gap-2.5 min-w-0 flex-1 mr-3">
+                  {selectedFileMeta && (
+                    <span
+                      className={clsx(
+                        "px-1.5 py-0.5 rounded text-[10px] flex items-center gap-1 border shrink-0 uppercase font-mono",
+                        selectedFileMeta.badgeClass
+                      )}
+                    >
+                      <span>{selectedFileMeta.code}</span>
+                      <span className="font-sans font-normal hidden sm:inline text-[10px]">
+                        {selectedFileMeta.label}
+                      </span>
+                    </span>
+                  )}
+
+                  <div className="flex items-center text-xs font-mono min-w-0 truncate">
+                    <span className="text-tertiary mr-1.5 hidden md:inline font-sans text-[11px]">
+                      Tệp:
+                    </span>
+                    <span className="font-bold text-primary truncate">
+                      {selectedPathParts?.dir
+                        ? `${selectedPathParts.dir}${selectedPathParts.fileName}`
+                        : `/${selectedFile.path}`}
+                    </span>
+                  </div>
+
+                  {/* Copy file path button */}
+                  <button
+                    type="button"
+                    onClick={() => handleCopyFilePath(selectedFile.path)}
+                    className="p-1 rounded hover:bg-surface-hover text-tertiary hover:text-primary transition-colors cursor-pointer shrink-0"
+                    title="Sao chép đường dẫn tệp"
+                  >
+                    {copiedFilePath ? (
+                      <Check size={13} className="text-diff-add-text" />
+                    ) : (
+                      <Copy size={13} />
+                    )}
+                  </button>
+
+                  <div className="flex items-center gap-1 font-mono text-xs shrink-0 ml-1">
+                    <span className="text-diff-add-text font-semibold">{`+${selectedFile.additions}`}</span>
+                    <span className="text-diff-remove-text font-semibold">{`-${selectedFile.deletions}`}</span>
+                  </div>
+                </div>
+
+                {/* Right: Prev / Next File Navigation */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="text-[11px] text-tertiary font-mono mr-1.5">
+                    {currentFileIndex >= 0
+                      ? `${currentFileIndex + 1} / ${details.files.length}`
+                      : ""}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={handlePrevFile}
+                    disabled={!hasPrev}
+                    className="p-1 rounded border border-border-subtle bg-surface hover:bg-surface-hover disabled:opacity-30 disabled:pointer-events-none text-secondary hover:text-primary transition-colors cursor-pointer"
+                    title="Tệp trước"
+                  >
+                    <ChevronLeft size={14} />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleNextFile}
+                    disabled={!hasNext}
+                    className="p-1 rounded border border-border-subtle bg-surface hover:bg-surface-hover disabled:opacity-30 disabled:pointer-events-none text-secondary hover:text-primary transition-colors cursor-pointer"
+                    title="Tệp tiếp theo"
+                  >
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Code Diff Viewer Area */}
+              <div className="flex-1 overflow-y-auto p-3">
+                <FileDiffViewer
+                  repoPath={currentRepo.path}
+                  commitId={selectedCommitId}
+                  filePath={selectedFile.path}
+                />
+              </div>
+            </>
           ) : (
-            <div className="flex items-center justify-center h-full text-tertiary text-xs">
-              Chọn một tệp từ danh sách bên trái để xem diff
+            <div className="flex flex-col items-center justify-center h-full text-tertiary text-xs gap-2">
+              <Folder size={24} className="opacity-40" />
+              <span>Chọn một tệp từ danh sách bên trái để xem diff</span>
             </div>
           )}
         </div>
