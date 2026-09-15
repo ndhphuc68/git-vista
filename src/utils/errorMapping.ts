@@ -1,3 +1,5 @@
+import { getTranslation } from "../i18n";
+
 export interface FriendlyError {
   title: string;
   message: string;
@@ -5,15 +7,19 @@ export interface FriendlyError {
   rawError?: string;
 }
 
-export function mapGitError(error: unknown): FriendlyError {
+export function mapGitError(
+  error: unknown,
+  tParam?: ReturnType<typeof getTranslation>
+): FriendlyError {
+  const t = tParam ?? getTranslation();
   const raw = error instanceof Error ? error.message : String(error);
   const lower = raw.toLowerCase();
 
   if (lower.includes("authentication failed") || lower.includes("permission denied")) {
     return {
-      title: "Lỗi xác thực Git",
-      message: "Không thể kết nối hoặc không có quyền truy cập vào máy chủ Git.",
-      actionHint: "Vui lòng kiểm tra lại SSH key hoặc Personal Access Token trên tài khoản của bạn.",
+      title: t.errors.authFailedTitle,
+      message: t.errors.authFailedMessage,
+      actionHint: t.errors.authFailedHint,
       rawError: raw,
     };
   }
@@ -24,9 +30,9 @@ export function mapGitError(error: unknown): FriendlyError {
     lower.includes("non-fast-forward")
   ) {
     return {
-      title: "Nhánh từ xa đã có commit mới",
-      message: "Máy chủ từ xa chứa các thay đổi mà bạn chưa có ở máy cục bộ.",
-      actionHint: "Hãy thực hiện 'Lấy về (Pull)' các commit mới trước khi Gửi lên (Push).",
+      title: t.errors.remoteNewCommitsTitle,
+      message: t.errors.remoteNewCommitsMessage,
+      actionHint: t.errors.remoteNewCommitsHint,
       rawError: raw,
     };
   }
@@ -36,9 +42,9 @@ export function mapGitError(error: unknown): FriendlyError {
     lower.includes("local changes would be overwritten")
   ) {
     return {
-      title: "Xung đột khi chuyển nhánh",
-      message: "Bạn đang có các thay đổi chưa lưu có thể bị ghi đè khi đổi nhánh.",
-      actionHint: "Hãy Commit các thay đổi hoặc bấm 'Lưu tạm (Stash)' trước khi chuyển nhánh.",
+      title: t.errors.checkoutConflictTitle,
+      message: t.errors.checkoutConflictMessage,
+      actionHint: t.errors.checkoutConflictHint,
       rawError: raw,
     };
   }
@@ -49,15 +55,15 @@ export function mapGitError(error: unknown): FriendlyError {
     lower.includes("network is unreachable")
   ) {
     return {
-      title: "Không thể kết nối mạng",
-      message: "Không thể liên lạc với máy chủ từ xa.",
-      actionHint: "Vui lòng kiểm tra lại kết nối Internet của bạn và thử lại.",
+      title: t.errors.networkErrorTitle,
+      message: t.errors.networkErrorMessage,
+      actionHint: t.errors.networkErrorHint,
       rawError: raw,
     };
   }
 
   return {
-    title: "Thao tác không thành công",
+    title: t.errors.genericTitle,
     message: raw,
     rawError: raw,
   };

@@ -1,6 +1,7 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { AlertTriangle, X, ArrowRight, Archive } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
+import { useTranslation } from "../../i18n";
 
 export interface CheckoutConflictModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
   repoPath,
   onSuccess,
 }) => {
+  const { t } = useTranslation();
   const [isStashing, setIsStashing] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -54,7 +56,7 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
     try {
       await invokeCommand.saveStash(
         repoPath,
-        `Tự động lưu trước khi chuyển sang ${targetBranch}`,
+        t.modals.checkoutConflict.autoStashMessage.replace("{target}", targetBranch),
         true
       );
       await invokeCommand.checkoutBranch(repoPath, targetBranch);
@@ -62,7 +64,7 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
       onSuccess?.();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      setActionError(`Lỗi khi Stash & chuyển nhánh: ${msg}`);
+      setActionError(t.modals.checkoutConflict.stashError.replace("{msg}", msg));
     } finally {
       setIsStashing(false);
     }
@@ -87,13 +89,13 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
               id="checkout-conflict-title"
               className="text-xs font-semibold text-primary m-0"
             >
-              Xung đột khi chuyển nhánh
+              {t.modals.checkoutConflict.title}
             </h3>
           </div>
           <button
             onClick={onClose}
             className="flex items-center justify-center bg-transparent border-none cursor-pointer text-secondary hover:text-primary hover:bg-surface-hover p-1 rounded-sm transition-colors"
-            aria-label="Đóng"
+            aria-label={t.common.close}
           >
             <X size={16} />
           </button>
@@ -101,7 +103,9 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
 
         <div className="p-4 flex flex-col gap-3">
           <p className="text-xs text-primary leading-normal m-0">
-            Không thể chuyển sang nhánh <strong className="font-semibold">{targetBranch}</strong> vì bạn đang có các file sửa đổi dở dang bị trùng lặp và có thể bị ghi đè.
+            {t.modals.checkoutConflict.description.split("{target}")[0]}
+            <strong className="font-semibold">{targetBranch}</strong>
+            {t.modals.checkoutConflict.description.split("{target}")[1]}
           </p>
 
           <div className="p-3 bg-diff-remove-bg border border-diff-remove-text/30 rounded-sm text-diff-remove-text text-xs font-mono break-all leading-relaxed max-h-40 overflow-y-auto">
@@ -115,7 +119,7 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
           )}
 
           <p className="text-[11px] text-secondary leading-normal m-0">
-            Để tiếp tục chuyển nhánh một cách an toàn, bạn có thể lưu tạm các thay đổi vào Stash hoặc chuyển sang màn hình <strong>Thay đổi (Changes)</strong> để commit.
+            {t.modals.checkoutConflict.advice}
           </p>
         </div>
 
@@ -126,7 +130,7 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
             disabled={isStashing}
             className="px-3 py-1.5 bg-transparent border border-border-subtle rounded-sm text-xs font-medium text-primary cursor-pointer hover:bg-surface-hover transition-colors disabled:opacity-50"
           >
-            Đóng
+            {t.modals.checkoutConflict.close}
           </button>
           {repoPath && (
             <button
@@ -136,7 +140,11 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
               className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-hover border border-border-subtle text-primary rounded-sm text-xs font-semibold cursor-pointer hover:bg-border-subtle active:scale-[0.98] transition-all disabled:opacity-50"
             >
               <Archive size={13} className="text-accent" />
-              <span>{isStashing ? "Đang lưu & chuyển..." : "Lưu tạm (Stash) rồi chuyển nhánh"}</span>
+              <span>
+                {isStashing
+                  ? t.modals.checkoutConflict.stashingAndCheckout
+                  : t.modals.checkoutConflict.stashAndCheckout}
+              </span>
             </button>
           )}
           <button
@@ -148,7 +156,7 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white border-none rounded-sm text-xs font-semibold cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
           >
-            <span>Đến màn hình Thay đổi</span>
+            <span>{t.modals.checkoutConflict.toChanges}</span>
             <ArrowRight size={13} />
           </button>
         </div>

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { App } from "../App";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { useRepoStore } from "../store/useRepoStore";
@@ -95,7 +95,9 @@ describe("Visual Git Client - M1 App Shell", () => {
       expect(useRepoStore.getState().currentRepo).not.toBeNull();
     });
 
-    useViewStore.getState().openConflictResolver("src/main.rs");
+    act(() => {
+      useViewStore.getState().openConflictResolver("src/main.rs");
+    });
 
     await waitFor(() => {
       expect(screen.getByText("src/main.rs")).toBeInTheDocument();

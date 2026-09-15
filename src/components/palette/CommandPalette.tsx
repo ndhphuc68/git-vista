@@ -8,25 +8,30 @@ import {
   getAppCommands,
   filterCommands,
 } from "../../utils/commandRegistry";
+import { useTranslation } from "../../i18n";
 
 export interface CommandPaletteProps {
   context: CommandContext;
 }
 
-const CATEGORY_LABELS: Record<CommandCategory, string> = {
-  navigation: "Điều hướng",
-  branch: "Nhánh",
-  git: "Thao tác Git",
-  settings: "Cài đặt & Trợ giúp",
-};
-
 export const CommandPalette: React.FC<CommandPaletteProps> = ({ context }) => {
+  const { t } = useTranslation();
   const { isOpen, query, selectedIndex, close, setQuery, setSelectedIndex } =
     useCommandPaletteStore();
   const inputRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const allCommands = useMemo(() => getAppCommands(context), [context]);
+  const categoryLabels: Record<CommandCategory, string> = useMemo(
+    () => ({
+      navigation: t.palette.categories.navigation,
+      branch: t.palette.categories.branch,
+      git: t.palette.categories.git,
+      settings: t.palette.categories.settings,
+    }),
+    [t]
+  );
+
+  const allCommands = useMemo(() => getAppCommands(context, t), [context, t]);
   const filteredCommands = useMemo(
     () => filterCommands(allCommands, query),
     [allCommands, query]
@@ -128,7 +133,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ context }) => {
   categoryMap.forEach((items, cat) => {
     categories.push({
       category: cat,
-      label: CATEGORY_LABELS[cat] || cat,
+      label: categoryLabels[cat] || cat,
       items,
     });
   });
@@ -154,7 +159,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ context }) => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Tìm kiếm lệnh... (Ctrl+K)"
+            placeholder={`${t.palette.inputPlaceholder} (Ctrl+K)`}
             autoFocus
             className="w-full bg-transparent text-primary placeholder-muted outline-none text-sm"
           />
@@ -164,7 +169,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ context }) => {
               onClick={() => setQuery("")}
               className="text-xs text-secondary hover:text-primary px-1.5 py-0.5 rounded hover:bg-surface-hover cursor-pointer"
             >
-              Xóa
+              {t.palette.clear}
             </button>
           )}
         </div>
@@ -173,7 +178,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ context }) => {
         <div className="overflow-y-auto flex-1 p-2 space-y-3">
           {filteredCommands.length === 0 ? (
             <div className="text-center py-8 text-secondary text-sm">
-              Không tìm thấy lệnh phù hợp với "{query}"
+              {t.palette.emptyMatch.replace("{query}", query)}
             </div>
           ) : (
             categories.map((group) => (
@@ -228,23 +233,23 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ context }) => {
               <kbd className="font-mono bg-surface px-1 py-0.5 border border-border-subtle rounded text-[11px]">
                 ↑↓
               </kbd>{" "}
-              điều hướng
+              {t.palette.navigateHint}
             </span>
             <span>
               <kbd className="font-mono bg-surface px-1 py-0.5 border border-border-subtle rounded text-[11px]">
                 Enter
               </kbd>{" "}
-              chọn
+              {t.palette.executeHint}
             </span>
             <span>
               <kbd className="font-mono bg-surface px-1 py-0.5 border border-border-subtle rounded text-[11px]">
                 Esc
               </kbd>{" "}
-              đóng
+              {t.palette.closeHint}
             </span>
           </div>
           <div className="text-[11px]">
-            {filteredCommands.length} lệnh
+            {t.palette.commandsCount.replace("{count}", String(filteredCommands.length))}
           </div>
         </div>
       </div>

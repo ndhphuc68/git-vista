@@ -8,6 +8,7 @@ import { useViewStore } from "../../store/useViewStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
 import { invokeCommand } from "../../ipc/client";
 import { GraphSvgLane } from "./GraphSvgLane";
+import { useTranslation } from "../../i18n";
 
 const PAGE_SIZE = 50;
 const ROW_HEIGHT = 32;
@@ -93,6 +94,7 @@ function getBranchPillStyle(name: string, isHead: boolean, isTag: boolean) {
 }
 
 export const CommitGraph: React.FC = () => {
+  const { t } = useTranslation();
   const { currentRepo, selectedCommitId, setSelectedCommit } = useRepoStore();
   const { setActiveScreen } = useViewStore();
   const { setDetailPanelOpen } = useLayoutStore();
@@ -162,11 +164,11 @@ export const CommitGraph: React.FC = () => {
     <div className="h-full w-full flex flex-col bg-surface overflow-hidden select-none">
       {/* 3-Column Header */}
       <div className="h-8 px-3 flex items-center border-b border-border-subtle bg-window text-[11px] font-mono text-secondary uppercase tracking-wider select-none shrink-0">
-        <span className="w-80 shrink-0 pl-2">BRANCH / TAG</span>
-        <span className="w-32 shrink-0 pl-2">GRAPH</span>
-        <span className="flex-1 pl-2">COMMIT MESSAGE</span>
-        <span className="w-36 text-right pr-2">TÁC GIẢ</span>
-        <span className="w-24 text-right pr-3">SHA</span>
+        <span className="w-80 shrink-0 pl-2">{t.graph.columns.branchTag}</span>
+        <span className="w-32 shrink-0 pl-2">{t.graph.columns.graph}</span>
+        <span className="flex-1 pl-2">{t.graph.columns.commitMessage}</span>
+        <span className="w-36 text-right pr-2">{t.graph.columns.author}</span>
+        <span className="w-24 text-right pr-3">{t.graph.columns.sha}</span>
       </div>
 
       {/* Main Scrollable Canvas */}
@@ -196,7 +198,7 @@ export const CommitGraph: React.FC = () => {
                 setActiveScreen("changes");
               }
             }}
-            aria-label="Xem thay đổi chưa lưu (Working directory changes)"
+            aria-label={t.graph.wipChanges}
             className="flex items-center px-3 h-8 bg-amber-50/50 dark:bg-amber-950/25 hover:bg-amber-100/60 dark:hover:bg-amber-950/45 border-b border-border-subtle cursor-pointer transition-colors group shrink-0"
           >
             <div className="w-80 shrink-0 pr-2 flex items-center justify-end">
@@ -231,17 +233,17 @@ export const CommitGraph: React.FC = () => {
 
             <div className="flex items-center gap-2 flex-1 min-w-0 pl-2">
               <span className="font-semibold text-primary truncate text-xs group-hover:text-accent transition-colors">
-                Thư mục làm việc đang có thay đổi chưa lưu
+                {t.graph.wipChanges}
               </span>
               <div className="flex items-center gap-1.5 font-mono text-[10.5px]">
                 {modifiedCount > 0 && (
                   <span className="text-amber-600 dark:text-amber-400 font-semibold">
-                    ✏️ {modifiedCount} sửa đổi
+                    ✏️ {t.graph.modifiedCount.replace("{n}", String(modifiedCount))}
                   </span>
                 )}
                 {untrackedCount > 0 && (
                   <span className="text-diff-add-text font-semibold">
-                    + {untrackedCount} thêm mới
+                    + {t.graph.untrackedCount.replace("{n}", String(untrackedCount))}
                   </span>
                 )}
               </div>
@@ -249,7 +251,7 @@ export const CommitGraph: React.FC = () => {
 
             <div className="w-36 text-right pr-2 shrink-0 text-secondary font-mono text-[11px]">
               <span className="px-1.5 py-0.5 rounded bg-window text-secondary font-medium">
-                Vừa xong
+                {t.graph.justNow}
               </span>
             </div>
             <div className="w-24 shrink-0"></div>
@@ -335,7 +337,7 @@ export const CommitGraph: React.FC = () => {
                           <span className="truncate min-w-0">{r.name}</span>
                           {isHeadRef && (
                             <span className="text-[8.5px] px-1 bg-white/25 rounded font-bold ml-0.5 shrink-0">
-                              HEAD
+                              {t.graph.headBadge}
                             </span>
                           )}
                         </div>
@@ -405,7 +407,7 @@ export const CommitGraph: React.FC = () => {
                 {/* Col 5: Short SHA (Bolder, clearer font & styled badge) */}
                 <div className="w-24 text-right pr-3 shrink-0">
                   <span
-                    title={`Mã commit: ${commit.id}`}
+                    title={`${t.graph.columns.sha}: ${commit.id}`}
                     className="font-mono font-bold text-accent dark:text-accent text-xs px-1.5 py-0.5 rounded bg-surface hover:bg-surface-hover border border-border-subtle shadow-2xs inline-block"
                   >
                     {commit.short_id}

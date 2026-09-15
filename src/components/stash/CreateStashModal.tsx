@@ -1,5 +1,6 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Archive } from "lucide-react";
+import { useTranslation } from "../../i18n";
 
 interface CreateStashModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export const CreateStashModal: React.FC<CreateStashModalProps> = ({
   repoPath: _repoPath,
   onSaveStash,
 }) => {
+  const { t } = useTranslation();
   const [message, setMessage] = useState("");
   const [includeUntracked, setIncludeUntracked] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -72,13 +74,13 @@ export const CreateStashModal: React.FC<CreateStashModalProps> = ({
               id="create-stash-title"
               className="text-xs font-semibold text-primary m-0"
             >
-              Luu tam thay doi (Stash)
+              {t.modals.createStash.title}
             </h3>
           </div>
           <button
             onClick={onClose}
             className="flex items-center justify-center bg-transparent border-none cursor-pointer text-secondary hover:text-primary hover:bg-surface-hover p-1 rounded-sm transition-colors"
-            aria-label="Dong"
+            aria-label={t.common.close}
           >
             <X size={16} />
           </button>
@@ -88,12 +90,12 @@ export const CreateStashModal: React.FC<CreateStashModalProps> = ({
         <div className="p-4 flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <label htmlFor="stash-message" className="text-xs text-secondary font-medium">
-              Mo ta (tuy chon)
+              {t.modals.createStash.descLabel}
             </label>
             <input
               id="stash-message"
               type="text"
-              placeholder="Mo ta noi dung stash"
+              placeholder={t.modals.createStash.descPlaceholder}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="px-3 py-1.5 bg-window border border-border-subtle rounded-sm text-xs text-primary outline-none focus:border-accent transition-colors"
@@ -114,7 +116,7 @@ export const CreateStashModal: React.FC<CreateStashModalProps> = ({
               htmlFor="stash-include-untracked"
               className="text-xs text-primary cursor-pointer select-none"
             >
-              Bao gom ca cac file chua theo doi (untracked)
+              {t.modals.createStash.untrackedLabel}
             </label>
           </div>
         </div>
@@ -127,7 +129,7 @@ export const CreateStashModal: React.FC<CreateStashModalProps> = ({
             disabled={loading}
             className="px-3 py-1.5 bg-transparent border border-border-subtle rounded-sm text-xs font-medium text-primary cursor-pointer hover:bg-surface-hover transition-colors disabled:opacity-50"
           >
-            Huy
+            {t.modals.createStash.cancel}
           </button>
           <button
             type="button"
@@ -135,7 +137,7 @@ export const CreateStashModal: React.FC<CreateStashModalProps> = ({
             disabled={loading}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white border-none rounded-sm text-xs font-semibold cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
           >
-            {loading ? "Dang luu..." : "Luu Stash"}
+            {loading ? t.modals.createStash.saving : t.modals.createStash.submit}
           </button>
         </div>
       </div>

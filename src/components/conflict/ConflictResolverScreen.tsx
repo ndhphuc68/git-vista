@@ -1,8 +1,9 @@
-﻿import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { useQuery, useQueryClient, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ArrowLeft, Check, ChevronUp, ChevronDown, RefreshCw } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
 import { ConflictFileData } from "../../ipc/bindings";
+import { useTranslation } from "../../i18n";
 
 export interface ConflictResolverScreenProps {
   filePath: string;
@@ -23,6 +24,7 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
   onBack,
   onSaveAndStage,
 }) => {
+  const { t } = useTranslation();
   const { data, isLoading } = useQuery({
     queryKey: ["conflict_file_data", repoPath, filePath],
     queryFn: () => invokeCommand.getConflictFileData(repoPath, filePath),
@@ -95,7 +97,7 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
       const confirmSave =
         typeof window !== "undefined" && typeof window.confirm === "function"
           ? window.confirm(
-              `Còn ${unresolvedCount} khối xung đột chưa chọn giải pháp. Bạn có chắc muốn lưu?`
+              t.conflictResolver.unresolvedWarning.replace("{count}", String(unresolvedCount))
             )
           : true;
       if (!confirmSave) return;
@@ -122,7 +124,7 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
     return (
       <div className="flex flex-col items-center justify-center h-full w-full bg-surface text-secondary gap-3">
         <RefreshCw size={24} className="animate-spin text-accent" />
-        <span className="text-sm">Đang tải dữ liệu xung đột...</span>
+        <span className="text-sm">{t.conflictResolver.loading}</span>
       </div>
     );
   }
@@ -139,7 +141,7 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
             className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-secondary hover:text-primary hover:bg-surface-hover rounded-sm border border-border-subtle transition-colors cursor-pointer"
           >
             <ArrowLeft size={14} />
-            <span>Quay lại</span>
+            <span>{t.conflictResolver.back}</span>
           </button>
           <div className="flex items-center gap-2 truncate">
             <span className="font-semibold text-xs text-primary truncate" title={filePath}>
@@ -152,7 +154,9 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
                   : "bg-diff-remove-bg text-diff-remove-text"
               }`}
             >
-              Xung đột: {resolvedCount}/{totalConflicts} khối
+              {t.conflictResolver.progress
+                .replace("{resolved}", String(resolvedCount))
+                .replace("{total}", String(totalConflicts))}
             </span>
           </div>
         </div>
@@ -165,10 +169,10 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
               onClick={handlePrevConflict}
               disabled={currentConflictIndex <= 0}
               className="flex items-center gap-1 px-2 py-1 text-xs text-secondary hover:text-primary hover:bg-surface-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-              title="Khối trước"
+              title={t.conflictResolver.prevConflict}
             >
               <ChevronUp size={13} />
-              <span>Khối trước</span>
+              <span>{t.conflictResolver.prevConflict}</span>
             </button>
             <div className="w-[1px] h-4 bg-border-subtle" />
             <button
@@ -176,29 +180,29 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
               onClick={handleNextConflict}
               disabled={currentConflictIndex >= totalConflicts - 1}
               className="flex items-center gap-1 px-2 py-1 text-xs text-secondary hover:text-primary hover:bg-surface-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-              title="Khối sau"
+              title={t.conflictResolver.nextConflict}
             >
-              <span>Khối sau</span>
+              <span>{t.conflictResolver.nextConflict}</span>
               <ChevronDown size={13} />
             </button>
           </div>
 
           <button
             type="button"
-            aria-label="Lấy tất cả Của bạn"
+            aria-label={t.conflictResolver.takeAllOursAria}
             onClick={handleTakeAllOurs}
             className="px-2.5 py-1 text-xs text-secondary hover:text-primary hover:bg-surface-hover rounded-sm border border-border-subtle transition-colors cursor-pointer"
           >
-            Lấy tất cả (Ours)
+            {t.conflictResolver.takeAllOurs}
           </button>
 
           <button
             type="button"
-            aria-label="Lấy tất cả Của họ"
+            aria-label={t.conflictResolver.takeAllTheirsAria}
             onClick={handleTakeAllTheirs}
             className="px-2.5 py-1 text-xs text-secondary hover:text-primary hover:bg-surface-hover rounded-sm border border-border-subtle transition-colors cursor-pointer"
           >
-            Lấy tất cả (Theirs)
+            {t.conflictResolver.takeAllTheirs}
           </button>
         </div>
 
@@ -211,7 +215,7 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-sm bg-accent text-white hover:bg-accent-hover active:opacity-90 disabled:opacity-50 transition-colors shadow-sm cursor-pointer"
           >
             <Check size={14} />
-            <span>{isSaving ? "Đang lưu..." : "Hoàn tất"}</span>
+            <span>{isSaving ? t.conflictResolver.saving : t.conflictResolver.complete}</span>
           </button>
         </div>
       </header>
@@ -219,13 +223,13 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
       {/* 3-Column Header Bar */}
       <div className="grid grid-cols-3 border-b border-border-subtle bg-surface-subtle shrink-0 text-xs font-semibold text-secondary">
         <div className="px-4 py-2 border-r border-border-subtle flex items-center justify-between">
-          <span>CỦA BẠN (OURS)</span>
+          <span>{t.conflictResolver.oursHeader}</span>
         </div>
         <div className="px-4 py-2 border-r border-border-subtle flex items-center justify-between">
-          <span>KẾT QUẢ (MERGED)</span>
+          <span>{t.conflictResolver.mergedHeader}</span>
         </div>
         <div className="px-4 py-2 flex items-center justify-between">
-          <span>CỦA HỌ (THEIRS)</span>
+          <span>{t.conflictResolver.theirsHeader}</span>
         </div>
       </div>
 
@@ -266,7 +270,7 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
                       onClick={() => handleSetResolution(hunk.id, hunk.ours || "")}
                       className="px-2 py-0.5 text-[11px] font-medium bg-diff-add-bg text-diff-add-text border border-diff-add-border rounded-sm hover:brightness-95 transition-all cursor-pointer"
                     >
-                      Lấy bên này (Ours)
+                      {t.conflictResolver.acceptOurs}
                     </button>
                   </div>
                   <pre className="flex-1 p-3 font-mono text-xs text-diff-add-text whitespace-pre-wrap overflow-x-auto select-text">
@@ -279,9 +283,9 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
                   <div className="flex items-center justify-between px-3 py-1.5 border-b border-border-subtle bg-surface-subtle">
                     <span className="text-[11px] font-semibold text-primary flex items-center gap-1.5">
                       {isResolved ? (
-                        <span className="text-diff-add-text font-bold">✓ Đã chọn</span>
+                        <span className="text-diff-add-text font-bold">{t.conflictResolver.selectedBadge}</span>
                       ) : (
-                        <span className="text-secondary font-normal italic">Chưa chọn</span>
+                        <span className="text-secondary font-normal italic">{t.conflictResolver.unselectedBadge}</span>
                       )}
                     </span>
                     <button
@@ -294,7 +298,7 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
                       }
                       className="px-2 py-0.5 text-[11px] font-medium bg-surface text-secondary hover:text-primary border border-border-subtle rounded-sm hover:bg-surface-hover transition-all cursor-pointer"
                     >
-                      Lấy cả hai (Both)
+                      {t.conflictResolver.takeBoth}
                     </button>
                   </div>
                   <textarea
@@ -304,7 +308,7 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
                     )}
                     value={resolutions[hunk.id] ?? ""}
                     onChange={(e) => handleSetResolution(hunk.id, e.target.value)}
-                    placeholder="// Chọn bên trái/phải hoặc tự chỉnh sửa mã tại đây..."
+                    placeholder={t.conflictResolver.editorPlaceholder}
                     className="flex-1 w-full p-3 font-mono text-xs text-primary bg-transparent focus:outline-none focus:bg-surface-subtle/40 resize-y"
                   />
                 </div>
@@ -320,7 +324,7 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
                       onClick={() => handleSetResolution(hunk.id, hunk.theirs || "")}
                       className="px-2 py-0.5 text-[11px] font-medium bg-accent-subtle text-primary border border-border-subtle rounded-sm hover:brightness-95 transition-all cursor-pointer"
                     >
-                      Lấy bên này (Theirs)
+                      {t.conflictResolver.acceptTheirs}
                     </button>
                   </div>
                   <pre className="flex-1 p-3 font-mono text-xs text-primary whitespace-pre-wrap overflow-x-auto select-text">

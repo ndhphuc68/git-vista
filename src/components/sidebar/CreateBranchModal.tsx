@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { GitBranch, X, AlertCircle, Loader2 } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
+import { useTranslation } from "../../i18n";
 
 export interface CreateBranchModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
   targetCommit,
   onSuccess,
 }) => {
+  const { t } = useTranslation();
   const [branchName, setBranchName] = useState("");
   const [checkout, setCheckout] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -64,7 +66,7 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
     e.preventDefault();
     const trimmed = branchName.trim();
     if (!trimmed) {
-      setError("Vui lòng nhập tên nhánh");
+      setError(t.modals.createBranch.errorEmpty);
       return;
     }
 
@@ -82,7 +84,7 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
       onClose();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      setError(msg || "Không thể tạo nhánh");
+      setError(msg || t.common.error);
     } finally {
       setLoading(false);
     }
@@ -107,13 +109,13 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
               id="create-branch-title"
               className="text-xs font-semibold text-primary m-0"
             >
-              Tạo nhánh mới
+              {t.modals.createBranch.title}
             </h3>
           </div>
           <button
             onClick={onClose}
             className="flex items-center justify-center bg-transparent border-none cursor-pointer text-secondary hover:text-primary hover:bg-surface-hover p-1 rounded-sm transition-colors"
-            aria-label="Đóng"
+            aria-label={t.common.close}
           >
             <X size={16} />
           </button>
@@ -122,7 +124,7 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
         <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-3">
           {targetCommit && (
             <div className="text-[11px] text-secondary flex items-center gap-1 bg-window px-2.5 py-1.5 rounded-sm border border-border-subtle">
-              <span>Xuất phát từ commit:</span>
+              <span>{t.modals.createBranch.fromCommit}</span>
               <span className="font-mono text-primary font-semibold">
                 {targetCommit.substring(0, 7)}
               </span>
@@ -134,14 +136,14 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
               htmlFor="branch-name-input"
               className="text-xs font-medium text-primary"
             >
-              Tên nhánh mới
+              {t.modals.createBranch.nameLabel}
             </label>
             <input
               ref={inputRef}
               id="branch-name-input"
-              aria-label="Tên nhánh mới"
+              aria-label={t.modals.createBranch.nameLabel}
               type="text"
-              placeholder="ví dụ: feature/login, bugfix/navbar"
+              placeholder={t.modals.createBranch.namePlaceholder}
               value={branchName}
               onChange={handleNameChange}
               disabled={loading}
@@ -155,10 +157,10 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
               checked={checkout}
               onChange={(e) => setCheckout(e.target.checked)}
               disabled={loading}
-              aria-label="Chuyển sang nhánh mới sau khi tạo"
+              aria-label={t.modals.createBranch.checkoutLabel}
               className="accent-accent cursor-pointer rounded-sm"
             />
-            <span>Chuyển sang nhánh mới sau khi tạo (Checkout)</span>
+            <span>{t.modals.createBranch.checkoutLabel}</span>
           </label>
 
           {error && (
@@ -175,7 +177,7 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
               disabled={loading}
               className="px-3 py-1.5 bg-transparent border border-border-subtle rounded-sm text-xs font-medium text-primary cursor-pointer hover:bg-surface-hover transition-colors disabled:opacity-50"
             >
-              Huỷ bỏ
+              {t.modals.createBranch.cancel}
             </button>
             <button
               type="submit"
@@ -185,10 +187,10 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
               {loading ? (
                 <>
                   <Loader2 size={13} className="animate-spin" />
-                  <span>Đang tạo...</span>
+                  <span>{t.modals.createBranch.creating}</span>
                 </>
               ) : (
-                <span>Tạo nhánh</span>
+                <span>{t.modals.createBranch.submit}</span>
               )}
             </button>
           </div>

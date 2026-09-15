@@ -13,8 +13,10 @@ import { StagingFileList, SelectedWorkingFile } from "./StagingFileList";
 import { CommitBox } from "./CommitBox";
 import { InteractiveDiffViewer } from "./InteractiveDiffViewer";
 import { CreateStashModal } from "../stash/CreateStashModal";
+import { useTranslation } from "../../i18n";
 
 export const ChangesScreen: React.FC = () => {
+  const { t } = useTranslation();
   const { currentRepo } = useRepoStore();
   const { sidebarOpen, activeChangesView, setActiveChangesView } =
     useLayoutStore();
@@ -64,7 +66,7 @@ export const ChangesScreen: React.FC = () => {
   if (!currentRepo) {
     return (
       <div className="flex items-center justify-center h-full text-tertiary text-xs">
-        Chưa mở kho mã nguồn
+        {t.changes.noRepoOpen}
       </div>
     );
   }
@@ -197,7 +199,17 @@ export const ChangesScreen: React.FC = () => {
                 : "bg-transparent text-secondary font-normal"
             )}
           >
-            Tệp đã đổi ({status ? status.staged.length + status.unstaged.length + status.untracked.length + (status.conflicted?.length || 0) : 0})
+            {t.changes.mobileTabFiles.replace(
+              "{count}",
+              String(
+                status
+                  ? status.staged.length +
+                      status.unstaged.length +
+                      status.untracked.length +
+                      (status.conflicted?.length || 0)
+                  : 0
+              )
+            )}
           </button>
           <button
             type="button"
@@ -210,7 +222,7 @@ export const ChangesScreen: React.FC = () => {
                 : "bg-transparent text-secondary font-normal"
             )}
           >
-            Xem Diff
+            {t.changes.mobileTabDiff}
           </button>
         </div>
       )}
@@ -220,7 +232,7 @@ export const ChangesScreen: React.FC = () => {
         {/* Left Sidebar: Staging File List + Commit Box */}
         {showSidebar && (
           <section
-            aria-label="Danh sách thay đổi và lưu commit"
+            aria-label={t.changes.sidebarAria}
             data-testid="changes-sidebar"
             className={clsx(
               isMobile
@@ -263,7 +275,7 @@ export const ChangesScreen: React.FC = () => {
                 className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-transparent border border-border-subtle rounded-sm text-xs text-secondary hover:text-primary hover:bg-surface-hover cursor-pointer transition-colors"
               >
                 <Archive size={12} />
-                <span>Luu Stash</span>
+                <span>{t.changes.saveStashBtn}</span>
               </button>
             </div>
           </section>
@@ -272,7 +284,7 @@ export const ChangesScreen: React.FC = () => {
         {/* Right Area: Interactive Diff Viewer */}
         {showDiffViewer && (
           <section
-            aria-label="Xem chi tiết thay đổi diff"
+            aria-label={t.changes.diffViewerAria}
             data-testid="changes-diff-viewer"
             className="flex-1 h-full min-w-0 flex flex-col overflow-hidden"
           >
@@ -290,8 +302,7 @@ export const ChangesScreen: React.FC = () => {
               <div className="flex flex-col items-center justify-center h-full gap-3 text-tertiary text-xs text-center p-4">
                 <FileText size={36} className="text-tertiary" />
                 <span>
-                  Chọn một file từ danh sách bên trái để xem diff và đánh dấu
-                  thay đổi.
+                  {t.changes.selectFileHint}
                 </span>
               </div>
             )}

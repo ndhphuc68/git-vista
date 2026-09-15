@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "../../i18n";
 
 export interface RemoteTaskState {
   taskId: string;
@@ -16,6 +17,7 @@ export const RemoteProgressBanner: React.FC<RemoteProgressBannerProps> = ({
   task,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   if (!task) return null;
 
   return (
@@ -43,9 +45,9 @@ export const RemoteProgressBanner: React.FC<RemoteProgressBannerProps> = ({
               type="button"
               onClick={() => onCancel(task.taskId)}
               className="px-2 py-0.5 text-xs font-medium text-zinc-300 hover:text-white bg-zinc-800 hover:bg-zinc-700 border border-zinc-600/60 rounded transition focus:outline-none focus:ring-1 focus:ring-blue-500"
-              aria-label="Huỷ tác vụ"
+              aria-label={t.remoteProgress.cancelTaskAria}
             >
-              Huỷ
+              {t.remoteProgress.cancelTask}
             </button>
           )}
         </div>

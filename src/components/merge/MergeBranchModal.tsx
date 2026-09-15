@@ -1,5 +1,6 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { X, GitMerge, AlertTriangle, ArrowRight } from "lucide-react";
+import { useTranslation } from "../../i18n";
 
 export interface MergeBranchModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const MergeBranchModal: React.FC<MergeBranchModalProps> = ({
   hasUncommittedChanges,
   onMerge,
 }) => {
+  const { t } = useTranslation();
   const [noFf, setNoFf] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,14 +57,14 @@ export const MergeBranchModal: React.FC<MergeBranchModalProps> = ({
         onClose();
       } else {
         if (res.status === "Conflict") {
-          setError("Xung dot khi gop nhanh. Vui long giai quyet xung dot truoc khi tiep tuc.");
+          setError(t.modals.merge.conflictError);
         } else {
-          setError(res.output || `Gop nhanh that bai (${res.status})`);
+          setError(res.output || t.modals.merge.genericError.replace("{msg}", res.status));
         }
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      setError(`Loi khi gop nhanh: ${msg}`);
+      setError(t.modals.merge.genericError.replace("{msg}", msg));
     } finally {
       setLoading(false);
     }
@@ -88,13 +90,13 @@ export const MergeBranchModal: React.FC<MergeBranchModalProps> = ({
               id="merge-branch-title"
               className="text-xs font-semibold text-primary m-0"
             >
-              Gop nhanh (Merge)
+              {t.modals.merge.title}
             </h3>
           </div>
           <button
             onClick={onClose}
             className="flex items-center justify-center bg-transparent border-none cursor-pointer text-secondary hover:text-primary hover:bg-surface-hover p-1 rounded-sm transition-colors"
-            aria-label="Dong"
+            aria-label={t.common.close}
           >
             <X size={16} />
           </button>
@@ -109,13 +111,13 @@ export const MergeBranchModal: React.FC<MergeBranchModalProps> = ({
           </div>
 
           <p className="text-xs text-secondary leading-normal m-0">
-            Gop cac thay doi tu nhanh nguon vao nhanh dich hien tai cua ban.
+            {t.modals.merge.desc}
           </p>
 
           {hasUncommittedChanges && (
             <div className="flex items-start gap-2 p-2.5 bg-diff-remove-bg border border-diff-remove-text/30 rounded-sm text-diff-remove-text text-xs">
               <AlertTriangle size={14} className="shrink-0 mt-0.5" />
-              <span>Ban co thay doi chua commit. Hay stash hoac commit truoc khi gop de tranh mat du lieu.</span>
+              <span>{t.modals.merge.uncommittedWarn}</span>
             </div>
           )}
 
@@ -138,7 +140,7 @@ export const MergeBranchModal: React.FC<MergeBranchModalProps> = ({
               htmlFor="merge-no-ff"
               className="text-xs text-primary cursor-pointer select-none"
             >
-              Khong fast-forward (--no-ff)
+              {t.modals.merge.noFfLabel}
             </label>
           </div>
         </div>
@@ -151,17 +153,17 @@ export const MergeBranchModal: React.FC<MergeBranchModalProps> = ({
             disabled={loading}
             className="px-3 py-1.5 bg-transparent border border-border-subtle rounded-sm text-xs font-medium text-primary cursor-pointer hover:bg-surface-hover transition-colors disabled:opacity-50"
           >
-            Huy
+            {t.modals.merge.cancel}
           </button>
           <button
             type="button"
-            aria-label="Gop nhanh"
+            aria-label={t.modals.merge.submit}
             onClick={handleMergeSubmit}
             disabled={loading}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white border-none rounded-sm text-xs font-semibold cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <GitMerge size={13} />
-            <span>{loading ? "Dang gop..." : "Gộp nhánh"}</span>
+            <span>{loading ? t.modals.merge.merging : t.modals.merge.submit}</span>
           </button>
         </div>
       </div>

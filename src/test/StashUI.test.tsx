@@ -16,14 +16,14 @@ describe("CreateStashModal Component", () => {
       />
     );
 
-    expect(screen.getByText("Luu tam thay doi (Stash)")).toBeInTheDocument();
-    const input = screen.getByPlaceholderText(/Mo ta noi dung stash/i);
+    expect(screen.getByText("Lưu tạm thay đổi (Stash)")).toBeInTheDocument();
+    const input = screen.getByPlaceholderText(/Mô tả nội dung stash/i);
     fireEvent.change(input, { target: { value: "My temp changes" } });
 
-    const checkbox = screen.getByLabelText(/Bao gom ca cac file chua theo doi/i);
+    const checkbox = screen.getByLabelText(/chưa theo dõi/i);
     fireEvent.click(checkbox);
 
-    const submitBtn = screen.getByRole("button", { name: "Luu Stash" });
+    const submitBtn = screen.getByRole("button", { name: "Lưu Stash" });
     fireEvent.click(submitBtn);
 
     await waitFor(() => {

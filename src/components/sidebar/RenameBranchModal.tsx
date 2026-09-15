@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Edit3, X, AlertCircle, Loader2 } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
+import { useTranslation } from "../../i18n";
 
 export interface RenameBranchModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export const RenameBranchModal: React.FC<RenameBranchModalProps> = ({
   currentName,
   onSuccess,
 }) => {
+  const { t } = useTranslation();
   const [newName, setNewName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,11 +66,11 @@ export const RenameBranchModal: React.FC<RenameBranchModalProps> = ({
     e.preventDefault();
     const trimmed = newName.trim();
     if (!trimmed) {
-      setError("Tên nhánh không được để trống");
+      setError(t.modals.renameBranch.errorEmpty);
       return;
     }
     if (trimmed === currentName) {
-      setError("Tên nhánh mới phải khác tên nhánh hiện tại");
+      setError(t.modals.renameBranch.errorSame);
       return;
     }
 
@@ -81,7 +83,7 @@ export const RenameBranchModal: React.FC<RenameBranchModalProps> = ({
       onClose();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      setError(msg || "Không thể đổi tên nhánh");
+      setError(msg || t.common.error);
     } finally {
       setLoading(false);
     }
@@ -106,13 +108,13 @@ export const RenameBranchModal: React.FC<RenameBranchModalProps> = ({
               id="rename-branch-title"
               className="text-xs font-semibold text-primary m-0"
             >
-              Đổi tên nhánh
+              {t.modals.renameBranch.title}
             </h3>
           </div>
           <button
             onClick={onClose}
             className="flex items-center justify-center bg-transparent border-none cursor-pointer text-secondary hover:text-primary hover:bg-surface-hover p-1 rounded-sm transition-colors"
-            aria-label="Đóng"
+            aria-label={t.common.close}
           >
             <X size={16} />
           </button>
@@ -120,7 +122,7 @@ export const RenameBranchModal: React.FC<RenameBranchModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-3">
           <div className="text-[11px] text-secondary flex items-center gap-1 bg-window px-2.5 py-1.5 rounded-sm border border-border-subtle">
-            <span>Tên hiện tại:</span>
+            <span>{t.modals.renameBranch.currentLabel}:</span>
             <span className="font-mono text-primary font-semibold">
               {currentName}
             </span>
@@ -131,12 +133,12 @@ export const RenameBranchModal: React.FC<RenameBranchModalProps> = ({
               htmlFor="rename-branch-input"
               className="text-xs font-medium text-primary"
             >
-              Tên nhánh mới
+              {t.modals.renameBranch.newLabel}
             </label>
             <input
               ref={inputRef}
               id="rename-branch-input"
-              aria-label="Tên nhánh mới"
+              aria-label={t.modals.renameBranch.newLabel}
               type="text"
               value={newName}
               onChange={handleNameChange}
@@ -159,7 +161,7 @@ export const RenameBranchModal: React.FC<RenameBranchModalProps> = ({
               disabled={loading}
               className="px-3 py-1.5 bg-transparent border border-border-subtle rounded-sm text-xs font-medium text-primary cursor-pointer hover:bg-surface-hover transition-colors disabled:opacity-50"
             >
-              Huỷ bỏ
+              {t.modals.renameBranch.cancel}
             </button>
             <button
               type="submit"
@@ -169,10 +171,10 @@ export const RenameBranchModal: React.FC<RenameBranchModalProps> = ({
               {loading ? (
                 <>
                   <Loader2 size={13} className="animate-spin" />
-                  <span>Đang lưu...</span>
+                  <span>{t.modals.renameBranch.renaming}</span>
                 </>
               ) : (
-                <span>Đổi tên</span>
+                <span>{t.modals.renameBranch.submit}</span>
               )}
             </button>
           </div>

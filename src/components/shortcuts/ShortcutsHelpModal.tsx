@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { X, Keyboard } from "lucide-react";
+import { useTranslation } from "../../i18n";
 
 export interface ShortcutsHelpModalProps {
   isOpen: boolean;
@@ -16,45 +17,50 @@ interface ShortcutSection {
   items: ShortcutItem[];
 }
 
-const SHORTCUT_SECTIONS: ShortcutSection[] = [
-  {
-    title: "Chung",
-    items: [
-      { label: "Command Palette", keys: ["Ctrl+K"] },
-      { label: "Trợ giúp phím tắt", keys: ["?", "Ctrl+/"] },
-      { label: "Đóng modal / Thoát", keys: ["Esc"] },
-    ],
-  },
-  {
-    title: "Điều hướng màn hình",
-    items: [
-      { label: "Màn hình Lịch sử", keys: ["Ctrl+1"] },
-      { label: "Màn hình Thay đổi", keys: ["Ctrl+2"] },
-    ],
-  },
-  {
-    title: "Thao tác Git",
-    items: [
-      { label: "Tạo nhánh mới", keys: ["Ctrl+B"] },
-      { label: "Lưu thay đổi (Commit)", keys: ["Ctrl+Enter"] },
-      { label: "Lấy về (Fetch)", keys: ["Ctrl+Shift+F"] },
-      { label: "Kéo về (Pull)", keys: ["Ctrl+Shift+P"] },
-      { label: "Đẩy lên (Push)", keys: ["Ctrl+Shift+U"] },
-      { label: "Stage tất cả thay đổi", keys: ["Ctrl+Shift+A"] },
-    ],
-  },
-  {
-    title: "Cài đặt & Giao diện",
-    items: [
-      { label: "Đổi giao diện Sáng/Tối", keys: ["Ctrl+T"] },
-    ],
-  },
-];
-
 export const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { t } = useTranslation();
+
+  const sections: ShortcutSection[] = useMemo(
+    () => [
+      {
+        title: t.shortcuts.categories.general,
+        items: [
+          { label: t.shortcuts.items.commandPalette, keys: ["Ctrl+K"] },
+          { label: t.shortcuts.items.shortcutsHelp, keys: ["?", "Ctrl+/"] },
+          { label: t.shortcuts.items.closeModal, keys: ["Esc"] },
+        ],
+      },
+      {
+        title: t.shortcuts.categories.navigation,
+        items: [
+          { label: t.shortcuts.items.historyScreen, keys: ["Ctrl+1"] },
+          { label: t.shortcuts.items.changesScreen, keys: ["Ctrl+2"] },
+        ],
+      },
+      {
+        title: t.shortcuts.categories.git,
+        items: [
+          { label: t.shortcuts.items.createBranch, keys: ["Ctrl+B"] },
+          { label: t.shortcuts.items.commitChanges, keys: ["Ctrl+Enter"] },
+          { label: t.shortcuts.items.fetchRemote, keys: ["Ctrl+Shift+F"] },
+          { label: t.shortcuts.items.pullRemote, keys: ["Ctrl+Shift+P"] },
+          { label: t.shortcuts.items.pushRemote, keys: ["Ctrl+Shift+U"] },
+          { label: t.shortcuts.items.stageAll, keys: ["Ctrl+Shift+A"] },
+        ],
+      },
+      {
+        title: t.shortcuts.categories.settings,
+        items: [
+          { label: t.shortcuts.items.toggleTheme, keys: ["Ctrl+T"] },
+        ],
+      },
+    ],
+    [t]
+  );
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -94,10 +100,10 @@ export const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({
                 id="shortcuts-modal-title"
                 className="text-sm font-semibold text-primary m-0"
               >
-                Bảng phím tắt
+                {t.shortcuts.title}
               </h2>
               <p className="text-[11px] text-secondary m-0">
-                Phím tắt thao tác nhanh trong ứng dụng
+                {t.shortcuts.subtitle}
               </p>
             </div>
           </div>
@@ -105,7 +111,7 @@ export const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({
             type="button"
             onClick={onClose}
             className="flex items-center justify-center w-7 h-7 bg-transparent border-none cursor-pointer text-secondary hover:text-primary hover:bg-surface-hover rounded-md transition-colors"
-            aria-label="Đóng"
+            aria-label={t.common.close}
           >
             <X size={16} />
           </button>
@@ -113,7 +119,7 @@ export const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({
 
         {/* Content */}
         <div className="p-5 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-5">
-          {SHORTCUT_SECTIONS.map((section) => (
+          {sections.map((section) => (
             <div
               key={section.title}
               className="bg-window/50 rounded-lg p-3.5 border border-border-subtle/50 flex flex-col gap-2.5"
@@ -149,8 +155,18 @@ export const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-border-subtle bg-surface-header/20 flex items-center justify-between text-xs text-secondary">
-          <span>Mẹo: Nhấn phím <kbd className="px-1 py-0.2 text-[10px] font-mono bg-window border border-border-subtle rounded">?</kbd> bất cứ lúc nào để xem bảng này</span>
-          <span className="text-[11px] text-secondary/70">Esc để đóng</span>
+          <span>
+            {t.shortcuts.tip.includes("{key}") ? (
+              <>
+                {t.shortcuts.tip.split("{key}")[0]}
+                <kbd className="px-1 py-0.2 text-[10px] font-mono bg-window border border-border-subtle rounded">?</kbd>
+                {t.shortcuts.tip.split("{key}")[1]}
+              </>
+            ) : (
+              t.shortcuts.tip
+            )}
+          </span>
+          <span className="text-[11px] text-secondary/70">{t.shortcuts.escToClose}</span>
         </div>
       </div>
     </div>

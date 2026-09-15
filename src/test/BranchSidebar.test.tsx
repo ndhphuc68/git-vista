@@ -43,7 +43,7 @@ describe("BranchSidebar", () => {
       </QueryClientProvider>
     );
 
-    const newBranchBtn = screen.getByLabelText("Tạo nhánh mới");
+    const newBranchBtn = screen.getByLabelText(/Tạo nhánh mới/i);
     expect(newBranchBtn).toBeInTheDocument();
 
     fireEvent.click(newBranchBtn);
@@ -77,7 +77,7 @@ describe("BranchSidebar", () => {
     expect(renameBtn).toBeInTheDocument();
 
     fireEvent.click(renameBtn);
-    expect(screen.getByText("Đổi tên nhánh")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Đổi tên nhánh" })).toBeInTheDocument();
   });
 });
 

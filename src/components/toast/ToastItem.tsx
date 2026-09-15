@@ -1,13 +1,15 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CheckCircle2, AlertCircle, Info } from "lucide-react";
 import clsx from "clsx";
 import { ToastItem as ToastItemType, useToastStore } from "../../store/useToastStore";
+import { useTranslation } from "../../i18n";
 
 export interface ToastItemProps {
   toast: ToastItemType;
 }
 
 export const ToastItem: React.FC<ToastItemProps> = ({ toast }) => {
+  const { t } = useTranslation();
   const [isUndoing, setIsUndoing] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const removeToast = useToastStore((state) => state.removeToast);
@@ -74,7 +76,7 @@ export const ToastItem: React.FC<ToastItemProps> = ({ toast }) => {
                 onClick={() => setShowDetails((prev) => !prev)}
                 className="text-xs text-slate-400 hover:text-slate-200 underline flex items-center gap-1 cursor-pointer transition-colors"
               >
-                Chi tiết kỹ thuật {showDetails ? "▲" : "▼"}
+                {t.toast.technicalDetails} {showDetails ? "▲" : "▼"}
               </button>
               {showDetails && (
                 <pre className="mt-1.5 p-2 bg-slate-950 text-rose-300 font-mono text-[11px] rounded border border-slate-800 overflow-x-auto max-h-36 whitespace-pre-wrap break-all select-text">
@@ -92,7 +94,7 @@ export const ToastItem: React.FC<ToastItemProps> = ({ toast }) => {
                 disabled={isUndoing}
                 className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-medium text-xs rounded transition-colors cursor-pointer"
               >
-                {isUndoing ? "Đang hoàn tác..." : toast.undoLabel || "Hoàn tác"}
+                {isUndoing ? t.toast.undoing : toast.undoLabel || t.toast.undo}
               </button>
             </div>
           )}
@@ -101,7 +103,7 @@ export const ToastItem: React.FC<ToastItemProps> = ({ toast }) => {
         <button
           type="button"
           onClick={() => removeToast(toast.id)}
-          aria-label="Đóng"
+          aria-label={t.toast.close || t.common.close}
           className="shrink-0 text-slate-400 hover:text-slate-200 transition-colors p-1 rounded hover:bg-slate-800 text-sm leading-none cursor-pointer"
         >
           ✕

@@ -33,8 +33,8 @@ describe("StagingFileList & DiscardConfirmModal", () => {
   it("renders staged and changes sections with correct counts", () => {
     render(<StagingFileList {...mockProps} />);
 
-    expect(screen.getByText(/STAGED \(1\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/CHANGES \(2\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/(TỆP ĐÃ ĐÁNH DẤU|STAGED) \(1\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/(TỆP THAY ĐỔI|CHANGES) \(2\)/i)).toBeInTheDocument();
     expect(screen.getByText("src/staged1.ts")).toBeInTheDocument();
     expect(screen.getByText("src/unstaged1.ts")).toBeInTheDocument();
     expect(screen.getByText("src/untracked1.ts")).toBeInTheDocument();
@@ -88,7 +88,7 @@ describe("StagingFileList & DiscardConfirmModal", () => {
 
     // Modal should be open with warning
     expect(
-      screen.getByRole("heading", { name: /Huỷ thay đổi \/ Discard Changes/i })
+      screen.getByRole("heading", { name: /Huỷ thay đổi/i })
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Các thay đổi trong file này sẽ bị huỷ vĩnh viễn/i)

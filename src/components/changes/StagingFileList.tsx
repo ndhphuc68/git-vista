@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { Plus, Minus, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
 import { RepoStatusResult, StatusFileItem, FileStatus } from "../../ipc/bindings";
 import { DiscardConfirmModal } from "./DiscardConfirmModal";
+import { useTranslation } from "../../i18n";
 
 export interface SelectedWorkingFile {
   path: string;
@@ -26,44 +27,47 @@ export interface StagingFileListProps {
   onOpenConflictResolver?: (filePath: string) => void;
 }
 
-const getStatusBadge = (status: FileStatus | "Untracked") => {
+const getStatusBadge = (
+  status: FileStatus | "Untracked",
+  badgeDict: Record<"conflicted" | "modified" | "untracked" | "deleted" | "renamed", string>
+) => {
   switch (status) {
     case "Conflicted":
       return {
         label: "C",
         className: "bg-diff-remove-bg text-diff-remove-text",
-        title: "Conflicted / Xung đột",
+        title: badgeDict.conflicted,
       };
     case "Modified":
       return {
         label: "M",
         className: "bg-accent-subtle text-accent",
-        title: "Modified / Đã sửa",
+        title: badgeDict.modified,
       };
     case "New":
     case "Untracked":
       return {
         label: "U",
         className: "bg-diff-add-bg text-diff-add-text",
-        title: "Untracked / Tệp mới",
+        title: badgeDict.untracked,
       };
     case "Deleted":
       return {
         label: "D",
         className: "bg-diff-remove-bg text-diff-remove-text",
-        title: "Deleted / Đã xoá",
+        title: badgeDict.deleted,
       };
     case "Renamed":
       return {
         label: "R",
         className: "bg-accent-subtle text-accent",
-        title: "Renamed / Đổi tên",
+        title: badgeDict.renamed,
       };
     default:
       return {
         label: "M",
         className: "bg-window text-secondary",
-        title: status,
+        title: String(status),
       };
   }
 };
@@ -83,6 +87,7 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
   onDiscardFile,
   onOpenConflictResolver,
 }) => {
+  const { t } = useTranslation();
   const [discardTarget, setDiscardTarget] = useState<string | null>(null);
 
   const stagedFiles = staged ?? status?.staged ?? [];
@@ -108,7 +113,7 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
         <div className="flex items-center justify-between px-3 py-2 bg-window text-xs font-semibold text-secondary tracking-[0.5px]">
           <div className="flex items-center gap-1.5">
             <CheckCircle2 size={13} className="text-diff-add-text" />
-            <span>STAGED ({stagedFiles.length})</span>
+            <span>{t.changes.stagedTitle} ({stagedFiles.length})</span>
           </div>
           {stagedFiles.length > 0 && (
             <button
@@ -116,10 +121,10 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
               data-testid="unstage-all-button"
               onClick={onUnstageAll}
               className="flex items-center gap-1 px-1.5 py-0.5 bg-transparent border border-border-subtle rounded-sm text-secondary text-xs cursor-pointer hover:bg-surface-hover hover:text-primary transition-colors duration-fast ease-macos"
-              title="Bỏ đánh dấu tất cả"
+              title={t.changes.unstageAll}
             >
               <Minus size={11} />
-              <span>Bỏ tất cả</span>
+              <span>{t.changes.unstageAll}</span>
             </button>
           )}
         </div>
@@ -127,13 +132,13 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
         <div className="flex flex-col">
           {stagedFiles.length === 0 ? (
             <div className="p-3 text-tertiary text-xs italic">
-              Chưa có file nào được đánh dấu
+              {t.changes.noStagedFiles}
             </div>
           ) : (
             stagedFiles.map((file) => {
               const isSelected =
                 selectedFile?.path === file.path && selectedFile?.is_staged === true;
-              const badge = getStatusBadge(file.status);
+              const badge = getStatusBadge(file.status, t.changes.statusBadge);
 
               return (
                 <div
@@ -176,7 +181,7 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
                         onUnstageFile(file.path);
                       }}
                       className="flex items-center justify-center w-[22px] h-[22px] bg-transparent border border-border-subtle rounded-sm text-secondary cursor-pointer hover:bg-surface-hover hover:text-primary transition-colors duration-fast ease-macos"
-                      title="Bỏ đánh dấu (Unstage)"
+                      title={t.changes.unstageTitle}
                     >
                       <Minus size={12} />
                     </button>
@@ -194,7 +199,7 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
           <div className="flex items-center justify-between px-3 py-2 bg-diff-remove-bg/40 text-xs font-semibold tracking-[0.5px]">
             <div className="flex items-center gap-1.5">
               <AlertCircle size={13} className="text-diff-remove-text" />
-              <span>TỆP XUNG ĐỘT ({conflictedFiles.length})</span>
+              <span>{t.changes.conflictedTitle} ({conflictedFiles.length})</span>
             </div>
           </div>
 
@@ -225,7 +230,7 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
                       }}
                       className="flex items-center gap-1 px-2 py-0.5 bg-diff-remove-text text-white rounded-sm text-xs font-medium cursor-pointer hover:opacity-90 transition-opacity"
                     >
-                      Giải quyết
+                      {t.changes.resolveBtn}
                     </button>
                   </div>
                 </div>
@@ -240,7 +245,7 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
         <div className="flex items-center justify-between px-3 py-2 bg-window text-xs font-semibold text-secondary tracking-[0.5px]">
           <div className="flex items-center gap-1.5">
             <AlertCircle size={13} className="text-accent" />
-            <span>CHANGES ({changesFiles.length})</span>
+            <span>{t.changes.changesTitle} ({changesFiles.length})</span>
           </div>
           {changesFiles.length > 0 && (
             <button
@@ -248,10 +253,10 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
               data-testid="stage-all-button"
               onClick={onStageAll}
               className="flex items-center gap-1 px-1.5 py-0.5 bg-transparent border border-border-subtle rounded-sm text-secondary text-[11px] cursor-pointer hover:bg-surface-hover hover:text-primary transition-colors duration-fast ease-macos"
-              title="Đánh dấu tất cả"
+              title={t.changes.stageAll}
             >
               <Plus size={11} />
-              <span>Đánh dấu tất cả</span>
+              <span>{t.changes.stageAll}</span>
             </button>
           )}
         </div>
@@ -259,13 +264,16 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
         <div className="flex flex-col">
           {changesFiles.length === 0 ? (
             <div className="p-3 text-tertiary text-xs italic">
-              Không có thay đổi nào trong thư mục làm việc
+              {t.changes.noChanges}
             </div>
           ) : (
             changesFiles.map((file) => {
               const isSelected =
                 selectedFile?.path === file.path && selectedFile?.is_staged === false;
-              const badge = getStatusBadge(file.isUntracked ? "Untracked" : file.status);
+              const badge = getStatusBadge(
+                file.isUntracked ? "Untracked" : file.status,
+                t.changes.statusBadge
+              );
 
               return (
                 <div
@@ -308,7 +316,7 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
                         onStageFile(file.path);
                       }}
                       className="flex items-center justify-center w-[22px] h-[22px] bg-transparent border border-border-subtle rounded-sm text-secondary cursor-pointer hover:bg-surface-hover hover:text-primary transition-colors duration-fast ease-macos"
-                      title="Đánh dấu (Stage)"
+                      title={t.changes.stageTitle}
                     >
                       <Plus size={12} />
                     </button>
@@ -321,7 +329,7 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
                         setDiscardTarget(file.path);
                       }}
                       className="flex items-center justify-center w-[22px] h-[22px] bg-transparent border border-border-subtle rounded-sm text-diff-remove-text cursor-pointer hover:bg-diff-remove-bg transition-colors duration-fast ease-macos"
-                      title="Huỷ thay đổi (Discard)"
+                      title={t.discard.title}
                     >
                       <Trash2 size={12} />
                     </button>

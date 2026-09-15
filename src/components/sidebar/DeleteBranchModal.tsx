@@ -3,6 +3,7 @@ import { Trash2, X, AlertTriangle, AlertCircle, Loader2, ShieldCheck } from "luc
 import { invokeCommand } from "../../ipc/client";
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
+import { useTranslation } from "../../i18n";
 
 export interface DeleteBranchModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
   targetCommitId,
   onSuccess,
 }) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isUnmerged, setIsUnmerged] = useState(false);
@@ -57,7 +59,7 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
       const backupRef = await invokeCommand.deleteBranch(repoPath, branchName, force);
       if (targetCommitId) {
         useToastStore.getState().showToast({
-          message: `Đã xoá nhánh ${branchName}`,
+          message: t.modals.deleteBranch.successToast.replace("{name}", branchName),
           type: "success",
           durationMs: 10000,
           undoAction: async () => {
@@ -72,7 +74,7 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
       if (msg.includes("UNMERGED_BRANCH")) {
         setIsUnmerged(true);
       } else {
-        setError(msg || "Không thể xoá nhánh");
+        setError(msg || t.modals.deleteBranch.errorGeneric);
         useToastStore.getState().showError(mapGitError(err));
       }
     } finally {
@@ -99,13 +101,13 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
               id="delete-branch-title"
               className="text-xs font-semibold text-primary m-0"
             >
-              Xoá nhánh
+              {t.modals.deleteBranch.title}
             </h3>
           </div>
           <button
             onClick={onClose}
             className="flex items-center justify-center bg-transparent border-none cursor-pointer text-secondary hover:text-primary hover:bg-surface-hover p-1 rounded-sm transition-colors"
-            aria-label="Đóng"
+            aria-label={t.common.close}
           >
             <X size={16} />
           </button>
@@ -113,7 +115,7 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
 
         <div className="p-4 flex flex-col gap-3">
           <p className="text-xs text-primary leading-normal m-0">
-            Bạn có chắc chắn muốn xoá nhánh sau đây không?
+            {t.modals.deleteBranch.confirmMessage}
           </p>
 
           <div className="px-3 py-2 bg-window rounded-sm border border-border-subtle font-mono text-xs text-primary font-semibold break-all">
@@ -124,9 +126,9 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
             <div className="flex items-start gap-2 p-2.5 bg-diff-remove-bg border border-diff-remove-text/30 rounded-sm text-diff-remove-text text-xs leading-normal">
               <AlertTriangle size={16} className="shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold m-0">Cảnh báo: Nhánh chưa được gộp (Unmerged)</p>
+                <p className="font-semibold m-0">{t.modals.deleteBranch.unmergedTitle}</p>
                 <p className="m-0 mt-1">
-                  Nhánh này chứa các commit chưa được gộp vào nhánh HEAD. Nếu bạn xoá, các commit này sẽ không còn xuất hiện trên nhánh nào nữa.
+                  {t.modals.deleteBranch.unmergedWarning}
                 </p>
               </div>
             </div>
@@ -135,9 +137,9 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
           <div className="flex items-start gap-2 p-2 bg-accent-subtle/40 border border-accent-subtle rounded-sm text-secondary text-[11px] leading-normal">
             <ShieldCheck size={14} className="shrink-0 text-accent mt-0.5" />
             <span>
-              An toàn: Hệ thống sẽ tự động tạo một ref sao lưu trong{" "}
+              {t.modals.deleteBranch.backupNoticePrefix}{" "}
               <code className="text-primary font-mono font-semibold">refs/gitui-backup/</code>{" "}
-              để bạn có thể khôi phục bất kỳ lúc nào trong 30 ngày.
+              {t.modals.deleteBranch.backupNoticeSuffix}
             </span>
           </div>
 
@@ -156,7 +158,7 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
             disabled={loading}
             className="px-3 py-1.5 bg-transparent border border-border-subtle rounded-sm text-xs font-medium text-primary cursor-pointer hover:bg-surface-hover transition-colors disabled:opacity-50"
           >
-            Huỷ bỏ
+            {t.modals.deleteBranch.cancel}
           </button>
           <button
             type="button"
@@ -167,12 +169,12 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
             {loading ? (
               <>
                 <Loader2 size={13} className="animate-spin" />
-                <span>Đang xoá...</span>
+                <span>{t.modals.deleteBranch.deleting}</span>
               </>
             ) : isUnmerged ? (
-              <span>Vẫn xoá nhánh này</span>
+              <span>{t.modals.deleteBranch.forceDelete}</span>
             ) : (
-              <span>Xoá nhánh</span>
+              <span>{t.modals.deleteBranch.safeDelete}</span>
             )}
           </button>
         </div>

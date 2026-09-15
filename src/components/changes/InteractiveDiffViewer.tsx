@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Minus, FileCode, AlertTriangle, Layers } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
+import { useTranslation } from "../../i18n";
 
 export interface InteractiveDiffViewerProps {
   repoPath: string;
@@ -23,6 +24,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
   onStageLines,
   onUnstageLines,
 }) => {
+  const { t } = useTranslation();
   const [hoveredLineKey, setHoveredLineKey] = useState<string | null>(null);
 
   const { data: diff, isLoading, isError } = useQuery({
@@ -34,7 +36,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full text-secondary text-xs">
-        Đang đọc diff...
+        {t.diff.readingDiff}
       </div>
     );
   }
@@ -43,7 +45,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 text-tertiary text-xs">
         <AlertTriangle size={18} className="text-diff-remove-text" />
-        <span>Không thể đọc diff cho tệp này.</span>
+        <span>{t.diff.diffError}</span>
       </div>
     );
   }
@@ -54,7 +56,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 text-secondary text-xs">
         <FileCode size={24} className="text-tertiary" />
-        <span>Tệp nhị phân - không thể hiển thị diff</span>
+        <span>{t.diff.binaryFile}</span>
       </div>
     );
   }
@@ -62,7 +64,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
   if (diff.hunks.length === 0) {
     return (
       <div className="flex items-center justify-center h-full text-tertiary text-xs">
-        Không có thay đổi nội dung
+        {t.diff.noDiffContent}
       </div>
     );
   }
@@ -83,7 +85,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
                 : "bg-surface text-secondary border border-border-subtle"
             )}
           >
-            {isStaged ? "STAGED" : "UNSTAGED"}
+            {isStaged ? t.diff.stagedBadge : t.diff.unstagedBadge}
           </span>
           <span
             className="font-mono text-xs font-semibold text-primary overflow-hidden text-ellipsis whitespace-nowrap"
@@ -119,10 +121,10 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
                   data-testid={`unstage-hunk-${hIdx}`}
                   onClick={() => onUnstageHunk(hIdx)}
                   className="flex items-center gap-1 px-2 py-0.5 bg-surface border border-border-subtle rounded-sm text-primary text-xs font-medium cursor-pointer hover:bg-surface-hover transition-colors"
-                  title="Bỏ đánh dấu đoạn này (Unstage Hunk)"
+                  title={t.diff.unstageHunk}
                 >
                   <Minus size={11} />
-                  <span>Unstage Hunk</span>
+                  <span>{t.diff.unstageHunk}</span>
                 </button>
               ) : (
                 <button
@@ -130,10 +132,10 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
                   data-testid={`stage-hunk-${hIdx}`}
                   onClick={() => onStageHunk(hIdx)}
                   className="flex items-center gap-1 px-2 py-0.5 bg-accent border border-accent rounded-sm text-accent-contrast text-xs font-semibold cursor-pointer hover:bg-accent-hover transition-colors"
-                  title="Đánh dấu đoạn này (Stage Hunk)"
+                  title={t.diff.stageHunk}
                 >
                   <Plus size={11} />
-                  <span>Stage Hunk</span>
+                  <span>{t.diff.stageHunk}</span>
                 </button>
               )}
             </div>
@@ -209,7 +211,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
                           data-testid={`unstage-line-${hIdx}-${lIdx}`}
                           onClick={() => onUnstageLines(hIdx, [lIdx])}
                           className="inline-flex items-center gap-0.5 px-1.5 py-px bg-surface border border-border-subtle rounded-sm text-secondary text-[10px] cursor-pointer hover:bg-surface-hover hover:text-primary transition-colors"
-                          title="Bỏ đánh dấu dòng này"
+                          title={t.diff.unstageSelectedLines}
                         >
                           <Minus size={10} />
                           <span>Line</span>
@@ -220,7 +222,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
                           data-testid={`stage-line-${hIdx}-${lIdx}`}
                           onClick={() => onStageLines(hIdx, [lIdx])}
                           className="inline-flex items-center gap-0.5 px-1.5 py-px bg-accent border border-accent rounded-sm text-accent-contrast text-[10px] cursor-pointer hover:bg-accent-hover transition-colors"
-                          title="Đánh dấu dòng này"
+                          title={t.diff.stageSelectedLines}
                         >
                           <Plus size={10} />
                           <span>Line</span>

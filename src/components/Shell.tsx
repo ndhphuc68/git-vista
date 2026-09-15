@@ -6,8 +6,10 @@ import { CommitDetailPanel } from "./diff/CommitDetailPanel";
 import { useLayoutStore } from "../store/useLayoutStore";
 import { useRepoStore } from "../store/useRepoStore";
 import { useWindowDimensions } from "../hooks/useWindowDimensions";
+import { useTranslation } from "../i18n";
 
 export const Shell: React.FC = () => {
+  const { t } = useTranslation();
   const {
     sidebarOpen,
     sidebarWidth,
@@ -81,7 +83,7 @@ export const Shell: React.FC = () => {
                 onMouseDown={handleResizeMouseDown}
                 onDoubleClick={() => setSidebarWidth(260)}
                 className="w-1 hover:w-1.5 -mr-0.5 h-full cursor-col-resize z-20 transition-all group shrink-0 relative select-none hover:bg-accent active:bg-accent border-r border-border-subtle hover:border-accent"
-                title="Kéo để thay đổi chiều rộng sidebar (Nhấp đúp để đặt lại mặc định)"
+                title={t.shellExt.resizeTooltip}
               >
                 <div className="w-full h-full" />
               </div>

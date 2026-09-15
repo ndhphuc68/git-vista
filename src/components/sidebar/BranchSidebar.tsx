@@ -34,6 +34,7 @@ import { CheckoutConflictModal } from "./CheckoutConflictModal";
 import { StashDiffView } from "../stash/StashDiffView";
 import { MergeBranchModal } from "../merge/MergeBranchModal";
 import { RebaseBranchModal } from "../merge/RebaseBranchModal";
+import { useTranslation } from "../../i18n";
 
 export interface BranchTreeNode {
   isFolder: boolean;
@@ -102,6 +103,7 @@ export function countBranchesInNode(node: BranchTreeNode): number {
 }
 
 export const BranchSidebar: React.FC = () => {
+  const { t } = useTranslation();
   const { currentRepo, selectedBranch, setSelectedBranch } = useRepoStore();
   const { setActiveScreen } = useViewStore();
   const queryClient = useQueryClient();
@@ -389,7 +391,7 @@ export const BranchSidebar: React.FC = () => {
                     className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
                   >
                     <Check size={13} className="text-accent" />
-                    <span>Chuyển tới nhánh này</span>
+                    <span>{t.sidebar.checkoutBranch}</span>
                   </button>
 
                   <button
@@ -401,7 +403,7 @@ export const BranchSidebar: React.FC = () => {
                     className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
                   >
                     <GitMerge size={13} className="text-secondary" />
-                    <span>Gộp vào nhánh hiện tại...</span>
+                    <span>{t.sidebar.mergeIntoCurrent}</span>
                   </button>
 
                   <button
@@ -413,7 +415,7 @@ export const BranchSidebar: React.FC = () => {
                     className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
                   >
                     <GitCommit size={13} className="text-secondary" />
-                    <span>Rebase nhánh hiện tại lên đây...</span>
+                    <span>{t.sidebar.rebaseOntoThis}</span>
                   </button>
                 </>
               )}
@@ -427,7 +429,7 @@ export const BranchSidebar: React.FC = () => {
                 className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
               >
                 <Edit3 size={13} className="text-secondary" />
-                <span>Đổi tên...</span>
+                <span>{t.sidebar.renameBranch}</span>
               </button>
 
               {!branch.is_head && (
@@ -443,7 +445,7 @@ export const BranchSidebar: React.FC = () => {
                   className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-diff-remove-text hover:bg-diff-remove-bg cursor-pointer text-left w-full transition-colors"
                 >
                   <Trash2 size={13} />
-                  <span>Xoá nhánh...</span>
+                  <span>{t.sidebar.deleteBranch}</span>
                 </button>
               )}
             </div>
@@ -552,7 +554,7 @@ export const BranchSidebar: React.FC = () => {
                 className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
               >
                 <Check size={13} className="text-accent" />
-                <span>Chuyển tới nhánh này</span>
+                <span>{t.sidebar.checkoutBranch}</span>
               </button>
 
               <button
@@ -564,7 +566,7 @@ export const BranchSidebar: React.FC = () => {
                 className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
               >
                 <GitMerge size={13} className="text-secondary" />
-                <span>Gộp vào nhánh hiện tại...</span>
+                <span>{t.sidebar.mergeIntoCurrent}</span>
               </button>
 
               <button
@@ -576,7 +578,7 @@ export const BranchSidebar: React.FC = () => {
                 className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
               >
                 <GitCommit size={13} className="text-secondary" />
-                <span>Rebase nhánh hiện tại lên đây...</span>
+                <span>{t.sidebar.rebaseOntoThis}</span>
               </button>
             </div>
           )}
@@ -596,8 +598,8 @@ export const BranchSidebar: React.FC = () => {
             />
             <input
               type="text"
-              placeholder="Tìm nhánh..."
-              aria-label="Tìm nhánh"
+              placeholder={t.sidebar.searchPlaceholder}
+              aria-label={t.sidebar.searchAria}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => {
@@ -612,8 +614,8 @@ export const BranchSidebar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                aria-label="Xoá tìm kiếm"
-                title="Xoá tìm kiếm (Esc)"
+                aria-label={t.sidebar.clearSearchAria}
+                title={t.sidebar.clearSearchTitle}
                 className="p-0.5 -mr-1 text-tertiary hover:text-primary hover:bg-surface-hover rounded-full cursor-pointer transition-colors flex items-center justify-center border-0 bg-transparent"
               >
                 <X size={12} />
@@ -633,18 +635,18 @@ export const BranchSidebar: React.FC = () => {
               <button
                 onClick={() => setLocalOpen(!localOpen)}
                 aria-expanded={localOpen}
-                aria-label="Branches"
+                aria-label={t.sidebar.branches}
                 className="flex items-center gap-1.5 p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
               >
                 {localOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                 <GitBranch size={13} />
-                <span>BRANCHES ({localBranches.length})</span>
+                <span>{t.sidebar.branches} ({localBranches.length})</span>
               </button>
               <button
                 type="button"
                 onClick={() => setIsCreateOpen(true)}
-                aria-label="Tạo nhánh mới"
-                title="Tạo nhánh mới (Ctrl+B)"
+                aria-label={t.sidebar.createBranchTitle}
+                title={t.sidebar.createBranchTitle}
                 className="flex items-center justify-center p-1 bg-transparent border-0 text-secondary hover:text-accent hover:bg-surface-hover rounded-sm cursor-pointer transition-colors"
               >
                 <Plus size={13} />
@@ -663,19 +665,19 @@ export const BranchSidebar: React.FC = () => {
             <button
               onClick={() => setRemoteOpen(!remoteOpen)}
               aria-expanded={remoteOpen}
-              aria-label="Remotes"
+              aria-label={t.sidebar.remotes}
               className="flex items-center gap-1.5 w-full p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
             >
               {remoteOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
               <Cloud size={13} />
-              <span>REMOTES ({remoteBranches.length})</span>
+              <span>{t.sidebar.remotes} ({remoteBranches.length})</span>
             </button>
 
             {remoteOpen && (
               <div className="flex flex-col gap-0.5 mt-1">
                 {remoteBranches.length === 0 ? (
                   <div className="px-2 py-1 text-xs text-tertiary italic">
-                    Không có remote nào.
+                    {t.sidebar.emptyRemotes}
                   </div>
                 ) : (
                   remoteBranchTree.map((node) => renderRemoteTreeNode(node))
@@ -689,19 +691,19 @@ export const BranchSidebar: React.FC = () => {
             <button
               onClick={() => setTagsOpen(!tagsOpen)}
               aria-expanded={tagsOpen}
-              aria-label="Tags"
+              aria-label={t.sidebar.tags}
               className="flex items-center gap-1.5 w-full p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
             >
               {tagsOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
               <Tag size={13} />
-              <span>TAGS ({tags.length})</span>
+              <span>{t.sidebar.tags} ({tags.length})</span>
             </button>
 
             {tagsOpen && (
               <div className="flex flex-col gap-0.5 mt-1">
                 {tags.length === 0 ? (
                   <div className="px-2 py-1 text-xs text-tertiary italic">
-                    Không có tag nào.
+                    {t.sidebar.emptyTags}
                   </div>
                 ) : (
                   tags.map((tag) => (
@@ -723,19 +725,19 @@ export const BranchSidebar: React.FC = () => {
             <button
               onClick={() => setStashOpen(!stashOpen)}
               aria-expanded={stashOpen}
-              aria-label="Stashes"
+              aria-label={t.sidebar.stashes}
               className="flex items-center gap-1.5 w-full p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
             >
               {stashOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
               <Archive size={13} />
-              <span>STASHES ({stashes.length})</span>
+              <span>{t.sidebar.stashes} ({stashes.length})</span>
             </button>
 
             {stashOpen && (
               <div className="flex flex-col gap-0.5 mt-1">
                 {stashes.length === 0 ? (
                   <div className="px-2 py-1 text-xs text-tertiary italic">
-                    Không có stash nào.
+                    {t.sidebar.emptyStashes}
                   </div>
                 ) : (
                   stashes.map((item) => (
@@ -760,7 +762,7 @@ export const BranchSidebar: React.FC = () => {
                       >
                         <button
                           type="button"
-                          title="Áp dụng (Apply)"
+                          title={t.sidebar.applyStashTitle}
                           onClick={() => handleApplyStash(item.index)}
                           className="p-0.5 bg-transparent border-0 text-secondary hover:text-accent cursor-pointer rounded-sm"
                         >
@@ -768,7 +770,7 @@ export const BranchSidebar: React.FC = () => {
                         </button>
                         <button
                           type="button"
-                          title="Áp dụng & Xoá (Pop)"
+                          title={t.sidebar.popStashTitle}
                           onClick={() => handlePopStash(item.index)}
                           className="p-0.5 bg-transparent border-0 text-secondary hover:text-accent cursor-pointer rounded-sm"
                         >
@@ -776,7 +778,7 @@ export const BranchSidebar: React.FC = () => {
                         </button>
                         <button
                           type="button"
-                          title="Xoá Stash (Drop)"
+                          title={t.sidebar.dropStashTitle}
                           onClick={() => handleDropStash(item.index)}
                           className="p-0.5 bg-transparent border-0 text-secondary hover:text-diff-remove-text cursor-pointer rounded-sm"
                         >

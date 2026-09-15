@@ -1,7 +1,8 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Play, PlayCircle, Trash2 } from "lucide-react";
 import { StashItem, CommitDetails } from "../../ipc/bindings";
 import { invokeCommand } from "../../ipc/client";
+import { useTranslation } from "../../i18n";
 
 interface StashDiffViewProps {
   stashItem: StashItem;
@@ -18,6 +19,7 @@ export const StashDiffView: React.FC<StashDiffViewProps> = ({
   onPop,
   onDrop,
 }) => {
+  const { t, locale } = useTranslation();
   const [commitDetails, setCommitDetails] = useState<CommitDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,7 +42,9 @@ export const StashDiffView: React.FC<StashDiffViewProps> = ({
     };
   }, [repoPath, stashItem.commit_id]);
 
-  const createdDate = new Date(stashItem.created_at * 1000).toLocaleString("vi-VN");
+  const createdDate = new Date(stashItem.created_at * 1000).toLocaleString(
+    locale === "vi" ? "vi-VN" : "en-US"
+  );
 
   return (
     <div className="flex flex-col h-full">
@@ -50,28 +54,28 @@ export const StashDiffView: React.FC<StashDiffViewProps> = ({
           type="button"
           onClick={() => onApply(stashItem.index)}
           className="flex items-center gap-1.5 px-2.5 py-1 bg-transparent border border-border-subtle rounded-sm text-xs text-primary hover:bg-surface-hover cursor-pointer transition-colors"
-          title="Ap dung stash vao working tree (khong xoa stash)"
+          title={t.modals.stashDiff.applyTitle}
         >
           <Play size={12} className="text-accent" />
-          <span>Ap dung (Apply)</span>
+          <span>{t.modals.stashDiff.applyBtn}</span>
         </button>
         <button
           type="button"
           onClick={() => onPop(stashItem.index)}
           className="flex items-center gap-1.5 px-2.5 py-1 bg-transparent border border-border-subtle rounded-sm text-xs text-primary hover:bg-surface-hover cursor-pointer transition-colors"
-          title="Ap dung va xoa stash (pop)"
+          title={t.modals.stashDiff.popTitle}
         >
           <PlayCircle size={12} className="text-accent" />
-          <span>Ap dung &amp; Xoa (Pop)</span>
+          <span>{t.modals.stashDiff.popBtn}</span>
         </button>
         <button
           type="button"
           onClick={() => onDrop(stashItem.index)}
           className="flex items-center gap-1.5 px-2.5 py-1 bg-transparent border border-border-subtle rounded-sm text-xs text-diff-remove-text hover:bg-diff-remove-bg cursor-pointer transition-colors"
-          title="Xoa stash vinh vien"
+          title={t.modals.stashDiff.dropTitle}
         >
           <Trash2 size={12} />
-          <span>Xoa Stash (Drop)</span>
+          <span>{t.modals.stashDiff.dropBtn}</span>
         </button>
       </div>
 
@@ -90,14 +94,14 @@ export const StashDiffView: React.FC<StashDiffViewProps> = ({
       <div className="flex-1 overflow-y-auto p-2">
         {error ? (
           <div className="p-3 text-xs text-secondary text-center">
-            <p className="text-tertiary mb-1">Khong the tai chi tiet stash.</p>
+            <p className="text-tertiary mb-1">{t.modals.stashDiff.loadError}</p>
             <p className="font-mono text-[10px] text-tertiary">{stashItem.commit_id.substring(0, 12)}</p>
           </div>
         ) : commitDetails ? (
           <div className="flex flex-col gap-0.5">
             {commitDetails.files.length === 0 ? (
               <div className="text-xs text-tertiary text-center py-4">
-                Stash khong co file nao.
+                {t.modals.stashDiff.emptyFiles}
               </div>
             ) : (
               commitDetails.files.map((file) => (
@@ -130,7 +134,7 @@ export const StashDiffView: React.FC<StashDiffViewProps> = ({
           </div>
         ) : (
           <div className="text-xs text-tertiary text-center py-4">
-            Dang tai...
+            {t.common.loading}
           </div>
         )}
       </div>

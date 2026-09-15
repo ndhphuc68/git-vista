@@ -5,6 +5,7 @@ import { invokeCommand } from "../../ipc/client";
 import { useToastStore } from "../../store/useToastStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { mapGitError } from "../../utils/errorMapping";
+import { useTranslation } from "../../i18n";
 
 export interface CommitBoxProps {
   repoPath: string;
@@ -23,6 +24,7 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
   onSuccess,
   isLoading = false,
 }) => {
+  const { t } = useTranslation();
   const [summary, setSummary] = useState("");
   const [description, setDescription] = useState("");
   const [isAmend, setIsAmend] = useState(false);
@@ -75,7 +77,7 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
       }
 
       useToastStore.getState().showToast({
-        message: isAmend ? "Đã sửa commit (Amend)" : "Đã tạo commit",
+        message: isAmend ? t.commit.amendSuccess : t.commit.commitSuccess,
         type: "success",
         durationMs: 10000,
         undoAction: async () => {
@@ -107,7 +109,7 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
         <div className="flex items-center gap-1.5">
           <GitCommit size={14} className="text-accent" />
           <span className="text-xs font-semibold text-secondary">
-            COMMIT
+            {t.commit.title}
           </span>
         </div>
 
@@ -130,7 +132,7 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Tiêu đề commit (ngắn gọn, dưới 72 ký tự)..."
+          placeholder={t.commit.summaryPlaceholder}
           className={clsx(
             "w-full px-2 py-1.5 bg-window rounded-sm text-xs text-primary outline-none box-border transition-colors",
             isOver72 ? "border border-diff-remove-text focus:border-diff-remove-text" : "border border-border-subtle focus:border-accent"
@@ -140,7 +142,7 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
         {isOver72 && (
           <div className="flex items-center gap-1 text-diff-remove-text text-[10px] mt-0.5">
             <AlertCircle size={11} />
-            <span>Vượt quá 72 ký tự khuyến nghị</span>
+            <span>{t.commit.charLimitWarn}</span>
           </div>
         )}
       </div>
@@ -150,7 +152,7 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Mô tả chi tiết (tuỳ chọn)..."
+        placeholder={t.commit.descPlaceholder}
         rows={3}
         className="w-full px-2 py-1.5 bg-window border border-border-subtle focus:border-accent rounded-sm text-xs text-primary resize-y outline-none font-inherit box-border transition-colors"
       />
@@ -166,8 +168,8 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
           />
           <span>
             {mode === "simple"
-              ? "Sửa commit vừa tạo"
-              : "Amend (Sửa commit gần nhất)"}
+              ? t.commit.amendSimple
+              : t.commit.amendAdvanced}
           </span>
         </label>
 
@@ -191,15 +193,19 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
         {submitting || isLoading ? (
           <>
             <RefreshCw size={13} className="animate-spin" />
-            <span>Đang lưu...</span>
+            <span>{t.commit.saving}</span>
           </>
         ) : isAmend ? (
-          <span>{mode === "simple" ? "Sửa commit trước" : "Amend Commit"}</span>
+          <span>
+            {mode === "simple"
+              ? t.commit.amendCommitSimple
+              : t.commit.amendCommitAdvanced}
+          </span>
         ) : (
           <span>
             {mode === "simple"
-              ? `Lưu thay đổi (${stagedCount} tệp)`
-              : `Commit (${stagedCount} files)`}
+              ? t.commit.commitSimple.replace("{count}", String(stagedCount))
+              : t.commit.commitAdvanced.replace("{count}", String(stagedCount))}
           </span>
         )}
       </button>

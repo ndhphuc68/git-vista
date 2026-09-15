@@ -32,7 +32,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
   // Đọc thiết lập ban đầu từ localStorage nếu có
   const savedTheme = (typeof localStorage !== "undefined" && (localStorage.getItem("theme") as Theme)) || "system";
   const savedColorblind = typeof localStorage !== "undefined" && localStorage.getItem("colorblind") === "true";
-  const savedLocale = (typeof localStorage !== "undefined" && (localStorage.getItem("locale") as Locale)) || "en";
+  const savedLocale = (typeof localStorage !== "undefined" && (localStorage.getItem("locale") as Locale)) || "vi";
   const savedMode = (typeof localStorage !== "undefined" && (localStorage.getItem("mode") as AppMode)) || "simple";
 
   const resolved = savedTheme === "system" ? getSystemTheme() : savedTheme;

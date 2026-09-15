@@ -1,5 +1,6 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { X, GitCommit, AlertTriangle, ArrowRight } from "lucide-react";
+import { useTranslation } from "../../i18n";
 
 export interface RebaseBranchModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const RebaseBranchModal: React.FC<RebaseBranchModalProps> = ({
   hasUncommittedChanges,
   onRebase,
 }) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,14 +56,14 @@ export const RebaseBranchModal: React.FC<RebaseBranchModalProps> = ({
         onClose();
       } else {
         if (res.status === "Conflict") {
-          setError("Rebase bi xung dot. Hay giai quyet conflict roi dung Continue.");
+          setError(t.modals.rebase.conflictError);
         } else {
-          setError(res.output || `Rebase that bai (${res.status})`);
+          setError(res.output || t.modals.rebase.genericError.replace("{msg}", res.status));
         }
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      setError(`Loi khi rebase: ${msg}`);
+      setError(t.modals.rebase.genericError.replace("{msg}", msg));
     } finally {
       setLoading(false);
     }
@@ -87,13 +89,13 @@ export const RebaseBranchModal: React.FC<RebaseBranchModalProps> = ({
               id="rebase-branch-title"
               className="text-xs font-semibold text-primary m-0"
             >
-              Rebase nhanh
+              {t.modals.rebase.title}
             </h3>
           </div>
           <button
             onClick={onClose}
             className="flex items-center justify-center bg-transparent border-none cursor-pointer text-secondary hover:text-primary hover:bg-surface-hover p-1 rounded-sm transition-colors"
-            aria-label="Dong"
+            aria-label={t.common.close}
           >
             <X size={16} />
           </button>
@@ -108,13 +110,13 @@ export const RebaseBranchModal: React.FC<RebaseBranchModalProps> = ({
           </div>
 
           <p className="text-xs text-secondary leading-normal m-0">
-            Cac commit cua nhanh hien tai se duoc viet lai tren dinh cua nhanh dich.
+            {t.modals.rebase.desc}
           </p>
 
           {hasUncommittedChanges && (
             <div className="flex items-start gap-2 p-2.5 bg-diff-remove-bg border border-diff-remove-text/30 rounded-sm text-diff-remove-text text-xs">
               <AlertTriangle size={14} className="shrink-0 mt-0.5" />
-              <span>Can working tree sach de rebase. Hay stash hoac commit truoc.</span>
+              <span>{t.modals.rebase.uncommittedWarn}</span>
             </div>
           )}
 
@@ -133,16 +135,17 @@ export const RebaseBranchModal: React.FC<RebaseBranchModalProps> = ({
             disabled={loading}
             className="px-3 py-1.5 bg-transparent border border-border-subtle rounded-sm text-xs font-medium text-primary cursor-pointer hover:bg-surface-hover transition-colors disabled:opacity-50"
           >
-            Huy
+            {t.modals.rebase.cancel}
           </button>
           <button
             type="button"
+            aria-label={t.modals.rebase.submit}
             onClick={handleRebaseSubmit}
             disabled={loading || hasUncommittedChanges}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white border-none rounded-sm text-xs font-semibold cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <GitCommit size={13} />
-            <span>{loading ? "Dang rebase..." : "Rebase"}</span>
+            <span>{loading ? t.modals.rebase.rebasing : t.modals.rebase.submit}</span>
           </button>
         </div>
       </div>

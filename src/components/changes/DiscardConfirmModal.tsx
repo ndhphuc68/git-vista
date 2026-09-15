@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { AlertTriangle, X } from "lucide-react";
+import { useTranslation } from "../../i18n";
 
 export interface DiscardConfirmModalProps {
   isOpen: boolean;
@@ -14,6 +15,8 @@ export const DiscardConfirmModal: React.FC<DiscardConfirmModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -49,13 +52,13 @@ export const DiscardConfirmModal: React.FC<DiscardConfirmModalProps> = ({
               id="discard-modal-title"
               className="text-xs font-semibold text-primary m-0"
             >
-              Huỷ thay đổi / Discard Changes
+              {t.discard.title}
             </h3>
           </div>
           <button
             onClick={onCancel}
             className="flex items-center justify-center bg-transparent border-none cursor-pointer text-secondary hover:text-primary hover:bg-surface-hover p-1 rounded-sm transition-colors"
-            aria-label="Đóng"
+            aria-label={t.common.close}
           >
             <X size={16} />
           </button>
@@ -63,7 +66,7 @@ export const DiscardConfirmModal: React.FC<DiscardConfirmModalProps> = ({
 
         <div className="p-4 flex flex-col gap-3">
           <p className="text-xs text-primary leading-normal m-0">
-            Các thay đổi trong file này sẽ bị huỷ vĩnh viễn và không thể khôi phục.
+            {t.discard.description}
           </p>
 
           <div className="px-3 py-2 bg-window rounded-sm border border-border-subtle font-mono text-xs text-primary break-all">
@@ -78,7 +81,7 @@ export const DiscardConfirmModal: React.FC<DiscardConfirmModalProps> = ({
             onClick={onCancel}
             className="px-3 py-1.5 bg-transparent border border-border-subtle rounded-sm text-xs font-medium text-primary cursor-pointer hover:bg-surface-hover transition-colors"
           >
-            Huỷ bỏ
+            {t.discard.cancel}
           </button>
 
           <button
@@ -87,7 +90,7 @@ export const DiscardConfirmModal: React.FC<DiscardConfirmModalProps> = ({
             onClick={onConfirm}
             className="px-3 py-1.5 bg-diff-remove-text border-none rounded-sm text-xs font-semibold text-white cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all"
           >
-            Huỷ thay đổi
+            {t.discard.confirm}
           </button>
         </div>
       </div>

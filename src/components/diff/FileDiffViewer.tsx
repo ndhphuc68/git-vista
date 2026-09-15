@@ -2,6 +2,7 @@ import React from "react";
 import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
 import { invokeCommand } from "../../ipc/client";
+import { useTranslation } from "../../i18n";
 
 interface FileDiffViewerProps {
   repoPath: string;
@@ -10,6 +11,7 @@ interface FileDiffViewerProps {
 }
 
 export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commitId, filePath }) => {
+  const { t } = useTranslation();
   const { data: diff, isLoading } = useQuery({
     queryKey: ["file-diff", repoPath, commitId, filePath],
     queryFn: () => invokeCommand.getCommitFileDiff(repoPath, commitId, filePath),
@@ -19,7 +21,7 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
     return (
       <div className="p-8 text-secondary text-xs flex items-center justify-center gap-2 h-48">
         <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-        <span>Đang đọc diff...</span>
+        <span>{t.diff.readingDiff}</span>
       </div>
     );
   }
@@ -27,7 +29,7 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
   if (!diff || diff.hunks.length === 0) {
     return (
       <div className="p-8 text-tertiary text-xs text-center">
-        Không có thay đổi văn bản cho tệp này.
+        {t.diff.noTextChanges}
       </div>
     );
   }

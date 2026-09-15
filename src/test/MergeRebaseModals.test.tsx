@@ -19,11 +19,11 @@ describe("MergeBranchModal Component", () => {
       />
     );
 
-    expect(screen.getByText(/Gop nhanh/i)).toBeInTheDocument();
+    expect(screen.getByText("Gộp nhánh (Merge)")).toBeInTheDocument();
     expect(screen.getByText("feature/login")).toBeInTheDocument();
     expect(screen.getByText("main")).toBeInTheDocument();
 
-    const mergeBtn = screen.getByRole("button", { name: /Gop nhanh/i });
+    const mergeBtn = screen.getByRole("button", { name: /Gộp nhánh/i });
     fireEvent.click(mergeBtn);
 
     await waitFor(() => {
@@ -48,7 +48,7 @@ describe("RebaseBranchModal Component", () => {
       />
     );
 
-    expect(screen.getByText("Rebase nhanh")).toBeInTheDocument();
+    expect(screen.getByText("Rebase nhánh")).toBeInTheDocument();
     expect(screen.getByText("feature/login")).toBeInTheDocument();
     expect(screen.getByText("main")).toBeInTheDocument();
 
@@ -72,7 +72,7 @@ describe("RebaseBranchModal Component", () => {
       />
     );
 
-    expect(screen.getByText(/Can working tree sach de rebase/i)).toBeInTheDocument();
+    expect(screen.getByText(/Cần working tree sạch để rebase/i)).toBeInTheDocument();
     const rebaseBtn = screen.getByRole("button", { name: "Rebase" });
     expect(rebaseBtn).toBeDisabled();
   });

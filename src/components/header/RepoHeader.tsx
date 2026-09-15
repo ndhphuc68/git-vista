@@ -43,7 +43,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
   } = useLayoutStore();
   const { theme, setTheme, locale, setLocale, mode, setMode } = useSettingsStore();
   const { isMobile } = useWindowDimensions();
-  const { t } = useTranslation();
+  const { t, actions } = useTranslation();
   const queryClient = useQueryClient();
 
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -99,8 +99,8 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
     const taskId = `task-fetch-${Date.now()}`;
     setActiveRemoteTask({
       taskId,
-      title: "Đang Fetch từ remote",
-      statusText: "Bắt đầu...",
+      title: t.remoteProgress.fetchTitle,
+      statusText: t.remoteProgress.starting,
       progressPercent: 0,
     });
     setIsRemotePending(true);
@@ -120,8 +120,8 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
     const taskId = `task-pull-${Date.now()}`;
     setActiveRemoteTask({
       taskId,
-      title: "Đang kéo dữ liệu (Pull)",
-      statusText: "Bắt đầu...",
+      title: t.remoteProgress.pullTitle,
+      statusText: t.remoteProgress.starting,
       progressPercent: 0,
     });
     setIsRemotePending(true);
@@ -142,8 +142,8 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
     const setUpstream = !headInfo?.upstream;
     setActiveRemoteTask({
       taskId,
-      title: "Đang đẩy dữ liệu (Push)",
-      statusText: "Bắt đầu...",
+      title: t.remoteProgress.pushTitle,
+      statusText: t.remoteProgress.starting,
       progressPercent: 0,
     });
     setIsRemotePending(true);
@@ -230,7 +230,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
               "flex items-center justify-center w-7 h-7 border border-border-subtle rounded-md cursor-pointer shrink-0 transition-colors",
               sidebarOpen ? "bg-accent-subtle text-accent font-semibold" : "bg-transparent text-secondary hover:bg-surface-hover hover:text-primary"
             )}
-            title={`Bật/tắt thanh bên (${shortcutSidebar})`}
+            title={t.header.toggleSidebar.replace("{shortcut}", shortcutSidebar)}
           >
             <PanelLeft size={14} />
           </button>
@@ -238,10 +238,10 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
           <button
             onClick={onBackToWelcome}
             className="flex items-center gap-1 px-2 py-1 bg-surface border border-border-subtle rounded-md text-secondary text-xs cursor-pointer shrink-0 hover:bg-surface-hover hover:text-primary transition-colors shadow-2xs"
-            title="Đổi repository"
+            title={t.header.switchRepo}
           >
             <ArrowLeft size={12} />
-            {!isMobile && <span>Kho</span>}
+            {!isMobile && <span>{t.header.repoBtn}</span>}
           </button>
 
           {/* Repo Name Pill */}
@@ -330,10 +330,10 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
               onClick={handleFetch}
               disabled={isRemotePending}
               className="flex items-center gap-1.5 px-2.5 py-1 text-secondary hover:text-primary hover:bg-surface-hover text-xs font-medium cursor-pointer transition-colors disabled:opacity-50"
-              title="Fetch từ remote"
+              title={t.header.fetchTitle}
             >
               <RefreshCw size={12} className={isRemotePending && activeRemoteTask?.title.includes("Fetch") ? "animate-spin" : ""} />
-              <span>{mode === "simple" ? "Lấy về" : "Fetch"}</span>
+              <span>{actions.fetch}</span>
             </button>
 
             {/* Pull */}
@@ -343,15 +343,15 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
               onClick={handlePull}
               disabled={isRemotePending}
               className="flex items-center gap-1.5 px-2.5 py-1 text-secondary hover:text-primary hover:bg-surface-hover text-xs font-medium cursor-pointer transition-colors disabled:opacity-50"
-              title="Pull commit mới từ remote"
+              title={t.header.pullTitle}
             >
               <ArrowDown size={12} className="text-accent" />
-              <span>{mode === "simple" ? "Kéo về" : "Pull"}</span>
+              <span>{actions.pull}</span>
               {behindCount > 0 && (
                 <span
                   data-testid="behind-badge"
                   className="inline-flex items-center justify-center px-1.5 min-w-[15px] h-3.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 leading-none font-mono"
-                  title={`${behindCount} commit cần pull`}
+                  title={t.header.commitsBehind.replace("{count}", String(behindCount))}
                 >
                   {behindCount}
                 </span>
@@ -370,15 +370,15 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
                   ? "bg-accent text-accent-contrast font-bold hover:bg-accent-hover rounded-r-xs"
                   : "text-secondary hover:text-primary hover:bg-surface-hover font-medium"
               )}
-              title={headInfo?.upstream ? "Push commit lên remote" : "Push và thiết lập upstream lên remote"}
+              title={headInfo?.upstream ? t.header.pushNormal : t.header.pushUpstream}
             >
               <ArrowUp size={12} />
-              <span>{mode === "simple" ? "Đẩy lên" : "Push"}</span>
+              <span>{actions.push}</span>
               {aheadCount > 0 && (
                 <span
                   data-testid="ahead-badge"
                   className="inline-flex items-center justify-center px-1.5 min-w-[15px] h-3.5 rounded-full text-[10px] font-bold bg-white/30 text-white leading-none font-mono"
-                  title={`${aheadCount} commit cần push`}
+                  title={t.header.commitsAhead.replace("{count}", String(aheadCount))}
                 >
                   {aheadCount}
                 </span>
@@ -393,7 +393,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
             <button
               onClick={() => queryClient.invalidateQueries()}
               className="flex items-center justify-center w-7 h-7 bg-surface border border-border-subtle rounded-md text-secondary cursor-pointer hover:bg-surface-hover hover:text-primary transition-colors shadow-2xs"
-              title="Tải lại dữ liệu repo"
+              title={t.header.refreshRepo}
             >
               <RefreshCw size={12} />
             </button>
@@ -406,7 +406,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
                 "flex items-center justify-center w-7 h-7 border border-border-subtle rounded-md cursor-pointer transition-colors shadow-2xs",
                 settingsOpen ? "bg-accent-subtle text-accent" : "bg-surface text-secondary hover:bg-surface-hover hover:text-primary"
               )}
-              title="Cài đặt (Theme, Ngôn ngữ, Chế độ Git)"
+              title={t.header.settingsTitle}
             >
               <Settings size={13} />
             </button>
@@ -418,7 +418,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="font-bold text-primary border-b border-border-subtle pb-1.5 flex items-center justify-between">
-                  <span>Cài đặt hệ thống</span>
+                  <span>{t.header.settingsMenuTitle}</span>
                   <button
                     onClick={() => setSettingsOpen(false)}
                     className="text-secondary hover:text-primary p-0.5"
@@ -429,7 +429,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
 
                 {/* Theme options */}
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">Giao diện</span>
+                  <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">{t.settings.theme}</span>
                   <div className="grid grid-cols-3 gap-1 bg-window p-0.5 rounded-md border border-border-subtle">
                     {(["light", "dark", "system"] as Theme[]).map((tVal) => (
                       <button
@@ -446,7 +446,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
                         {tVal === "light" && <Sun size={11} />}
                         {tVal === "dark" && <Moon size={11} />}
                         {tVal === "system" && <Laptop size={11} />}
-                        <span className="capitalize">{tVal}</span>
+                        <span className="capitalize">{tVal === "light" ? t.settings.themeLight : tVal === "dark" ? t.settings.themeDark : t.settings.themeSystem}</span>
                       </button>
                     ))}
                   </div>
@@ -454,7 +454,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
 
                 {/* Locale options */}
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">Ngôn ngữ</span>
+                  <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">{t.settings.language}</span>
                   <div className="grid grid-cols-2 gap-1 bg-window p-0.5 rounded-md border border-border-subtle">
                     {(["vi", "en"] as Locale[]).map((loc) => (
                       <button
@@ -476,14 +476,14 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
 
                 {/* Mode options */}
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">Chế độ Git</span>
+                  <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">{t.settings.mode}</span>
                   <button
                     onClick={() => setMode(mode === "simple" ? "advanced" : "simple")}
                     className="flex items-center justify-between px-2 py-1.5 rounded-md bg-window hover:bg-surface-hover border border-border-subtle text-primary font-medium cursor-pointer transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <Terminal size={12} className="text-accent" />
-                      <span>{mode === "simple" ? "Chế độ Đơn giản" : "Chế độ Nâng cao"}</span>
+                      <span>{mode === "simple" ? t.settings.modeSimple : t.settings.modeAdvanced}</span>
                     </div>
                     <span className="text-[10px] text-accent font-bold uppercase">{mode}</span>
                   </button>

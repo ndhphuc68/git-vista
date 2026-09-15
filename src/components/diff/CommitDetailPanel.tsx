@@ -19,6 +19,7 @@ import { useRepoStore } from "../../store/useRepoStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
 import { invokeCommand } from "../../ipc/client";
 import { FileDiffViewer } from "./FileDiffViewer";
+import { useTranslation, formatRelativeTime as i18nFormatRelativeTime } from "../../i18n";
 
 interface CommitDetailPanelProps {
   onClose?: () => void;
@@ -52,7 +53,21 @@ export function getAuthorInitials(name: string): string {
   return name.slice(0, 2).toUpperCase();
 }
 
-export function formatRelativeTime(timestampSec: number): string {
+export function formatRelativeTime(
+  timestampSec: number,
+  timeDict?: {
+    justNow: string;
+    minutesAgo: string;
+    hoursAgo: string;
+    yesterday: string;
+    daysAgo: string;
+    monthsAgo: string;
+    yearsAgo: string;
+  }
+): string {
+  if (timeDict) {
+    return i18nFormatRelativeTime(timestampSec, timeDict);
+  }
   const now = Math.floor(Date.now() / 1000);
   const diff = now - timestampSec;
 
@@ -133,12 +148,15 @@ export function splitFilePath(fullPath: string): { dir: string; fileName: string
   };
 }
 
-export function getFileStatusMeta(status: string) {
+export function getFileStatusMeta(
+  status: string,
+  dict?: { added: string; deleted: string; renamed: string; modified: string }
+) {
   const s = (status || "").toUpperCase();
   if (s.startsWith("A") || s === "ADDED") {
     return {
       code: "A",
-      label: "Thêm mới",
+      label: dict?.added ?? "Thêm mới",
       badgeClass:
         "bg-diff-add-bg text-diff-add-text border-diff-add-border font-bold",
     };
@@ -146,7 +164,7 @@ export function getFileStatusMeta(status: string) {
   if (s.startsWith("D") || s === "DELETED") {
     return {
       code: "D",
-      label: "Đã xoá",
+      label: dict?.deleted ?? "Đã xoá",
       badgeClass:
         "bg-diff-remove-bg text-diff-remove-text border-diff-remove-border font-bold",
     };
@@ -154,20 +172,21 @@ export function getFileStatusMeta(status: string) {
   if (s.startsWith("R") || s === "RENAMED") {
     return {
       code: "R",
-      label: "Đổi tên",
+      label: dict?.renamed ?? "Đổi tên",
       badgeClass:
         "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 border-purple-300 dark:border-purple-800 font-bold",
     };
   }
   return {
     code: "M",
-    label: "Sửa đổi",
+    label: dict?.modified ?? "Sửa đổi",
     badgeClass:
       "bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border-amber-300 dark:border-amber-800 font-bold",
   };
 }
 
 export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose }) => {
+  const { t } = useTranslation();
   const {
     currentRepo,
     selectedCommitId,
@@ -282,8 +301,8 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
   }, [details?.author_name]);
 
   const relativeTime = useMemo(() => {
-    return details ? formatRelativeTime(details.author_timestamp_sec) : "";
-  }, [details]);
+    return details ? formatRelativeTime(details.author_timestamp_sec, t.diff.time) : "";
+  }, [details, t.diff.time]);
 
   const exactDateTime = useMemo(() => {
     return details ? formatExactDateTime(details.author_timestamp_sec) : "";
@@ -330,7 +349,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
     return (
       <div className="flex flex-col items-center justify-center h-full text-tertiary text-xs gap-2 p-6">
         <GitCommit size={28} className="opacity-40" />
-        <span className="font-medium">Chọn một commit để xem chi tiết và diff</span>
+        <span className="font-medium">{t.diff.selectCommitPrompt}</span>
       </div>
     );
   }
@@ -339,12 +358,12 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
     return (
       <div className="p-8 text-secondary text-xs flex items-center justify-center gap-3 h-full">
         <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-        <span className="font-medium">Đang tải thông tin commit...</span>
+        <span className="font-medium">{t.diff.loadingCommitDetails}</span>
       </div>
     );
   }
 
-  const selectedFileMeta = selectedFile ? getFileStatusMeta(selectedFile.status) : null;
+  const selectedFileMeta = selectedFile ? getFileStatusMeta(selectedFile.status, t.diff.fileStatus) : null;
   const selectedPathParts = selectedFile ? splitFilePath(selectedFile.path) : null;
 
   return (
@@ -357,13 +376,13 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
           </span>
           <div className="flex items-center gap-2.5 min-w-0">
             <span className="font-bold text-sm text-primary tracking-tight">
-              Chi tiết Commit
+              {t.diff.commitDetailsTitle}
             </span>
             <button
               type="button"
               onClick={() => handleCopySha(details.id)}
               className="flex items-center gap-1.5 font-mono text-xs px-2 py-0.5 rounded-md bg-surface border border-border-subtle hover:bg-surface-hover text-accent font-semibold cursor-pointer transition-colors shadow-2xs"
-              title="Nhấp để sao chép mã SHA đầy đủ"
+              title={t.diff.copyShaTooltip}
             >
               <span>{details.id.substring(0, 7)}</span>
               {copiedSha ? (
@@ -388,8 +407,8 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
           <button
             type="button"
             onClick={handleClose}
-            aria-label="Đóng chi tiết commit"
-            title="Đóng chi tiết commit (Phím Esc)"
+            aria-label={t.diff.closeDetailAria}
+            title={t.diff.closeDetailTitle}
             className="px-2.5 py-1 rounded-md bg-surface hover:bg-surface-hover active:bg-surface-active text-secondary hover:text-primary text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors border border-border-subtle shadow-2xs"
           >
             <span>Đóng</span>
@@ -452,7 +471,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
                 </div>
                 <div
                   className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-surface flex items-center justify-center shadow-2xs"
-                  title="Tác giả commit"
+                  title={t.diff.authorTitle}
                 >
                   <UserCheck size={9} className="text-white stroke-[3]" />
                 </div>
@@ -482,7 +501,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
 
                 <div
                   className="flex items-center gap-1 text-[11px] text-secondary font-mono mt-0.5"
-                  title="Thời gian commit"
+                  title={t.diff.commitTimeTitle}
                 >
                   <Calendar size={11} className="shrink-0 text-tertiary" />
                   <span className="truncate">{exactDateTime}</span>
@@ -494,9 +513,13 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
           {/* Files List Header with Search Filter */}
           <div className="p-2 border-b border-border-subtle bg-window flex flex-col gap-1.5">
             <div className="flex items-center justify-between text-[11px] font-bold text-secondary tracking-wide uppercase px-1">
-              <span>CÁC TỆP THAY ĐỔI</span>
+              <span>{t.diff.filesChangedHeader}</span>
               <span className="text-tertiary font-mono text-[10px] font-normal lowercase">
-                {fileFilter ? `${filteredFiles.length} / ${details.files.length} tệp` : `${details.files.length} tệp`}
+                {fileFilter
+                  ? t.diff.filesCountFiltered
+                      .replace("{filtered}", String(filteredFiles.length))
+                      .replace("{total}", String(details.files.length))
+                  : t.diff.filesCount.replace("{count}", String(details.files.length))}
               </span>
             </div>
 
@@ -510,7 +533,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
                 type="text"
                 value={fileFilter}
                 onChange={(e) => setFileFilter(e.target.value)}
-                placeholder="Lọc tệp thay đổi..."
+                placeholder={t.diff.searchFilesPlaceholder}
                 className="w-full pl-7 pr-7 py-1 text-xs rounded-md bg-surface border border-border-subtle text-primary placeholder:text-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
               />
               {fileFilter && (
@@ -518,7 +541,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
                   type="button"
                   onClick={() => setFileFilter("")}
                   className="absolute right-2 text-tertiary hover:text-primary cursor-pointer"
-                  title="Xóa bộ lọc"
+                  title={t.diff.clearFilterTitle}
                 >
                   <X size={12} />
                 </button>
@@ -530,12 +553,12 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
           <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
             {filteredFiles.length === 0 ? (
               <div className="py-6 text-center text-xs text-tertiary">
-                Không tìm thấy tệp phù hợp
+                {t.diff.noMatchingFiles}
               </div>
             ) : (
               filteredFiles.map((file) => {
                 const isSelected = selectedFilePath === file.path;
-                const statusMeta = getFileStatusMeta(file.status);
+                const statusMeta = getFileStatusMeta(file.status, t.diff.fileStatus);
                 const { dir, fileName } = splitFilePath(file.path);
 
                 return (
@@ -602,7 +625,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
           onMouseDown={handleResizeMouseDown}
           onDoubleClick={() => setFilesWidth(340)}
           className="w-1 hover:w-1.5 -mr-0.5 h-full cursor-col-resize z-10 transition-all group shrink-0 relative select-none hover:bg-accent active:bg-accent border-r border-border-subtle hover:border-accent"
-          title="Kéo để thay đổi chiều rộng cột tệp (Nhấp đúp để đặt lại 340px)"
+          title={t.diff.resizerTooltip}
         >
           <div className="w-full h-full" />
         </div>
@@ -631,7 +654,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
 
                   <div className="flex items-center text-xs font-mono min-w-0 truncate">
                     <span className="text-tertiary mr-1.5 hidden md:inline font-sans text-[11px]">
-                      Tệp:
+                      {t.diff.fileLabel}
                     </span>
                     <span className="font-bold text-primary truncate">
                       {selectedPathParts?.dir
@@ -645,7 +668,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
                     type="button"
                     onClick={() => handleCopyFilePath(selectedFile.path)}
                     className="p-1 rounded hover:bg-surface-hover text-tertiary hover:text-primary transition-colors cursor-pointer shrink-0"
-                    title="Sao chép đường dẫn tệp"
+                    title={t.diff.copyPathTooltip}
                   >
                     {copiedFilePath ? (
                       <Check size={13} className="text-diff-add-text" />
@@ -673,7 +696,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
                     onClick={handlePrevFile}
                     disabled={!hasPrev}
                     className="p-1 rounded border border-border-subtle bg-surface hover:bg-surface-hover disabled:opacity-30 disabled:pointer-events-none text-secondary hover:text-primary transition-colors cursor-pointer"
-                    title="Tệp trước"
+                    title={t.diff.prevFile}
                   >
                     <ChevronLeft size={14} />
                   </button>
@@ -683,7 +706,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
                     onClick={handleNextFile}
                     disabled={!hasNext}
                     className="p-1 rounded border border-border-subtle bg-surface hover:bg-surface-hover disabled:opacity-30 disabled:pointer-events-none text-secondary hover:text-primary transition-colors cursor-pointer"
-                    title="Tệp tiếp theo"
+                    title={t.diff.nextFile}
                   >
                     <ChevronRight size={14} />
                   </button>
@@ -702,7 +725,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-tertiary text-xs gap-2">
               <Folder size={24} className="opacity-40" />
-              <span>Chọn một tệp từ danh sách bên trái để xem diff</span>
+              <span>{t.diff.selectFilePrompt}</span>
             </div>
           )}
         </div>
