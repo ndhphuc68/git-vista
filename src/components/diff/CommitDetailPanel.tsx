@@ -9,6 +9,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Folder,
+  Calendar,
+  Clock,
+  Mail,
+  UserCheck,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
@@ -18,6 +22,104 @@ import { FileDiffViewer } from "./FileDiffViewer";
 
 interface CommitDetailPanelProps {
   onClose?: () => void;
+}
+
+const AVATAR_STYLES = [
+  { bg: "bg-indigo-600 text-white", ring: "ring-indigo-300 dark:ring-indigo-800" },
+  { bg: "bg-emerald-600 text-white", ring: "ring-emerald-300 dark:ring-emerald-800" },
+  { bg: "bg-violet-600 text-white", ring: "ring-violet-300 dark:ring-violet-800" },
+  { bg: "bg-amber-600 text-white", ring: "ring-amber-300 dark:ring-amber-800" },
+  { bg: "bg-rose-600 text-white", ring: "ring-rose-300 dark:ring-rose-800" },
+  { bg: "bg-cyan-600 text-white", ring: "ring-cyan-300 dark:ring-cyan-800" },
+  { bg: "bg-teal-600 text-white", ring: "ring-teal-300 dark:ring-teal-800" },
+];
+
+export function getAuthorAvatarStyle(name: string) {
+  let hash = 0;
+  for (let i = 0; i < (name || "").length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % AVATAR_STYLES.length;
+  return AVATAR_STYLES[index]!;
+}
+
+export function getAuthorInitials(name: string): string {
+  if (!name) return "??";
+  const parts = name.trim().split(/[\s._-]+/);
+  if (parts.length >= 2 && parts[0] && parts[parts.length - 1]) {
+    return (parts[0][0]! + parts[parts.length - 1]![0]!).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+}
+
+export function formatRelativeTime(timestampSec: number): string {
+  const now = Math.floor(Date.now() / 1000);
+  const diff = now - timestampSec;
+
+  if (diff < 0 || diff < 60) return "Vừa xong";
+  if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
+  if (diff < 86400 * 2) return "Hôm qua";
+  if (diff < 86400 * 30) return `${Math.floor(diff / 86400)} ngày trước`;
+  if (diff < 86400 * 365) return `${Math.floor(diff / (86400 * 30))} tháng trước`;
+  return `${Math.floor(diff / (86400 * 365))} năm trước`;
+}
+
+export function formatExactDateTime(timestampSec: number): string {
+  const date = new Date(timestampSec * 1000);
+  const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+  const day = pad(date.getDate());
+  const month = pad(date.getMonth() + 1);
+  const year = date.getFullYear();
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  const seconds = pad(date.getSeconds());
+  return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
+}
+
+export function parseCommitMessage(message: string) {
+  const lines = (message || "").split("\n");
+  const subject = lines[0] || "";
+  const body = lines.slice(1).join("\n").trim();
+
+  const match = subject.match(/^([a-zA-Z]+)(?:\(([^)]+)\))?:\s*(.+)$/);
+  if (match && match[1] && match[3]) {
+    return {
+      type: match[1].toLowerCase(),
+      scope: match[2] || null,
+      cleanSubject: match[3],
+      fullSubject: subject,
+      body,
+    };
+  }
+  return {
+    type: null,
+    scope: null,
+    cleanSubject: subject,
+    fullSubject: subject,
+    body,
+  };
+}
+
+export function getTypeBadgeStyle(type: string | null) {
+  switch (type) {
+    case "feat":
+      return "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border-blue-300 dark:border-blue-800";
+    case "fix":
+      return "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300 border-red-300 dark:border-red-800";
+    case "docs":
+      return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800";
+    case "refactor":
+      return "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border-amber-300 dark:border-amber-800";
+    case "style":
+      return "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 border-purple-300 dark:border-purple-800";
+    case "test":
+      return "bg-cyan-100 text-cyan-800 dark:bg-cyan-950 dark:text-cyan-300 border-cyan-300 dark:border-cyan-800";
+    case "chore":
+      return "bg-stone-100 text-stone-800 dark:bg-stone-800 dark:text-stone-300 border-stone-300 dark:border-stone-700";
+    default:
+      return "bg-accent-subtle text-accent border-accent/30";
+  }
 }
 
 export function splitFilePath(fullPath: string): { dir: string; fileName: string } {
@@ -166,14 +268,26 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
     window.addEventListener("mouseup", handleMouseUp);
   };
 
-  // Commit message subject and body
-  const { subject, body } = useMemo(() => {
-    if (!details?.full_message) return { subject: "", body: "" };
-    const lines = details.full_message.split("\n");
-    const subject = lines[0] || "";
-    const body = lines.slice(1).join("\n").trim();
-    return { subject, body };
+  // Commit message parsed with conventional commits & body
+  const parsedMsg = useMemo(() => {
+    return parseCommitMessage(details?.full_message || "");
   }, [details?.full_message]);
+
+  const authorAvatarStyle = useMemo(() => {
+    return getAuthorAvatarStyle(details?.author_name || "");
+  }, [details?.author_name]);
+
+  const authorInitials = useMemo(() => {
+    return getAuthorInitials(details?.author_name || "");
+  }, [details?.author_name]);
+
+  const relativeTime = useMemo(() => {
+    return details ? formatRelativeTime(details.author_timestamp_sec) : "";
+  }, [details]);
+
+  const exactDateTime = useMemo(() => {
+    return details ? formatExactDateTime(details.author_timestamp_sec) : "";
+  }, [details]);
 
   // Filtered files list
   const filteredFiles = useMemo(() => {
@@ -294,32 +408,85 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
           style={{ width: `${filesWidth}px` }}
           className="border-r border-border-subtle bg-window flex flex-col shrink-0 overflow-hidden"
         >
-          {/* Commit Message & Author Card */}
-          <div className="p-3.5 border-b border-border-subtle bg-surface flex flex-col gap-2.5 shadow-2xs">
-            {/* Subject */}
-            <h3 className="text-xs font-bold text-primary leading-snug break-words">
-              {subject || details.full_message}
-            </h3>
-
-            {/* Optional body */}
-            {body && (
-              <p className="text-[11px] text-secondary leading-relaxed max-h-24 overflow-y-auto whitespace-pre-wrap bg-window/50 p-2 rounded border border-border-subtle">
-                {body}
-              </p>
-            )}
-
-            {/* Author info */}
-            <div className="flex items-center gap-2.5 pt-2 text-secondary text-[11px] border-t border-border-subtle">
-              <div className="w-6 h-6 rounded-full bg-accent text-accent-contrast font-bold flex items-center justify-center text-[11px] shrink-0 ring-1 ring-border-subtle">
-                {details.author_name.charAt(0).toUpperCase()}
+          {/* Commit Message & Author Hero Card */}
+          <div className="p-3.5 border-b border-border-subtle bg-surface flex flex-col gap-3 shadow-2xs">
+            {/* Subject with Conventional Commits Type Badge */}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-start gap-2 flex-wrap">
+                {parsedMsg.type && (
+                  <span
+                    className={clsx(
+                      "px-2 py-0.5 rounded text-[11px] font-mono font-bold tracking-wide uppercase border shadow-2xs shrink-0",
+                      getTypeBadgeStyle(parsedMsg.type)
+                    )}
+                  >
+                    {parsedMsg.type}
+                    {parsedMsg.scope ? `(${parsedMsg.scope})` : ""}
+                  </span>
+                )}
+                <h3 className="text-sm font-bold text-primary leading-snug break-words flex-1">
+                  {parsedMsg.cleanSubject || parsedMsg.fullSubject || details.full_message}
+                </h3>
               </div>
-              <div className="flex flex-col min-w-0">
-                <span className="font-semibold text-primary truncate leading-tight">
-                  {details.author_name}
-                </span>
-                <span className="text-tertiary text-[10px] truncate leading-tight font-mono">
-                  {new Date(details.author_timestamp_sec * 1000).toLocaleString()}
-                </span>
+
+              {/* Optional body */}
+              {parsedMsg.body && (
+                <div className="text-xs text-secondary leading-relaxed max-h-28 overflow-y-auto whitespace-pre-wrap bg-window/60 p-2.5 rounded-md border border-border-subtle font-sans border-l-2 border-l-accent mt-1">
+                  {parsedMsg.body}
+                </div>
+              )}
+            </div>
+
+            {/* Author & Timestamp Section */}
+            <div className="flex items-center gap-3 pt-2.5 border-t border-border-subtle/70">
+              {/* Avatar */}
+              <div className="relative shrink-0">
+                <div
+                  className={clsx(
+                    "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-sm ring-2 select-none",
+                    authorAvatarStyle.bg,
+                    authorAvatarStyle.ring
+                  )}
+                >
+                  {authorInitials}
+                </div>
+                <div
+                  className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-surface flex items-center justify-center shadow-2xs"
+                  title="Tác giả commit"
+                >
+                  <UserCheck size={9} className="text-white stroke-[3]" />
+                </div>
+              </div>
+
+              {/* Author Meta */}
+              <div className="flex flex-col min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-1">
+                  <span className="font-bold text-sm text-primary truncate leading-tight">
+                    {details.author_name}
+                  </span>
+                  <div
+                    className="flex items-center gap-1 text-[10px] text-accent font-semibold bg-accent-subtle/80 px-1.5 py-0.5 rounded border border-accent/20 shrink-0"
+                    title={exactDateTime}
+                  >
+                    <Clock size={10} className="shrink-0" />
+                    <span>{relativeTime}</span>
+                  </div>
+                </div>
+
+                {details.author_email && (
+                  <span className="text-[11px] text-tertiary truncate leading-tight flex items-center gap-1 font-mono mt-0.5">
+                    <Mail size={10} className="shrink-0 opacity-70" />
+                    <span className="truncate">{details.author_email}</span>
+                  </span>
+                )}
+
+                <div
+                  className="flex items-center gap-1 text-[11px] text-secondary font-mono mt-0.5"
+                  title="Thời gian commit"
+                >
+                  <Calendar size={11} className="shrink-0 text-tertiary" />
+                  <span className="truncate">{exactDateTime}</span>
+                </div>
               </div>
             </div>
           </div>
