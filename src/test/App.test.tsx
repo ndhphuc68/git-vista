@@ -73,6 +73,9 @@ describe("Visual Git Client - M1 App Shell", () => {
       expect(document.documentElement.getAttribute("data-theme")).toBe("light");
     });
 
+    const settingsBtn = screen.getByTitle("Cài đặt (Theme, Ngôn ngữ, Chế độ Git)");
+    fireEvent.click(settingsBtn);
+
     const darkBtn = screen.getByTitle("Theme: dark");
     fireEvent.click(darkBtn);
 

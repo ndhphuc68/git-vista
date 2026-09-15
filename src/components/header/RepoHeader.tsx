@@ -9,7 +9,6 @@ import {
   FileDiff,
   PanelLeft,
   PanelRight,
-  SlidersHorizontal,
   ArrowDown,
   ArrowUp,
   Settings,
@@ -44,8 +43,6 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
     toggleSidebar,
     detailPanelOpen,
     toggleDetailPanel,
-    controlsOpen,
-    toggleControls,
   } = useLayoutStore();
   const { theme, setTheme, locale, setLocale, mode, setMode } = useSettingsStore();
   const { isMobile } = useWindowDimensions();
@@ -392,22 +389,8 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
             </button>
           </div>
 
-          {/* Khối Công Cụ Phải: Detail Panel toggle, Controls toggle, Refresh & Settings */}
+          {/* Khối Công Cụ Phải: Detail Panel toggle, Refresh & Settings */}
           <div className="flex items-center gap-1 pl-1 border-l border-border-subtle relative" ref={settingsMenuRef}>
-            {/* Toggle ControlsBar / DevTools */}
-            <button
-              type="button"
-              data-testid="toggle-controls"
-              onClick={toggleControls}
-              className={clsx(
-                "flex items-center gap-1 px-2 py-1 border border-border-subtle rounded-md text-xs cursor-pointer transition-colors",
-                controlsOpen ? "bg-accent-subtle text-accent font-semibold" : "bg-surface text-secondary hover:text-primary hover:bg-surface-hover shadow-2xs"
-              )}
-              title="Bật/tắt thanh công cụ"
-            >
-              <SlidersHorizontal size={12} />
-              {!isMobile && <span>Thanh công cụ</span>}
-            </button>
 
             {/* Toggle Detail Panel */}
             {isHistoryActive && (

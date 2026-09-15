@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ControlsBar } from "./components/ControlsBar";
 import { Shell } from "./components/Shell";
 import { WelcomeScreen } from "./components/welcome/WelcomeScreen";
 import { RepoHeader } from "./components/header/RepoHeader";
 import { ChangesScreen } from "./components/changes/ChangesScreen";
 import { InProgressOperationBanner } from "./components/banner/InProgressOperationBanner";
-import { listenToRepoChanged, RepoChangedPayload, invokeCommand } from "./ipc/client";
+import { listenToRepoChanged, invokeCommand } from "./ipc/client";
 import { RepoSummary } from "./ipc/bindings";
 import { useRepoStore } from "./store/useRepoStore";
 import { useViewStore } from "./store/useViewStore";
-import { useLayoutStore } from "./store/useLayoutStore";
 import { useSettingsStore } from "./store/useSettingsStore";
 import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
 import { CreateBranchModal } from "./components/sidebar/CreateBranchModal";
@@ -33,8 +31,6 @@ const queryClient = new QueryClient({
 interface RepoContentProps {
   currentRepo: RepoSummary;
   clearRepo: () => void;
-  controlsOpen: boolean;
-  lastEvent: RepoChangedPayload | null;
   isGlobalCreateBranchOpen: boolean;
   setIsGlobalCreateBranchOpen: (open: boolean) => void;
 }
@@ -42,8 +38,6 @@ interface RepoContentProps {
 const RepoContent: React.FC<RepoContentProps> = ({
   currentRepo,
   clearRepo,
-  controlsOpen,
-  lastEvent,
   isGlobalCreateBranchOpen,
   setIsGlobalCreateBranchOpen,
 }) => {
@@ -68,7 +62,6 @@ const RepoContent: React.FC<RepoContentProps> = ({
 
   return (
     <>
-      {controlsOpen && <ControlsBar lastEvent={lastEvent} />}
       <RepoHeader onBackToWelcome={clearRepo} />
       <InProgressOperationBanner
         repoState={repoState}
@@ -110,11 +103,9 @@ const RepoContent: React.FC<RepoContentProps> = ({
 };
 
 export const App: React.FC = () => {
-  const [lastEvent, setLastEvent] = useState<RepoChangedPayload | null>(null);
   const [isGlobalCreateBranchOpen, setIsGlobalCreateBranchOpen] = useState(false);
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const { currentRepo, setRepo, clearRepo } = useRepoStore();
-  const { controlsOpen } = useLayoutStore();
   const { setActiveScreen } = useViewStore();
   const { resolvedTheme, setTheme, mode, setMode } = useSettingsStore();
   const { open: openCommandPalette, close: closeCommandPalette } = useCommandPaletteStore();
@@ -163,7 +154,6 @@ export const App: React.FC = () => {
 
     listenToRepoChanged((payload) => {
       console.log("🔔 [Event] repo-changed payload:", payload);
-      setLastEvent(payload);
       // Invalidate queries khi repo thay đổi theo mục 4.4 của spec
       queryClient.invalidateQueries();
     }).then((unlisten) => {
@@ -187,8 +177,6 @@ export const App: React.FC = () => {
           <RepoContent
             currentRepo={currentRepo}
             clearRepo={clearRepo}
-            controlsOpen={controlsOpen}
-            lastEvent={lastEvent}
             isGlobalCreateBranchOpen={isGlobalCreateBranchOpen}
             setIsGlobalCreateBranchOpen={setIsGlobalCreateBranchOpen}
           />

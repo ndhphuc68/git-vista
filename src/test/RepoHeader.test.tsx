@@ -227,15 +227,12 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
     );
 
     const toggleSidebarBtn = screen.getByTestId("toggle-sidebar");
-    const toggleControlsBtn = screen.getByTestId("toggle-controls");
     const toggleDetailPanelBtn = screen.getByTestId("toggle-detail-panel");
 
     expect(toggleSidebarBtn).toBeInTheDocument();
-    expect(toggleControlsBtn).toBeInTheDocument();
     expect(toggleDetailPanelBtn).toBeInTheDocument();
 
     fireEvent.click(toggleSidebarBtn);
-    fireEvent.click(toggleControlsBtn);
     fireEvent.click(toggleDetailPanelBtn);
   });
 
