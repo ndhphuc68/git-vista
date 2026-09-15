@@ -4,11 +4,13 @@ export type ChangesViewMode = "split" | "files" | "diff";
 
 export interface LayoutState {
   sidebarOpen: boolean;
+  sidebarWidth: number;
   detailPanelOpen: boolean;
   controlsOpen: boolean;
   devToolsOpen: boolean;
   activeChangesView: ChangesViewMode;
   setSidebarOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
+  setSidebarWidth: (width: number) => void;
   setDetailPanelOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
   setControlsOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
   setDevToolsOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
@@ -21,10 +23,21 @@ export interface LayoutState {
 
 export const useLayoutStore = create<LayoutState>((set) => ({
   sidebarOpen: true,
+  sidebarWidth:
+    typeof window !== "undefined"
+      ? Number(localStorage.getItem("gitvista_sidebar_width")) || 260
+      : 260,
   detailPanelOpen: true,
   controlsOpen: true,
   devToolsOpen: false,
   activeChangesView: "split",
+
+  setSidebarWidth: (width: number) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gitvista_sidebar_width", String(width));
+    }
+    set({ sidebarWidth: width });
+  },
 
   setSidebarOpen: (open) =>
     set((state) => ({

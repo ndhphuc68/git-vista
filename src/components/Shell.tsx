@@ -8,13 +8,44 @@ import { useRepoStore } from "../store/useRepoStore";
 import { useWindowDimensions } from "../hooks/useWindowDimensions";
 
 export const Shell: React.FC = () => {
-  const { sidebarOpen, detailPanelOpen, toggleSidebar, setDetailPanelOpen } = useLayoutStore();
+  const {
+    sidebarOpen,
+    sidebarWidth,
+    setSidebarWidth,
+    detailPanelOpen,
+    toggleSidebar,
+    setDetailPanelOpen,
+  } = useLayoutStore();
   const { setSelectedCommit } = useRepoStore();
   const { isMobile } = useWindowDimensions();
 
   const handleCloseDetail = () => {
     setDetailPanelOpen(false);
     setSelectedCommit(null);
+  };
+
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = sidebarWidth;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const delta = moveEvent.clientX - startX;
+      const newWidth = Math.min(Math.max(startWidth + delta, 180), 520);
+      setSidebarWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
   };
 
   return (
@@ -34,12 +65,27 @@ export const Shell: React.FC = () => {
           )}
           <div
             data-testid="shell-sidebar-container"
+            style={!isMobile ? { width: `${sidebarWidth}px` } : undefined}
             className={clsx(
-              isMobile ? "absolute inset-y-0 left-0 z-30 shadow-lg" : "relative z-1",
-              "w-60 h-full shrink-0"
+              isMobile ? "absolute inset-y-0 left-0 z-30 shadow-lg w-72" : "relative z-1",
+              "h-full shrink-0 flex"
             )}
           >
-            <BranchSidebar />
+            <div className="flex-1 h-full min-w-0 overflow-hidden">
+              <BranchSidebar />
+            </div>
+
+            {/* Resizer Handle */}
+            {!isMobile && (
+              <div
+                onMouseDown={handleResizeMouseDown}
+                onDoubleClick={() => setSidebarWidth(260)}
+                className="w-1 hover:w-1.5 -mr-0.5 h-full cursor-col-resize z-20 transition-all group shrink-0 relative select-none hover:bg-accent active:bg-accent border-r border-border-subtle hover:border-accent"
+                title="Kéo để thay đổi chiều rộng sidebar (Nhấp đúp để đặt lại mặc định)"
+              >
+                <div className="w-full h-full" />
+              </div>
+            )}
           </div>
         </>
       )}

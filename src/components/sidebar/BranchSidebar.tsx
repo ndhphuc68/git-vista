@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import clsx from "clsx";
 import {
   GitBranch,
-  Globe,
+  Cloud,
   Tag,
   ChevronDown,
   ChevronRight,
@@ -453,7 +453,7 @@ export const BranchSidebar: React.FC = () => {
 
   return (
     <>
-      <aside className="bg-surface border-r border-border-subtle w-60 shrink-0 h-full flex flex-col overflow-y-auto">
+      <aside className="bg-surface border-r border-border-subtle w-full shrink-0 h-full flex flex-col overflow-y-auto">
         <div className="px-3 py-2 border-b border-border-subtle">
           <div className="flex items-center gap-1.5 bg-window rounded-sm px-2 py-1 border border-border-subtle">
             <Search size={12} className="text-tertiary shrink-0" />
@@ -469,18 +469,18 @@ export const BranchSidebar: React.FC = () => {
         </div>
 
         <div className="p-2 flex flex-col gap-3">
-          {/* LOCAL BRANCHES */}
+          {/* BRANCHES */}
           <div>
             <div className="flex items-center justify-between">
               <button
                 onClick={() => setLocalOpen(!localOpen)}
                 aria-expanded={localOpen}
-                aria-label="Nhánh cục bộ"
-                className="flex items-center gap-1 p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
+                aria-label="Branches"
+                className="flex items-center gap-1.5 p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
               >
                 {localOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                 <GitBranch size={13} />
-                <span>NHÁNH CỤC BỘ ({localBranches.length})</span>
+                <span>BRANCHES ({localBranches.length})</span>
               </button>
               <button
                 type="button"
@@ -500,43 +500,13 @@ export const BranchSidebar: React.FC = () => {
             )}
           </div>
 
-          {/* REMOTE BRANCHES */}
-          <div>
-            <button
-              onClick={() => setRemoteOpen(!remoteOpen)}
-              aria-expanded={remoteOpen}
-              aria-label="Nhánh máy chủ"
-              className="flex items-center gap-1 w-full p-1 bg-transparent border-0 text-secondary font-semibold text-xs cursor-pointer"
-            >
-              {remoteOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-              <Globe size={13} />
-              <span>NHÁNH MÁY CHỦ ({remoteBranches.length})</span>
-            </button>
-
-            {remoteOpen && (
-              <div className="flex flex-col gap-0.5 mt-1">
-                {remoteBranches.map((branch) => (
-                  <div
-                    key={branch.name}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded-sm text-secondary text-xs overflow-hidden text-ellipsis whitespace-nowrap"
-                  >
-                    <Globe size={11} className="text-tertiary shrink-0" />
-                    <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-                      {branch.name}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
           {/* TAGS */}
           <div>
             <button
               onClick={() => setTagsOpen(!tagsOpen)}
               aria-expanded={tagsOpen}
               aria-label="Tags"
-              className="flex items-center gap-1 w-full p-1 bg-transparent border-0 text-secondary font-semibold text-xs cursor-pointer"
+              className="flex items-center gap-1.5 w-full p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
             >
               {tagsOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
               <Tag size={13} />
@@ -545,36 +515,79 @@ export const BranchSidebar: React.FC = () => {
 
             {tagsOpen && (
               <div className="flex flex-col gap-0.5 mt-1">
-                {tags.map((tag) => (
-                  <div
-                    key={tag}
-                    className="px-2 py-1 text-xs text-secondary"
-                  >
-                    {tag}
+                {tags.length === 0 ? (
+                  <div className="px-2 py-1 text-xs text-tertiary italic">
+                    Không có tag nào.
                   </div>
-                ))}
+                ) : (
+                  tags.map((tag) => (
+                    <div
+                      key={tag}
+                      className="flex items-center gap-1.5 px-2 py-1 rounded-sm text-secondary hover:text-primary hover:bg-surface-hover text-xs cursor-default transition-colors"
+                    >
+                      <Tag size={11} className="text-tertiary shrink-0" />
+                      <span className="truncate">{tag}</span>
+                    </div>
+                  ))
+                )}
               </div>
             )}
           </div>
 
-          {/* STASH */}
+          {/* REMOTES */}
+          <div>
+            <button
+              onClick={() => setRemoteOpen(!remoteOpen)}
+              aria-expanded={remoteOpen}
+              aria-label="Remotes"
+              className="flex items-center gap-1.5 w-full p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
+            >
+              {remoteOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+              <Cloud size={13} />
+              <span>REMOTES ({remoteBranches.length})</span>
+            </button>
+
+            {remoteOpen && (
+              <div className="flex flex-col gap-0.5 mt-1">
+                {remoteBranches.length === 0 ? (
+                  <div className="px-2 py-1 text-xs text-tertiary italic">
+                    Không có remote nào.
+                  </div>
+                ) : (
+                  remoteBranches.map((branch) => (
+                    <div
+                      key={branch.name}
+                      className="flex items-center gap-1.5 px-2 py-1 rounded-sm text-secondary hover:text-primary hover:bg-surface-hover text-xs overflow-hidden text-ellipsis whitespace-nowrap cursor-default transition-colors"
+                    >
+                      <Cloud size={11} className="text-tertiary shrink-0" />
+                      <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+                        {branch.name}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* STASHES */}
           <div>
             <button
               onClick={() => setStashOpen(!stashOpen)}
               aria-expanded={stashOpen}
-              aria-label="Stash"
-              className="flex items-center gap-1 w-full p-1 bg-transparent border-0 text-secondary font-semibold text-xs cursor-pointer"
+              aria-label="Stashes"
+              className="flex items-center gap-1.5 w-full p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
             >
               {stashOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
               <Archive size={13} />
-              <span>STASH ({stashes.length})</span>
+              <span>STASHES ({stashes.length})</span>
             </button>
 
             {stashOpen && (
               <div className="flex flex-col gap-0.5 mt-1">
                 {stashes.length === 0 ? (
                   <div className="px-2 py-1 text-xs text-tertiary italic">
-                    Khong co stash nao.
+                    Không có stash nào.
                   </div>
                 ) : (
                   stashes.map((item) => (
@@ -599,7 +612,7 @@ export const BranchSidebar: React.FC = () => {
                       >
                         <button
                           type="button"
-                          title="Ap dung (Apply)"
+                          title="Áp dụng (Apply)"
                           onClick={() => handleApplyStash(item.index)}
                           className="p-0.5 bg-transparent border-0 text-secondary hover:text-accent cursor-pointer rounded-sm"
                         >
@@ -607,7 +620,7 @@ export const BranchSidebar: React.FC = () => {
                         </button>
                         <button
                           type="button"
-                          title="Ap dung & Xoa (Pop)"
+                          title="Áp dụng & Xoá (Pop)"
                           onClick={() => handlePopStash(item.index)}
                           className="p-0.5 bg-transparent border-0 text-secondary hover:text-accent cursor-pointer rounded-sm"
                         >
@@ -615,7 +628,7 @@ export const BranchSidebar: React.FC = () => {
                         </button>
                         <button
                           type="button"
-                          title="Xoa Stash (Drop)"
+                          title="Xoá Stash (Drop)"
                           onClick={() => handleDropStash(item.index)}
                           className="p-0.5 bg-transparent border-0 text-secondary hover:text-diff-remove-text cursor-pointer rounded-sm"
                         >
