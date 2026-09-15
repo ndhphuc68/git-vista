@@ -157,6 +157,54 @@ describe("WelcomeScreen", () => {
     // Reset back to English
     useSettingsStore.getState().setLocale("en");
   });
+
+  it("copies repo path to clipboard when clicking copy button", async () => {
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: vi.fn().mockResolvedValue(undefined),
+      },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <WelcomeScreen onSelectRepo={vi.fn()} />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("project-v3")).toBeInTheDocument();
+    });
+
+    const copyBtn = screen.getByLabelText(/Copy path|Sao chép đường dẫn/i);
+    expect(copyBtn).toBeInTheDocument();
+    fireEvent.click(copyBtn);
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith("d:/project-v3");
+  });
+
+  it("pins and unpins a repository when clicking star button", async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <WelcomeScreen onSelectRepo={vi.fn()} />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("project-v3")).toBeInTheDocument();
+    });
+
+    const pinBtn = screen.getByLabelText(/Pin to top|Ghim lên đầu/i);
+    expect(pinBtn).toBeInTheDocument();
+
+    // Click to pin
+    fireEvent.click(pinBtn);
+    expect(screen.getByLabelText(/Unpin|Bỏ ghim/i)).toBeInTheDocument();
+
+    // Click to unpin
+    fireEvent.click(screen.getByLabelText(/Unpin|Bỏ ghim/i));
+    expect(screen.getByLabelText(/Pin to top|Ghim lên đầu/i)).toBeInTheDocument();
+  });
 });
+
 
 
