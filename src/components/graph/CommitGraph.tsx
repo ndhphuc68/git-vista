@@ -162,7 +162,7 @@ export const CommitGraph: React.FC = () => {
     <div className="h-full w-full flex flex-col bg-surface overflow-hidden select-none">
       {/* 3-Column Header */}
       <div className="h-8 px-3 flex items-center border-b border-border-subtle bg-window text-[11px] font-mono text-secondary uppercase tracking-wider select-none shrink-0">
-        <span className="w-64 shrink-0 pl-2">BRANCH / TAG</span>
+        <span className="w-80 shrink-0 pl-2">BRANCH / TAG</span>
         <span className="w-32 shrink-0 pl-2">GRAPH</span>
         <span className="flex-1 pl-2">COMMIT MESSAGE</span>
         <span className="w-36 text-right pr-2">TÁC GIẢ</span>
@@ -199,7 +199,7 @@ export const CommitGraph: React.FC = () => {
             aria-label="Xem thay đổi chưa lưu (Working directory changes)"
             className="flex items-center px-3 h-8 bg-amber-50/50 dark:bg-amber-950/25 hover:bg-amber-100/60 dark:hover:bg-amber-950/45 border-b border-border-subtle cursor-pointer transition-colors group shrink-0"
           >
-            <div className="w-64 shrink-0 pr-2 flex items-center justify-end">
+            <div className="w-80 shrink-0 pr-2 flex items-center justify-end">
               <span className="text-[10px] font-mono font-bold text-sky-700 dark:text-sky-400 bg-sky-100 dark:bg-sky-900/50 px-1.5 py-0.5 rounded">
                 // WIP
               </span>
@@ -269,6 +269,8 @@ export const CommitGraph: React.FC = () => {
             const isSelected = selectedCommitId === commit.id;
             const isHead = commit.refs.some((r) => r.ref_type === "head");
             const isMerge = commit.lines.some((l) => l.edge_type === "merge");
+            const displayedRefs = commit.refs.slice(0, 2);
+            const remainingCount = commit.refs.length - displayedRefs.length;
 
             return (
               <div
@@ -308,18 +310,18 @@ export const CommitGraph: React.FC = () => {
                 )}
               >
                 {/* Col 1: Branch / Tag Pills */}
-                <div className="w-64 shrink-0 pr-2 flex items-center justify-end overflow-visible gap-1.5">
-                  {commit.refs.map((r, i) => {
+                <div className="w-80 shrink-0 pr-2 flex items-center justify-end overflow-visible gap-1.5 min-w-0">
+                  {displayedRefs.map((r, i) => {
                     const isHeadRef = r.ref_type === "head";
                     const isTagRef = r.ref_type === "tag";
                     const style = getBranchPillStyle(r.name, isHeadRef, isTagRef);
 
                     return (
-                      <div key={i} className="relative group/pill shrink-0 max-w-[210px]">
+                      <div key={i} className="relative group/pill min-w-0 shrink max-w-[190px]">
                         <div
                           title={r.name}
                           className={clsx(
-                            "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-mono border shadow-2xs cursor-pointer transition-all hover:brightness-95 hover:shadow-xs",
+                            "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-mono border shadow-2xs cursor-pointer transition-all hover:brightness-95 hover:shadow-xs min-w-0",
                             style.container
                           )}
                         >
@@ -330,22 +332,35 @@ export const CommitGraph: React.FC = () => {
                           ) : (
                             <span className={clsx("w-1.5 h-1.5 rounded-full shrink-0", style.dot)} />
                           )}
-                          <span className="truncate max-w-[170px]">{r.name}</span>
+                          <span className="truncate min-w-0">{r.name}</span>
                           {isHeadRef && (
-                            <span className="text-[8.5px] px-1 bg-white/25 rounded font-bold ml-0.5">
+                            <span className="text-[8.5px] px-1 bg-white/25 rounded font-bold ml-0.5 shrink-0">
                               HEAD
                             </span>
                           )}
                         </div>
 
                         {/* Hover floating tooltip displaying full branch name */}
-                        <div className="absolute right-0 bottom-full mb-1.5 hidden group-hover/pill:flex items-center gap-1.5 px-2.5 py-1 bg-slate-900/95 dark:bg-slate-800 text-white text-[11px] font-mono rounded-md shadow-xl z-50 pointer-events-none whitespace-nowrap border border-slate-700/60">
+                        <div
+                          className={clsx(
+                            "absolute left-0 hidden group-hover/pill:flex items-center gap-1.5 px-2.5 py-1 bg-slate-900/95 dark:bg-slate-800 text-white text-[11px] font-mono rounded-md shadow-xl z-50 pointer-events-none whitespace-nowrap border border-slate-700/60 animate-fade-in",
+                            virtualRow.index === 0 ? "top-full mt-1.5" : "bottom-full mb-1.5"
+                          )}
+                        >
                           <span className={clsx("w-1.5 h-1.5 rounded-full shrink-0", style.dot)} />
                           <span>{r.name}</span>
                         </div>
                       </div>
                     );
                   })}
+                  {remainingCount > 0 && (
+                    <div
+                      title={commit.refs.slice(2).map((r) => r.name).join(", ")}
+                      className="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-surface border border-border-strong text-secondary shrink-0 cursor-help"
+                    >
+                      +{remainingCount}
+                    </div>
+                  )}
                   {commit.refs.length > 0 && (
                     <span className="w-2.5 h-[1.5px] bg-border-strong ml-0.5 shrink-0" />
                   )}
