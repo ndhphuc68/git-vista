@@ -23,8 +23,8 @@ describe("BranchSidebar", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("main")).toBeInTheDocument();
-      expect(screen.getByText("origin/main")).toBeInTheDocument();
+      expect(screen.getAllByText("main").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText("origin")).toBeInTheDocument();
     });
   });
 
@@ -67,7 +67,7 @@ describe("BranchSidebar", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("main")).toBeInTheDocument();
+      expect(screen.getAllByText("main").length).toBeGreaterThanOrEqual(1);
     });
 
     const menuBtn = screen.getByLabelText("Menu thao tác nhánh main");

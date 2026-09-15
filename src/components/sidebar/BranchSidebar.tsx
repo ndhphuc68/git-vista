@@ -271,6 +271,7 @@ export const BranchSidebar: React.FC = () => {
   };
 
   const branchTree = useMemo(() => buildBranchTree(localBranches), [localBranches]);
+  const remoteBranchTree = useMemo(() => buildBranchTree(remoteBranches), [remoteBranches]);
 
   const renderTreeNode = (node: BranchTreeNode) => {
     if (node.isFolder) {
@@ -450,6 +451,138 @@ export const BranchSidebar: React.FC = () => {
       </div>
     );
   };
+ 
+  const renderRemoteTreeNode = (node: BranchTreeNode, depth: number = 0) => {
+    if (node.isFolder) {
+      const isExpanded = search.trim() !== "" || expandedFolders[node.fullPath] !== false;
+      const count = countBranchesInNode(node);
+      const isRemoteRoot = depth === 0;
+
+      return (
+        <div key={node.fullPath} className="flex flex-col mt-0.5">
+          <button
+            type="button"
+            onClick={() => toggleFolder(node.fullPath)}
+            className="flex items-center justify-between px-2 py-1 rounded-sm hover:bg-surface-hover text-primary font-semibold text-xs cursor-pointer border-0 bg-transparent text-left group transition-colors"
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <span className="text-secondary group-hover:text-primary">
+                {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+              </span>
+              {isRemoteRoot ? (
+                <Cloud size={13} className="text-sky-500 shrink-0" />
+              ) : (
+                <Folder size={13} className="text-amber-500 shrink-0 fill-amber-500/20" />
+              )}
+              <span className="truncate">{node.name}</span>
+            </div>
+            <span className="text-[10px] font-mono text-tertiary px-1.5 bg-surface-hover rounded-full">
+              {count}
+            </span>
+          </button>
+
+          {isExpanded && (
+            <div className="tree-guide border-l border-border-subtle ml-3 pl-2 flex flex-col gap-0.5 mt-0.5">
+              {node.children.map((child) => renderRemoteTreeNode(child, depth + 1))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const branch = node.branch!;
+    const isSelected = selectedBranch === branch.name;
+    const isMenuOpen = menuBranch === branch.name;
+
+    return (
+      <div
+        key={branch.name}
+        className="group relative flex items-center justify-between rounded-sm"
+        onContextMenu={(e) => {
+          e.preventDefault();
+          setMenuBranch(branch.name);
+        }}
+      >
+        <button
+          onClick={() => setSelectedBranch(branch.name)}
+          onDoubleClick={() => handleCheckout(branch.name)}
+          aria-selected={isSelected}
+          aria-label={branch.name}
+          className={clsx(
+            "flex-1 flex items-center gap-1.5 px-2 py-1 rounded-sm border-0 cursor-pointer text-left min-h-[26px] text-xs transition-colors overflow-hidden",
+            isSelected
+              ? "bg-accent-subtle text-accent font-semibold"
+              : "bg-transparent text-primary hover:bg-surface-hover font-normal"
+          )}
+          title={branch.name}
+        >
+          <Cloud size={11} className={clsx("shrink-0", isSelected ? "text-accent" : "text-tertiary")} />
+          <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+            {node.name}
+          </span>
+        </button>
+
+        {/* Three dots action menu */}
+        <div className="relative shrink-0 flex items-center pr-1">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuBranch(isMenuOpen ? null : branch.name);
+            }}
+            aria-label={`Menu thao tác nhánh ${branch.name}`}
+            className={clsx(
+              "p-1 bg-transparent border-0 text-secondary hover:text-primary hover:bg-surface-hover rounded-sm cursor-pointer transition-opacity",
+              isMenuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus:opacity-100"
+            )}
+          >
+            <MoreVertical size={13} />
+          </button>
+
+          {isMenuOpen && (
+            <div
+              ref={menuRef}
+              className="absolute right-0 top-full mt-1 w-44 bg-surface border border-border-subtle rounded-md shadow-xl py-1 z-50 text-xs flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => handleCheckout(branch.name)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+              >
+                <Check size={13} className="text-accent" />
+                <span>Chuyển tới nhánh này</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuBranch(null);
+                  setMergeModal({ targetBranch: branch.name });
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+              >
+                <GitMerge size={13} className="text-secondary" />
+                <span>Gộp vào nhánh hiện tại...</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuBranch(null);
+                  setRebaseModal({ upstreamBranch: branch.name });
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+              >
+                <GitCommit size={13} className="text-secondary" />
+                <span>Rebase nhánh hiện tại lên đây...</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -500,6 +633,32 @@ export const BranchSidebar: React.FC = () => {
             )}
           </div>
 
+          {/* REMOTES */}
+          <div>
+            <button
+              onClick={() => setRemoteOpen(!remoteOpen)}
+              aria-expanded={remoteOpen}
+              aria-label="Remotes"
+              className="flex items-center gap-1.5 w-full p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
+            >
+              {remoteOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+              <Cloud size={13} />
+              <span>REMOTES ({remoteBranches.length})</span>
+            </button>
+
+            {remoteOpen && (
+              <div className="flex flex-col gap-0.5 mt-1">
+                {remoteBranches.length === 0 ? (
+                  <div className="px-2 py-1 text-xs text-tertiary italic">
+                    Không có remote nào.
+                  </div>
+                ) : (
+                  remoteBranchTree.map((node) => renderRemoteTreeNode(node))
+                )}
+              </div>
+            )}
+          </div>
+
           {/* TAGS */}
           <div>
             <button
@@ -527,42 +686,6 @@ export const BranchSidebar: React.FC = () => {
                     >
                       <Tag size={11} className="text-tertiary shrink-0" />
                       <span className="truncate">{tag}</span>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* REMOTES */}
-          <div>
-            <button
-              onClick={() => setRemoteOpen(!remoteOpen)}
-              aria-expanded={remoteOpen}
-              aria-label="Remotes"
-              className="flex items-center gap-1.5 w-full p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
-            >
-              {remoteOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-              <Cloud size={13} />
-              <span>REMOTES ({remoteBranches.length})</span>
-            </button>
-
-            {remoteOpen && (
-              <div className="flex flex-col gap-0.5 mt-1">
-                {remoteBranches.length === 0 ? (
-                  <div className="px-2 py-1 text-xs text-tertiary italic">
-                    Không có remote nào.
-                  </div>
-                ) : (
-                  remoteBranches.map((branch) => (
-                    <div
-                      key={branch.name}
-                      className="flex items-center gap-1.5 px-2 py-1 rounded-sm text-secondary hover:text-primary hover:bg-surface-hover text-xs overflow-hidden text-ellipsis whitespace-nowrap cursor-default transition-colors"
-                    >
-                      <Cloud size={11} className="text-tertiary shrink-0" />
-                      <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-                        {branch.name}
-                      </span>
                     </div>
                   ))
                 )}
