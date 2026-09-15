@@ -31,6 +31,7 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         stage_all,
         unstage_all,
         discard_file_changes,
+        restore_discard,
         stage_hunk,
         stage_lines,
         create_commit,
@@ -58,7 +59,6 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         resolve_conflict_file,
         undo_commit,
         undo_delete_branch,
-        undo_discard_file,
         undo_drop_stash
     ])
 }

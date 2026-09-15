@@ -152,3 +152,32 @@ fn test_delete_unmerged_branch_requires_force() {
     assert!(repo.find_reference(&backup_ref).is_ok(), "backup ref must exist");
 }
 
+
+#[test]
+fn deleting_two_branches_in_one_second_backs_up_both() {
+    let dir = tempfile::tempdir().unwrap();
+    let repo = git2::Repository::init(dir.path()).unwrap();
+    let sig = git2::Signature::now("T", "t@t.com").unwrap();
+    let tree = {
+        let mut index = repo.index().unwrap();
+        let oid = index.write_tree().unwrap();
+        repo.find_tree(oid).unwrap()
+    };
+    let base = repo
+        .commit(Some("HEAD"), &sig, &sig, "init", &tree, &[])
+        .unwrap();
+    let head = repo.find_commit(base).unwrap();
+    let extra = repo
+        .commit(None, &sig, &sig, "extra", &tree, &[&head])
+        .unwrap();
+    repo.branch("alpha", &head, false).unwrap();
+    repo.branch("beta", &repo.find_commit(extra).unwrap(), false)
+        .unwrap();
+
+    let path = dir.path();
+    let a = visual_git_lib::write::branch::delete_branch(path, "alpha", true).unwrap();
+    let b = visual_git_lib::write::branch::delete_branch(path, "beta", true).unwrap();
+
+    assert_eq!(repo.find_reference(&a).unwrap().target().unwrap(), base);
+    assert_eq!(repo.find_reference(&b).unwrap().target().unwrap(), extra);
+}

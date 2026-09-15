@@ -5,6 +5,7 @@ import { ChangesScreen } from "../components/changes/ChangesScreen";
 import { useRepoStore } from "../store/useRepoStore";
 import { useLayoutStore } from "../store/useLayoutStore";
 import { invokeCommand } from "../ipc/client";
+import { useToastStore } from "../store/useToastStore";
 
 describe("ChangesScreen", () => {
   let queryClient: QueryClient;
@@ -60,6 +61,17 @@ describe("ChangesScreen", () => {
       },
     ],
   };
+
+  it("offers undo after discard and refreshes the restored file", async () => {
+    useToastStore.setState({ toasts: [] });
+    vi.spyOn(invokeCommand, "getRepoStatus").mockResolvedValue(mockStatus);
+    vi.spyOn(invokeCommand, "getWorkingFileDiff").mockResolvedValue(mockDiff);
+    vi.spyOn(invokeCommand, "discardFileChanges").mockResolvedValue("discard-receipt" as never);
+    render(<QueryClientProvider client={queryClient}><ChangesScreen /></QueryClientProvider>);
+    fireEvent.click(await screen.findByTestId("discard-file-src/unstaged.ts"));
+    fireEvent.click(screen.getByTestId("confirm-discard-button"));
+    await waitFor(() => expect(useToastStore.getState().toasts.some(t => t.undoAction)).toBe(true));
+  });
 
   it("renders 2-column layout with StagingFileList, CommitBox, and diff viewer", async () => {
     vi.spyOn(invokeCommand, "getRepoStatus").mockResolvedValue(mockStatus);

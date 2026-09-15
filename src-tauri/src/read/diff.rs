@@ -16,6 +16,8 @@ pub struct CommitChangedFile {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct CommitDetails {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub undo_token: Option<String>,
     pub id: String,
     pub full_message: String,
     pub author_name: String,
@@ -148,6 +150,7 @@ pub fn get_commit_info<P: AsRef<Path>>(
     let author_timestamp_sec = commit.time().seconds() as f64;
 
     Ok(CommitDetails {
+        undo_token: None,
         id: commit_id_str.to_string(),
         full_message,
         author_name,

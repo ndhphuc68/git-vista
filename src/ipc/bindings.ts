@@ -109,6 +109,7 @@ export interface CommitChangedFile {
 }
 
 export interface CommitDetails {
+  undo_token?: string | null;
   id: string;
   full_message: string;
   author_name: string;

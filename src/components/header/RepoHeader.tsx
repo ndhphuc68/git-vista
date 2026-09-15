@@ -23,12 +23,13 @@ import { useLayoutStore } from "../../store/useLayoutStore";
 import { useSettingsStore, Theme, Locale } from "../../store/useSettingsStore";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import { useTranslation } from "../../i18n";
-import { invokeCommand, listenToTaskProgress } from "../../ipc/client";
+import { invokeCommand } from "../../ipc/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   RemoteProgressBanner,
-  RemoteTaskState,
 } from "../common/RemoteProgressBanner";
+
+import { useRemoteTask } from "../../hooks/useRemoteTask";
 
 interface RepoHeaderProps {
   onBackToWelcome: () => void;
@@ -71,101 +72,9 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
     enabled: Boolean(currentRepo?.path),
   });
 
-  const [activeRemoteTask, setActiveRemoteTask] = useState<RemoteTaskState | null>(null);
-  const [isRemotePending, setIsRemotePending] = useState(false);
-
-  useEffect(() => {
-    let unlisten: (() => void) | undefined;
-    listenToTaskProgress((payload) => {
-      setActiveRemoteTask((prev) => {
-        if (!prev || prev.taskId !== payload.task_id) return prev;
-        return {
-          ...prev,
-          progressPercent: payload.progress_percent,
-          statusText: payload.status_text,
-        };
-      });
-    }).then((fn) => {
-      unlisten = fn;
-    });
-
-    return () => {
-      if (unlisten) unlisten();
-    };
-  }, []);
-
-  const handleFetch = async () => {
-    if (!currentRepo || isRemotePending) return;
-    const taskId = `task-fetch-${Date.now()}`;
-    setActiveRemoteTask({
-      taskId,
-      title: t.remoteProgress.fetchTitle,
-      statusText: t.remoteProgress.starting,
-      progressPercent: 0,
-    });
-    setIsRemotePending(true);
-    try {
-      await invokeCommand.fetchRepo(currentRepo.path, undefined, false, taskId);
-      queryClient.invalidateQueries();
-    } catch (err) {
-      console.error("Fetch failed", err);
-    } finally {
-      setIsRemotePending(false);
-      setTimeout(() => setActiveRemoteTask(null), 1000);
-    }
-  };
-
-  const handlePull = async () => {
-    if (!currentRepo || isRemotePending) return;
-    const taskId = `task-pull-${Date.now()}`;
-    setActiveRemoteTask({
-      taskId,
-      title: t.remoteProgress.pullTitle,
-      statusText: t.remoteProgress.starting,
-      progressPercent: 0,
-    });
-    setIsRemotePending(true);
-    try {
-      await invokeCommand.pullRepo(currentRepo.path, undefined, undefined, undefined, taskId);
-      queryClient.invalidateQueries();
-    } catch (err) {
-      console.error("Pull failed", err);
-    } finally {
-      setIsRemotePending(false);
-      setTimeout(() => setActiveRemoteTask(null), 1000);
-    }
-  };
-
-  const handlePush = async () => {
-    if (!currentRepo || isRemotePending) return;
-    const taskId = `task-push-${Date.now()}`;
-    const setUpstream = !headInfo?.upstream;
-    setActiveRemoteTask({
-      taskId,
-      title: t.remoteProgress.pushTitle,
-      statusText: t.remoteProgress.starting,
-      progressPercent: 0,
-    });
-    setIsRemotePending(true);
-    try {
-      await invokeCommand.pushRepo(currentRepo.path, undefined, undefined, setUpstream, false, taskId);
-      queryClient.invalidateQueries();
-    } catch (err) {
-      console.error("Push failed", err);
-    } finally {
-      setIsRemotePending(false);
-      setTimeout(() => setActiveRemoteTask(null), 1000);
-    }
-  };
-
-  const handleCancelTask = async (taskId: string) => {
-    try {
-      await invokeCommand.cancelRemoteTask(taskId);
-    } finally {
-      setActiveRemoteTask(null);
-      setIsRemotePending(false);
-    }
-  };
+  const remote = useRemoteTask(currentRepo?.path, Boolean(headInfo?.upstream));
+  const activeRemoteTask = remote.task;
+  const isRemotePending = remote.isPending;
 
   const isMac =
     typeof navigator !== "undefined" &&
@@ -327,12 +236,12 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
             <button
               type="button"
               data-testid="btn-fetch"
-              onClick={handleFetch}
+              onClick={() => void remote.run("fetch")}
               disabled={isRemotePending}
               className="flex items-center gap-1.5 px-2.5 py-1 text-secondary hover:text-primary hover:bg-surface-hover text-xs font-medium cursor-pointer transition-colors disabled:opacity-50"
               title={t.header.fetchTitle}
             >
-              <RefreshCw size={12} className={isRemotePending && activeRemoteTask?.title.includes("Fetch") ? "animate-spin" : ""} />
+              <RefreshCw size={12} className={isRemotePending && activeRemoteTask?.operation === "fetch" ? "animate-spin" : ""} />
               <span>{actions.fetch}</span>
             </button>
 
@@ -340,7 +249,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
             <button
               type="button"
               data-testid="btn-pull"
-              onClick={handlePull}
+              onClick={() => void remote.run("pull")}
               disabled={isRemotePending}
               className="flex items-center gap-1.5 px-2.5 py-1 text-secondary hover:text-primary hover:bg-surface-hover text-xs font-medium cursor-pointer transition-colors disabled:opacity-50"
               title={t.header.pullTitle}
@@ -362,7 +271,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
             <button
               type="button"
               data-testid="btn-push"
-              onClick={handlePush}
+              onClick={() => void remote.run("push")}
               disabled={isRemotePending}
               className={clsx(
                 "flex items-center gap-1.5 px-2.5 py-1 text-xs cursor-pointer transition-colors disabled:opacity-50",
@@ -495,7 +404,9 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
       </header>
       <RemoteProgressBanner
         task={activeRemoteTask}
-        onCancel={handleCancelTask}
+        onCancel={remote.cancel}
+        onRetry={remote.retry}
+        onDismiss={remote.dismiss}
       />
     </>
   );

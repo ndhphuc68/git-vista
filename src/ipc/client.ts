@@ -289,10 +289,16 @@ export const invokeCommand = {
     await invoke("unstage_all", { repoPath });
   },
 
-  discardFileChanges: async (repoPath: string, filePath: string): Promise<void> => {
+  discardFileChanges: async (repoPath: string, filePath: string): Promise<string> => {
+    if (!isTauri()) return "browser-discard-receipt";
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<string>("discard_file_changes", { repoPath, filePath });
+  },
+
+  restoreDiscard: async (repoPath: string, token: string): Promise<void> => {
     if (!isTauri()) return;
     const { invoke } = await import("@tauri-apps/api/core");
-    await invoke("discard_file_changes", { repoPath, filePath });
+    await invoke("restore_discard", { repoPath, token });
   },
 
   stageHunk: async (
@@ -327,6 +333,7 @@ export const invokeCommand = {
     if (!isTauri()) {
       return {
         id: "mockcommit1234567890abcdef",
+        undo_token: "browser-commit-receipt",
         full_message: description ? `${summary}\n\n${description}` : summary,
         author_name: "Mock Author",
         author_email: "mock@example.com",
@@ -656,12 +663,12 @@ export const invokeCommand = {
     });
   },
 
-  undoCommit: async (repoPath: string): Promise<void> => {
+  undoCommit: async (repoPath: string, undoToken: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
     const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("undo_commit", { repoPath });
+    return await invoke("undo_commit", { repoPath, undoToken });
   },
 
   undoDeleteBranch: async (
@@ -674,18 +681,6 @@ export const invokeCommand = {
     }
     const { invoke } = await import("@tauri-apps/api/core");
     return await invoke("undo_delete_branch", { repoPath, branchName, commitId });
-  },
-
-  undoDiscardFile: async (
-    repoPath: string,
-    filePath: string,
-    backupContent: string
-  ): Promise<void> => {
-    if (!isTauri()) {
-      return;
-    }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("undo_discard_file", { repoPath, filePath, backupContent });
   },
 
   undoDropStash: async (

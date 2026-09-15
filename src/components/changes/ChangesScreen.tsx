@@ -104,7 +104,17 @@ export const ChangesScreen: React.FC = () => {
 
   const handleDiscardFile = async (filePath: string) => {
     try {
-      await invokeCommand.discardFileChanges(currentRepo.path, filePath);
+      const repoPath = currentRepo.path;
+      const token = await invokeCommand.discardFileChanges(repoPath, filePath);
+      useToastStore.getState().showToast({
+        type: "success",
+        message: t.discard.success.replace("{path}", filePath),
+        durationMs: 10000,
+        undoAction: async () => {
+          await invokeCommand.restoreDiscard(repoPath, token);
+          await queryClient.invalidateQueries();
+        },
+      });
       await queryClient.invalidateQueries();
     } catch (err: unknown) {
       useToastStore.getState().showError(mapGitError(err));
@@ -165,13 +175,14 @@ export const ChangesScreen: React.FC = () => {
     description?: string,
     amend?: boolean
   ) => {
-    await invokeCommand.createCommit(
+    const result = await invokeCommand.createCommit(
       currentRepo.path,
       summary,
       description,
       amend
     );
     await queryClient.invalidateQueries();
+    return result;
   };
 
   const showSidebar = isMobile ? activeChangesView !== "diff" : sidebarOpen;
@@ -264,6 +275,7 @@ export const ChangesScreen: React.FC = () => {
                 repoPath={currentRepo.path}
                 stagedCount={stagedCount}
                 onCommit={handleCommit}
+                onSuccess={() => { void queryClient.invalidateQueries(); }}
               />
             </div>
 

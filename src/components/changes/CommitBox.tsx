@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import clsx from "clsx";
 import { GitCommit, AlertCircle, RefreshCw } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
+import type { CommitDetails } from "../../ipc/bindings";
 import { useToastStore } from "../../store/useToastStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { mapGitError } from "../../utils/errorMapping";
@@ -11,7 +12,7 @@ export interface CommitBoxProps {
   repoPath: string;
   stagedCount: number;
   lastCommitMessage?: string;
-  onCommit?: (summary: string, description?: string, amend?: boolean) => Promise<void>;
+  onCommit?: (summary: string, description?: string, amend?: boolean) => Promise<CommitDetails | void>;
   onSuccess?: () => void;
   isLoading?: boolean;
 }
@@ -61,14 +62,15 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
 
     try {
       setSubmitting(true);
+      let result: CommitDetails | void;
       if (onCommit) {
-        await onCommit(
+        result = await onCommit(
           summary.trim(),
           description.trim() ? description.trim() : undefined,
           isAmend
         );
       } else {
-        await invokeCommand.createCommit(
+        result = await invokeCommand.createCommit(
           repoPath,
           summary.trim(),
           description.trim() ? description.trim() : undefined,
@@ -80,9 +82,10 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
         message: isAmend ? t.commit.amendSuccess : t.commit.commitSuccess,
         type: "success",
         durationMs: 10000,
-        undoAction: async () => {
-          await invokeCommand.undoCommit(repoPath);
-        },
+        undoAction: result?.undo_token ? async () => {
+          await invokeCommand.undoCommit(repoPath, result.undo_token!);
+          if (onSuccess) onSuccess();
+        } : undefined,
       });
 
       setSummary("");

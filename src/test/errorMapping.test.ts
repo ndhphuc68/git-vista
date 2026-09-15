@@ -2,6 +2,21 @@ import { describe, it, expect } from "vitest";
 import { mapGitError } from "../utils/errorMapping";
 
 describe("mapGitError utility", () => {
+  it("maps structured backend authentication errors and preserves command details", () => {
+    const res = mapGitError({ type: "CommandFailed", message: { code: 128, stderr: "fatal: Authentication failed" } });
+    expect(res.actionHint).toBeDefined();
+    expect(res.rawError).toContain("Authentication failed");
+    expect(res.rawError).toContain("128");
+  });
+
+  it("extracts structured string messages instead of showing object Object", () => {
+    const res = mapGitError({ type: "InvalidOperation", message: "Repository state changed. Review the current commit before undoing." });
+    expect(res.message).toBe("Repository state changed. Review the current commit before undoing.");
+  });
+
+  it("preserves unknown structured error details", () => {
+    expect(mapGitError({ unexpected: "backend detail" }).rawError).toContain("backend detail");
+  });
   it("maps authentication failure", () => {
     const res = mapGitError("fatal: Authentication failed for 'https://github.com/...'");
     expect(res.title).toContain("Lỗi xác thực");

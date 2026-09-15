@@ -1,8 +1,26 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { RemoteProgressBanner, RemoteTaskState } from "../components/common/RemoteProgressBanner";
+import { useSettingsStore } from "../store/useSettingsStore";
 
 describe("RemoteProgressBanner", () => {
+  afterEach(() => { vi.restoreAllMocks(); useSettingsStore.getState().setLocale("vi"); });
+
+  it("copies the technical error and reports clipboard failures without hiding the error", async () => {
+    useSettingsStore.getState().setLocale("en");
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
+    const task: RemoteTaskState = { taskId: "failed", title: "Pushing", statusText: "", progressPercent: 0, status: "error", error: { title: "Authentication failed", message: "Check access", rawError: "fatal: permission denied\nexit code 128" } };
+    render(<RemoteProgressBanner task={task} />);
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Copy technical details" })); });
+    expect(writeText).toHaveBeenCalledWith("fatal: permission denied\nexit code 128");
+    expect(screen.getByRole("status")).toHaveTextContent("Details copied");
+    writeText.mockRejectedValue(new Error("Clipboard unavailable"));
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Copy technical details" })); });
+    expect(screen.getByRole("status")).toHaveTextContent("Could not copy");
+    expect(screen.getByRole("alert")).toHaveTextContent("Authentication failed");
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+  });
   it("renders nothing when task is null", () => {
     const { container } = render(<RemoteProgressBanner task={null} />);
     expect(container.firstChild).toBeNull();

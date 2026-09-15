@@ -34,8 +34,10 @@ describe("invokeCommand M2.1 methods in browser environment", () => {
     await expect(invokeCommand.unstageAll("/mock/repo")).resolves.toBeUndefined();
   });
 
-  it("discardFileChanges resolves without error in browser mock", async () => {
-    await expect(invokeCommand.discardFileChanges("/mock/repo", "file.ts")).resolves.toBeUndefined();
+  it("discardFileChanges resolves to a restore receipt in browser mock", async () => {
+    await expect(invokeCommand.discardFileChanges("/mock/repo", "file.ts")).resolves.toBe(
+      "browser-discard-receipt"
+    );
   });
 
   it("stageHunk resolves without error in browser mock", async () => {

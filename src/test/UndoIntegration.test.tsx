@@ -12,7 +12,7 @@ describe("Undo & Toast Integration", () => {
   });
 
   it("shows toast with undo action after successful commit in CommitBox", async () => {
-    vi.spyOn(invokeCommand, "createCommit").mockResolvedValue("oid123" as any);
+    vi.spyOn(invokeCommand, "createCommit").mockResolvedValue({ id: "oid123", undo_token: "receipt-123" } as any);
     const undoSpy = vi.spyOn(invokeCommand, "undoCommit").mockResolvedValue(undefined);
 
     render(
@@ -38,7 +38,7 @@ describe("Undo & Toast Integration", () => {
 
     // Execute undo callback
     await useToastStore.getState().toasts[0]?.undoAction!();
-    expect(undoSpy).toHaveBeenCalledWith("/test/repo");
+    expect(undoSpy).toHaveBeenCalledWith("/test/repo", "receipt-123");
   });
 
   it("shows toast with undo action after deleting branch in DeleteBranchModal", async () => {

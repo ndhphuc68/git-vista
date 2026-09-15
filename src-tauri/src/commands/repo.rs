@@ -6,6 +6,10 @@ use tauri::Emitter;
 
 static REPO_MANAGER: Mutex<Option<RepoManager>> = Mutex::new(None);
 
+/// How long a safety backup ref stays recoverable. Far longer than any undo
+/// toast lives, so pruning can never strip a ref the UI still offers.
+const BACKUP_RETENTION_DAYS: u64 = 30;
+
 fn with_manager<F, R>(f: F) -> R
 where
     F: FnOnce(&mut RepoManager) -> R,
@@ -31,7 +35,20 @@ fn emit_repo_changed(app: &tauri::AppHandle, repo_path: String, reason: String) 
 }
 
 pub fn open_repository_internal(path: String) -> Result<RepoSummary, AppError> {
-    with_manager(|m| m.open(path))
+    with_manager(|m| {
+        let summary = m.open(path)?;
+        prune_backups(&summary.path);
+        Ok(summary)
+    })
+}
+
+/// Safety refs accumulate on every risky operation; reclaim the expired ones
+/// when a repository is opened rather than letting them grow without bound.
+/// Best-effort: opening must not fail because pruning did.
+fn prune_backups(repo_path: &str) {
+    if let Ok(repo) = git2::Repository::open(repo_path) {
+        let _ = crate::write::backup::prune_expired_backups(&repo, BACKUP_RETENTION_DAYS);
+    }
 }
 
 #[tauri::command]
@@ -39,6 +56,7 @@ pub fn open_repository_internal(path: String) -> Result<RepoSummary, AppError> {
 pub fn open_repository(app: tauri::AppHandle, path: String) -> Result<RepoSummary, AppError> {
     with_manager(|m| {
         let summary = m.open(&path)?;
+        prune_backups(&summary.path);
         let app_clone = app.clone();
         let repo_path = summary.path.clone();
         let _ = m.start_watcher(move |reason| {
@@ -174,9 +192,21 @@ pub fn discard_file_changes(
     app: tauri::AppHandle,
     repo_path: String,
     file_path: String,
-) -> Result<(), AppError> {
-    crate::write::staging::discard_file_changes(&repo_path, &file_path)?;
+) -> Result<String, AppError> {
+    let token = crate::write::discard::discard_with_backup(&repo_path, &file_path)?;
     emit_repo_changed(&app, repo_path, "discard_file_changes".to_string());
+    Ok(token)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn restore_discard(
+    app: tauri::AppHandle,
+    repo_path: String,
+    token: String,
+) -> Result<(), AppError> {
+    crate::write::discard::restore_discard(&repo_path, &token)?;
+    emit_repo_changed(&app, repo_path, "restore_discard".to_string());
     Ok(())
 }
 

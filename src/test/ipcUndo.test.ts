@@ -3,15 +3,15 @@ import { invokeCommand } from "../ipc/client";
 
 describe("IPC undo commands (browser mock)", () => {
   it("undoCommit completes successfully", async () => {
-    await expect(invokeCommand.undoCommit("test-repo")).resolves.not.toThrow();
+    await expect(invokeCommand.undoCommit("test-repo", "receipt")).resolves.not.toThrow();
   });
 
   it("undoDeleteBranch completes successfully", async () => {
     await expect(invokeCommand.undoDeleteBranch("test-repo", "feature", "oid123")).resolves.not.toThrow();
   });
 
-  it("undoDiscardFile completes successfully", async () => {
-    await expect(invokeCommand.undoDiscardFile("test-repo", "file.txt", "content")).resolves.not.toThrow();
+  it("restoreDiscard completes successfully", async () => {
+    await expect(invokeCommand.restoreDiscard("test-repo", "receipt")).resolves.not.toThrow();
   });
 
   it("undoDropStash completes successfully", async () => {
