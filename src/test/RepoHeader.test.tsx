@@ -227,13 +227,8 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
     );
 
     const toggleSidebarBtn = screen.getByTestId("toggle-sidebar");
-    const toggleDetailPanelBtn = screen.getByTestId("toggle-detail-panel");
-
     expect(toggleSidebarBtn).toBeInTheDocument();
-    expect(toggleDetailPanelBtn).toBeInTheDocument();
-
     fireEvent.click(toggleSidebarBtn);
-    fireEvent.click(toggleDetailPanelBtn);
   });
 
   it("toggles sidebar with Cmd+B / Ctrl+B keyboard shortcut", () => {

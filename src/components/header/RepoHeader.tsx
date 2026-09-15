@@ -8,7 +8,6 @@ import {
   History,
   FileDiff,
   PanelLeft,
-  PanelRight,
   ArrowDown,
   ArrowUp,
   Settings,
@@ -41,8 +40,6 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
   const {
     sidebarOpen,
     toggleSidebar,
-    detailPanelOpen,
-    toggleDetailPanel,
   } = useLayoutStore();
   const { theme, setTheme, locale, setLocale, mode, setMode } = useSettingsStore();
   const { isMobile } = useWindowDimensions();
@@ -389,24 +386,8 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
             </button>
           </div>
 
-          {/* Khối Công Cụ Phải: Detail Panel toggle, Refresh & Settings */}
+          {/* Khối Công Cụ Phải: Refresh & Settings */}
           <div className="flex items-center gap-1 pl-1 border-l border-border-subtle relative" ref={settingsMenuRef}>
-
-            {/* Toggle Detail Panel */}
-            {isHistoryActive && (
-              <button
-                type="button"
-                data-testid="toggle-detail-panel"
-                onClick={toggleDetailPanel}
-                className={clsx(
-                  "flex items-center justify-center w-7 h-7 border border-border-subtle rounded-md cursor-pointer transition-colors shadow-2xs",
-                  detailPanelOpen ? "bg-accent-subtle text-accent font-medium" : "bg-surface text-secondary hover:text-primary hover:bg-surface-hover"
-                )}
-                title="Bật/tắt chi tiết commit"
-              >
-                <PanelRight size={14} />
-              </button>
-            )}
 
             {/* Refresh button */}
             <button

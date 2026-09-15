@@ -27,7 +27,7 @@ export const useLayoutStore = create<LayoutState>((set) => ({
     typeof window !== "undefined"
       ? Number(localStorage.getItem("gitvista_sidebar_width")) || 260
       : 260,
-  detailPanelOpen: true,
+  detailPanelOpen: false,
   controlsOpen: true,
   devToolsOpen: false,
   activeChangesView: "split",

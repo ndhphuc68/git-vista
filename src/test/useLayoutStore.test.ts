@@ -5,7 +5,7 @@ describe("useLayoutStore", () => {
   beforeEach(() => {
     useLayoutStore.setState({
       sidebarOpen: true,
-      detailPanelOpen: true,
+      detailPanelOpen: false,
       controlsOpen: true,
       devToolsOpen: false,
       activeChangesView: "split",
@@ -15,7 +15,7 @@ describe("useLayoutStore", () => {
   it("has correct initial defaults", () => {
     const state = useLayoutStore.getState();
     expect(state.sidebarOpen).toBe(true);
-    expect(state.detailPanelOpen).toBe(true);
+    expect(state.detailPanelOpen).toBe(false);
     expect(state.controlsOpen).toBe(true);
     expect(state.devToolsOpen).toBe(false);
     expect(state.activeChangesView).toBe("split");
@@ -32,9 +32,9 @@ describe("useLayoutStore", () => {
   it("toggles detailPanelOpen", () => {
     const { toggleDetailPanel } = useLayoutStore.getState();
     toggleDetailPanel();
-    expect(useLayoutStore.getState().detailPanelOpen).toBe(false);
-    toggleDetailPanel();
     expect(useLayoutStore.getState().detailPanelOpen).toBe(true);
+    toggleDetailPanel();
+    expect(useLayoutStore.getState().detailPanelOpen).toBe(false);
   });
 
   it("toggles controlsOpen and devToolsOpen", () => {
