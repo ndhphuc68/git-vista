@@ -3,16 +3,22 @@ import { create } from "zustand";
 export type Theme = "light" | "dark" | "system";
 export type Locale = "vi" | "en";
 export type AppMode = "simple" | "advanced";
+export type SettingsTab = "profile" | "appearance" | "behavior";
 
 interface SettingsState {
   theme: Theme;
   colorblind: boolean;
   locale: Locale;
   mode: AppMode;
+  isSettingsOpen: boolean;
+  activeTab: SettingsTab;
   setTheme: (theme: Theme) => void;
   setColorblind: (enabled: boolean) => void;
   setLocale: (locale: Locale) => void;
   setMode: (mode: AppMode) => void;
+  openSettings: (tab?: SettingsTab) => void;
+  closeSettings: () => void;
+  setActiveTab: (tab: SettingsTab) => void;
   resolvedTheme: "light" | "dark";
 }
 
@@ -84,6 +90,12 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
       if (typeof localStorage !== "undefined") localStorage.setItem("mode", mode);
       set({ mode });
     },
+
+    isSettingsOpen: false,
+    activeTab: "profile",
+    openSettings: (tab = "profile") => set({ isSettingsOpen: true, activeTab: tab }),
+    closeSettings: () => set({ isSettingsOpen: false }),
+    setActiveTab: (tab: SettingsTab) => set({ activeTab: tab }),
   };
 });
 
