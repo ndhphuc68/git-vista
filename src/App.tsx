@@ -16,6 +16,7 @@ import { ConflictResolverScreen } from "./components/conflict/ConflictResolverSc
 import { ToastContainer } from "./components/toast/ToastContainer";
 import { CommandPalette } from "./components/palette/CommandPalette";
 import { ShortcutsHelpModal } from "./components/shortcuts/ShortcutsHelpModal";
+import { SplashScreen } from "./components/splash/SplashScreen";
 import { useCommandPaletteStore } from "./store/useCommandPaletteStore";
 import { CommandContext } from "./utils/commandRegistry";
 
@@ -102,7 +103,14 @@ const RepoContent: React.FC<RepoContentProps> = ({
   );
 };
 
-export const App: React.FC = () => {
+export interface AppProps {
+  skipSplash?: boolean;
+}
+
+export const App: React.FC<AppProps> = ({
+  skipSplash = typeof process !== "undefined" && process.env?.NODE_ENV === "test",
+}) => {
+  const [splashFinished, setSplashFinished] = useState(skipSplash);
   const [isGlobalCreateBranchOpen, setIsGlobalCreateBranchOpen] = useState(false);
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const { currentRepo, setRepo, clearRepo } = useRepoStore();
@@ -172,6 +180,12 @@ export const App: React.FC = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
+      {!splashFinished && (
+        <SplashScreen
+          onFinish={() => setSplashFinished(true)}
+          skipSplash={skipSplash}
+        />
+      )}
       <div className="flex flex-col h-screen w-screen overflow-hidden">
         {currentRepo ? (
           <RepoContent

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { App } from "../App";
 import { useSettingsStore } from "../store/useSettingsStore";
@@ -123,5 +123,21 @@ describe("Visual Git Client - M1 App Shell", () => {
     await waitFor(() => {
       expect(screen.getByText(/Bảng phím tắt/i)).toBeInTheDocument();
     });
+  });
+
+  it("hiển thị SplashScreen khi skipSplash là false và chuyển vào app khi kết thúc", () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    try {
+      render(<App skipSplash={false} />);
+      expect(screen.getByTestId("splash-screen")).toBeInTheDocument();
+
+      act(() => {
+        vi.advanceTimersByTime(2100);
+      });
+
+      expect(screen.queryByTestId("splash-screen")).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
