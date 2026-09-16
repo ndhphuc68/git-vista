@@ -59,7 +59,9 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         resolve_conflict_file,
         undo_commit,
         undo_delete_branch,
-        undo_drop_stash
+        undo_drop_stash,
+        get_git_config,
+        set_git_config
     ])
 }
 

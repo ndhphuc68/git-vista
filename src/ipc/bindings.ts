@@ -205,4 +205,16 @@ export interface ConflictFileData {
   hunks: ConflictHunk[];
 }
 
+export type ConfigScope = "global" | "local";
+
+export interface GitConfigDto {
+  userName: string | null;
+  userNameSource: ConfigScope | null;
+  userEmail: string | null;
+  userEmailSource: ConfigScope | null;
+  defaultBranch: string | null;
+  pullRebase: boolean | null;
+}
+
+
 

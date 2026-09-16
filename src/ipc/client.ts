@@ -18,6 +18,8 @@ import {
   RebaseResult,
   ConflictHunk,
   ConflictFileData,
+  ConfigScope,
+  GitConfigDto,
 } from "./bindings";
 
 let mockStashes: StashItem[] = [
@@ -693,6 +695,39 @@ export const invokeCommand = {
     const { invoke } = await import("@tauri-apps/api/core");
     return await invoke("undo_drop_stash", { repoPath, receipt });
   },
+
+  getGitConfig: async (repoPath?: string | null): Promise<GitConfigDto> => {
+    if (!isTauri()) {
+      return {
+        userName: "GitVista User",
+        userNameSource: "global",
+        userEmail: "user@gitvista.dev",
+        userEmailSource: "global",
+        defaultBranch: "main",
+        pullRebase: false,
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<GitConfigDto>("get_git_config", { repoPath: repoPath ?? null });
+  },
+
+  setGitConfig: async (
+    repoPath: string | null | undefined,
+    scope: ConfigScope,
+    key: string,
+    value: string
+  ): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("set_git_config", {
+      repoPath: repoPath ?? null,
+      scope,
+      key,
+      value,
+    });
+  },
 };
 
 export async function listenToRepoChanged(
@@ -747,5 +782,7 @@ export type {
   RebaseResult,
   ConflictHunk,
   ConflictFileData,
+  ConfigScope,
+  GitConfigDto,
 };
 
