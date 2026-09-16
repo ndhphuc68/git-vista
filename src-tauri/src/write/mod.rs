@@ -4,6 +4,7 @@
 pub mod backup;
 pub mod branch;
 pub mod commit;
+pub mod config;
 pub mod conflict;
 pub mod discard;
 pub mod staging;
@@ -11,5 +12,6 @@ pub mod stash;
 pub mod undo;
 
 pub use backup::*;
+pub use config::*;
 pub use conflict::*;
 pub use undo::*;
