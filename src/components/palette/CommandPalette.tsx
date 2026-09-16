@@ -9,6 +9,7 @@ import {
   filterCommands,
 } from "../../utils/commandRegistry";
 import { useTranslation } from "../../i18n";
+import { Transition } from "../common/Transition";
 
 export interface CommandPaletteProps {
   context: CommandContext;
@@ -69,8 +70,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ context }) => {
       activeEl.scrollIntoView({ block: "nearest" });
     }
   }, [selectedIndex]);
-
-  if (!isOpen) return null;
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Escape") {
@@ -139,17 +138,23 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ context }) => {
   });
 
   return (
-    <div
-      className="fixed inset-0 z-[9999] bg-black/50 flex justify-center pt-20 px-4"
-      onClick={close}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Command Palette"
+    <Transition
+      show={isOpen}
+      enterClass="animate-fade-in"
+      exitClass="opacity-0 transition-opacity duration-180 ease-macos pointer-events-none"
+      unmountOnExit={true}
     >
       <div
-        className="bg-surface rounded-lg border border-border-subtle w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[70vh]"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 z-[9999] modal-backdrop flex justify-center pt-20 px-4"
+        onClick={close}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command Palette"
       >
+        <div
+          className="bg-surface rounded-xl border border-border-subtle w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[70vh] animate-scale-in"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Search Input */}
         <div className="flex items-center px-4 py-3 border-b border-border-subtle gap-3">
           <Search size={18} className="text-secondary shrink-0" />
@@ -254,5 +259,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ context }) => {
         </div>
       </div>
     </div>
+    </Transition>
   );
 };

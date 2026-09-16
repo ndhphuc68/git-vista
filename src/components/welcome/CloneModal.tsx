@@ -3,6 +3,7 @@ import { FolderOpen, X, Download, AlertCircle, Loader2 } from "lucide-react";
 import { invokeCommand, listenToTaskProgress } from "../../ipc/client";
 import { RepoSummary } from "../../ipc/bindings";
 import { useTranslation } from "../../i18n";
+import { Transition } from "../common/Transition";
 
 export interface CloneModalProps {
   isOpen: boolean;
@@ -76,7 +77,6 @@ export const CloneModal: React.FC<CloneModalProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, isCloning, onClose]);
 
-  if (!isOpen) return null;
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newUrl = e.target.value;
@@ -151,13 +151,23 @@ export const CloneModal: React.FC<CloneModalProps> = ({
   };
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="clone-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in"
+    <Transition
+      show={isOpen}
+      enterClass="animate-fade-in"
+      exitClass="opacity-0 transition-opacity duration-180 ease-macos pointer-events-none"
+      unmountOnExit={true}
     >
-      <div className="relative w-full max-w-lg rounded-2xl border border-border-subtle bg-surface p-6 sm:p-7 shadow-2xl transition-all">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="clone-modal-title"
+        className="fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4"
+        onClick={handleCancel}
+      >
+        <div
+          className="relative w-full max-w-lg rounded-2xl border border-border-subtle bg-surface p-6 sm:p-7 shadow-2xl animate-scale-in"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Close Button */}
         <button
           type="button"
@@ -306,5 +316,6 @@ export const CloneModal: React.FC<CloneModalProps> = ({
         </form>
       </div>
     </div>
+    </Transition>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { AlertTriangle, X } from "lucide-react";
 import { useTranslation } from "../../i18n";
+import { Transition } from "../common/Transition";
 
 export interface DiscardConfirmModalProps {
   isOpen: boolean;
@@ -31,18 +32,19 @@ export const DiscardConfirmModal: React.FC<DiscardConfirmModalProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onCancel]);
 
+
   if (!isOpen || !filePath) return null;
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4"
+      className="fixed inset-0 modal-backdrop flex items-center justify-center z-[9999] p-4"
       onClick={onCancel}
       role="dialog"
       aria-modal="true"
       aria-labelledby="discard-modal-title"
     >
       <div
-        className="bg-surface rounded-lg border border-border-subtle w-full max-w-115 shadow-2xl overflow-hidden"
+        className="bg-surface rounded-xl border border-border-subtle w-full max-w-115 shadow-2xl overflow-hidden animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">

@@ -4,6 +4,7 @@ import { invokeCommand } from "../../ipc/client";
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
 import { useTranslation } from "../../i18n";
+import { Transition } from "../common/Transition";
 
 export interface DeleteBranchModalProps {
   isOpen: boolean;
@@ -47,7 +48,6 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
 
   const handleDelete = async (force: boolean) => {
     setLoading(true);
@@ -79,17 +79,23 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="delete-branch-title"
+    <Transition
+      show={isOpen}
+      enterClass="animate-fade-in"
+      exitClass="opacity-0 transition-opacity duration-180 ease-macos pointer-events-none"
+      unmountOnExit={true}
     >
       <div
-        className="bg-surface rounded-lg border border-border-subtle w-full max-w-115 shadow-2xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 modal-backdrop flex items-center justify-center z-[9999] p-4"
+        onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-branch-title"
       >
+        <div
+          className="bg-surface rounded-xl border border-border-subtle w-full max-w-115 shadow-2xl overflow-hidden animate-scale-in"
+          onClick={(e) => e.stopPropagation()}
+        >
         <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
           <div className="flex items-center gap-2">
             <Trash2 size={16} className="text-diff-remove-text" />
@@ -176,5 +182,6 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
         </div>
       </div>
     </div>
+    </Transition>
   );
 };

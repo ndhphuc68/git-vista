@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, Archive } from "lucide-react";
 import { useTranslation } from "../../i18n";
+import { Transition } from "../common/Transition";
 
 interface CreateStashModalProps {
   isOpen: boolean;
@@ -43,7 +44,6 @@ export const CreateStashModal: React.FC<CreateStashModalProps> = ({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -55,17 +55,23 @@ export const CreateStashModal: React.FC<CreateStashModalProps> = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="create-stash-title"
+    <Transition
+      show={isOpen}
+      enterClass="animate-fade-in"
+      exitClass="opacity-0 transition-opacity duration-180 ease-macos pointer-events-none"
+      unmountOnExit={true}
     >
       <div
-        className="bg-surface rounded-lg border border-border-subtle w-full max-w-md shadow-2xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 modal-backdrop flex items-center justify-center z-[9999] p-4"
+        onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-stash-title"
       >
+        <div
+          className="bg-surface rounded-xl border border-border-subtle w-full max-w-md shadow-2xl overflow-hidden animate-scale-in"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
           <div className="flex items-center gap-2">
@@ -142,5 +148,6 @@ export const CreateStashModal: React.FC<CreateStashModalProps> = ({
         </div>
       </div>
     </div>
+    </Transition>
   );
 };

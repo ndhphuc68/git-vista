@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { X, Keyboard } from "lucide-react";
 import { useTranslation } from "../../i18n";
+import { Transition } from "../common/Transition";
 
 export interface ShortcutsHelpModalProps {
   isOpen: boolean;
@@ -75,20 +76,25 @@ export const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4 backdrop-blur-xs"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="shortcuts-modal-title"
+    <Transition
+      show={isOpen}
+      enterClass="animate-fade-in"
+      exitClass="opacity-0 transition-opacity duration-180 ease-macos pointer-events-none"
+      unmountOnExit={true}
     >
       <div
-        className="bg-surface border border-border-subtle rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh]"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 z-[9999] modal-backdrop flex items-center justify-center p-4"
+        onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="shortcuts-modal-title"
       >
+        <div
+          className="bg-surface border border-border-subtle rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh] animate-scale-in"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle bg-surface-header/40">
           <div className="flex items-center gap-2.5">
@@ -170,5 +176,6 @@ export const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({
         </div>
       </div>
     </div>
+    </Transition>
   );
 };
