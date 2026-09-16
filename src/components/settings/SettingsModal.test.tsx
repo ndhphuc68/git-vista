@@ -43,12 +43,13 @@ describe("SettingsModal", () => {
     expect(useSettingsStore.getState().activeTab).toBe("behavior");
   });
 
-  it("maintains a stable fixed height container across tabs", () => {
+  it("maintains a stable 85% width and height container across tabs", () => {
     useSettingsStore.getState().openSettings("profile");
     render(<SettingsModal currentRepoPath={null} />);
 
     const dialog = screen.getByRole("dialog");
     const modalBox = dialog.firstElementChild;
-    expect(modalBox).toHaveClass("h-[530px]");
+    expect(modalBox).toHaveClass("w-[85vw]");
+    expect(modalBox).toHaveClass("h-[85vh]");
   });
 });

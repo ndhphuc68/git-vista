@@ -51,23 +51,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
         aria-labelledby="settings-modal-title"
       >
         <div
-          className="bg-surface border border-border-subtle rounded-xl shadow-2xl w-full max-w-2xl h-[530px] overflow-hidden flex flex-col animate-scale-in"
+          className="bg-surface border border-border-subtle rounded-2xl shadow-2xl w-[85vw] h-[85vh] overflow-hidden flex flex-col animate-scale-in"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle bg-surface-header/40 shrink-0">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
-                <Settings size={18} />
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle bg-surface-header/40 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
+                <Settings size={20} />
               </div>
               <div>
                 <h2
                   id="settings-modal-title"
-                  className="text-sm font-semibold text-primary m-0"
+                  className="text-base font-semibold text-primary m-0"
                 >
                   {t.settings.title}
                 </h2>
-                <p className="text-[11px] text-secondary m-0">
+                <p className="text-xs text-secondary m-0 mt-0.5">
                   {t.settings.description}
                 </p>
               </div>
@@ -75,18 +75,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
             <button
               type="button"
               onClick={closeSettings}
-              className="flex items-center justify-center w-7 h-7 bg-transparent border-none cursor-pointer text-secondary hover:text-primary hover:bg-surface-hover rounded-md transition-colors"
+              className="flex items-center justify-center w-8 h-8 bg-transparent border-none cursor-pointer text-secondary hover:text-primary hover:bg-surface-hover rounded-lg transition-colors"
               aria-label={t.common.close}
             >
-              <X size={16} />
+              <X size={18} />
             </button>
           </div>
 
           {/* Body: Left Sidebar Tabs + Right Content */}
           <div className="flex flex-1 min-h-0 overflow-hidden">
             {/* Sidebar Tabs */}
-            <div className="w-52 shrink-0 border-r border-border-subtle bg-surface-header/20 p-3 flex flex-col justify-between">
-              <div className="flex flex-col gap-1">
+            <div className="w-60 shrink-0 border-r border-border-subtle bg-surface-header/20 p-4 flex flex-col justify-between">
+              <div className="flex flex-col gap-1.5">
                 {navItems.map((item) => {
                   const isActive = activeTab === item.id;
                   return (
@@ -94,7 +94,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
                       key={item.id}
                       type="button"
                       onClick={() => setActiveTab(item.id)}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all text-left cursor-pointer ${
+                      className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-medium transition-all text-left cursor-pointer ${
                         isActive
                           ? "bg-accent text-white font-semibold shadow-xs"
                           : "text-secondary hover:bg-surface-hover hover:text-primary"
@@ -113,8 +113,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
             </div>
 
             {/* Main Tab Content */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-6">
-              <div key={activeTab} className="animate-fade-in">
+            <div className="flex-1 min-h-0 overflow-y-auto p-8">
+              <div key={activeTab} className="animate-fade-in max-w-3xl">
                 {activeTab === "profile" && (
                   <GitProfileTab currentRepoPath={currentRepoPath} />
                 )}
