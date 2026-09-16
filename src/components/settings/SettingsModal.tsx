@@ -38,19 +38,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
   return (
     <Transition
       show={isSettingsOpen}
+      className="fixed inset-0 z-[9999]"
       enterClass="animate-fade-in"
       exitClass="opacity-0 transition-opacity duration-180 ease-macos pointer-events-none"
       unmountOnExit={true}
     >
       <div
-        className="fixed inset-0 z-[9999] modal-backdrop flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[9999]"
         onClick={closeSettings}
         role="dialog"
         aria-modal="true"
         aria-labelledby="settings-modal-title"
       >
         <div
-          className="bg-surface border border-border-subtle rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col h-[540px] max-h-[90vh] animate-scale-in"
+          className="bg-surface border border-border-subtle rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col min-h-[460px] max-h-[85vh] animate-scale-in"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -84,25 +85,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
           {/* Body: Left Sidebar Tabs + Right Content */}
           <div className="flex flex-1 min-h-0 overflow-hidden">
             {/* Sidebar Tabs */}
-            <div className="w-48 border-r border-border-subtle bg-surface-header/20 p-3 flex flex-col gap-1">
-              {navItems.map((item) => {
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setActiveTab(item.id)}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all text-left ${
-                      isActive
-                        ? "bg-accent text-accent-fg font-semibold shadow-sm"
-                        : "text-secondary hover:bg-surface-hover hover:text-primary"
-                    }`}
-                  >
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
+            <div className="w-48 border-r border-border-subtle bg-surface-header/20 p-3 flex flex-col justify-between">
+              <div className="flex flex-col gap-1">
+                {navItems.map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setActiveTab(item.id)}
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all text-left ${
+                        isActive
+                          ? "bg-accent text-white font-semibold shadow-sm"
+                          : "text-secondary hover:bg-surface-hover hover:text-primary"
+                      }`}
+                    >
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="px-2 py-1 text-[10px] text-tertiary">
+                GitVista v0.1.0
+              </div>
             </div>
 
             {/* Main Tab Content */}

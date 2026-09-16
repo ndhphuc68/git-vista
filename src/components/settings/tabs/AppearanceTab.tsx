@@ -112,7 +112,7 @@ export const AppearanceTab: React.FC = () => {
             <div>
               <div className="text-xs font-semibold text-primary">{t.settings.appearance.modeSimple}</div>
               <div className="text-[11px] text-secondary mt-0.5">
-                {t.settings.profile.subtitle}
+                {t.settings.appearance.modeSimpleDesc}
               </div>
             </div>
           </button>
@@ -130,7 +130,7 @@ export const AppearanceTab: React.FC = () => {
             <div>
               <div className="text-xs font-semibold text-primary">{t.settings.appearance.modeAdvanced}</div>
               <div className="text-[11px] text-secondary mt-0.5">
-                Full Git CLI standards
+                {t.settings.appearance.modeAdvancedDesc}
               </div>
             </div>
           </button>
@@ -138,10 +138,10 @@ export const AppearanceTab: React.FC = () => {
       </div>
 
       {/* Colorblind Accessibility */}
-      <div className="pt-2 border-t border-border-subtle">
-        <label className="flex items-center justify-between cursor-pointer p-2 -mx-2 rounded-lg hover:bg-surface-hover transition-colors">
+      <div className="pt-3 border-t border-border-subtle">
+        <div className="flex items-center justify-between p-3 rounded-lg bg-surface-header/20 border border-border-subtle">
           <div className="flex items-center gap-3">
-            <Eye className="w-5 h-5 text-secondary" />
+            <Eye className="w-5 h-5 text-secondary shrink-0" />
             <div>
               <span className="text-xs font-semibold text-primary block">
                 {t.settings.appearance.colorblindTitle}
@@ -151,13 +151,23 @@ export const AppearanceTab: React.FC = () => {
               </span>
             </div>
           </div>
-          <input
-            type="checkbox"
-            checked={colorblind}
-            onChange={(e) => setColorblind(e.target.checked)}
-            className="w-4 h-4 rounded text-accent focus:ring-accent border-border-subtle cursor-pointer"
-          />
-        </label>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={colorblind}
+            onClick={() => setColorblind(!colorblind)}
+            aria-label={t.settings.appearance.colorblindTitle}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent ${
+              colorblind ? "bg-accent" : "bg-border-strong"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                colorblind ? "translate-x-4" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
       </div>
     </div>
   );

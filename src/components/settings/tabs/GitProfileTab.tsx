@@ -214,7 +214,7 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({ currentRepoPath })
           <button
             type="submit"
             disabled={saving || loading}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-accent text-accent-fg hover:opacity-90 active:scale-95 text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-accent text-white hover:opacity-90 active:scale-95 text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer"
           >
             <Check size={14} />
             <span>{saving ? t.common.loading : t.settings.profile.saveBtn}</span>

@@ -81,12 +81,13 @@ export const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({
   return (
     <Transition
       show={isOpen}
+      className="fixed inset-0 z-[9999]"
       enterClass="animate-fade-in"
       exitClass="opacity-0 transition-opacity duration-180 ease-macos pointer-events-none"
       unmountOnExit={true}
     >
       <div
-        className="fixed inset-0 z-[9999] modal-backdrop flex items-center justify-center p-4"
+        className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
         onClick={onClose}
         role="dialog"
         aria-modal="true"
