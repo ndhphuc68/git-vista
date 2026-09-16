@@ -51,11 +51,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
         aria-labelledby="settings-modal-title"
       >
         <div
-          className="bg-surface border border-border-subtle rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col min-h-[460px] max-h-[85vh] animate-scale-in"
+          className="bg-surface border border-border-subtle rounded-xl shadow-2xl w-full max-w-2xl h-[530px] overflow-hidden flex flex-col animate-scale-in"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle bg-surface-header/40">
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle bg-surface-header/40 shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
                 <Settings size={18} />
@@ -85,7 +85,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
           {/* Body: Left Sidebar Tabs + Right Content */}
           <div className="flex flex-1 min-h-0 overflow-hidden">
             {/* Sidebar Tabs */}
-            <div className="w-48 border-r border-border-subtle bg-surface-header/20 p-3 flex flex-col justify-between">
+            <div className="w-52 shrink-0 border-r border-border-subtle bg-surface-header/20 p-3 flex flex-col justify-between">
               <div className="flex flex-col gap-1">
                 {navItems.map((item) => {
                   const isActive = activeTab === item.id;
@@ -94,9 +94,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
                       key={item.id}
                       type="button"
                       onClick={() => setActiveTab(item.id)}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all text-left ${
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all text-left cursor-pointer ${
                         isActive
-                          ? "bg-accent text-white font-semibold shadow-sm"
+                          ? "bg-accent text-white font-semibold shadow-xs"
                           : "text-secondary hover:bg-surface-hover hover:text-primary"
                       }`}
                     >
@@ -106,20 +106,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
                   );
                 })}
               </div>
-              <div className="px-2 py-1 text-[10px] text-tertiary">
-                GitVista v0.1.0
+              <div className="flex flex-col gap-0.5 px-2 py-1 text-[11px] text-tertiary">
+                <span className="font-semibold text-secondary">GitVista</span>
+                <span>v0.1.0 • macOS Edition</span>
               </div>
             </div>
 
             {/* Main Tab Content */}
-            <div className="flex-1 overflow-y-auto p-6">
-              {activeTab === "profile" && (
-                <GitProfileTab currentRepoPath={currentRepoPath} />
-              )}
-              {activeTab === "appearance" && <AppearanceTab />}
-              {activeTab === "behavior" && (
-                <GitBehaviorTab currentRepoPath={currentRepoPath} />
-              )}
+            <div className="flex-1 min-h-0 overflow-y-auto p-6">
+              <div key={activeTab} className="animate-fade-in">
+                {activeTab === "profile" && (
+                  <GitProfileTab currentRepoPath={currentRepoPath} />
+                )}
+                {activeTab === "appearance" && <AppearanceTab />}
+                {activeTab === "behavior" && (
+                  <GitBehaviorTab currentRepoPath={currentRepoPath} />
+                )}
+              </div>
             </div>
           </div>
         </div>
