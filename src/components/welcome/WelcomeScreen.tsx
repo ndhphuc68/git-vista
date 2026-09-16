@@ -13,11 +13,13 @@ import {
   Copy,
   Check,
   Star,
+  Settings,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { invokeCommand } from "../../ipc/client";
 import { RepoSummary } from "../../ipc/bindings";
 import { useTranslation } from "../../i18n";
+import { useSettingsStore } from "../../store/useSettingsStore";
 import { CloneModal } from "./CloneModal";
 
 interface WelcomeScreenProps {
@@ -59,6 +61,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onSelectRepo,
 }) => {
   const { t } = useTranslation();
+  const { openSettings } = useSettingsStore();
   const [error, setError] = useState<string | null>(null);
   const [isCloneOpen, setIsCloneOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -265,6 +268,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-center">
+            <button
+              onClick={() => openSettings()}
+              type="button"
+              className="px-3 py-1.5 rounded-xl bg-surface hover:bg-surface-hover border border-border-subtle text-xs font-medium text-secondary hover:text-primary transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+              title={`${t.settings.title} (Ctrl+,)`}
+            >
+              <Settings size={13} className="text-secondary" />
+              <span>{t.settings.title}</span>
+            </button>
             <button
               onClick={handleOpenShortcuts}
               type="button"

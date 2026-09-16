@@ -56,6 +56,7 @@ export const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({
         title: t.shortcuts.categories.settings,
         items: [
           { label: t.shortcuts.items.toggleTheme, keys: ["Ctrl+T"] },
+          { label: t.settings.title, keys: ["Ctrl+,"] },
         ],
       },
     ],

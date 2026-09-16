@@ -19,6 +19,7 @@ export interface CommandContext {
   openShortcutsHelp?: () => void;
   toggleTheme?: () => void;
   toggleMode?: () => void;
+  openSettings?: () => void;
   fetch?: () => void | Promise<void>;
   pull?: () => void | Promise<void>;
   push?: () => void | Promise<void>;
@@ -138,6 +139,15 @@ export function getAppCommands(
       shortcut: "?",
       keywords: ["shortcuts", "help", "phim tat", "phím tắt", "tro giup", "trợ giúp", "?"],
       action: () => context.openShortcutsHelp?.(),
+    },
+    {
+      id: "settings-open",
+      title: t.settings.title,
+      description: t.settings.description,
+      category: "settings",
+      shortcut: "Ctrl+,",
+      keywords: ["settings", "cai dat", "cài đặt", "config", "profile", "author", "email", "theme"],
+      action: () => context.openSettings?.(),
     },
   ];
 

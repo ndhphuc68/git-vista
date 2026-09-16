@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect } from "react";
 import clsx from "clsx";
 import {
   FolderGit2,
@@ -11,16 +11,11 @@ import {
   ArrowDown,
   ArrowUp,
   Settings,
-  Sun,
-  Moon,
-  Laptop,
-  Languages,
-  Terminal,
 } from "lucide-react";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
-import { useSettingsStore, Theme, Locale } from "../../store/useSettingsStore";
+import { useSettingsStore } from "../../store/useSettingsStore";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import { useTranslation } from "../../i18n";
 import { invokeCommand } from "../../ipc/client";
@@ -42,23 +37,10 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
     sidebarOpen,
     toggleSidebar,
   } = useLayoutStore();
-  const { theme, setTheme, locale, setLocale, mode, setMode } = useSettingsStore();
+  const { openSettings } = useSettingsStore();
   const { isMobile } = useWindowDimensions();
   const { t, actions } = useTranslation();
   const queryClient = useQueryClient();
-
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const settingsMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (settingsMenuRef.current && !settingsMenuRef.current.contains(e.target as Node)) {
-        setSettingsOpen(false);
-      }
-    };
-    window.addEventListener("mousedown", handleOutsideClick);
-    return () => window.removeEventListener("mousedown", handleOutsideClick);
-  }, []);
 
   const { data: repoStatus } = useQuery({
     queryKey: ["repoStatus", currentRepo?.path],
@@ -296,7 +278,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
           </div>
 
           {/* Khối Công Cụ Phải: Refresh & Settings */}
-          <div className="flex items-center gap-1 pl-1 border-l border-border-subtle relative" ref={settingsMenuRef}>
+          <div className="flex items-center gap-1 pl-1 border-l border-border-subtle relative">
 
             {/* Refresh button */}
             <button
@@ -307,98 +289,16 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
               <RefreshCw size={12} />
             </button>
 
-            {/* Settings dropdown trigger */}
+            {/* Settings modal trigger */}
             <button
               type="button"
-              onClick={() => setSettingsOpen(!settingsOpen)}
-              className={clsx(
-                "flex items-center justify-center w-7 h-7 border border-border-subtle rounded-md cursor-pointer transition-colors shadow-2xs",
-                settingsOpen ? "bg-accent-subtle text-accent" : "bg-surface text-secondary hover:bg-surface-hover hover:text-primary"
-              )}
+              onClick={() => openSettings("appearance")}
+              className="flex items-center justify-center w-7 h-7 border border-border-subtle rounded-md cursor-pointer transition-colors shadow-2xs bg-surface text-secondary hover:bg-surface-hover hover:text-primary"
               title={t.header.settingsTitle}
+              aria-label={t.settings.title}
             >
               <Settings size={13} />
             </button>
-
-            {/* Settings Popover Dropdown */}
-            {settingsOpen && (
-              <div
-                className="absolute right-0 top-full mt-1.5 w-60 bg-surface border border-border-subtle rounded-xl shadow-xl p-3 text-xs flex flex-col gap-3 z-50 animate-in fade-in zoom-in-95 duration-100"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="font-bold text-primary border-b border-border-subtle pb-1.5 flex items-center justify-between">
-                  <span>{t.header.settingsMenuTitle}</span>
-                  <button
-                    onClick={() => setSettingsOpen(false)}
-                    className="text-secondary hover:text-primary p-0.5"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                {/* Theme options */}
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">{t.settings.theme}</span>
-                  <div className="grid grid-cols-3 gap-1 bg-window p-0.5 rounded-md border border-border-subtle">
-                    {(["light", "dark", "system"] as Theme[]).map((tVal) => (
-                      <button
-                        key={tVal}
-                        onClick={() => setTheme(tVal)}
-                        className={clsx(
-                          "px-1.5 py-1 rounded text-xs flex items-center justify-center gap-1 cursor-pointer transition-colors",
-                          theme === tVal
-                            ? "bg-surface text-primary shadow-xs font-bold"
-                            : "text-secondary hover:text-primary"
-                        )}
-                        title={`Theme: ${tVal}`}
-                      >
-                        {tVal === "light" && <Sun size={11} />}
-                        {tVal === "dark" && <Moon size={11} />}
-                        {tVal === "system" && <Laptop size={11} />}
-                        <span className="capitalize">{tVal === "light" ? t.settings.themeLight : tVal === "dark" ? t.settings.themeDark : t.settings.themeSystem}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Locale options */}
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">{t.settings.language}</span>
-                  <div className="grid grid-cols-2 gap-1 bg-window p-0.5 rounded-md border border-border-subtle">
-                    {(["vi", "en"] as Locale[]).map((loc) => (
-                      <button
-                        key={loc}
-                        onClick={() => setLocale(loc)}
-                        className={clsx(
-                          "px-2 py-1 rounded text-xs flex items-center justify-center gap-1 cursor-pointer transition-colors",
-                          locale === loc
-                            ? "bg-surface text-primary shadow-xs font-bold"
-                            : "text-secondary hover:text-primary"
-                        )}
-                      >
-                        <Languages size={11} />
-                        <span>{loc === "vi" ? "Tiếng Việt" : "English"}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Mode options */}
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">{t.settings.mode}</span>
-                  <button
-                    onClick={() => setMode(mode === "simple" ? "advanced" : "simple")}
-                    className="flex items-center justify-between px-2 py-1.5 rounded-md bg-window hover:bg-surface-hover border border-border-subtle text-primary font-medium cursor-pointer transition-colors"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <Terminal size={12} className="text-accent" />
-                      <span>{mode === "simple" ? t.settings.modeSimple : t.settings.modeAdvanced}</span>
-                    </div>
-                    <span className="text-[10px] text-accent font-bold uppercase">{mode}</span>
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </header>

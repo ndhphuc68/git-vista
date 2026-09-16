@@ -17,6 +17,7 @@ import { ToastContainer } from "./components/toast/ToastContainer";
 import { CommandPalette } from "./components/palette/CommandPalette";
 import { ShortcutsHelpModal } from "./components/shortcuts/ShortcutsHelpModal";
 import { SplashScreen } from "./components/splash/SplashScreen";
+import { SettingsModal } from "./components/settings/SettingsModal";
 import { useCommandPaletteStore } from "./store/useCommandPaletteStore";
 import { CommandContext } from "./utils/commandRegistry";
 
@@ -115,7 +116,7 @@ export const App: React.FC<AppProps> = ({
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const { currentRepo, setRepo, clearRepo } = useRepoStore();
   const { setActiveScreen } = useViewStore();
-  const { resolvedTheme, setTheme, mode, setMode } = useSettingsStore();
+  const { resolvedTheme, setTheme, mode, setMode, openSettings, closeSettings } = useSettingsStore();
   const { open: openCommandPalette, close: closeCommandPalette } = useCommandPaletteStore();
 
   const handleToggleTheme = () => {
@@ -137,9 +138,13 @@ export const App: React.FC<AppProps> = ({
       setIsShortcutsHelpOpen(true);
     },
     onToggleTheme: handleToggleTheme,
+    onOpenSettings: () => {
+      openSettings();
+    },
     onEscape: () => {
       setIsGlobalCreateBranchOpen(false);
       setIsShortcutsHelpOpen(false);
+      closeSettings();
       closeCommandPalette();
     },
     enabled: true,
@@ -154,6 +159,7 @@ export const App: React.FC<AppProps> = ({
     openShortcutsHelp: () => setIsShortcutsHelpOpen(true),
     toggleTheme: handleToggleTheme,
     toggleMode: handleToggleMode,
+    openSettings: () => openSettings(),
   };
 
   useEffect(() => {
@@ -203,6 +209,7 @@ export const App: React.FC<AppProps> = ({
           isOpen={isShortcutsHelpOpen}
           onClose={() => setIsShortcutsHelpOpen(false)}
         />
+        <SettingsModal currentRepoPath={currentRepo?.path ?? null} />
       </div>
     </QueryClientProvider>
   );

@@ -6,6 +6,7 @@ export interface UseGlobalShortcutsOptions {
   onOpenCommandPalette?: () => void;
   onOpenShortcutsHelp?: () => void;
   onToggleTheme?: () => void;
+  onOpenSettings?: () => void;
   onEscape?: () => void;
   enabled?: boolean;
 }
@@ -16,6 +17,7 @@ export function useGlobalShortcuts(options: UseGlobalShortcutsOptions = {}) {
     onOpenCommandPalette,
     onOpenShortcutsHelp,
     onToggleTheme,
+    onOpenSettings,
     onEscape,
     enabled = true,
   } = options;
@@ -79,6 +81,11 @@ export function useGlobalShortcuts(options: UseGlobalShortcutsOptions = {}) {
           if (onOpenCreateBranch) {
             onOpenCreateBranch();
           }
+        } else if (e.key === "," || e.key === "<") {
+          e.preventDefault();
+          if (onOpenSettings) {
+            onOpenSettings();
+          }
         }
       }
     };
@@ -91,6 +98,7 @@ export function useGlobalShortcuts(options: UseGlobalShortcutsOptions = {}) {
     onOpenCommandPalette,
     onOpenShortcutsHelp,
     onToggleTheme,
+    onOpenSettings,
     onEscape,
     setActiveScreen,
   ]);

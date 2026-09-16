@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User, Globe, FolderGit2, Check, AlertCircle } from "lucide-react";
+import { Globe, FolderGit2, Check, AlertCircle } from "lucide-react";
 import { useTranslation } from "../../../i18n";
 import { invokeCommand, ConfigScope, GitConfigDto } from "../../../ipc/client";
 import { useToastStore } from "../../../store/useToastStore";
@@ -10,7 +10,7 @@ interface GitProfileTabProps {
 
 export const GitProfileTab: React.FC<GitProfileTabProps> = ({ currentRepoPath }) => {
   const { t } = useTranslation();
-  const { addToast } = useToastStore();
+  const { showSuccess, showError } = useToastStore();
 
   const [scope, setScope] = useState<ConfigScope>(currentRepoPath ? "local" : "global");
   const [userName, setUserName] = useState("");
@@ -76,11 +76,7 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({ currentRepoPath })
       await invokeCommand.setGitConfig(repoPath, scope, "user.email", userEmail.trim());
       await invokeCommand.setGitConfig(repoPath, scope, "init.defaultBranch", defaultBranch.trim() || "main");
 
-      addToast({
-        title: t.settings.profile.savedSuccess,
-        type: "success",
-        duration: 3500,
-      });
+      showSuccess(t.settings.profile.savedSuccess);
 
       // Reload config
       const updatedGlobal = await invokeCommand.getGitConfig(null);
@@ -91,11 +87,7 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({ currentRepoPath })
       }
     } catch (err) {
       console.error("Failed to save git config:", err);
-      addToast({
-        title: t.common.error,
-        message: String(err),
-        type: "error",
-      });
+      showError(String(err));
     } finally {
       setSaving(false);
     }

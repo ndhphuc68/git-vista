@@ -1,7 +1,7 @@
 import React from "react";
-import { Sun, Moon, Laptop, Eye, Languages, Sparkles } from "lucide-react";
+import { Sun, Moon, Laptop, Eye, Sparkles } from "lucide-react";
 import { useTranslation } from "../../../i18n";
-import { useSettingsStore, Theme, Locale, AppMode } from "../../../store/useSettingsStore";
+import { useSettingsStore, Theme, Locale } from "../../../store/useSettingsStore";
 
 export const AppearanceTab: React.FC = () => {
   const { t } = useTranslation();
@@ -51,6 +51,7 @@ export const AppearanceTab: React.FC = () => {
                 key={opt.value}
                 type="button"
                 onClick={() => setTheme(opt.value)}
+                title={`Theme: ${opt.value}`}
                 className={`flex items-center justify-center gap-2 p-3 rounded-lg border text-xs font-medium transition-all ${
                   isSelected
                     ? "border-accent bg-accent/10 text-accent ring-1 ring-accent"

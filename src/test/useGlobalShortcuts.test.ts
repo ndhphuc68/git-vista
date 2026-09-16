@@ -98,6 +98,18 @@ describe("useGlobalShortcuts", () => {
     expect(onEscape).toHaveBeenCalledTimes(1);
   });
 
+  it("triggers onOpenSettings on Ctrl+,", () => {
+    const onOpenSettings = vi.fn();
+    renderHook(() => useGlobalShortcuts({ onOpenSettings }));
+
+    act(() => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: ",", ctrlKey: true, bubbles: true })
+      );
+    });
+    expect(onOpenSettings).toHaveBeenCalledTimes(1);
+  });
+
   it("ignores shortcuts when focus is inside input/textarea", () => {
     const onOpenCommandPalette = vi.fn();
     renderHook(() => useGlobalShortcuts({ onOpenCommandPalette }));

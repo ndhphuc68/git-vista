@@ -10,7 +10,7 @@ interface GitBehaviorTabProps {
 
 export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({ currentRepoPath }) => {
   const { t } = useTranslation();
-  const { addToast } = useToastStore();
+  const { showSuccess, showError } = useToastStore();
 
   const [pullRebase, setPullRebase] = useState<boolean>(false);
   const [autoFetchInterval, setAutoFetchInterval] = useState<number>(() => {
@@ -54,18 +54,10 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({ currentRepoPath 
       } else {
         await invokeCommand.setGitConfig(null, "global", "pull.rebase", String(isRebase));
       }
-      addToast({
-        title: t.settings.profile.savedSuccess,
-        type: "success",
-        duration: 2500,
-      });
+      showSuccess(t.settings.profile.savedSuccess);
     } catch (err) {
       console.error("Failed to update pull strategy:", err);
-      addToast({
-        title: t.common.error,
-        message: String(err),
-        type: "error",
-      });
+      showError(String(err));
     } finally {
       setSaving(false);
     }
@@ -76,11 +68,7 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({ currentRepoPath 
     if (typeof localStorage !== "undefined") {
       localStorage.setItem("gitvista_autofetch_interval", String(seconds));
     }
-    addToast({
-      title: t.settings.profile.savedSuccess,
-      type: "success",
-      duration: 2500,
-    });
+    showSuccess(t.settings.profile.savedSuccess);
   };
 
   return (
