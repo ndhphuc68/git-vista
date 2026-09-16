@@ -70,7 +70,7 @@ export const Shell: React.FC = () => {
             style={!isMobile ? { width: `${sidebarWidth}px` } : undefined}
             className={clsx(
               isMobile ? "absolute inset-y-0 left-0 z-30 shadow-lg w-72" : "relative z-1",
-              "h-full shrink-0 flex"
+              "h-full shrink-0 flex transition-[width] duration-200 ease-macos"
             )}
           >
             <div className="flex-1 h-full min-w-0 overflow-hidden">
@@ -106,12 +106,12 @@ export const Shell: React.FC = () => {
           <div
             data-testid="detail-backdrop"
             onClick={handleCloseDetail}
-            className="absolute inset-0 bg-black/30 backdrop-blur-[2px] z-30 transition-opacity duration-300"
+            className="absolute inset-0 modal-backdrop z-30 animate-fade-in"
           />
           <div
             data-testid="shell-detail-container"
             className={clsx(
-              "absolute top-0 right-0 bottom-0 z-40 bg-surface border-l border-border-subtle shadow-2xl transition-transform duration-300 ease-out flex flex-col overflow-hidden",
+              "absolute top-0 right-0 bottom-0 z-40 bg-surface border-l border-border-subtle shadow-2xl transition-transform duration-300 ease-macos flex flex-col overflow-hidden animate-slide-up",
               isMobile ? "w-full max-w-full" : "w-3/4 max-w-[85vw]"
             )}
           >

@@ -242,9 +242,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         isDragging ? "ring-2 ring-accent ring-inset bg-accent-subtle/30" : ""
       }`}
     >
-      <div className="w-full max-w-[840px] flex flex-col gap-6 my-auto animate-fade">
+      <div className="w-full max-w-[840px] flex flex-col gap-6 my-auto animate-fade-in">
         {/* Header / Hero Branding */}
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1 animate-slide-down">
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-2xl bg-surface border border-border-subtle shadow-xs flex items-center justify-center text-accent shrink-0">
               <FolderGit2 size={24} className="text-accent" />
@@ -296,12 +296,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         )}
 
         {/* Primary Action Cards (2 Thao tác lớn rõ ràng) */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 animate-slide-up">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {/* Open Folder Card */}
             <button
               onClick={handleOpenFolder}
-              className="group flex items-start gap-4 p-4.5 bg-surface hover:bg-surface-hover border border-border-subtle hover:border-accent rounded-xl text-left transition-all duration-200 cursor-pointer shadow-xs hover:shadow-md min-h-[92px]"
+              className="group flex items-start gap-4 p-4.5 bg-surface hover:bg-surface-hover border border-border-subtle hover:border-accent rounded-xl text-left card-lift btn-press cursor-pointer shadow-xs hover:shadow-md min-h-[92px]"
             >
               <div className="w-11 h-11 rounded-xl bg-accent-subtle text-accent flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform mt-0.5">
                 <FolderOpen size={22} />
@@ -326,7 +326,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               type="button"
               data-testid="welcome-clone-btn"
               onClick={() => setIsCloneOpen(true)}
-              className="group flex items-start gap-4 p-4.5 bg-surface hover:bg-surface-hover border border-border-subtle hover:border-emerald-500 rounded-xl text-left transition-all duration-200 cursor-pointer shadow-xs hover:shadow-md min-h-[92px]"
+              className="group flex items-start gap-4 p-4.5 bg-surface hover:bg-surface-hover border border-border-subtle hover:border-emerald-500 rounded-xl text-left card-lift btn-press cursor-pointer shadow-xs hover:shadow-md min-h-[92px]"
             >
               <div className="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform mt-0.5">
                 <Download size={22} />
@@ -350,7 +350,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           {/* Integrated Drag & Drop Zone */}
           <div
             onClick={handleOpenFolder}
-            className="p-3.5 rounded-xl bg-surface/70 border border-dashed border-border-strong/70 hover:border-accent flex items-center justify-center gap-2.5 text-xs sm:text-sm text-secondary hover:text-primary transition-all cursor-pointer shadow-2xs hover:bg-surface"
+            className="p-3.5 rounded-xl bg-surface/70 border border-dashed border-border-strong/70 hover:border-accent flex items-center justify-center gap-2.5 text-xs sm:text-sm text-secondary hover:text-primary transition-all card-lift btn-press cursor-pointer shadow-2xs hover:bg-surface"
           >
             <FolderGit2 size={16} className="text-tertiary shrink-0" />
             <span>{t.welcome.dropzoneHint}</span>
@@ -358,7 +358,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         </div>
 
         {/* Recent Repositories Container (Tường minh, rõ ràng) */}
-        <div className="bg-surface border border-border-subtle rounded-xl p-4 sm:p-5 flex flex-col gap-3.5 shadow-xs">
+        <div className="bg-surface border border-border-subtle rounded-xl p-4 sm:p-5 flex flex-col gap-3.5 shadow-xs animate-slide-up">
           {/* Section Header with Search Bar */}
           <div className="flex items-center justify-between gap-3 pb-3 border-b border-border-subtle flex-wrap">
             <div className="flex items-center gap-2">

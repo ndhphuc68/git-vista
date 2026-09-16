@@ -187,9 +187,9 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
         disabled={!canCommit}
         onClick={handleSubmit}
         className={clsx(
-          "flex items-center justify-center gap-1.5 w-full py-2 px-3 border rounded-sm text-xs font-semibold transition-all duration-150 ease-macos",
+          "flex items-center justify-center gap-1.5 w-full py-2 px-3 border rounded-sm text-xs font-semibold transition-all duration-150 ease-macos btn-press",
           canCommit
-            ? "bg-accent text-accent-contrast border-accent cursor-pointer hover:bg-accent-hover active:scale-[0.99]"
+            ? "bg-accent text-accent-contrast border-accent cursor-pointer hover:bg-accent-hover active:scale-[0.98]"
             : "bg-window text-tertiary border-border-subtle cursor-not-allowed"
         )}
       >
