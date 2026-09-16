@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { AlertTriangle, X } from "lucide-react";
 import { useTranslation } from "../../i18n";
-import { Transition } from "../common/Transition";
 
 export interface DiscardConfirmModalProps {
   isOpen: boolean;
