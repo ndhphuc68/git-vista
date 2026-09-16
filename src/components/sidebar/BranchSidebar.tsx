@@ -118,10 +118,7 @@ export const BranchSidebar: React.FC = () => {
   // Modal states
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [renameBranchName, setRenameBranchName] = useState<string | null>(null);
-  const [deleteBranchInfo, setDeleteBranchInfo] = useState<{
-    name: string;
-    commitId: string;
-  } | null>(null);
+  const [deleteBranchName, setDeleteBranchName] = useState<string | null>(null);
   const [mergeModal, setMergeModal] = useState<{ targetBranch: string } | null>(null);
   const [rebaseModal, setRebaseModal] = useState<{ upstreamBranch: string } | null>(null);
   const [conflictInfo, setConflictInfo] = useState<{
@@ -231,7 +228,7 @@ export const BranchSidebar: React.FC = () => {
     if (!window.confirm("Xoa stash nay?")) return;
     const stashToDrop = stashes[index];
     try {
-      await invokeCommand.dropStash(currentRepo.path, index);
+      const receipt = await invokeCommand.dropStash(currentRepo.path, index);
       invalidateStashes();
       setSelectedStash(null);
       if (stashToDrop) {
@@ -242,8 +239,7 @@ export const BranchSidebar: React.FC = () => {
           undoAction: async () => {
             await invokeCommand.undoDropStash(
               currentRepo.path,
-              stashToDrop.commit_id,
-              stashToDrop.message
+              receipt
             );
             invalidateStashes();
           },
@@ -437,10 +433,7 @@ export const BranchSidebar: React.FC = () => {
                   type="button"
                   onClick={() => {
                     setMenuBranch(null);
-                    setDeleteBranchInfo({
-                      name: branch.name,
-                      commitId: branch.target_commit_id,
-                    });
+                    setDeleteBranchName(branch.name);
                   }}
                   className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-diff-remove-text hover:bg-diff-remove-bg cursor-pointer text-left w-full transition-colors"
                 >
@@ -824,11 +817,10 @@ export const BranchSidebar: React.FC = () => {
       />
 
       <DeleteBranchModal
-        isOpen={Boolean(deleteBranchInfo)}
-        onClose={() => setDeleteBranchInfo(null)}
+        isOpen={Boolean(deleteBranchName)}
+        onClose={() => setDeleteBranchName(null)}
         repoPath={currentRepo.path}
-        branchName={deleteBranchInfo?.name || ""}
-        targetCommitId={deleteBranchInfo?.commitId}
+        branchName={deleteBranchName || ""}
         onSuccess={invalidateRepo}
       />
 

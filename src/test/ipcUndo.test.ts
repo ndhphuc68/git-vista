@@ -7,7 +7,13 @@ describe("IPC undo commands (browser mock)", () => {
   });
 
   it("undoDeleteBranch completes successfully", async () => {
-    await expect(invokeCommand.undoDeleteBranch("test-repo", "feature", "oid123")).resolves.not.toThrow();
+    await expect(
+      invokeCommand.undoDeleteBranch(
+        "test-repo",
+        "feature",
+        "refs/gitui-backup/delete-branch-feature-123"
+      )
+    ).resolves.not.toThrow();
   });
 
   it("restoreDiscard completes successfully", async () => {
@@ -15,6 +21,6 @@ describe("IPC undo commands (browser mock)", () => {
   });
 
   it("undoDropStash completes successfully", async () => {
-    await expect(invokeCommand.undoDropStash("test-repo", "oid123", "msg")).resolves.not.toThrow();
+    await expect(invokeCommand.undoDropStash("test-repo", "receipt")).resolves.not.toThrow();
   });
 });

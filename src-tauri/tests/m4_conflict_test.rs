@@ -8,28 +8,53 @@ fn create_conflict_repo() -> (tempfile::TempDir, String) {
     let dir = tempfile::tempdir().unwrap();
     let p = dir.path();
     let run = |args: &[&str]| {
-        let out = Command::new("git").current_dir(p).args(args).output().unwrap();
-        assert!(out.status.success(), "git {:?} failed: {}", args, String::from_utf8_lossy(&out.stderr));
+        let out = Command::new("git")
+            .current_dir(p)
+            .args(args)
+            .output()
+            .unwrap();
+        assert!(
+            out.status.success(),
+            "git {:?} failed: {}",
+            args,
+            String::from_utf8_lossy(&out.stderr)
+        );
     };
 
     run(&["init"]);
     run(&["config", "user.name", "Tester"]);
     run(&["config", "user.email", "tester@test.com"]);
 
-    fs::write(p.join("app.txt"), "common header\ncommon middle\ncommon footer\n").unwrap();
+    fs::write(
+        p.join("app.txt"),
+        "common header\ncommon middle\ncommon footer\n",
+    )
+    .unwrap();
     run(&["add", "app.txt"]);
     run(&["commit", "-m", "initial"]);
     run(&["branch", "-M", "main"]);
 
     run(&["checkout", "-b", "feature"]);
-    fs::write(p.join("app.txt"), "common header\nfeature line\ncommon footer\n").unwrap();
+    fs::write(
+        p.join("app.txt"),
+        "common header\nfeature line\ncommon footer\n",
+    )
+    .unwrap();
     run(&["commit", "-am", "feature change"]);
 
     run(&["checkout", "main"]);
-    fs::write(p.join("app.txt"), "common header\nmain line\ncommon footer\n").unwrap();
+    fs::write(
+        p.join("app.txt"),
+        "common header\nmain line\ncommon footer\n",
+    )
+    .unwrap();
     run(&["commit", "-am", "main change"]);
 
-    let _ = Command::new("git").current_dir(p).args(["merge", "feature"]).output().unwrap();
+    let _ = Command::new("git")
+        .current_dir(p)
+        .args(["merge", "feature"])
+        .output()
+        .unwrap();
 
     let path_str = dir.path().to_str().unwrap().to_string();
     (dir, path_str)
@@ -44,9 +69,17 @@ fn test_conflict_parsing_and_resolution_lifecycle() {
     assert_eq!(data.file_path, "app.txt");
     assert_eq!(data.total_conflicts, 1);
 
-    let conflict_hunk = data.hunks.iter().find(|h| h.is_conflict).expect("Must have 1 conflict hunk");
+    let conflict_hunk = data
+        .hunks
+        .iter()
+        .find(|h| h.is_conflict)
+        .expect("Must have 1 conflict hunk");
     assert!(conflict_hunk.ours.as_ref().unwrap().contains("main line"));
-    assert!(conflict_hunk.theirs.as_ref().unwrap().contains("feature line"));
+    assert!(conflict_hunk
+        .theirs
+        .as_ref()
+        .unwrap()
+        .contains("feature line"));
 
     // 2. Giải quyết conflict và auto-stage
     let resolved = "common header\nmain line\nfeature line\ncommon footer\n";
@@ -56,4 +89,39 @@ fn test_conflict_parsing_and_resolution_lifecycle() {
     let status = get_repo_status(&repo_path).unwrap();
     assert_eq!(status.conflicted.len(), 0);
     assert!(status.staged.iter().any(|s| s.path == "app.txt"));
+}
+
+#[test]
+fn conflict_paths_cannot_escape_the_repository() {
+    let parent = tempfile::tempdir().unwrap();
+    let repo_path = parent.path().join("repo");
+    fs::create_dir(&repo_path).unwrap();
+    git2::Repository::init(&repo_path).unwrap();
+    let outside_path = parent.path().join("outside.txt");
+    fs::write(&outside_path, "safe\n").unwrap();
+
+    assert!(get_conflict_file_data(&repo_path, "../outside.txt").is_err());
+    assert!(resolve_conflict_file(&repo_path, "../outside.txt", "overwritten\n", false,).is_err());
+    assert!(get_conflict_file_data(&repo_path, outside_path.to_str().unwrap()).is_err());
+    assert!(get_conflict_file_data(&repo_path, ".git/config").is_err());
+    assert!(resolve_conflict_file(&repo_path, ".git/config", "overwritten\n", false).is_err());
+    assert_eq!(fs::read_to_string(outside_path).unwrap(), "safe\n");
+}
+
+#[cfg(unix)]
+#[test]
+fn conflict_paths_reject_symlinks() {
+    use std::os::unix::fs::symlink;
+
+    let parent = tempfile::tempdir().unwrap();
+    let repo_path = parent.path().join("repo");
+    fs::create_dir(&repo_path).unwrap();
+    git2::Repository::init(&repo_path).unwrap();
+    let outside_path = parent.path().join("outside.txt");
+    fs::write(&outside_path, "safe\n").unwrap();
+    symlink(&outside_path, repo_path.join("linked.txt")).unwrap();
+
+    assert!(get_conflict_file_data(&repo_path, "linked.txt").is_err());
+    assert!(resolve_conflict_file(&repo_path, "linked.txt", "overwritten\n", false).is_err());
+    assert_eq!(fs::read_to_string(outside_path).unwrap(), "safe\n");
 }

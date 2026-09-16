@@ -17,7 +17,9 @@ pub fn create_backup_ref(
     // backup — the only pointer to the overwritten commit. Retry with a
     // disambiguating suffix instead of overwriting.
     static NEXT: AtomicU64 = AtomicU64::new(0);
-    let base = format!("refs/gitui-backup/{}-{}", action, now);
+    // Include the immutable target object in the token so a consumed receipt
+    // name cannot be silently reused for a different recovery operation.
+    let base = format!("refs/gitui-backup/{}-{}.{}", action, now, target_oid);
     for attempt in 0..1000 {
         // `.N` keeps the trailing `-<seconds>` intact so pruning can still
         // read the timestamp as the last hyphen-separated segment.

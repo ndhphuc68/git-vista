@@ -1,6 +1,22 @@
 use crate::error::AppError;
 use git2::{build::CheckoutBuilder, BranchType, Oid, Reference, Repository};
+use serde::{Deserialize, Serialize};
 use std::path::Path;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct BranchDeletionRecovery {
+    pub version: u8,
+    pub branch_name: String,
+    pub target: String,
+    pub nonce: String,
+}
+
+fn recovery_signature(repo: &Repository) -> Result<git2::Signature<'static>, AppError> {
+    repo.signature().map(|sig| sig.to_owned()).or_else(|_| {
+        git2::Signature::now("Visual Git Client", "app@visualgit.local").map_err(AppError::from)
+    })
+}
 
 /// Kiểm tra tính hợp lệ của tên nhánh Git
 pub fn validate_branch_name(name: &str) -> Result<(), AppError> {
@@ -8,6 +24,11 @@ pub fn validate_branch_name(name: &str) -> Result<(), AppError> {
     if trimmed.is_empty() {
         return Err(AppError::InvalidOperation(
             "Tên nhánh không được để trống".into(),
+        ));
+    }
+    if trimmed.starts_with('-') {
+        return Err(AppError::InvalidOperation(
+            "Branch name cannot start with '-' because Git CLI would parse it as an option".into(),
         ));
     }
     let ref_name = format!("refs/heads/{}", trimmed);
@@ -99,7 +120,12 @@ pub fn delete_branch<P: AsRef<Path>>(
     force: bool,
 ) -> Result<String, AppError> {
     let trimmed = branch_name.trim();
+    validate_branch_name(trimmed)?;
     let repo = Repository::open(repo_path.as_ref())?;
+    let branch_ref = format!("refs/heads/{trimmed}");
+    let mut transaction = repo.transaction()?;
+    transaction.lock_ref("HEAD")?;
+    transaction.lock_ref(&branch_ref)?;
 
     // 1. Kiểm tra HEAD
     if let Ok(head) = repo.head() {
@@ -110,7 +136,7 @@ pub fn delete_branch<P: AsRef<Path>>(
         }
     }
 
-    let mut branch = repo.find_branch(trimmed, BranchType::Local)?;
+    let branch = repo.find_branch(trimmed, BranchType::Local)?;
     let branch_commit = branch.get().peel_to_commit()?;
 
     // 2. Kiểm tra merged
@@ -130,24 +156,43 @@ pub fn delete_branch<P: AsRef<Path>>(
         }
     }
 
-    // 3. Tạo backup ref trước khi xoá (mục 6.4)
-    let sanitized_name = trimmed.replace('/', "-");
-    let backup_action = format!("delete-branch-{}", sanitized_name);
-    let timestamp = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map_err(|e| AppError::InvalidOperation(e.to_string()))?
-        .as_secs();
-    let backup_ref_name = format!("refs/gitui-backup/{}-{}", backup_action, timestamp);
-    repo.reference(
-        &backup_ref_name,
-        branch_commit.id(),
-        false,
-        "Backup before branch deletion",
+    // 3. Create a typed receipt whose payload binds this exact branch to its
+    // target. The parent keeps the deleted commit reachable for recovery.
+    static NEXT_RECEIPT: AtomicU64 = AtomicU64::new(0);
+    let nonce = format!(
+        "{}-{}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos(),
+        NEXT_RECEIPT.fetch_add(1, Ordering::Relaxed)
+    );
+    let recovery = BranchDeletionRecovery {
+        version: 1,
+        branch_name: trimmed.to_string(),
+        target: branch_commit.id().to_string(),
+        nonce,
+    };
+    let message = serde_json::to_string(&recovery)
+        .map_err(|error| AppError::Io(error.to_string()))?;
+    let tree = branch_commit.tree()?;
+    let signature = recovery_signature(&repo)?;
+    let receipt_commit = repo.commit(
+        None,
+        &signature,
+        &signature,
+        &message,
+        &tree,
+        &[&branch_commit],
     )?;
+    let backup_ref_name =
+        crate::write::create_backup_ref(&repo, "delete-branch", receipt_commit)?;
 
-    // 4. Xoá nhánh
-    branch.delete()?;
+    // 4. Remove exactly the ref whose target was captured while the lock was
+    // held. A concurrent checkout/retarget cannot slip between receipt and delete.
+    drop(branch);
+    transaction.remove(&branch_ref)?;
+    transaction.commit()?;
 
     Ok(backup_ref_name)
 }
-

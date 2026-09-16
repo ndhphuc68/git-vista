@@ -29,6 +29,15 @@ fn get_cancelled_tasks() -> &'static Mutex<HashMap<String, bool>> {
     CANCELLED_TASKS.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
+pub fn validate_git_operand(value: &str, label: &str) -> Result<(), AppError> {
+    if value.is_empty() || value.starts_with('-') || value.contains('\0') {
+        return Err(AppError::InvalidOperation(format!(
+            "Invalid {label}: Git operands cannot be empty, start with '-', or contain NUL"
+        )));
+    }
+    Ok(())
+}
+
 pub fn register_task_process(task_id: &str, pid: u32) {
     if let Ok(mut map) = get_active_tasks().lock() {
         map.insert(task_id.to_string(), pid);
@@ -241,4 +250,17 @@ pub fn get_git_cli_version() -> Result<String, AppError> {
     }
 
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
+}
+
+#[cfg(test)]
+mod operand_tests {
+    use super::validate_git_operand;
+
+    #[test]
+    fn rejects_values_that_git_could_parse_as_options() {
+        assert!(validate_git_operand("--mirror", "branch").is_err());
+        assert!(validate_git_operand("", "branch").is_err());
+        assert!(validate_git_operand("bad\0value", "branch").is_err());
+        assert!(validate_git_operand("feature/safe", "branch").is_ok());
+    }
 }

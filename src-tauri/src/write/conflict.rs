@@ -1,5 +1,4 @@
 ﻿use crate::error::AppError;
-use std::fs;
 use std::path::Path;
 
 pub fn resolve_conflict_file<P: AsRef<Path>>(
@@ -8,8 +7,7 @@ pub fn resolve_conflict_file<P: AsRef<Path>>(
     resolved_content: &str,
     auto_stage: bool,
 ) -> Result<(), AppError> {
-    let full_path = repo_path.as_ref().join(file_path);
-    fs::write(&full_path, resolved_content)?;
+    crate::repo::path::write_existing_worktree_file(&repo_path, file_path, resolved_content)?;
 
     if auto_stage {
         let repo = git2::Repository::open(repo_path.as_ref())?;

@@ -533,13 +533,13 @@ export const invokeCommand = {
     return await invoke("pop_stash", { repoPath, index });
   },
 
-  dropStash: async (repoPath: string, index: number): Promise<void> => {
+  dropStash: async (repoPath: string, index: number): Promise<string> => {
     if (!isTauri()) {
       mockStashes = mockStashes.filter((s) => s.index !== index).map((s, idx) => ({ ...s, index: idx }));
-      return;
+      return `refs/gitui-backup/stash-drop-undo-${Date.now()}`;
     }
     const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("drop_stash", { repoPath, index });
+    return await invoke<string>("drop_stash", { repoPath, index });
   },
 
   getRepoState: async (repoPath: string): Promise<RepoStateInfo> => {
@@ -674,25 +674,24 @@ export const invokeCommand = {
   undoDeleteBranch: async (
     repoPath: string,
     branchName: string,
-    commitId: string
+    backupRef: string
   ): Promise<void> => {
     if (!isTauri()) {
       return;
     }
     const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("undo_delete_branch", { repoPath, branchName, commitId });
+    return await invoke("undo_delete_branch", { repoPath, branchName, backupRef });
   },
 
   undoDropStash: async (
     repoPath: string,
-    stashCommitId: string,
-    message: string
+    receipt: string
   ): Promise<void> => {
     if (!isTauri()) {
       return;
     }
     const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("undo_drop_stash", { repoPath, stashCommitId, message });
+    return await invoke("undo_drop_stash", { repoPath, receipt });
   },
 };
 

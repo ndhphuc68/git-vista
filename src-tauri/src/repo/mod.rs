@@ -1,15 +1,16 @@
 //! Module `repo`: Quản lý mở repository, cache phiên, và filesystem watcher.
 //! Tuân thủ nguyên tắc Deep Module: ẩn chi tiết cấu trúc .git/ và bộ theo dõi đĩa.
 
+pub mod path;
 pub mod recent;
 pub mod watcher;
 
 use crate::error::AppError;
 pub use recent::{RecentRepoEntry, RecentRepoStore};
-pub use watcher::RepoWatcher;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::path::{Path, PathBuf};
+pub use watcher::RepoWatcher;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct RepoSummary {

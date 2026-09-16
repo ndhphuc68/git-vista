@@ -10,7 +10,6 @@ export interface DeleteBranchModalProps {
   onClose: () => void;
   repoPath: string;
   branchName: string;
-  targetCommitId?: string;
   onSuccess?: (backupRef: string) => void;
 }
 
@@ -19,7 +18,6 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
   onClose,
   repoPath,
   branchName,
-  targetCommitId,
   onSuccess,
 }) => {
   const { t } = useTranslation();
@@ -57,16 +55,14 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
 
     try {
       const backupRef = await invokeCommand.deleteBranch(repoPath, branchName, force);
-      if (targetCommitId) {
-        useToastStore.getState().showToast({
-          message: t.modals.deleteBranch.successToast.replace("{name}", branchName),
-          type: "success",
-          durationMs: 10000,
-          undoAction: async () => {
-            await invokeCommand.undoDeleteBranch(repoPath, branchName, targetCommitId);
-          },
-        });
-      }
+      useToastStore.getState().showToast({
+        message: t.modals.deleteBranch.successToast.replace("{name}", branchName),
+        type: "success",
+        durationMs: 10000,
+        undoAction: async () => {
+          await invokeCommand.undoDeleteBranch(repoPath, branchName, backupRef);
+        },
+      });
       if (onSuccess) onSuccess(backupRef);
       onClose();
     } catch (err: unknown) {

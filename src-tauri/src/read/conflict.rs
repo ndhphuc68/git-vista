@@ -1,7 +1,6 @@
 use crate::error::AppError;
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use std::fs;
 use std::path::Path;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq)]
@@ -27,8 +26,7 @@ pub fn get_conflict_file_data<P: AsRef<Path>>(
     repo_path: P,
     file_path: &str,
 ) -> Result<ConflictFileData, AppError> {
-    let full_path = repo_path.as_ref().join(file_path);
-    let raw = fs::read_to_string(&full_path)?;
+    let raw = crate::repo::path::read_existing_worktree_file(repo_path, file_path)?;
 
     let mut hunks = Vec::new();
     let mut current_normal = Vec::new();
@@ -78,9 +76,21 @@ pub fn get_conflict_file_data<P: AsRef<Path>>(
                 id: format!("hunk_{}", hunk_counter),
                 is_conflict: true,
                 content: None,
-                ours: Some(if current_ours.is_empty() { String::new() } else { current_ours.join("\n") + "\n" }),
-                theirs: Some(if current_theirs.is_empty() { String::new() } else { current_theirs.join("\n") + "\n" }),
-                base: if current_base.is_empty() { None } else { Some(current_base.join("\n") + "\n") },
+                ours: Some(if current_ours.is_empty() {
+                    String::new()
+                } else {
+                    current_ours.join("\n") + "\n"
+                }),
+                theirs: Some(if current_theirs.is_empty() {
+                    String::new()
+                } else {
+                    current_theirs.join("\n") + "\n"
+                }),
+                base: if current_base.is_empty() {
+                    None
+                } else {
+                    Some(current_base.join("\n") + "\n")
+                },
                 ours_label: ours_label.take(),
                 theirs_label,
             });

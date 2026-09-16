@@ -42,7 +42,9 @@ describe("Undo & Toast Integration", () => {
   });
 
   it("shows toast with undo action after deleting branch in DeleteBranchModal", async () => {
-    vi.spyOn(invokeCommand, "deleteBranch").mockResolvedValue("refs/gitui-backup/delete_branch-123");
+    vi.spyOn(invokeCommand, "deleteBranch").mockResolvedValue(
+      "refs/gitui-backup/delete-branch-feature-test-123"
+    );
     const undoSpy = vi.spyOn(invokeCommand, "undoDeleteBranch").mockResolvedValue(undefined);
 
     render(
@@ -51,7 +53,6 @@ describe("Undo & Toast Integration", () => {
         onClose={vi.fn()}
         repoPath="/test/repo"
         branchName="feature-test"
-        targetCommitId="commit-oid-123"
         onSuccess={vi.fn()}
       />
     );
@@ -67,6 +68,10 @@ describe("Undo & Toast Integration", () => {
     });
 
     await useToastStore.getState().toasts[0]?.undoAction!();
-    expect(undoSpy).toHaveBeenCalledWith("/test/repo", "feature-test", "commit-oid-123");
+    expect(undoSpy).toHaveBeenCalledWith(
+      "/test/repo",
+      "feature-test",
+      "refs/gitui-backup/delete-branch-feature-test-123"
+    );
   });
 });
