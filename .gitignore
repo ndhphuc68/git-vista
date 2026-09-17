@@ -36,6 +36,7 @@ lerna-debug.log*
 coverage/
 .nyc_output/
 .codegraph/
+.superpowers/
 
 # Editor / IDE
 .vscode/*
