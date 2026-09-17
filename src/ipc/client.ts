@@ -31,6 +31,29 @@ let mockStashes: StashItem[] = [
   },
 ];
 
+let mockGlobalConfig: GitConfigDto = {
+  userName: "GitVista User",
+  userNameSource: "global",
+  userEmail: "user@gitvista.dev",
+  userEmailSource: "global",
+  defaultBranch: "main",
+  pullRebase: false,
+};
+
+let mockLocalConfigs: Record<string, Partial<GitConfigDto>> = {};
+
+export function resetMockGitConfig() {
+  mockGlobalConfig = {
+    userName: "GitVista User",
+    userNameSource: "global",
+    userEmail: "user@gitvista.dev",
+    userEmailSource: "global",
+    defaultBranch: "main",
+    pullRebase: false,
+  };
+  mockLocalConfigs = {};
+}
+
 // Helper kiểm tra môi trường chạy có phải trong Tauri runtime không
 export const isTauri = (): boolean => {
   return typeof window !== "undefined" && Boolean((window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__);
@@ -498,6 +521,8 @@ export const invokeCommand = {
 
   setRepoPullRebase: async (repoPath: string, rebase: boolean): Promise<void> => {
     if (!isTauri()) {
+      if (!mockLocalConfigs[repoPath]) mockLocalConfigs[repoPath] = {};
+      mockLocalConfigs[repoPath].pullRebase = rebase;
       return;
     }
     const { invoke } = await import("@tauri-apps/api/core");
@@ -712,14 +737,18 @@ export const invokeCommand = {
 
   getGitConfig: async (repoPath?: string | null): Promise<GitConfigDto> => {
     if (!isTauri()) {
-      return {
-        userName: "GitVista User",
-        userNameSource: "global",
-        userEmail: "user@gitvista.dev",
-        userEmailSource: "global",
-        defaultBranch: "main",
-        pullRebase: false,
-      };
+      if (repoPath && mockLocalConfigs[repoPath]) {
+        const local = mockLocalConfigs[repoPath];
+        return {
+          userName: local.userName ?? mockGlobalConfig.userName,
+          userNameSource: local.userName ? "local" : "global",
+          userEmail: local.userEmail ?? mockGlobalConfig.userEmail,
+          userEmailSource: local.userEmail ? "local" : "global",
+          defaultBranch: local.defaultBranch ?? mockGlobalConfig.defaultBranch,
+          pullRebase: local.pullRebase ?? mockGlobalConfig.pullRebase,
+        };
+      }
+      return { ...mockGlobalConfig };
     }
     const { invoke } = await import("@tauri-apps/api/core");
     return await invoke<GitConfigDto>("get_git_config", { repoPath: repoPath ?? null });
@@ -732,6 +761,23 @@ export const invokeCommand = {
     value: string
   ): Promise<void> => {
     if (!isTauri()) {
+      if (scope === "global") {
+        if (key === "user.name") mockGlobalConfig.userName = value;
+        if (key === "user.email") mockGlobalConfig.userEmail = value;
+        if (key === "init.defaultBranch") mockGlobalConfig.defaultBranch = value;
+        if (key === "pull.rebase") mockGlobalConfig.pullRebase = value === "true";
+      } else if (scope === "local" && repoPath) {
+        if (!mockLocalConfigs[repoPath]) mockLocalConfigs[repoPath] = {};
+        if (value.trim() === "") {
+          if (key === "user.name") delete mockLocalConfigs[repoPath].userName;
+          if (key === "user.email") delete mockLocalConfigs[repoPath].userEmail;
+          if (key === "pull.rebase") delete mockLocalConfigs[repoPath].pullRebase;
+        } else {
+          if (key === "user.name") mockLocalConfigs[repoPath].userName = value;
+          if (key === "user.email") mockLocalConfigs[repoPath].userEmail = value;
+          if (key === "pull.rebase") mockLocalConfigs[repoPath].pullRebase = value === "true";
+        }
+      }
       return;
     }
     const { invoke } = await import("@tauri-apps/api/core");
