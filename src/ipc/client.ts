@@ -289,7 +289,12 @@ export const invokeCommand = {
     return await invoke<CommitDetails>("get_commit_details", { repoPath, commitId });
   },
 
-  getCommitFileDiff: async (repoPath: string, commitId: string, filePath: string): Promise<FileDiffResult> => {
+  getCommitFileDiff: async (
+    repoPath: string,
+    commitId: string,
+    filePath: string,
+    ignoreWhitespace?: boolean
+  ): Promise<FileDiffResult> => {
     if (!isTauri()) {
       return {
         file_path: filePath,
@@ -312,7 +317,12 @@ export const invokeCommand = {
       };
     }
     const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<FileDiffResult>("get_commit_file_diff", { repoPath, commitId, filePath });
+    return await invoke<FileDiffResult>("get_commit_file_diff", {
+      repoPath,
+      commitId,
+      filePath,
+      ignoreWhitespace: ignoreWhitespace ?? false,
+    });
   },
 
   getRepoStatus: async (repoPath: string): Promise<RepoStatusResult> => {
@@ -337,7 +347,8 @@ export const invokeCommand = {
   getWorkingFileDiff: async (
     repoPath: string,
     filePath: string,
-    isStaged: boolean
+    isStaged: boolean,
+    ignoreWhitespace?: boolean
   ): Promise<FileDiffResult> => {
     if (!isTauri()) {
       return {
@@ -363,7 +374,12 @@ export const invokeCommand = {
       };
     }
     const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<FileDiffResult>("get_working_file_diff", { repoPath, filePath, isStaged });
+    return await invoke<FileDiffResult>("get_working_file_diff", {
+      repoPath,
+      filePath,
+      isStaged,
+      ignoreWhitespace: ignoreWhitespace ?? false,
+    });
   },
 
   stageFile: async (repoPath: string, filePath: string): Promise<void> => {

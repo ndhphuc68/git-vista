@@ -241,6 +241,17 @@ export interface TagItem {
   timestamp_sec?: number | null;
 }
 
-
-
-
+export interface Commands {
+  get_commit_file_diff: (
+    repoPath: string,
+    commitId: string,
+    filePath: string,
+    ignoreWhitespace?: boolean | null
+  ) => Promise<FileDiffResult>;
+  get_working_file_diff: (
+    repoPath: string,
+    filePath: string,
+    isStaged: boolean,
+    ignoreWhitespace?: boolean | null
+  ) => Promise<FileDiffResult>;
+}
