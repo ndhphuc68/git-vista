@@ -1,9 +1,9 @@
-﻿# Báo Cáo Tiến Độ Phát Triển GitVista: Toàn Diện & Thực Tế
+# Báo Cáo Tiến Độ Phát Triển GitVista: Toàn Diện & Thực Tế
 
 > Báo cáo này phản ánh chính xác và đầy đủ 100% hiện trạng mã nguồn thực tế của hệ thống **GitVista** tính đến hiện tại:
 > - **Milestone v1.0 (Nền tảng cốt lõi M1 → M5)**: Đã hoàn thiện toàn diện và bàn giao.
-> - **Phase 1.1 (Nâng cấp Trải nghiệm & Mở rộng Cốt lõi)**: Đã hoàn thành 3/4 hạng mục lớn (**75%**).
-> - **Phase 1.2 (Quy trình Git chuyên sâu)**: Đang chuẩn bị sẵn sàng triển khai.
+> - **Phase 1.1 (Nâng cấp Trải nghiệm & Mở rộng Cốt lõi)**: Đã hoàn thành toàn bộ 4/4 hạng mục lớn (**100%**).
+> - **Phase 1.2 (Quy trình Git chuyên sâu)**: Sẵn sàng triển khai.
 > - **Phase 2.0 (Công cụ sức mạnh nâng cao)**: Thiết kế kiến trúc dài hạn.
 
 ---
@@ -19,14 +19,14 @@
 | | M4: Stash, Rebase & Bộ giải quyết xung đột (Conflict Resolver) | - | ✅ Đã hoàn thành | 100% |
 | | M5: Sao lưu an toàn, Toast Undo, Phím tắt & Đóng gói CI | - | ✅ Đã hoàn thành | 100% |
 | | | | | |
-| **Phase 1.1** | **Nâng cấp Trải nghiệm & Mở rộng Cốt lõi** | **100%** | 🔄 **Đang hoàn thiện** | **75%** |
+| **Phase 1.1** | **Nâng cấp Trải nghiệm & Mở rộng Cốt lõi** | **100%** | ✅ **Đã hoàn thành** | **100%** |
 | | 1.1.0: Đa tab, Đa kho lưu trữ & Thương hiệu GitVista | 25% | ✅ Đã hoàn thành | 100% |
 | | 1.1.1: Cài đặt 5-Tab phân tầng & Sơ đồ động trực quan | 25% | ✅ Đã hoàn thành | 100% |
 | | 1.1.2: Quản lý Thẻ toàn diện (Tag Management) | 25% | ✅ Đã hoàn thành | 100% |
-| | 1.1.3: Nhặt & Hoàn tác Commit (Cherry-pick & Revert Commit) | 25% | ⏳ Kế tiếp (Sẵn sàng) | 0% |
+| | 1.1.3: Nhặt & Hoàn tác Commit (Cherry-pick & Revert Commit) | 25% | ✅ Đã hoàn thành | 100% |
 | | | | | |
-| **Phase 1.2** | **Quy trình Git chuyên sâu (Deep Git Workflows)** | **100%** | 📋 **Chờ Phase 1.1** | **0%** |
-| | 1.2.1: Word-level Diff & Bỏ qua khoảng trắng (Ignore Whitespace) | 35% | 📋 Chờ thực hiện | 0% |
+| **Phase 1.2** | **Quy trình Git chuyên sâu (Deep Git Workflows)** | **100%** | ⏳ **Kế tiếp (Sẵn sàng)** | **0%** |
+| | 1.2.1: Word-level Diff & Bỏ qua khoảng trắng (Ignore Whitespace) | 35% | ⏳ Sẵn sàng triển khai | 0% |
 | | 1.2.2: Lịch sử từng file & Git Blame (File History & Blame) | 35% | 📋 Chờ thực hiện | 0% |
 | | 1.2.3: Quản lý Remote & Dọn dẹp nhánh mồ côi (Remote Prune) | 30% | 📋 Chờ thực hiện | 0% |
 | | | | | |
@@ -52,7 +52,7 @@
 
 ---
 
-### 2. PHASE 1.1: NÂNG CẤP TRẢI NGHIỆM & MỞ RỘNG CỐT LÕI [HOÀN THÀNH 75%]
+### 2. PHASE 1.1: NÂNG CẤP TRẢI NGHIỆM & MỞ RỘNG CỐT LÕI [HOÀN THÀNH 100%]
 
 #### ✅ 1.1.0: Kiến Trúc Đa Tab, Đa Kho Lưu Trữ & Nhận Diện Thương Hiệu — [HOÀN THÀNH 100%]
 - **Rust Backend:**
@@ -114,23 +114,32 @@
 
 ---
 
-#### ⏳ 1.1.3: Nhặt & Hoàn Tác Commit (Cherry-pick & Revert Commit) — [KẾ TIẾP / SẴN SÀNG]
-- **Mục tiêu:** Sao chép thay đổi của một commit vào nhánh hiện tại (Cherry-pick) hoặc tạo một commit nghịch đảo để huỷ bỏ an toàn một commit lỗi mà không viết lại lịch sử (Revert).
-- **Kế hoạch triển khai:**
-  - **Backend Rust:**
-    - `src-tauri/src/write/cherry_pick.rs`: Thực hiện `repo.cherrypick` của libgit2 lên commit được chỉ định. Tự động commit nếu không có xung đột, hoặc thiết lập trạng thái `RepositoryState::CherryPick` và kích hoạt bộ giải quyết xung đột.
-    - `src-tauri/src/write/revert.rs`: Thực hiện `repo.revert` để tạo commit nghịch đảo.
-    - `src-tauri/src/commands/commit_actions.rs`: Lệnh IPC gọi cherry-pick và revert.
-  - **Frontend UI:**
-    - Menu chuột phải trên dòng commit trong `CommitGraph`: *Cherry-pick commit này vào nhánh hiện tại*, *Hoàn tác (Revert) commit này*.
-    - Hộp thoại cảnh báo xác nhận trước khi thực hiện hành động.
-    - Tích hợp với Conflict Resolver khi xuất hiện đụng độ file và thông báo Toast trạng thái hoàn tác.
+#### ✅ 1.1.3: Nhặt & Hoàn Tác Commit (Cherry-pick & Revert Commit) — [HOÀN THÀNH 100%]
+- **Rust Backend:**
+  - `src-tauri/src/exec/commit_actions.rs`:
+    - Động cơ lai (Hybrid Engine) thực thi `git cherry-pick` và `git revert` với tiền kiểm tra an toàn trạng thái kho lưu trữ (`RepositoryState::Clean`, OID hợp lệ, operand validation).
+    - Tạo safety backup ref `refs/gitui-backup/cherry-pick-*` và `revert-*`.
+    - Sinh `CommitRecovery` receipt commit và tạo `undo_token` khi auto-commit thành công, hỗ trợ hoàn tác soft undo 100% an toàn.
+    - Phân tích chi tiết mã thoát và output (phân loại `Committed`, `Staged`, `Conflict`, `Error`).
+  - `src-tauri/src/read/state.rs`:
+    - Nâng cấp `get_repo_state` phát hiện trạng thái in-progress `cherry_pick` và `revert`, trích xuất `target_name` từ `MERGE_MSG` hoặc `CHERRY_PICK_HEAD` / `REVERT_HEAD`.
+  - `src-tauri/src/commands/commit_actions.rs`:
+    - Lệnh IPC `cherry_pick_commit` và `revert_commit` qua Specta, tự động phát sự kiện `repo-changed`.
+- **Frontend IPC & UI Modals:**
+  - Định nghĩa interface `CommitActionResult` trong `src/ipc/bindings.ts` và triển khai `cherryPickCommit`, `revertCommit` trong `src/ipc/client.ts` kèm browser mocks.
+  - `CherryPickModal.tsx`: Hộp thoại xác nhận hiển thị mã SHA, tóm tắt commit, tác giả, nhánh đích, toggle "Tự động commit thay đổi" (mặc định bật) và chỉ báo loading.
+  - `RevertModal.tsx`: Hộp thoại xác nhận hoàn tác với biểu tượng cảnh báo, giải thích commit nghịch đảo, toggle auto-commit, nút submit Revert.
+  - Từ điển song ngữ Việt - Anh tại `src/i18n/vi.ts` và `src/i18n/en.ts`.
+- **CommitGraph & Vòng đời Toast / Xử lý Xung đột:**
+  - Menu ngữ cảnh chuột phải trên từng hàng commit: *"Cherry-pick vào nhánh hiện tại..."*, *"Hoàn tác (Revert) commit này..."*.
+  - Khi auto-commit thành công: hiển thị Toast thông báo kèm nút **"Hoàn tác" (Undo)** 10 giây gọi `undoCommit`.
+  - Khi ở chế độ Staged hoặc phát sinh xung đột (`Conflict`): hiển thị Toast tương ứng và tự động điều hướng sang màn hình **Thay đổi** (`changes`) để người dùng giải quyết xung đột qua Conflict Resolver.
 
 ---
 
-### 3. PHASE 1.2: QUY TRÌNH GIT CHUYÊN SÂU (DEEP GIT WORKFLOWS) [CHUẨN BỊ]
+### 3. PHASE 1.2: QUY TRÌNH GIT CHUYÊN SÂU (DEEP GIT WORKFLOWS) [KẾ TIẾP]
 
-#### 📋 1.2.1: Word-level Diff & Bỏ Qua Khoảng Trắng (Ignore Whitespace) — [CHỜ THỰC HIỆN]
+#### 📋 1.2.1: Word-level Diff & Bỏ Qua Khoảng Trắng (Ignore Whitespace) — [SẴN SÀNG TRIỂN KHAI]
 - **Mục tiêu:** So sánh diff chi tiết từng từ/ký tự bên trong dòng thay vì chỉ đánh dấu nguyên dòng, và lọc bỏ thay đổi format/tab/space rác.
 - **Kế hoạch triển khai:**
   - **Backend:** Thêm cờ `ignore_whitespace` (`git2::DiffOptions::ignore_whitespace`) vào `read/diff.rs`.
@@ -169,15 +178,13 @@ Hệ thống mã nguồn GitVista hiện tại đạt trạng thái kiểm thử
 
 | Tầng hệ thống | Công cụ kiểm thử | Số lượng kiểm thử | Trạng thái |
 | :--- | :--- | :---: | :---: |
-| **Backend (Rust)** | `cargo test` | **26 test suites / 72 tests** | ✅ **100% PASS** |
-| **Frontend (React/TS)** | `vitest` | **54 test files / 260 tests** | ✅ **100% PASS** |
+| **Backend (Rust)** | `cargo test` | **27 test suites / 80 tests** | ✅ **100% PASS** |
+| **Frontend (React/TS)** | `vitest` | **57 test files / 287 tests** | ✅ **100% PASS** |
 | **Đóng gói Sản phẩm** | `pnpm build` (TypeScript + Vite) | **0 lỗi / 0 cảnh báo** | ✅ **100% SẠCH** |
 
 ---
 
 ## 🚀 Bước Đi Kế Tiếp
 
-Tiến hành ngay **Phase 1.1.3: Nhặt & Hoàn tác Commit (Cherry-pick & Revert Commit)** theo quy trình phát triển chuyên nghiệp:
-1. **Đặc tả thiết kế kỹ thuật:** Tạo tài liệu `docs/superpowers/specs/2026-09-17-cherry-pick-revert-design.md`.
-2. **Kế hoạch triển khai:** Tạo tài liệu `docs/superpowers/plans/2026-09-17-cherry-pick-revert.md`.
-3. **Thực thi phân rã Subagents:** Triển khai Backend Rust TDD (`write/cherry_pick.rs`, `write/revert.rs`) -> IPC Specta -> Frontend UI Graph Context Menu & Xử lý xung đột -> Kiểm thử 100%.
+Hoàn thành trọn vẹn Phase 1.1 (100%), chuẩn bị tiến hành **Phase 1.2: Quy trình Git chuyên sâu (Deep Git Workflows)** với hạng mục mở đầu:
+**Phase 1.2.1: Word-level Diff & Bỏ qua khoảng trắng (Ignore Whitespace)**.
