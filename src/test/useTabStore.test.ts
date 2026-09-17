@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { useTabStore } from "../store/useTabStore";
 import { RepoSummary } from "../ipc/bindings";
 
@@ -27,8 +27,8 @@ describe("useTabStore", () => {
   it("initializes with Home tab as active", () => {
     const state = useTabStore.getState();
     expect(state.tabs).toHaveLength(1);
-    expect(state.tabs[0].id).toBe("home");
-    expect(state.tabs[0].type).toBe("home");
+    expect(state.tabs[0]?.id).toBe("home");
+    expect(state.tabs[0]?.type).toBe("home");
     expect(state.activeTabId).toBe("home");
   });
 
@@ -38,10 +38,10 @@ describe("useTabStore", () => {
 
     const updated = useTabStore.getState();
     expect(updated.tabs).toHaveLength(2);
-    expect(updated.tabs[1].id).toBe(mockRepo1.path);
-    expect(updated.tabs[1].type).toBe("repo");
-    expect(updated.tabs[1].repo?.name).toBe("repo1");
-    expect(updated.tabs[1].selectedBranch).toBe("main");
+    expect(updated.tabs[1]?.id).toBe(mockRepo1.path);
+    expect(updated.tabs[1]?.type).toBe("repo");
+    expect(updated.tabs[1]?.repo?.name).toBe("repo1");
+    expect(updated.tabs[1]?.selectedBranch).toBe("main");
     expect(updated.activeTabId).toBe(mockRepo1.path);
   });
 

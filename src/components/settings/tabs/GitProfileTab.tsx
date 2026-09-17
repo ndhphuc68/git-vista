@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Globe, FolderGit2, Check, AlertCircle } from "lucide-react";
+import { Globe, FolderGit2, Check } from "lucide-react";
 import { useTranslation } from "../../../i18n";
-import { invokeCommand, ConfigScope, GitConfigDto } from "../../../ipc/client";
+import { invokeCommand, GitConfigDto } from "../../../ipc/client";
 import { useToastStore } from "../../../store/useToastStore";
 
 interface GitProfileTabProps {

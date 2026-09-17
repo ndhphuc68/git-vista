@@ -72,15 +72,17 @@ export const useTabStore = create<TabStoreState>((set, get) => ({
     if (existingIndex >= 0) {
       // Tab already open, just switch to it and update repo summary if needed
       const tab = tabs[existingIndex];
-      useViewStore.getState().setActiveScreen(tab.activeScreen || "history");
-      const updatedTabs = [...tabs];
-      updatedTabs[existingIndex] = {
-        ...tab,
-        repo,
-        selectedBranch: tab.selectedBranch || repo.head_branch,
-      };
-      set({ tabs: updatedTabs, activeTabId: repo.path });
-      saveSessionToStorage(updatedTabs, repo.path);
+      if (tab) {
+        useViewStore.getState().setActiveScreen(tab.activeScreen || "history");
+        const updatedTabs = [...tabs];
+        updatedTabs[existingIndex] = {
+          ...tab,
+          repo,
+          selectedBranch: tab.selectedBranch || repo.head_branch,
+        };
+        set({ tabs: updatedTabs, activeTabId: repo.path });
+        saveSessionToStorage(updatedTabs, repo.path);
+      }
     } else {
       useViewStore.getState().setActiveScreen("history");
       const newTab = createRepoTab(repo);
@@ -108,10 +110,13 @@ export const useTabStore = create<TabStoreState>((set, get) => ({
 
     if (activeTabId === tabId) {
       // Select the adjacent tab: previous tab if available, otherwise next, fallback to home
-      if (index > 0) {
-        nextActiveId = tabs[index - 1].id;
-      } else if (remainingTabs.length > 0) {
-        nextActiveId = remainingTabs[0].id;
+      const prevTab = index > 0 ? tabs[index - 1] : undefined;
+      const firstRemaining = remainingTabs[0];
+
+      if (prevTab) {
+        nextActiveId = prevTab.id;
+      } else if (firstRemaining) {
+        nextActiveId = firstRemaining.id;
       } else {
         nextActiveId = "home";
       }

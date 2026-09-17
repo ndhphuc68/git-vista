@@ -172,7 +172,8 @@ export const App: React.FC<AppProps> = ({
     const currentIndex = tabs.findIndex((t) => t.id === activeTabId);
     if (currentIndex >= 0 && tabs.length > 1) {
       const nextIndex = (currentIndex + 1) % tabs.length;
-      setActiveTab(tabs[nextIndex].id);
+      const nextTab = tabs[nextIndex];
+      if (nextTab) setActiveTab(nextTab.id);
     }
   }, [tabs, activeTabId, setActiveTab]);
 
@@ -180,7 +181,8 @@ export const App: React.FC<AppProps> = ({
     const currentIndex = tabs.findIndex((t) => t.id === activeTabId);
     if (currentIndex >= 0 && tabs.length > 1) {
       const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-      setActiveTab(tabs[prevIndex].id);
+      const prevTab = tabs[prevIndex];
+      if (prevTab) setActiveTab(prevTab.id);
     }
   }, [tabs, activeTabId, setActiveTab]);
 
@@ -259,8 +261,8 @@ export const App: React.FC<AppProps> = ({
     };
   }, []);
 
-  const activeTab = tabs.find((t) => t.id === activeTabId) || tabs[0];
-  const repoToDisplay = activeTab.type === "repo" ? (activeTab.repo || currentRepo) : null;
+  const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0];
+  const repoToDisplay = activeTab?.type === "repo" ? (activeTab.repo || currentRepo) : null;
 
   return (
     <QueryClientProvider client={queryClient}>

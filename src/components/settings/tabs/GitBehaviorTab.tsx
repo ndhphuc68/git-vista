@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { GitMerge, GitPullRequest, Clock, Check, FolderGit2, Globe } from "lucide-react";
 import { useTranslation } from "../../../i18n";
-import { invokeCommand, GitConfigDto } from "../../../ipc/client";
+import { invokeCommand } from "../../../ipc/client";
 import { useToastStore } from "../../../store/useToastStore";
 
 interface GitBehaviorTabProps {
@@ -19,7 +19,6 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
 
   const activeScope = propScope || (currentRepoPath ? "repo" : "global");
 
-  const [globalConfig, setGlobalConfig] = useState<GitConfigDto | null>(null);
   const [localPullRebase, setLocalPullRebase] = useState<boolean | null>(null);
   const [globalPullRebase, setGlobalPullRebase] = useState<boolean>(false);
   const [autoFetchInterval, setAutoFetchInterval] = useState<number>(() => {
@@ -39,7 +38,6 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
       try {
         const globalCfg = await invokeCommand.getGitConfig(null);
         if (!isMounted) return;
-        setGlobalConfig(globalCfg);
         setGlobalPullRebase(Boolean(globalCfg.pullRebase));
 
         if (currentRepoPath) {

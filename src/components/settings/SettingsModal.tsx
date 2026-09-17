@@ -52,7 +52,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
       setScope("repo");
     } else if (openRepoTabs.length > 0) {
       if (!selectedRepoPath || !openRepoTabs.some((t) => t.id === selectedRepoPath)) {
-        setSelectedRepoPath(openRepoTabs[0].id);
+        const firstRepo = openRepoTabs[0];
+        if (firstRepo) setSelectedRepoPath(firstRepo.id);
       }
     } else {
       setScope("global");
@@ -165,7 +166,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
                   </select>
                 )}
 
-                {openRepoTabs.length === 1 && (
+                {openRepoTabs.length === 1 && openRepoTabs[0] && (
                   <span className="ml-1 font-mono text-[11px] opacity-85">
                     ({openRepoTabs[0].alias || openRepoTabs[0].repo?.name})
                   </span>
