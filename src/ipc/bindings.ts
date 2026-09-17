@@ -220,5 +220,18 @@ export interface GitConfigDto {
   rebaseAutostash?: boolean | null;
 }
 
+export interface TagItem {
+  name: string;
+  target_commit_id: string;
+  short_commit_id: string;
+  commit_summary: string;
+  is_annotated: boolean;
+  message?: string | null;
+  tagger_name?: string | null;
+  tagger_email?: string | null;
+  timestamp_sec?: number | null;
+}
+
+
 
 

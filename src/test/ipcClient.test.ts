@@ -92,3 +92,64 @@ describe("invokeCommand M3 remote operations in browser environment", () => {
   });
 });
 
+describe("invokeCommand Tag operations in browser environment", () => {
+  it("getTags returns mock tag list with expected properties", async () => {
+    const tags = await invokeCommand.getTags("/mock/repo");
+    expect(tags).toBeDefined();
+    expect(Array.isArray(tags)).toBe(true);
+    expect(tags.length).toBeGreaterThanOrEqual(2);
+    expect(tags[0]).toHaveProperty("name");
+    expect(tags[0]).toHaveProperty("target_commit_id");
+    expect(tags[0]).toHaveProperty("short_commit_id");
+    expect(tags[0]).toHaveProperty("commit_summary");
+    expect(tags[0]).toHaveProperty("is_annotated");
+  });
+
+  it("createTag adds a tag in mock mode", async () => {
+    await invokeCommand.createTag(
+      "/mock/repo",
+      "v2.0.0",
+      "fedcba9876543210fedcba9876543210fedcba98",
+      "Release v2.0"
+    );
+    const tags = await invokeCommand.getTags("/mock/repo");
+    const created = tags.find((t) => t.name === "v2.0.0");
+    expect(created).toBeDefined();
+    expect(created?.target_commit_id).toBe("fedcba9876543210fedcba9876543210fedcba98");
+    expect(created?.short_commit_id).toBe("fedcba9");
+    expect(created?.message).toBe("Release v2.0");
+    expect(created?.is_annotated).toBe(true);
+  });
+
+  it("checkoutTag resolves without error in browser mock", async () => {
+    await expect(invokeCommand.checkoutTag("/mock/repo", "v1.0.0")).resolves.toBeUndefined();
+  });
+
+  it("pushTag resolves without error in browser mock", async () => {
+    await expect(invokeCommand.pushTag("/mock/repo", "v1.0.0", "origin")).resolves.toBeUndefined();
+  });
+
+  it("deleteTag removes a tag in mock mode", async () => {
+    await invokeCommand.deleteTag("/mock/repo", "v2.0.0", false);
+    const tags = await invokeCommand.getTags("/mock/repo");
+    const found = tags.find((t) => t.name === "v2.0.0");
+    expect(found).toBeUndefined();
+  });
+
+  it("dispatches mock-repo-changed event on tag modifications", async () => {
+    let eventFired = false;
+    const handler = () => {
+      eventFired = true;
+    };
+    window.addEventListener("mock-repo-changed", handler);
+    try {
+      await invokeCommand.checkoutTag("/mock/repo", "v1.0.0");
+      expect(eventFired).toBe(true);
+    } finally {
+      window.removeEventListener("mock-repo-changed", handler);
+    }
+  });
+});
+
+
+

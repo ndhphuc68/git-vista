@@ -20,7 +20,60 @@ import {
   ConflictFileData,
   ConfigScope,
   GitConfigDto,
+  TagItem,
 } from "./bindings";
+
+let mockTags: TagItem[] = [
+  {
+    name: "v1.0.0",
+    target_commit_id: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
+    short_commit_id: "c1a2b3c",
+    commit_summary: "Initial release",
+    is_annotated: true,
+    message: "First official release",
+    tagger_name: "GitVista User",
+    tagger_email: "user@gitvista.dev",
+    timestamp_sec: Math.floor(Date.now() / 1000) - 86400 * 5,
+  },
+  {
+    name: "v0.9.0",
+    target_commit_id: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+    short_commit_id: "a1b2c3d",
+    commit_summary: "Beta testing release",
+    is_annotated: false,
+    message: null,
+    tagger_name: null,
+    tagger_email: null,
+    timestamp_sec: Math.floor(Date.now() / 1000) - 86400 * 15,
+  },
+];
+
+export function resetMockTags() {
+  mockTags = [
+    {
+      name: "v1.0.0",
+      target_commit_id: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
+      short_commit_id: "c1a2b3c",
+      commit_summary: "Initial release",
+      is_annotated: true,
+      message: "First official release",
+      tagger_name: "GitVista User",
+      tagger_email: "user@gitvista.dev",
+      timestamp_sec: Math.floor(Date.now() / 1000) - 86400 * 5,
+    },
+    {
+      name: "v0.9.0",
+      target_commit_id: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+      short_commit_id: "a1b2c3d",
+      commit_summary: "Beta testing release",
+      is_annotated: false,
+      message: null,
+      tagger_name: null,
+      tagger_email: null,
+      timestamp_sec: Math.floor(Date.now() / 1000) - 86400 * 15,
+    },
+  ];
+}
 
 let mockStashes: StashItem[] = [
   {
@@ -441,6 +494,119 @@ export const invokeCommand = {
     }
     const { invoke } = await import("@tauri-apps/api/core");
     return await invoke<string>("delete_branch", { repoPath, branchName, force });
+  },
+
+  getTags: async (repoPath: string): Promise<TagItem[]> => {
+    if (!isTauri()) {
+      return [...mockTags];
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<TagItem[]>("get_tags", { repoPath });
+  },
+
+  createTag: async (
+    repoPath: string,
+    name: string,
+    targetCommit: string,
+    message?: string
+  ): Promise<void> => {
+    if (!isTauri()) {
+      const isAnnotated = Boolean(message && message.trim().length > 0);
+      const newTag: TagItem = {
+        name,
+        target_commit_id: targetCommit,
+        short_commit_id: targetCommit.slice(0, 7),
+        commit_summary: message || "Tag created",
+        is_annotated: isAnnotated,
+        message: message ?? null,
+        tagger_name: isAnnotated ? "GitVista User" : null,
+        tagger_email: isAnnotated ? "user@gitvista.dev" : null,
+        timestamp_sec: Math.floor(Date.now() / 1000),
+      };
+      mockTags = [newTag, ...mockTags.filter((t) => t.name !== name)];
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("mock-repo-changed", {
+            detail: {
+              repo_path: repoPath,
+              reason: `Tag ${name} created`,
+              timestamp_ms: Date.now(),
+            },
+          })
+        );
+      }
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("create_tag", {
+      repoPath,
+      name,
+      targetCommit,
+      message: message ?? null,
+    });
+  },
+
+  deleteTag: async (
+    repoPath: string,
+    name: string,
+    deleteRemote?: boolean
+  ): Promise<void> => {
+    if (!isTauri()) {
+      mockTags = mockTags.filter((t) => t.name !== name);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("mock-repo-changed", {
+            detail: {
+              repo_path: repoPath,
+              reason: `Tag ${name} deleted`,
+              timestamp_ms: Date.now(),
+            },
+          })
+        );
+      }
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("delete_tag", {
+      repoPath,
+      name,
+      deleteRemote: deleteRemote ?? null,
+    });
+  },
+
+  checkoutTag: async (repoPath: string, name: string): Promise<void> => {
+    if (!isTauri()) {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("mock-repo-changed", {
+            detail: {
+              repo_path: repoPath,
+              reason: `Checked out tag ${name}`,
+              timestamp_ms: Date.now(),
+            },
+          })
+        );
+      }
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("checkout_tag", { repoPath, name });
+  },
+
+  pushTag: async (
+    repoPath: string,
+    name: string,
+    remoteName?: string
+  ): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("push_tag", {
+      repoPath,
+      name,
+      remoteName: remoteName ?? null,
+    });
   },
 
   fetchRepo: async (
@@ -868,5 +1034,6 @@ export type {
   ConflictFileData,
   ConfigScope,
   GitConfigDto,
+  TagItem,
 };
 
