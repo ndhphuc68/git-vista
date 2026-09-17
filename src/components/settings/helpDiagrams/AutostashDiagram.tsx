@@ -12,54 +12,54 @@ export const AutostashDiagram: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2.5">
       {/* 3 Step Visual */}
-      <div className="relative h-20 w-full bg-surface/80 rounded-md border border-border-subtle/50 flex items-center justify-around p-2 overflow-hidden">
+      <div className="relative h-28 w-full bg-surface/90 rounded-lg border border-border-subtle/70 flex items-center justify-around p-3 overflow-hidden">
         {/* Step 1: Code dở dang */}
         <div
-          className={`flex flex-col items-center gap-1 transition-opacity duration-300 ${
+          className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${
             step === 1 ? "opacity-100 scale-105" : "opacity-40 scale-95"
           }`}
         >
-          <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500">
-            <Archive size={16} />
+          <div className="w-11 h-11 rounded-xl bg-amber-500/15 border border-amber-500/35 flex items-center justify-center text-amber-500 shadow-2xs">
+            <Archive size={20} />
           </div>
-          <span className="text-[9px] font-medium text-primary">1. Cất Stash</span>
+          <span className="text-xs font-bold text-primary">1. Cất Stash</span>
         </div>
 
-        <ArrowRight size={12} className="text-secondary opacity-50" />
+        <ArrowRight size={15} className="text-secondary opacity-60" />
 
         {/* Step 2: Rebase */}
         <div
-          className={`flex flex-col items-center gap-1 transition-opacity duration-300 ${
+          className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${
             step === 2 ? "opacity-100 scale-105" : "opacity-40 scale-95"
           }`}
         >
-          <div className="w-8 h-8 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-500">
-            <RefreshCw size={16} className={step === 2 ? "animate-spin" : ""} />
+          <div className="w-11 h-11 rounded-xl bg-blue-500/15 border border-blue-500/35 flex items-center justify-center text-blue-500 shadow-2xs">
+            <RefreshCw size={20} className={step === 2 ? "animate-spin" : ""} />
           </div>
-          <span className="text-[9px] font-medium text-primary">2. Rebase</span>
+          <span className="text-xs font-bold text-primary">2. Rebase</span>
         </div>
 
-        <ArrowRight size={12} className="text-secondary opacity-50" />
+        <ArrowRight size={15} className="text-secondary opacity-60" />
 
         {/* Step 3: Pop Stash */}
         <div
-          className={`flex flex-col items-center gap-1 transition-opacity duration-300 ${
+          className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${
             step === 3 ? "opacity-100 scale-105" : "opacity-40 scale-95"
           }`}
         >
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
-            <CheckCircle2 size={16} />
+          <div className="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-500/35 flex items-center justify-center text-emerald-500 shadow-2xs">
+            <CheckCircle2 size={20} />
           </div>
-          <span className="text-[9px] font-medium text-primary">3. Dán lại code</span>
+          <span className="text-xs font-bold text-primary">3. Dán lại code</span>
         </div>
       </div>
 
-      <div className="text-[10px] text-secondary text-center italic">
-        {step === 1 && "📦 Tự động cất code đang code dở trước khi cập nhật"}
-        {step === 2 && "🔄 Kéo code mới về và xếp lại thứ tự commit an toàn"}
-        {step === 3 && "✨ Áp dụng lại code dở dang của bạn, không bị mất bất kỳ dòng nào"}
+      <div className="text-xs text-primary font-medium text-center bg-surface-header/60 py-1.5 px-2 rounded-md">
+        {step === 1 && "📦 Tự động cất code đang viết dở trước khi cập nhật"}
+        {step === 2 && "🔄 Kéo commit mới về và xếp lại thứ tự commit an toàn"}
+        {step === 3 && "✨ Bung lại code dở dang của bạn, không bị mất bất kỳ dòng nào"}
       </div>
     </div>
   );

@@ -128,10 +128,10 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={handleToggleClick}
-        className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[11px] font-bold transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent ${
+        className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent ${
           isOpen
-            ? "bg-accent text-white shadow-sm"
-            : "text-secondary hover:text-accent bg-surface-header/60 hover:bg-accent/15 border border-border-subtle hover:border-accent/40"
+            ? "bg-accent text-white shadow-sm ring-1 ring-accent"
+            : "text-secondary hover:text-accent bg-surface-header/80 hover:bg-accent/15 border border-border-subtle hover:border-accent/40"
         }`}
       >
         <span className="leading-none select-none">?</span>
@@ -144,18 +144,18 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
           role="tooltip"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
-          className={`absolute z-[100] w-80 max-w-[calc(100vw-32px)] bg-surface border border-border-subtle rounded-xl shadow-2xl p-3.5 text-xs text-primary animate-fade-in ${getPlacementClass()}`}
+          className={`absolute z-[100] w-96 max-w-[calc(100vw-32px)] bg-surface border border-border-subtle rounded-xl shadow-2xl p-4 text-primary animate-fade-in ${getPlacementClass()}`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-semibold text-primary text-xs flex items-center gap-1">
-                <HelpCircle size={13} className="text-accent shrink-0" />
+          <div className="flex items-start justify-between gap-2 mb-2.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-bold text-primary text-sm flex items-center gap-1.5">
+                <HelpCircle size={15} className="text-accent shrink-0" />
                 {title}
               </span>
               {tag && (
-                <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-accent/10 text-accent border border-accent/20">
+                <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-accent/10 text-accent border border-accent/20">
                   {tag}
                 </span>
               )}
@@ -164,27 +164,27 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
               type="button"
               aria-label="Đóng trợ giúp"
               onClick={handleClose}
-              className="text-tertiary hover:text-primary p-0.5 rounded transition-colors cursor-pointer"
+              className="text-tertiary hover:text-primary p-1 rounded transition-colors cursor-pointer"
             >
-              <X size={13} />
+              <X size={15} />
             </button>
           </div>
 
           {/* Diagram preview if available */}
           {diagram && (
-            <div className="mb-2.5 rounded-lg border border-border-subtle/80 bg-surface-header/40 p-2 overflow-hidden select-none">
+            <div className="mb-3 rounded-lg border border-border-subtle/80 bg-surface-header/40 p-2.5 overflow-hidden select-none">
               {diagram}
             </div>
           )}
 
           {/* Description */}
-          <p className="text-[11px] text-secondary leading-relaxed font-normal">
+          <p className="text-[13px] text-secondary leading-relaxed font-normal">
             {description}
           </p>
 
           {isPinned && (
-            <div className="mt-2 pt-2 border-t border-border-subtle/50 flex justify-end">
-              <span className="text-[9px] text-tertiary italic">
+            <div className="mt-2.5 pt-2 border-t border-border-subtle/50 flex justify-end">
+              <span className="text-xs text-tertiary italic">
                 Nhấn ESC hoặc bấm ra ngoài để đóng
               </span>
             </div>

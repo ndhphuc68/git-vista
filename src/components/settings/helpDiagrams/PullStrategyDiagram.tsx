@@ -5,86 +5,88 @@ export const PullStrategyDiagram: React.FC = () => {
   const [mode, setMode] = useState<"merge" | "rebase">("rebase");
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2.5">
       {/* Toggle tabs */}
-      <div className="flex items-center justify-between bg-surface-active/60 p-0.5 rounded-md text-[10px]">
+      <div className="flex items-center justify-between bg-surface-active/70 p-1 rounded-lg text-xs">
         <button
           type="button"
           onClick={() => setMode("rebase")}
-          className={`flex items-center gap-1 px-2 py-0.5 rounded font-medium transition-all cursor-pointer ${
+          className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer ${
             mode === "rebase"
               ? "bg-accent text-white shadow-xs"
               : "text-secondary hover:text-primary"
           }`}
         >
-          <GitPullRequest size={11} />
+          <GitPullRequest size={14} />
           <span>Rebase (Tuyến tính)</span>
         </button>
         <button
           type="button"
           onClick={() => setMode("merge")}
-          className={`flex items-center gap-1 px-2 py-0.5 rounded font-medium transition-all cursor-pointer ${
+          className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer ${
             mode === "merge"
               ? "bg-accent text-white shadow-xs"
               : "text-secondary hover:text-primary"
           }`}
         >
-          <GitMerge size={11} />
+          <GitMerge size={14} />
           <span>Merge (Rẽ nhánh)</span>
         </button>
       </div>
 
       {/* SVG Diagram Canvas */}
-      <div className="relative h-20 w-full bg-surface/80 rounded-md border border-border-subtle/50 flex items-center justify-center p-1.5 overflow-hidden">
+      <div className="relative h-28 w-full bg-surface/90 rounded-lg border border-border-subtle/70 flex items-center justify-center p-2 overflow-hidden">
         {mode === "rebase" ? (
-          <svg className="w-full h-full max-w-[280px]" viewBox="0 0 280 70" fill="none">
+          <svg className="w-full h-full max-w-[340px]" viewBox="0 0 340 85" fill="none">
             {/* Base line */}
-            <path d="M 20 35 L 260 35" stroke="currentColor" strokeWidth="2" className="text-border-strong" />
+            <path d="M 20 42 L 315 42" stroke="currentColor" strokeWidth="2.5" className="text-border-strong" />
             
             {/* Main commits */}
-            <circle cx="40" cy="35" r="7" className="fill-blue-500 stroke-surface" strokeWidth="2" />
-            <text x="40" y="55" fontSize="8" textAnchor="middle" className="fill-secondary font-mono">C1</text>
+            <circle cx="45" cy="42" r="9" className="fill-blue-500 stroke-surface" strokeWidth="2.5" />
+            <text x="45" y="65" fontSize="10" fontWeight="bold" textAnchor="middle" className="fill-secondary font-mono">C1</text>
 
-            <circle cx="95" cy="35" r="7" className="fill-blue-500 stroke-surface" strokeWidth="2" />
-            <text x="95" y="55" fontSize="8" textAnchor="middle" className="fill-secondary font-mono">C2 (remote)</text>
+            <circle cx="115" cy="42" r="9" className="fill-blue-500 stroke-surface" strokeWidth="2.5" />
+            <text x="115" y="65" fontSize="10" fontWeight="bold" textAnchor="middle" className="fill-secondary font-mono">C2 (remote)</text>
 
-            {/* Rebased commits with glow/animation */}
-            <circle cx="160" cy="35" r="7" className="fill-emerald-500 stroke-surface animate-pulse" strokeWidth="2" />
-            <text x="160" y="55" fontSize="8" textAnchor="middle" className="fill-emerald-600 dark:fill-emerald-400 font-mono font-bold">C3'</text>
+            {/* Rebased commits with pulse animation */}
+            <circle cx="195" cy="42" r="10" className="fill-emerald-500 stroke-surface animate-pulse" strokeWidth="2.5" />
+            <text x="195" y="66" fontSize="11" fontWeight="bold" textAnchor="middle" className="fill-emerald-600 dark:fill-emerald-400 font-mono">C3'</text>
 
-            <circle cx="225" cy="35" r="7" className="fill-emerald-500 stroke-surface animate-pulse" strokeWidth="2" />
-            <text x="225" y="55" fontSize="8" textAnchor="middle" className="fill-emerald-600 dark:fill-emerald-400 font-mono font-bold">C4'</text>
+            <circle cx="270" cy="42" r="10" className="fill-emerald-500 stroke-surface animate-pulse" strokeWidth="2.5" />
+            <text x="270" y="66" fontSize="11" fontWeight="bold" textAnchor="middle" className="fill-emerald-600 dark:fill-emerald-400 font-mono">C4'</text>
 
             {/* Arrow and badge */}
-            <path d="M 255 35 L 250 31 M 255 35 L 250 39" stroke="currentColor" strokeWidth="2" className="text-border-strong" />
-            <text x="192" y="20" fontSize="8" textAnchor="middle" className="fill-emerald-600 dark:fill-emerald-400 font-semibold">1 đường thẳng duy nhất</text>
+            <path d="M 315 42 L 308 36 M 315 42 L 308 48" stroke="currentColor" strokeWidth="2.5" className="text-border-strong" />
+            <text x="232" y="22" fontSize="11" fontWeight="bold" textAnchor="middle" className="fill-emerald-600 dark:fill-emerald-400">
+              1 đường thẳng duy nhất
+            </text>
           </svg>
         ) : (
-          <svg className="w-full h-full max-w-[280px]" viewBox="0 0 280 70" fill="none">
+          <svg className="w-full h-full max-w-[340px]" viewBox="0 0 340 85" fill="none">
             {/* Main line */}
-            <path d="M 20 22 L 250 22" stroke="currentColor" strokeWidth="2" className="text-border-strong" />
+            <path d="M 20 28 L 310 28" stroke="currentColor" strokeWidth="2.5" className="text-border-strong" />
             {/* Branch line */}
-            <path d="M 45 22 C 70 22, 70 50, 95 50 L 165 50 C 190 50, 190 22, 215 22" stroke="currentColor" strokeWidth="2" strokeDasharray="3 3" className="text-amber-500/70" />
+            <path d="M 50 28 C 80 28, 80 62, 110 62 L 195 62 C 225 62, 225 28, 255 28" stroke="currentColor" strokeWidth="2.5" strokeDasharray="4 4" className="text-amber-500/80" />
 
             {/* Commits */}
-            <circle cx="45" cy="22" r="6" className="fill-blue-500 stroke-surface" strokeWidth="2" />
-            <circle cx="110" cy="22" r="6" className="fill-blue-500 stroke-surface" strokeWidth="2" />
-            <text x="110" y="14" fontSize="7" textAnchor="middle" className="fill-secondary font-mono">remote</text>
+            <circle cx="50" cy="28" r="8" className="fill-blue-500 stroke-surface" strokeWidth="2.5" />
+            <circle cx="130" cy="28" r="8" className="fill-blue-500 stroke-surface" strokeWidth="2.5" />
+            <text x="130" y="17" fontSize="10" fontWeight="bold" textAnchor="middle" className="fill-secondary font-mono">remote</text>
 
-            <circle cx="130" cy="50" r="6" className="fill-amber-500 stroke-surface" strokeWidth="2" />
-            <text x="130" y="65" fontSize="7" textAnchor="middle" className="fill-amber-600 dark:fill-amber-400 font-mono">local</text>
+            <circle cx="150" cy="62" r="8" className="fill-amber-500 stroke-surface" strokeWidth="2.5" />
+            <text x="150" y="80" fontSize="10" fontWeight="bold" textAnchor="middle" className="fill-amber-600 dark:fill-amber-400 font-mono">local</text>
 
             {/* Merge commit */}
-            <circle cx="215" cy="22" r="7" className="fill-purple-500 stroke-surface animate-bounce" strokeWidth="2" />
-            <text x="215" y="14" fontSize="7" textAnchor="middle" className="fill-purple-600 dark:fill-purple-400 font-mono font-bold">Merge Commit</text>
+            <circle cx="255" cy="28" r="10" className="fill-purple-500 stroke-surface animate-bounce" strokeWidth="2.5" />
+            <text x="255" y="16" fontSize="11" fontWeight="bold" textAnchor="middle" className="fill-purple-600 dark:fill-purple-400 font-mono">Merge Commit</text>
           </svg>
         )}
       </div>
 
-      <div className="text-[10px] text-secondary text-center italic">
+      <div className="text-xs text-primary font-medium text-center bg-surface-header/60 py-1.5 px-2 rounded-md">
         {mode === "rebase"
-          ? "✨ Rebase: Giữ lịch sử commit gọn gàng, không tạo commit rác."
-          : "🔀 Merge: Giữ nguyên lịch sử rẽ nhánh nhưng sinh thêm Merge commit."}
+          ? "✨ Rebase: Giữ lịch sử commit gọn gàng, sạch sẽ, không tạo commit rác."
+          : "🔀 Merge: Giữ nguyên lịch sử rẽ nhánh nhưng sinh thêm Merge commit kết nối."}
       </div>
     </div>
   );
