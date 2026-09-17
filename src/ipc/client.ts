@@ -104,6 +104,20 @@ export const invokeCommand = {
     return await invoke<RepoSummary>("open_repository", { path });
   },
 
+  closeRepository: async (path: string): Promise<void> => {
+    if (!isTauri()) return;
+    const { invoke } = await import("@tauri-apps/api/core");
+    await invoke("close_repository", { path });
+  },
+
+  getOpenRepositories: async (): Promise<RepoSummary[]> => {
+    if (!isTauri()) {
+      return [];
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<RepoSummary[]>("get_open_repositories");
+  },
+
   getRecentRepos: async (): Promise<RecentRepoEntry[]> => {
     if (!isTauri()) {
       return [
