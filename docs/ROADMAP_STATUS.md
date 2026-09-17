@@ -25,9 +25,9 @@
 | | 1.1.2: Quản lý Thẻ toàn diện (Tag Management) | 25% | ✅ Đã hoàn thành | 100% |
 | | 1.1.3: Nhặt & Hoàn tác Commit (Cherry-pick & Revert Commit) | 25% | ✅ Đã hoàn thành | 100% |
 | | | | | |
-| **Phase 1.2** | **Quy trình Git chuyên sâu (Deep Git Workflows)** | **100%** | ⏳ **Kế tiếp (Sẵn sàng)** | **0%** |
-| | 1.2.1: Word-level Diff & Bỏ qua khoảng trắng (Ignore Whitespace) | 35% | ⏳ Sẵn sàng triển khai | 0% |
-| | 1.2.2: Lịch sử từng file & Git Blame (File History & Blame) | 35% | 📋 Chờ thực hiện | 0% |
+| **Phase 1.2** | **Quy trình Git chuyên sâu (Deep Git Workflows)** | **100%** | 🔄 **Đang triển khai** | **35%** |
+| | 1.2.1: Word-level Diff & Bỏ qua khoảng trắng (Ignore Whitespace) | 35% | ✅ Đã hoàn thành | 100% |
+| | 1.2.2: Lịch sử từng file & Git Blame (File History & Blame) | 35% | ⏳ Kế tiếp (Sẵn sàng) | 0% |
 | | 1.2.3: Quản lý Remote & Dọn dẹp nhánh mồ côi (Remote Prune) | 30% | 📋 Chờ thực hiện | 0% |
 | | | | | |
 | **Phase 2.0** | **Công cụ sức mạnh nâng cao (Advanced Power Tools)** | **100%** | 📋 **Chờ Phase 1.2** | **0%** |
@@ -137,15 +137,21 @@
 
 ---
 
-### 3. PHASE 1.2: QUY TRÌNH GIT CHUYÊN SÂU (DEEP GIT WORKFLOWS) [KẾ TIẾP]
+### 3. PHASE 1.2: QUY TRÌNH GIT CHUYÊN SÂU (DEEP GIT WORKFLOWS) [ĐANG TRIỂN KHAI - 35%]
 
-#### 📋 1.2.1: Word-level Diff & Bỏ Qua Khoảng Trắng (Ignore Whitespace) — [SẴN SÀNG TRIỂN KHAI]
-- **Mục tiêu:** So sánh diff chi tiết từng từ/ký tự bên trong dòng thay vì chỉ đánh dấu nguyên dòng, và lọc bỏ thay đổi format/tab/space rác.
-- **Kế hoạch triển khai:**
-  - **Backend:** Thêm cờ `ignore_whitespace` (`git2::DiffOptions::ignore_whitespace`) vào `read/diff.rs`.
-  - **Frontend Diff Viewer:** Nút toggle "Bỏ qua khoảng trắng" trên thanh công cụ; thuật toán tô màu word-diff cho các ký tự thay đổi thực sự; hỗ trợ chế độ xem Split Diff 2 cột.
+#### ✅ 1.2.1: Word-level Diff & Bỏ Qua Khoảng Trắng (Ignore Whitespace) — [HOÀN THÀNH 100%]
+- **Rust Backend:**
+  - `src-tauri/src/read/diff.rs` & `status.rs`: Thêm cờ `ignore_whitespace: Option<bool>` áp dụng `opts.ignore_whitespace(true)` và `opts.ignore_whitespace_eol(true)`.
+  - Bộ nhớ đệm 4-tuple key `(PathBuf, String, String, bool)` giúp chuyển đổi toggle tức thì.
+  - Lệnh IPC: `get_commit_file_diff` và `get_working_file_diff` hỗ trợ `ignore_whitespace`.
+  - Kiểm thử `tests/diff_options_test.rs` kiểm tra chính xác việc lọc bỏ diff thuần khoảng trắng.
+- **Frontend Word-Level Diff & UI:**
+  - `src/utils/wordDiff.ts`: Tokenizer Unicode nhận diện từ ngữ, khoảng trắng, ký hiệu và thuật toán LCS (Longest Common Subsequence) so khớp token giữa các cặp dòng `-` và `+`.
+  - `<DiffLineContent />`: Tô màu chi tiết các từ bị xóa (`bg-red-500/30 font-semibold`) và từ được thêm (`bg-emerald-500/30 font-semibold`).
+  - Thanh công cụ (Toolbar): Nút chuyển đổi nhanh Bỏ qua khoảng trắng (`<Space size={13} />`) và Word Diff (`<Type size={13} />`) trên cả `FileDiffViewer.tsx` (Lịch sử) và `InteractiveDiffViewer.tsx` (Staging), đồng bộ trạng thái toàn cục với `useSettingsStore` và React Query keys.
+  - Từ điển song ngữ Việt - Anh đầy đủ tại `vi.ts` và `en.ts`.
 
-#### 📋 1.2.2: Lịch Sử Từng File & Git Blame (File History & Blame View) — [CHỜ THỰC HIỆN]
+#### 📋 1.2.2: Lịch Sử Từng File & Git Blame (File History & Blame View) — [KẾ TIẾP]
 - **Mục tiêu:** Xem nguồn gốc xuất xứ của từng dòng code trong file và lịch sử sửa đổi riêng của từng tệp tin.
 - **Kế hoạch triển khai:**
   - **Backend:** `read/blame.rs` dùng `repo.blame_file` trích xuất thông tin tác giả, commit SHA cho từng dòng; `read/file_history.rs` lọc revwalk theo đường dẫn file.
@@ -178,13 +184,13 @@ Hệ thống mã nguồn GitVista hiện tại đạt trạng thái kiểm thử
 
 | Tầng hệ thống | Công cụ kiểm thử | Số lượng kiểm thử | Trạng thái |
 | :--- | :--- | :---: | :---: |
-| **Backend (Rust)** | `cargo test` | **27 test suites / 80 tests** | ✅ **100% PASS** |
-| **Frontend (React/TS)** | `vitest` | **57 test files / 287 tests** | ✅ **100% PASS** |
+| **Backend (Rust)** | `cargo test` | **29 test suites / 84 tests** | ✅ **100% PASS** |
+| **Frontend (React/TS)** | `vitest` | **60 test files / 314 tests** | ✅ **100% PASS** |
 | **Đóng gói Sản phẩm** | `pnpm build` (TypeScript + Vite) | **0 lỗi / 0 cảnh báo** | ✅ **100% SẠCH** |
 
 ---
 
 ## 🚀 Bước Đi Kế Tiếp
 
-Hoàn thành trọn vẹn Phase 1.1 (100%), chuẩn bị tiến hành **Phase 1.2: Quy trình Git chuyên sâu (Deep Git Workflows)** với hạng mục mở đầu:
-**Phase 1.2.1: Word-level Diff & Bỏ qua khoảng trắng (Ignore Whitespace)**.
+Hoàn thành trọn vẹn Phase 1.2.1 (100%), chuẩn bị tiến hành:
+**Phase 1.2.2: Lịch sử từng file & Git Blame (File History & Blame View)**.
