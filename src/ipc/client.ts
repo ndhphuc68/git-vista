@@ -38,6 +38,10 @@ let mockGlobalConfig: GitConfigDto = {
   userEmailSource: "global",
   defaultBranch: "main",
   pullRebase: false,
+  gpgSign: false,
+  gpgKey: "",
+  fetchPrune: false,
+  rebaseAutostash: false,
 };
 
 let mockLocalConfigs: Record<string, Partial<GitConfigDto>> = {};
@@ -50,6 +54,10 @@ export function resetMockGitConfig() {
     userEmailSource: "global",
     defaultBranch: "main",
     pullRebase: false,
+    gpgSign: false,
+    gpgKey: "",
+    fetchPrune: false,
+    rebaseAutostash: false,
   };
   mockLocalConfigs = {};
 }
@@ -746,6 +754,10 @@ export const invokeCommand = {
           userEmailSource: local.userEmail ? "local" : "global",
           defaultBranch: local.defaultBranch ?? mockGlobalConfig.defaultBranch,
           pullRebase: local.pullRebase ?? mockGlobalConfig.pullRebase,
+          gpgSign: local.gpgSign ?? mockGlobalConfig.gpgSign,
+          gpgKey: local.gpgKey ?? mockGlobalConfig.gpgKey,
+          fetchPrune: local.fetchPrune ?? mockGlobalConfig.fetchPrune,
+          rebaseAutostash: local.rebaseAutostash ?? mockGlobalConfig.rebaseAutostash,
         };
       }
       return { ...mockGlobalConfig };
@@ -766,16 +778,28 @@ export const invokeCommand = {
         if (key === "user.email") mockGlobalConfig.userEmail = value;
         if (key === "init.defaultBranch") mockGlobalConfig.defaultBranch = value;
         if (key === "pull.rebase") mockGlobalConfig.pullRebase = value === "true";
+        if (key === "commit.gpgsign") mockGlobalConfig.gpgSign = value === "true";
+        if (key === "user.signingkey") mockGlobalConfig.gpgKey = value;
+        if (key === "fetch.prune") mockGlobalConfig.fetchPrune = value === "true";
+        if (key === "rebase.autoStash") mockGlobalConfig.rebaseAutostash = value === "true";
       } else if (scope === "local" && repoPath) {
         if (!mockLocalConfigs[repoPath]) mockLocalConfigs[repoPath] = {};
         if (value.trim() === "") {
           if (key === "user.name") delete mockLocalConfigs[repoPath].userName;
           if (key === "user.email") delete mockLocalConfigs[repoPath].userEmail;
           if (key === "pull.rebase") delete mockLocalConfigs[repoPath].pullRebase;
+          if (key === "commit.gpgsign") delete mockLocalConfigs[repoPath].gpgSign;
+          if (key === "user.signingkey") delete mockLocalConfigs[repoPath].gpgKey;
+          if (key === "fetch.prune") delete mockLocalConfigs[repoPath].fetchPrune;
+          if (key === "rebase.autoStash") delete mockLocalConfigs[repoPath].rebaseAutostash;
         } else {
           if (key === "user.name") mockLocalConfigs[repoPath].userName = value;
           if (key === "user.email") mockLocalConfigs[repoPath].userEmail = value;
           if (key === "pull.rebase") mockLocalConfigs[repoPath].pullRebase = value === "true";
+          if (key === "commit.gpgsign") mockLocalConfigs[repoPath].gpgSign = value === "true";
+          if (key === "user.signingkey") mockLocalConfigs[repoPath].gpgKey = value;
+          if (key === "fetch.prune") mockLocalConfigs[repoPath].fetchPrune = value === "true";
+          if (key === "rebase.autoStash") mockLocalConfigs[repoPath].rebaseAutostash = value === "true";
         }
       }
       return;

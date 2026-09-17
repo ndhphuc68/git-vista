@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { GitMerge, GitPullRequest, Clock, Check, FolderGit2, Globe } from "lucide-react";
+import { GitMerge, GitPullRequest, Clock, Check, FolderGit2, Globe, ShieldAlert, Scissors, Archive } from "lucide-react";
 import { useTranslation } from "../../../i18n";
 import { invokeCommand } from "../../../ipc/client";
 import { useToastStore } from "../../../store/useToastStore";
+import { useSettingsStore } from "../../../store/useSettingsStore";
 
 interface GitBehaviorTabProps {
   currentRepoPath: string | null;
@@ -16,11 +17,22 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
 }) => {
   const { t } = useTranslation();
   const { showSuccess, showError } = useToastStore();
+  const {
+    confirmDiscard,
+    confirmDeleteBranch,
+    confirmForcePush,
+    setConfirmDiscard,
+    setConfirmDeleteBranch,
+    setConfirmForcePush,
+  } = useSettingsStore();
 
   const activeScope = propScope || (currentRepoPath ? "repo" : "global");
 
   const [localPullRebase, setLocalPullRebase] = useState<boolean | null>(null);
   const [globalPullRebase, setGlobalPullRebase] = useState<boolean>(false);
+  const [fetchPrune, setFetchPrune] = useState<boolean>(false);
+  const [rebaseAutostash, setRebaseAutostash] = useState<boolean>(false);
+
   const [autoFetchInterval, setAutoFetchInterval] = useState<number>(() => {
     if (typeof localStorage !== "undefined") {
       const saved = localStorage.getItem("gitvista_autofetch_interval");
@@ -39,14 +51,22 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
         const globalCfg = await invokeCommand.getGitConfig(null);
         if (!isMounted) return;
         setGlobalPullRebase(Boolean(globalCfg.pullRebase));
+        setFetchPrune(Boolean(globalCfg.fetchPrune));
+        setRebaseAutostash(Boolean(globalCfg.rebaseAutostash));
 
         if (currentRepoPath) {
           const localCfg = await invokeCommand.getGitConfig(currentRepoPath);
           if (!isMounted) return;
           setLocalPullRebase(localCfg.pullRebase ?? null);
+          if (localCfg.fetchPrune !== undefined && localCfg.fetchPrune !== null) {
+            setFetchPrune(Boolean(localCfg.fetchPrune));
+          }
+          if (localCfg.rebaseAutostash !== undefined && localCfg.rebaseAutostash !== null) {
+            setRebaseAutostash(Boolean(localCfg.rebaseAutostash));
+          }
         }
       } catch (err) {
-        console.error("Failed to load pull strategy:", err);
+        console.error("Failed to load git behavior:", err);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -93,6 +113,40 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
     }
   };
 
+  const handleToggleFetchPrune = async () => {
+    const nextVal = !fetchPrune;
+    setFetchPrune(nextVal);
+    setSaving(true);
+    try {
+      const scope = activeScope === "repo" && currentRepoPath ? "local" : "global";
+      const repo = activeScope === "repo" ? currentRepoPath : null;
+      await invokeCommand.setGitConfig(repo, scope, "fetch.prune", String(nextVal));
+      showSuccess(t.settings.profile.savedSuccess);
+    } catch (err) {
+      console.error("Failed to update fetch.prune:", err);
+      showError(String(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleToggleRebaseAutostash = async () => {
+    const nextVal = !rebaseAutostash;
+    setRebaseAutostash(nextVal);
+    setSaving(true);
+    try {
+      const scope = activeScope === "repo" && currentRepoPath ? "local" : "global";
+      const repo = activeScope === "repo" ? currentRepoPath : null;
+      await invokeCommand.setGitConfig(repo, scope, "rebase.autoStash", String(nextVal));
+      showSuccess(t.settings.profile.savedSuccess);
+    } catch (err) {
+      console.error("Failed to update rebase.autoStash:", err);
+      showError(String(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleAutoFetchChange = (seconds: number) => {
     setAutoFetchInterval(seconds);
     if (typeof localStorage !== "undefined") {
@@ -114,7 +168,7 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
             <div>
               <div className="text-xs font-semibold text-primary">
                 {t.settings.profile.repoSettingsBanner}{" "}
-                <span className="font-mono text-accent">{currentRepoPath.split("/").pop()}</span>
+                <span className="font-mono text-accent">{currentRepoPath.split(/[/\\]/).filter(Boolean).pop() || currentRepoPath}</span>
               </div>
               <p className="text-[11px] text-secondary mt-0.5">
                 {t.settings.profile.repoSettingsDesc}
@@ -275,6 +329,157 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
             </button>
           </div>
         )}
+      </div>
+
+      {/* Git Flags: fetch.prune & rebase.autoStash */}
+      <div className="pt-3 border-t border-border-subtle space-y-3">
+        {/* Fetch Prune */}
+        <div className="flex items-center justify-between p-3 rounded-lg bg-surface-header/20 border border-border-subtle">
+          <div className="flex items-start gap-2.5">
+            <Scissors size={16} className="text-accent mt-0.5 shrink-0" />
+            <div>
+              <span className="text-xs font-semibold text-primary block">
+                {t.settings.behavior.fetchPruneTitle}
+              </span>
+              <span className="text-[11px] text-secondary block mt-0.5">
+                {t.settings.behavior.fetchPruneDesc}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={fetchPrune}
+            data-testid="toggle-fetch-prune"
+            onClick={handleToggleFetchPrune}
+            aria-label={t.settings.behavior.fetchPruneTitle}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent ${
+              fetchPrune ? "bg-accent" : "bg-border-strong"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                fetchPrune ? "translate-x-4" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Rebase AutoStash */}
+        <div className="flex items-center justify-between p-3 rounded-lg bg-surface-header/20 border border-border-subtle">
+          <div className="flex items-start gap-2.5">
+            <Archive size={16} className="text-accent mt-0.5 shrink-0" />
+            <div>
+              <span className="text-xs font-semibold text-primary block">
+                {t.settings.behavior.rebaseAutostashTitle}
+              </span>
+              <span className="text-[11px] text-secondary block mt-0.5">
+                {t.settings.behavior.rebaseAutostashDesc}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={rebaseAutostash}
+            data-testid="toggle-rebase-autostash"
+            onClick={handleToggleRebaseAutostash}
+            aria-label={t.settings.behavior.rebaseAutostashTitle}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent ${
+              rebaseAutostash ? "bg-accent" : "bg-border-strong"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                rebaseAutostash ? "translate-x-4" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
+      {/* Safety Confirmations */}
+      <div className="pt-3 border-t border-border-subtle space-y-3">
+        <div className="flex items-center gap-2">
+          <ShieldAlert size={16} className="text-accent" />
+          <span className="text-xs font-semibold text-primary block">
+            {t.settings.behavior.confirmationsTitle}
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          {/* Confirm Discard */}
+          <div className="flex items-center justify-between p-3 rounded-lg bg-surface-header/20 border border-border-subtle">
+            <span className="text-xs font-medium text-primary">
+              {t.settings.behavior.confirmDiscardLabel}
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={confirmDiscard}
+              data-testid="toggle-confirm-discard"
+              onClick={() => setConfirmDiscard(!confirmDiscard)}
+              aria-label={t.settings.behavior.confirmDiscardLabel}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent ${
+                confirmDiscard ? "bg-accent" : "bg-border-strong"
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                  confirmDiscard ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Confirm Delete Branch */}
+          <div className="flex items-center justify-between p-3 rounded-lg bg-surface-header/20 border border-border-subtle">
+            <span className="text-xs font-medium text-primary">
+              {t.settings.behavior.confirmDeleteBranchLabel}
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={confirmDeleteBranch}
+              data-testid="toggle-confirm-delete-branch"
+              onClick={() => setConfirmDeleteBranch(!confirmDeleteBranch)}
+              aria-label={t.settings.behavior.confirmDeleteBranchLabel}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent ${
+                confirmDeleteBranch ? "bg-accent" : "bg-border-strong"
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                  confirmDeleteBranch ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Confirm Force Push */}
+          <div className="flex items-center justify-between p-3 rounded-lg bg-surface-header/20 border border-border-subtle">
+            <span className="text-xs font-medium text-primary">
+              {t.settings.behavior.confirmForcePushLabel}
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={confirmForcePush}
+              data-testid="toggle-confirm-force-push"
+              onClick={() => setConfirmForcePush(!confirmForcePush)}
+              aria-label={t.settings.behavior.confirmForcePushLabel}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent ${
+                confirmForcePush ? "bg-accent" : "bg-border-strong"
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                  confirmForcePush ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Auto Fetch (Global App Behavior) */}

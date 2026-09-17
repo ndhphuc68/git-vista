@@ -204,6 +204,23 @@ describe("WelcomeScreen", () => {
     fireEvent.click(screen.getByLabelText(/Unpin|Bỏ ghim/i));
     expect(screen.getByLabelText(/Pin to top|Ghim lên đầu/i)).toBeInTheDocument();
   });
+
+  it("opens settings modal when clicking settings button on header", async () => {
+    const { useSettingsStore } = await import("../store/useSettingsStore");
+    useSettingsStore.getState().closeSettings();
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <WelcomeScreen onSelectRepo={vi.fn()} />
+      </QueryClientProvider>
+    );
+
+    const settingsBtn = screen.getByRole("button", { name: /Cài đặt|Settings/i });
+    expect(settingsBtn).toBeInTheDocument();
+    fireEvent.click(settingsBtn);
+
+    expect(useSettingsStore.getState().isSettingsOpen).toBe(true);
+  });
 });
 
 

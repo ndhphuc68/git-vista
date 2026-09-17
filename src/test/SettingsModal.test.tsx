@@ -34,19 +34,28 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
     useTabStore.getState().reset();
   });
 
-  it("hiển thị Scope Switcher với nút Global và Repository trên đầu modal", async () => {
+  it("khi mở từ màn Home/Welcome (currentRepoPath là null), mở ra cài đặt chung (Global) và không có Scope Switcher hay phần setting riêng cho repo", async () => {
     render(<SettingsModal currentRepoPath={null} />);
 
-    expect(await screen.findByTestId("scope-switcher")).toBeInTheDocument();
-    expect(screen.getByTestId("scope-btn-global")).toBeInTheDocument();
-    expect(screen.getByTestId("scope-btn-repo")).toBeInTheDocument();
+    expect(screen.queryByTestId("scope-switcher")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("scope-btn-repo")).not.toBeInTheDocument();
+    expect(await screen.findByText(/Toàn hệ thống \(Global\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Nhánh mặc định/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Cài đặt riêng cho repository/i)).not.toBeInTheDocument();
+    expect(screen.queryByTestId("inherit-toggle-inherit")).not.toBeInTheDocument();
   });
 
-  it("vô hiệu hoá nút Repository khi chưa mở repo nào (đang ở Home)", async () => {
+  it("ngay cả khi có repo tab mở trong nền, nếu mở từ màn Welcome (currentRepoPath là null) thì vẫn chỉ mở cài đặt chung và không có phần setting riêng cho repo", async () => {
+    useTabStore.getState().openRepoTab(mockRepo1);
+
     render(<SettingsModal currentRepoPath={null} />);
 
-    const repoBtn = await screen.findByTestId("scope-btn-repo");
-    expect(repoBtn).toBeDisabled();
+    expect(screen.queryByTestId("scope-switcher")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("scope-btn-repo")).not.toBeInTheDocument();
+    expect(await screen.findByText(/Toàn hệ thống \(Global\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Nhánh mặc định/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Cài đặt riêng cho repository/i)).not.toBeInTheDocument();
+    expect(screen.queryByTestId("inherit-toggle-inherit")).not.toBeInTheDocument();
   });
 
   it("khi có repo mở, cho phép chuyển đổi giữa Global và Repository scope", async () => {
@@ -128,5 +137,36 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
     await waitFor(() => {
       expect(screen.getByTestId("inherit-toggle-inherit")).toBeChecked();
     });
+  });
+
+  it("hiển thị đầy đủ 5 tab cài đặt (Profile, Appearance, Diff, Behavior, Tools) và chuyển tab thành công", async () => {
+    render(<SettingsModal currentRepoPath={null} />);
+
+    // Check all 5 tab buttons in sidebar
+    expect(screen.getByRole("button", { name: /Hồ sơ Git/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Giao diện & Hiển thị/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Trình xem Diff/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Hành vi Git/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Công cụ ngoài/i })).toBeInTheDocument();
+
+    // Switch to Appearance tab
+    fireEvent.click(screen.getByRole("button", { name: /Giao diện & Hiển thị/i }));
+    expect(screen.getByText(/Chủ đề màu sắc/i)).toBeInTheDocument();
+    expect(screen.getByText(/Định dạng thời gian/i)).toBeInTheDocument();
+
+    // Switch to Diff tab
+    fireEvent.click(screen.getByRole("button", { name: /Trình xem Diff/i }));
+    expect(screen.getByText(/Bố cục hiển thị Diff mặc định/i)).toBeInTheDocument();
+    expect(screen.getByText(/Cỡ chữ hiển thị mã nguồn/i)).toBeInTheDocument();
+
+    // Switch to Behavior tab
+    fireEvent.click(screen.getByRole("button", { name: /Hành vi Git/i }));
+    expect(screen.getByText(/Hành vi khi Kéo về/i)).toBeInTheDocument();
+    expect(screen.getByText(/Hộp thoại cảnh báo & Xác nhận an toàn/i)).toBeInTheDocument();
+
+    // Switch to Tools tab
+    fireEvent.click(screen.getByRole("button", { name: /Công cụ ngoài/i }));
+    expect(screen.getByText(/Trình soạn thảo mã \/ IDE mặc định/i)).toBeInTheDocument();
+    expect(screen.getByText(/Cửa sổ dòng lệnh \(Terminal\) mặc định/i)).toBeInTheDocument();
   });
 });

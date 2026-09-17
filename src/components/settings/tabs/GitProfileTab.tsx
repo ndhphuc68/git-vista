@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Globe, FolderGit2, Check } from "lucide-react";
+import { Globe, FolderGit2, Check, ShieldCheck, Key, FileText } from "lucide-react";
 import { useTranslation } from "../../../i18n";
 import { invokeCommand, GitConfigDto } from "../../../ipc/client";
 import { useToastStore } from "../../../store/useToastStore";
+import { useSettingsStore, CommitMessageLimit } from "../../../store/useSettingsStore";
 
 interface GitProfileTabProps {
   currentRepoPath: string | null;
@@ -16,12 +17,15 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
 }) => {
   const { t } = useTranslation();
   const { showSuccess, showError } = useToastStore();
+  const { commitMessageLimit, setCommitMessageLimit } = useSettingsStore();
 
   const activeScope = propScope || (currentRepoPath ? "repo" : "global");
 
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [defaultBranch, setDefaultBranch] = useState("main");
+  const [gpgSign, setGpgSign] = useState(false);
+  const [gpgKey, setGpgKey] = useState("");
 
   const [globalConfig, setGlobalConfig] = useState<GitConfigDto | null>(null);
   const [localConfig, setLocalConfig] = useState<GitConfigDto | null>(null);
@@ -51,11 +55,15 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
           setIsOverride(hasLocalOverride);
           setUserName(localCfg.userName || globalCfg.userName || "");
           setUserEmail(localCfg.userEmail || globalCfg.userEmail || "");
+          setGpgSign(localCfg.gpgSign ?? globalCfg.gpgSign ?? false);
+          setGpgKey(localCfg.gpgKey ?? globalCfg.gpgKey ?? "");
         } else {
           setIsOverride(false);
           setUserName(globalCfg.userName || "");
           setUserEmail(globalCfg.userEmail || "");
           setDefaultBranch(globalCfg.defaultBranch || "main");
+          setGpgSign(Boolean(globalCfg.gpgSign));
+          setGpgKey(globalCfg.gpgKey || "");
         }
       } catch (err) {
         console.error("Failed to load git config:", err);
@@ -78,15 +86,21 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
         if (isOverride) {
           await invokeCommand.setGitConfig(currentRepoPath, "local", "user.name", userName.trim());
           await invokeCommand.setGitConfig(currentRepoPath, "local", "user.email", userEmail.trim());
+          await invokeCommand.setGitConfig(currentRepoPath, "local", "commit.gpgsign", String(gpgSign));
+          await invokeCommand.setGitConfig(currentRepoPath, "local", "user.signingkey", gpgKey.trim());
         } else {
           // Clear local override to inherit
           await invokeCommand.setGitConfig(currentRepoPath, "local", "user.name", "");
           await invokeCommand.setGitConfig(currentRepoPath, "local", "user.email", "");
+          await invokeCommand.setGitConfig(currentRepoPath, "local", "commit.gpgsign", "");
+          await invokeCommand.setGitConfig(currentRepoPath, "local", "user.signingkey", "");
         }
       } else {
         await invokeCommand.setGitConfig(null, "global", "user.name", userName.trim());
         await invokeCommand.setGitConfig(null, "global", "user.email", userEmail.trim());
         await invokeCommand.setGitConfig(null, "global", "init.defaultBranch", defaultBranch.trim() || "main");
+        await invokeCommand.setGitConfig(null, "global", "commit.gpgsign", String(gpgSign));
+        await invokeCommand.setGitConfig(null, "global", "user.signingkey", gpgKey.trim());
       }
 
       showSuccess(t.settings.profile.savedSuccess);
@@ -112,6 +126,8 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
     try {
       await invokeCommand.setGitConfig(currentRepoPath, "local", "user.name", "");
       await invokeCommand.setGitConfig(currentRepoPath, "local", "user.email", "");
+      await invokeCommand.setGitConfig(currentRepoPath, "local", "commit.gpgsign", "");
+      await invokeCommand.setGitConfig(currentRepoPath, "local", "user.signingkey", "");
 
       const updatedLocal = await invokeCommand.getGitConfig(currentRepoPath);
       setLocalConfig(updatedLocal);
@@ -119,6 +135,8 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
       if (globalConfig) {
         setUserName(globalConfig.userName || "");
         setUserEmail(globalConfig.userEmail || "");
+        setGpgSign(Boolean(globalConfig.gpgSign));
+        setGpgKey(globalConfig.gpgKey || "");
       }
       showSuccess(t.settings.profile.resetSuccess);
     } catch (err) {
@@ -133,6 +151,12 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
     activeScope === "repo" &&
     Boolean(localConfig?.userNameSource === "local" && localConfig?.userName);
 
+  const commitLimitOptions: { value: CommitMessageLimit; label: string }[] = [
+    { value: 0, label: t.settings.profile.commitLengthNoLimit },
+    { value: 50, label: t.settings.profile.commitLength50 },
+    { value: 72, label: t.settings.profile.commitLength72 },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Scope Header Banner */}
@@ -143,7 +167,7 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
             <div>
               <div className="text-xs font-semibold text-primary">
                 {t.settings.profile.repoSettingsBanner}{" "}
-                <span className="font-mono text-accent">{currentRepoPath.split("/").pop()}</span>
+                <span className="font-mono text-accent">{currentRepoPath.split(/[/\\]/).filter(Boolean).pop() || currentRepoPath}</span>
               </div>
               <p className="text-[11px] text-secondary mt-0.5">
                 {t.settings.profile.repoSettingsDesc}
@@ -200,6 +224,8 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
                   if (globalConfig) {
                     setUserName(globalConfig.userName || "");
                     setUserEmail(globalConfig.userEmail || "");
+                    setGpgSign(Boolean(globalConfig.gpgSign));
+                    setGpgKey(globalConfig.gpgKey || "");
                   }
                 }}
                 className="accent-accent"
@@ -309,6 +335,93 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
             />
           </div>
         )}
+
+        {/* GPG Signing Section */}
+        <div className="pt-3 border-t border-border-subtle space-y-3">
+          <div className="flex items-start gap-2">
+            <ShieldCheck size={16} className="text-accent mt-0.5 shrink-0" />
+            <div>
+              <div className="text-xs font-semibold text-primary">{t.settings.profile.gpgTitle}</div>
+              <p className="text-[11px] text-secondary mt-0.5">{t.settings.profile.gpgDesc}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between p-3 rounded-lg bg-surface-header/20 border border-border-subtle">
+            <label htmlFor="gpg-toggle" className="text-xs font-medium text-primary cursor-pointer">
+              {t.settings.profile.gpgEnable}
+            </label>
+            <button
+              id="gpg-toggle"
+              type="button"
+              role="switch"
+              disabled={activeScope === "repo" && !isOverride}
+              aria-checked={gpgSign}
+              data-testid="toggle-gpg-sign"
+              onClick={() => setGpgSign(!gpgSign)}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed ${
+                gpgSign ? "bg-accent" : "bg-border-strong"
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                  gpgSign ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+
+          <div>
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Key size={13} className="text-secondary" />
+              <label htmlFor="gpg-key" className="text-xs font-medium text-primary">
+                {t.settings.profile.gpgKeyLabel}
+              </label>
+            </div>
+            <input
+              id="gpg-key"
+              type="text"
+              disabled={activeScope === "repo" && !isOverride}
+              value={gpgKey}
+              onChange={(e) => setGpgKey(e.target.value)}
+              placeholder={t.settings.profile.gpgKeyPlaceholder}
+              className="w-full px-3 py-2 text-xs rounded-md bg-surface-input border border-border-subtle focus:border-accent focus:outline-none text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-mono"
+            />
+          </div>
+        </div>
+
+        {/* Commit Conventions Section */}
+        <div className="pt-3 border-t border-border-subtle space-y-3">
+          <div className="flex items-start gap-2">
+            <FileText size={16} className="text-accent mt-0.5 shrink-0" />
+            <div>
+              <div className="text-xs font-semibold text-primary">{t.settings.profile.commitConventionsTitle}</div>
+              <label className="text-[11px] text-secondary mt-0.5 block">
+                {t.settings.profile.commitLengthLabel}
+              </label>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            {commitLimitOptions.map((opt) => {
+              const isSelected = commitMessageLimit === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  data-testid={`commit-limit-${opt.value}`}
+                  onClick={() => setCommitMessageLimit(opt.value)}
+                  className={`p-2.5 rounded-lg border text-center transition-all text-xs font-medium ${
+                    isSelected
+                      ? "border-accent bg-accent/10 text-primary ring-1 ring-accent font-semibold"
+                      : "border-border-subtle bg-surface-header/30 hover:bg-surface-hover text-secondary"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <div className="pt-2 flex justify-end">
           <button

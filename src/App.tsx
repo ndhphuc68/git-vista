@@ -118,6 +118,8 @@ export const App: React.FC<AppProps> = ({
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const { currentRepo, setRepo, clearRepo } = useRepoStore();
   const { tabs, activeTabId, setActiveTab, openRepoTab, openHomeTab, closeTab, restoreSession } = useTabStore();
+  const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0];
+  const repoToDisplay = activeTab?.type === "repo" ? (activeTab.repo || currentRepo) : null;
   const { setActiveScreen } = useViewStore();
   const { resolvedTheme, setTheme, mode, setMode, openSettings, closeSettings } = useSettingsStore();
   const { open: openCommandPalette, close: closeCommandPalette } = useCommandPaletteStore();
@@ -175,7 +177,7 @@ export const App: React.FC<AppProps> = ({
 
   useGlobalShortcuts({
     onOpenCreateBranch: () => {
-      if (currentRepo) setIsGlobalCreateBranchOpen(true);
+      if (repoToDisplay) setIsGlobalCreateBranchOpen(true);
     },
     onOpenCommandPalette: () => {
       openCommandPalette();
@@ -205,10 +207,10 @@ export const App: React.FC<AppProps> = ({
   });
 
   const commandContext: CommandContext = {
-    repoPath: currentRepo?.path,
+    repoPath: repoToDisplay?.path,
     navigate: (screen) => setActiveScreen(screen),
     openCreateBranch: () => {
-      if (currentRepo) setIsGlobalCreateBranchOpen(true);
+      if (repoToDisplay) setIsGlobalCreateBranchOpen(true);
     },
     openShortcutsHelp: () => setIsShortcutsHelpOpen(true),
     toggleTheme: handleToggleTheme,
@@ -248,9 +250,6 @@ export const App: React.FC<AppProps> = ({
     };
   }, []);
 
-  const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0];
-  const repoToDisplay = activeTab?.type === "repo" ? (activeTab.repo || currentRepo) : null;
-
   return (
     <QueryClientProvider client={queryClient}>
       {!splashFinished && (
@@ -280,7 +279,7 @@ export const App: React.FC<AppProps> = ({
           isOpen={isShortcutsHelpOpen}
           onClose={() => setIsShortcutsHelpOpen(false)}
         />
-        <SettingsModal currentRepoPath={currentRepo?.path ?? null} />
+        <SettingsModal currentRepoPath={repoToDisplay?.path ?? null} />
       </div>
     </QueryClientProvider>
   );

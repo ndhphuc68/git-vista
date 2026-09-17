@@ -214,6 +214,10 @@ export interface GitConfigDto {
   userEmailSource: ConfigScope | null;
   defaultBranch: string | null;
   pullRebase: boolean | null;
+  gpgSign?: boolean | null;
+  gpgKey?: string | null;
+  fetchPrune?: boolean | null;
+  rebaseAutostash?: boolean | null;
 }
 
 

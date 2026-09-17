@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Settings, X, User, Palette, Sliders, Globe, FolderGit2 } from "lucide-react";
+import { Settings, X, User, Palette, Sliders, Globe, FolderGit2, FileCode, Terminal } from "lucide-react";
 import { useTranslation } from "../../i18n";
 import { useSettingsStore, SettingsTab } from "../../store/useSettingsStore";
 import { useTabStore } from "../../store/useTabStore";
@@ -7,6 +7,8 @@ import { Transition } from "../common/Transition";
 import { GitProfileTab } from "./tabs/GitProfileTab";
 import { AppearanceTab } from "./tabs/AppearanceTab";
 import { GitBehaviorTab } from "./tabs/GitBehaviorTab";
+import { DiffViewerTab } from "./tabs/DiffViewerTab";
+import { ExternalToolsTab } from "./tabs/ExternalToolsTab";
 
 interface SettingsModalProps {
   currentRepoPath: string | null;
@@ -15,21 +17,19 @@ interface SettingsModalProps {
 export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath }) => {
   const { t } = useTranslation();
   const { isSettingsOpen, activeTab, closeSettings, setActiveTab } = useSettingsStore();
-  const { tabs, activeTabId } = useTabStore();
+  const { tabs } = useTabStore();
 
   const openRepoTabs = tabs.filter((t) => t.type === "repo" && t.repo);
   const activeRepo = currentRepoPath
     ? openRepoTabs.find((t) => t.id === currentRepoPath)
-    : openRepoTabs.find((t) => t.id === activeTabId) || openRepoTabs[0];
+    : null;
 
   const [scope, setScope] = useState<"global" | "repo">(() => {
-    return currentRepoPath || (activeTabId !== "home" && openRepoTabs.length > 0)
-      ? "repo"
-      : "global";
+    return currentRepoPath ? "repo" : "global";
   });
 
   const [selectedRepoPath, setSelectedRepoPath] = useState<string>(
-    activeRepo?.id || currentRepoPath || (openRepoTabs[0]?.id ?? "")
+    currentRepoPath || ""
   );
 
   useEffect(() => {
@@ -47,26 +47,31 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
   }, [isSettingsOpen, closeSettings]);
 
   useEffect(() => {
+    if (!isSettingsOpen) return;
+
     if (currentRepoPath) {
       setSelectedRepoPath(currentRepoPath);
       setScope("repo");
-    } else if (openRepoTabs.length > 0) {
-      if (!selectedRepoPath || !openRepoTabs.some((t) => t.id === selectedRepoPath)) {
-        const firstRepo = openRepoTabs[0];
-        if (firstRepo) setSelectedRepoPath(firstRepo.id);
-      }
     } else {
+      setSelectedRepoPath("");
       setScope("global");
     }
-  }, [currentRepoPath, openRepoTabs.length, isSettingsOpen]);
+  }, [currentRepoPath, isSettingsOpen]);
 
   const navItems: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
     { id: "profile", label: t.settings.tabs.profile, icon: <User size={16} /> },
     { id: "appearance", label: t.settings.tabs.appearance, icon: <Palette size={16} /> },
+    { id: "diff", label: t.settings.tabs.diff, icon: <FileCode size={16} /> },
     { id: "behavior", label: t.settings.tabs.behavior, icon: <Sliders size={16} /> },
+    { id: "tools", label: t.settings.tabs.tools, icon: <Terminal size={16} /> },
   ];
 
-  const effectiveRepoPath = scope === "repo" ? (selectedRepoPath || currentRepoPath) : null;
+  const getRepoDisplayName = (path: string) => {
+    return path.split(/[/\\]/).filter(Boolean).pop() || path;
+  };
+
+  const effectiveScope = currentRepoPath ? scope : "global";
+  const effectiveRepoPath = effectiveScope === "repo" ? (selectedRepoPath || currentRepoPath) : null;
 
   return (
     <Transition
@@ -106,73 +111,68 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
               </div>
             </div>
 
-            {/* 2-Tier Scope Switcher */}
-            <div
-              data-testid="scope-switcher"
-              className="flex items-center bg-surface-header/80 p-1 rounded-xl border border-border-subtle text-xs shrink-0"
-            >
-              <button
-                type="button"
-                data-testid="scope-btn-global"
-                data-active={scope === "global"}
-                onClick={() => setScope("global")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
-                  scope === "global"
-                    ? "bg-accent text-white font-semibold shadow-xs"
-                    : "text-secondary hover:text-primary hover:bg-surface-hover"
-                }`}
+            {/* 2-Tier Scope Switcher (Chỉ hiển thị khi đang trong một repository) */}
+            {currentRepoPath && (
+              <div
+                data-testid="scope-switcher"
+                className="flex items-center bg-surface-header/80 p-1 rounded-xl border border-border-subtle text-xs shrink-0"
               >
-                <Globe size={14} />
-                <span>{t.settings.scopeSwitcher.global}</span>
-              </button>
+                <button
+                  type="button"
+                  data-testid="scope-btn-global"
+                  data-active={effectiveScope === "global"}
+                  onClick={() => setScope("global")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
+                    effectiveScope === "global"
+                      ? "bg-accent text-white font-semibold shadow-xs"
+                      : "text-secondary hover:text-primary hover:bg-surface-hover"
+                  }`}
+                >
+                  <Globe size={14} />
+                  <span>{t.settings.scopeSwitcher.global}</span>
+                </button>
 
-              <button
-                type="button"
-                data-testid="scope-btn-repo"
-                data-active={scope === "repo"}
-                disabled={openRepoTabs.length === 0 && !currentRepoPath}
-                onClick={() => {
-                  if (openRepoTabs.length > 0 || currentRepoPath) {
-                    setScope("repo");
-                  }
-                }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
-                  openRepoTabs.length === 0 && !currentRepoPath
-                    ? "text-muted opacity-40 cursor-not-allowed"
-                    : scope === "repo"
-                    ? "bg-accent text-white font-semibold shadow-xs cursor-pointer"
-                    : "text-secondary hover:text-primary hover:bg-surface-hover cursor-pointer"
-                }`}
-              >
-                <FolderGit2 size={14} />
-                <span>{t.settings.scopeSwitcher.repo}</span>
+                <button
+                  type="button"
+                  data-testid="scope-btn-repo"
+                  data-active={effectiveScope === "repo"}
+                  onClick={() => setScope("repo")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
+                    effectiveScope === "repo"
+                      ? "bg-accent text-white font-semibold shadow-xs"
+                      : "text-secondary hover:text-primary hover:bg-surface-hover"
+                  }`}
+                >
+                  <FolderGit2 size={14} />
+                  <span>{t.settings.scopeSwitcher.repo}</span>
 
-                {openRepoTabs.length > 1 && (
-                  <select
-                    data-testid="scope-repo-select"
-                    value={selectedRepoPath}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) => {
-                      setSelectedRepoPath(e.target.value);
-                      setScope("repo");
-                    }}
-                    className="ml-1 bg-surface border border-border-subtle rounded px-1.5 py-0.5 text-xs text-primary font-mono cursor-pointer outline-hidden"
-                  >
-                    {openRepoTabs.map((tab) => (
-                      <option key={tab.id} value={tab.id}>
-                        {tab.alias || tab.repo?.name || tab.id}
-                      </option>
-                    ))}
-                  </select>
-                )}
+                  {openRepoTabs.length > 1 && (
+                    <select
+                      data-testid="scope-repo-select"
+                      value={selectedRepoPath || currentRepoPath}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => {
+                        setSelectedRepoPath(e.target.value);
+                        setScope("repo");
+                      }}
+                      className="ml-1 bg-surface border border-border-subtle rounded px-1.5 py-0.5 text-xs text-primary font-mono cursor-pointer outline-hidden"
+                    >
+                      {openRepoTabs.map((tab) => (
+                        <option key={tab.id} value={tab.id}>
+                          {tab.alias || tab.repo?.name || getRepoDisplayName(tab.id)}
+                        </option>
+                      ))}
+                    </select>
+                  )}
 
-                {openRepoTabs.length === 1 && openRepoTabs[0] && (
-                  <span className="ml-1 font-mono text-[11px] opacity-85">
-                    ({openRepoTabs[0].alias || openRepoTabs[0].repo?.name})
-                  </span>
-                )}
-              </button>
-            </div>
+                  {openRepoTabs.length <= 1 && (
+                    <span className="ml-1 font-mono text-[11px] opacity-85">
+                      ({activeRepo?.alias || activeRepo?.repo?.name || getRepoDisplayName(currentRepoPath)})
+                    </span>
+                  )}
+                </button>
+              </div>
+            )}
 
             <button
               type="button"
@@ -216,22 +216,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
 
             {/* Main Tab Content */}
             <div className="flex-1 min-h-0 overflow-y-auto p-8">
-              <div key={`${activeTab}-${scope}-${selectedRepoPath}`} className="animate-fade-in max-w-3xl">
+              <div key={`${activeTab}-${effectiveScope}-${effectiveRepoPath}`} className="animate-fade-in max-w-3xl">
                 {activeTab === "profile" && (
                   <GitProfileTab
-                    scope={scope}
+                    scope={effectiveScope}
                     currentRepoPath={effectiveRepoPath}
                     onScopeChange={setScope}
                   />
                 )}
                 {activeTab === "appearance" && <AppearanceTab />}
+                {activeTab === "diff" && <DiffViewerTab />}
                 {activeTab === "behavior" && (
                   <GitBehaviorTab
-                    scope={scope}
+                    scope={effectiveScope}
                     currentRepoPath={effectiveRepoPath}
                     onScopeChange={setScope}
                   />
                 )}
+                {activeTab === "tools" && <ExternalToolsTab />}
               </div>
             </div>
           </div>
@@ -240,3 +242,4 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
     </Transition>
   );
 };
+
