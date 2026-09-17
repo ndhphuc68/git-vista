@@ -249,8 +249,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         {/* Header / Hero Branding */}
         <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1 animate-slide-down">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-surface border border-border-subtle shadow-xs flex items-center justify-center text-accent shrink-0">
-              <FolderGit2 size={24} className="text-accent" />
+            <div className="w-12 h-12 rounded-2xl bg-surface border border-border-subtle shadow-xs flex items-center justify-center overflow-hidden shrink-0 p-1">
+              <img
+                src="/app-icon.png"
+                alt="GitVista Logo"
+                className="w-full h-full object-contain select-none pointer-events-none"
+              />
             </div>
             <div>
               <div className="flex items-center gap-2.5">

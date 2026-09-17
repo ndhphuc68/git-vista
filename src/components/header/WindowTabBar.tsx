@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus, X, Settings, GitBranch, Home, FolderGit2 } from "lucide-react";
+import { Plus, X, Settings, GitBranch, FolderGit2 } from "lucide-react";
 import { clsx } from "clsx";
 import { useTabStore } from "../../store/useTabStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
@@ -48,9 +48,10 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
                   )}
                   title="Home (Welcome)"
                 >
-                  <Home
-                    size={14}
-                    className={clsx("shrink-0", isActive ? "text-accent" : "text-secondary group-hover:text-primary")}
+                  <img
+                    src="/app-icon.png"
+                    alt="GitVista"
+                    className="w-3.5 h-3.5 object-contain shrink-0 select-none pointer-events-none"
                   />
                   <span className="truncate">Home</span>
                 </div>
