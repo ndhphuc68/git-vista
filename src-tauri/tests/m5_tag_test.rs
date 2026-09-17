@@ -247,3 +247,17 @@ fn test_delete_tag_local() {
     // 4. Verify ref is deleted
     assert!(repo.find_reference("refs/tags/v1.0.0-to-delete").is_err());
 }
+
+#[test]
+fn test_get_tags_command() {
+    let (dir, repo) = create_clean_repo().expect("Failed to create clean repo");
+    let c1 = repo.head().unwrap().peel_to_commit().unwrap();
+    let c1_oid = c1.id().to_string();
+
+    create_tag(dir.path(), "v1.0.0-cmd", &c1_oid, None).expect("Failed to create tag");
+
+    let tags = visual_git_lib::commands::get_tags(dir.path().to_string_lossy().to_string())
+        .expect("get_tags command failed");
+    assert_eq!(tags.len(), 1);
+    assert_eq!(tags[0].name, "v1.0.0-cmd");
+}

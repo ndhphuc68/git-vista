@@ -63,7 +63,12 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         undo_delete_branch,
         undo_drop_stash,
         get_git_config,
-        set_git_config
+        set_git_config,
+        get_tags,
+        create_tag,
+        delete_tag,
+        checkout_tag,
+        push_tag
     ])
 }
 
