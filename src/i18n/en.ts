@@ -355,6 +355,10 @@ export const en: Translations = {
     loadingMore: "Loading more commits...",
     allLoaded: "All {count} commits loaded",
     headBadge: "HEAD",
+    createTagHere: "Create tag here...",
+    createBranchHere: "Create branch here...",
+    copySha: "Copy commit SHA",
+    copyShaSuccess: "Copied commit SHA to clipboard",
   },
   diff: {
     closeDetail: "Close",

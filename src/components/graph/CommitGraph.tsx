@@ -1,14 +1,18 @@
-import React, { useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import clsx from "clsx";
-import { GitBranch, Tag } from "lucide-react";
+import { GitBranch, Tag, Copy } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
+import { useToastStore } from "../../store/useToastStore";
 import { invokeCommand } from "../../ipc/client";
+import { GraphCommitNode } from "../../ipc/bindings";
 import { GraphSvgLane } from "./GraphSvgLane";
 import { useTranslation } from "../../i18n";
+import { CreateTagModal } from "../tag";
+import { CreateBranchModal } from "../sidebar/CreateBranchModal";
 
 const PAGE_SIZE = 50;
 const ROW_HEIGHT = 32;
@@ -95,10 +99,55 @@ function getBranchPillStyle(name: string, isHead: boolean, isTag: boolean) {
 
 export const CommitGraph: React.FC = () => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const { currentRepo, selectedCommitId, setSelectedCommit } = useRepoStore();
   const { setActiveScreen } = useViewStore();
   const { setDetailPanelOpen } = useLayoutStore();
   const parentRef = useRef<HTMLDivElement>(null);
+
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    commit: GraphCommitNode;
+  } | null>(null);
+  const [createTagCommit, setCreateTagCommit] = useState<GraphCommitNode | null>(null);
+  const [createBranchCommit, setCreateBranchCommit] = useState<GraphCommitNode | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!contextMenu) return;
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setContextMenu(null);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setContextMenu(null);
+      }
+    };
+
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [contextMenu]);
+
+  const handleCopySha = async (commitId: string) => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(commitId);
+      }
+    } catch {
+      // ignore clipboard errors
+    }
+    useToastStore.getState().showSuccess(t.graph.copyShaSuccess);
+    setContextMenu(null);
+  };
 
   const {
     data,
@@ -282,6 +331,16 @@ export const CommitGraph: React.FC = () => {
                 aria-selected={isSelected}
                 aria-label={`Commit ${commit.short_id}: ${commit.summary}`}
                 onClick={() => handleSelectCommit(commit.id)}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSelectCommit(commit.id);
+                  setContextMenu({
+                    x: e.clientX,
+                    y: e.clientY,
+                    commit,
+                  });
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
@@ -418,6 +477,88 @@ export const CommitGraph: React.FC = () => {
           })}
         </div>
       </div>
+
+      {/* Floating Context Menu */}
+      {contextMenu && (
+        <div
+          ref={menuRef}
+          role="menu"
+          style={{
+            position: "fixed",
+            top: `${contextMenu.y}px`,
+            left: `${contextMenu.x}px`,
+            zIndex: 50,
+          }}
+          className="w-52 bg-surface border border-border-subtle rounded-md shadow-xl py-1 text-xs flex flex-col animate-fade-in"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setCreateTagCommit(contextMenu.commit);
+              setContextMenu(null);
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer transition-colors"
+          >
+            <Tag size={13} className="shrink-0 text-secondary" />
+            <span>{t.graph.createTagHere}</span>
+          </button>
+
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setCreateBranchCommit(contextMenu.commit);
+              setContextMenu(null);
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer transition-colors"
+          >
+            <GitBranch size={13} className="shrink-0 text-secondary" />
+            <span>{t.graph.createBranchHere}</span>
+          </button>
+
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => handleCopySha(contextMenu.commit.id)}
+            className="flex items-center gap-2 px-3 py-1.5 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer transition-colors border-t border-border-subtle/50 mt-0.5 pt-1.5"
+          >
+            <Copy size={13} className="shrink-0 text-secondary" />
+            <span>{t.graph.copySha}</span>
+          </button>
+        </div>
+      )}
+
+      {/* Modals */}
+      {createTagCommit && currentRepo && (
+        <CreateTagModal
+          isOpen={Boolean(createTagCommit)}
+          onClose={() => setCreateTagCommit(null)}
+          repoPath={currentRepo.path}
+          targetCommitId={createTagCommit.id}
+          targetCommitSummary={createTagCommit.summary}
+          onSuccess={() => {
+            setCreateTagCommit(null);
+            queryClient.invalidateQueries({ queryKey: ["commit-graph"] });
+            queryClient.invalidateQueries({ queryKey: ["tags"] });
+          }}
+        />
+      )}
+
+      {createBranchCommit && currentRepo && (
+        <CreateBranchModal
+          isOpen={Boolean(createBranchCommit)}
+          onClose={() => setCreateBranchCommit(null)}
+          repoPath={currentRepo.path}
+          targetCommit={createBranchCommit.id}
+          onSuccess={() => {
+            setCreateBranchCommit(null);
+            queryClient.invalidateQueries({ queryKey: ["commit-graph"] });
+            queryClient.invalidateQueries({ queryKey: ["branches"] });
+          }}
+        />
+      )}
     </div>
   );
 };

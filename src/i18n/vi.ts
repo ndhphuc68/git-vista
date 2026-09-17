@@ -353,6 +353,10 @@ export const vi = {
     loadingMore: "Đang tải thêm commit...",
     allLoaded: "Đã xem hết {count} commit",
     headBadge: "HEAD",
+    createTagHere: "Tạo thẻ tại đây...",
+    createBranchHere: "Tạo nhánh tại đây...",
+    copySha: "Sao chép mã commit (SHA)",
+    copyShaSuccess: "Đã sao chép mã commit vào clipboard",
   },
   diff: {
     closeDetail: "Đóng",
