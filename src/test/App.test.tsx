@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor, act } from "@testing-library/react"
 import { App } from "../App";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { useRepoStore } from "../store/useRepoStore";
+import { useTabStore } from "../store/useTabStore";
 import { useViewStore } from "../store/useViewStore";
 import { useCommandPaletteStore } from "../store/useCommandPaletteStore";
 
@@ -15,6 +16,8 @@ describe("Visual Git Client - M1 App Shell", () => {
     settings.setLocale("vi");
     settings.setMode("simple");
     useRepoStore.getState().clearRepo();
+    useTabStore.getState().reset();
+    useViewStore.getState().setActiveScreen("history");
     useCommandPaletteStore.getState().close();
   });
 
@@ -139,5 +142,37 @@ describe("Visual Git Client - M1 App Shell", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("hỗ trợ đa tab: mở repo tạo tab mới, chuyển về Home và quay lại repo tab tức thì", async () => {
+    render(<App />);
+
+    // Mở repo
+    await waitFor(() => {
+      expect(screen.getByText("project-v3")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText("project-v3"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("tab-d:/project-v3")).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("feat(m1): visual git viewer")).toBeInTheDocument();
+    });
+
+    // Bấm về tab Home trên WindowTabBar
+    fireEvent.click(screen.getByTestId("tab-home"));
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "GitVista" })).toBeInTheDocument();
+    });
+
+    // Tab repo vẫn còn trên WindowTabBar, bấm vào để quay lại
+    fireEvent.click(screen.getByTestId("tab-d:/project-v3"));
+
+    await waitFor(() => {
+      expect(screen.getByText("feat(m1): visual git viewer")).toBeInTheDocument();
+    });
   });
 });

@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { RepoSummary } from "../ipc/bindings";
 import { TabItem, TabSessionData } from "../types/tab";
 import { invokeCommand } from "../ipc/client";
+import { useRepoStore } from "./useRepoStore";
+import { useViewStore } from "./useViewStore";
 
 const SESSION_STORAGE_KEY = "gitvista_session_tabs_v1";
 
@@ -64,17 +66,23 @@ export const useTabStore = create<TabStoreState>((set, get) => ({
     const { tabs } = get();
     const existingIndex = tabs.findIndex((t) => t.id === repo.path);
 
+    // Sync RepoStore immediately
+    useRepoStore.getState().setRepo(repo);
+
     if (existingIndex >= 0) {
       // Tab already open, just switch to it and update repo summary if needed
+      const tab = tabs[existingIndex];
+      useViewStore.getState().setActiveScreen(tab.activeScreen || "history");
       const updatedTabs = [...tabs];
       updatedTabs[existingIndex] = {
-        ...updatedTabs[existingIndex],
+        ...tab,
         repo,
-        selectedBranch: updatedTabs[existingIndex].selectedBranch || repo.head_branch,
+        selectedBranch: tab.selectedBranch || repo.head_branch,
       };
       set({ tabs: updatedTabs, activeTabId: repo.path });
       saveSessionToStorage(updatedTabs, repo.path);
     } else {
+      useViewStore.getState().setActiveScreen("history");
       const newTab = createRepoTab(repo);
       const updatedTabs = [...tabs, newTab];
       set({ tabs: updatedTabs, activeTabId: repo.path });
@@ -83,6 +91,7 @@ export const useTabStore = create<TabStoreState>((set, get) => ({
   },
 
   openHomeTab: () => {
+    useRepoStore.getState().clearRepo();
     set({ activeTabId: "home" });
     saveSessionToStorage(get().tabs, "home");
   },
@@ -106,6 +115,14 @@ export const useTabStore = create<TabStoreState>((set, get) => ({
       } else {
         nextActiveId = "home";
       }
+
+      // Sync active repo state
+      const nextTab = remainingTabs.find((t) => t.id === nextActiveId);
+      if (nextTab && nextTab.type === "repo" && nextTab.repo) {
+        useRepoStore.getState().setRepo(nextTab.repo);
+      } else {
+        useRepoStore.getState().clearRepo();
+      }
     }
 
     set({ tabs: remainingTabs, activeTabId: nextActiveId });
@@ -119,7 +136,20 @@ export const useTabStore = create<TabStoreState>((set, get) => ({
 
   setActiveTab: (tabId: string) => {
     const { tabs } = get();
-    if (tabs.some((t) => t.id === tabId)) {
+    const targetTab = tabs.find((t) => t.id === tabId);
+    if (targetTab) {
+      if (targetTab.type === "repo" && targetTab.repo) {
+        useRepoStore.getState().setRepo(targetTab.repo);
+        if (targetTab.selectedBranch) {
+          useRepoStore.getState().setSelectedBranch(targetTab.selectedBranch);
+        }
+        if (targetTab.activeScreen) {
+          useViewStore.getState().setActiveScreen(targetTab.activeScreen);
+        }
+      } else if (tabId === "home") {
+        useRepoStore.getState().clearRepo();
+      }
+
       set({ activeTabId: tabId });
       saveSessionToStorage(tabs, tabId);
     }

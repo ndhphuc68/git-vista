@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Shell } from "./components/Shell";
 import { WelcomeScreen } from "./components/welcome/WelcomeScreen";
 import { RepoHeader } from "./components/header/RepoHeader";
+import { WindowTabBar } from "./components/header/WindowTabBar";
 import { ChangesScreen } from "./components/changes/ChangesScreen";
 import { InProgressOperationBanner } from "./components/banner/InProgressOperationBanner";
 import { listenToRepoChanged, invokeCommand } from "./ipc/client";
 import { RepoSummary } from "./ipc/bindings";
 import { useRepoStore } from "./store/useRepoStore";
+import { useTabStore } from "./store/useTabStore";
 import { useViewStore } from "./store/useViewStore";
 import { useSettingsStore } from "./store/useSettingsStore";
 import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
@@ -115,6 +117,7 @@ export const App: React.FC<AppProps> = ({
   const [isGlobalCreateBranchOpen, setIsGlobalCreateBranchOpen] = useState(false);
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const { currentRepo, setRepo, clearRepo } = useRepoStore();
+  const { tabs, activeTabId, setActiveTab, openRepoTab, openHomeTab, closeTab, restoreSession } = useTabStore();
   const { setActiveScreen } = useViewStore();
   const { resolvedTheme, setTheme, mode, setMode, openSettings, closeSettings } = useSettingsStore();
   const { open: openCommandPalette, close: closeCommandPalette } = useCommandPaletteStore();
@@ -126,6 +129,60 @@ export const App: React.FC<AppProps> = ({
   const handleToggleMode = () => {
     setMode(mode === "simple" ? "advanced" : "simple");
   };
+
+  // Đồng bộ tab đang active sang repoStore để tương thích ngược với mọi component con
+  useEffect(() => {
+    const activeTab = tabs.find((t) => t.id === activeTabId);
+    if (activeTab && activeTab.type === "repo" && activeTab.repo) {
+      setRepo(activeTab.repo);
+    } else if (activeTabId === "home") {
+      clearRepo();
+    }
+  }, [activeTabId, tabs, setRepo, clearRepo]);
+
+  // Khôi phục phiên làm việc trước đó khi khởi động app
+  useEffect(() => {
+    restoreSession();
+  }, [restoreSession]);
+
+  const handleSelectFolder = useCallback(async () => {
+    const folder = await invokeCommand.selectRepoFolder();
+    if (folder) {
+      try {
+        const summary = await invokeCommand.openRepository(folder);
+        openRepoTab(summary);
+        setRepo(summary);
+      } catch (err) {
+        console.error("Failed to open repository folder:", err);
+      }
+    }
+  }, [openRepoTab, setRepo]);
+
+  const handleSelectRepo = useCallback((repo: RepoSummary) => {
+    openRepoTab(repo);
+    setRepo(repo);
+  }, [openRepoTab, setRepo]);
+
+  const handleBackToWelcome = useCallback(() => {
+    openHomeTab();
+    clearRepo();
+  }, [openHomeTab, clearRepo]);
+
+  const handleNextTab = useCallback(() => {
+    const currentIndex = tabs.findIndex((t) => t.id === activeTabId);
+    if (currentIndex >= 0 && tabs.length > 1) {
+      const nextIndex = (currentIndex + 1) % tabs.length;
+      setActiveTab(tabs[nextIndex].id);
+    }
+  }, [tabs, activeTabId, setActiveTab]);
+
+  const handlePrevTab = useCallback(() => {
+    const currentIndex = tabs.findIndex((t) => t.id === activeTabId);
+    if (currentIndex >= 0 && tabs.length > 1) {
+      const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      setActiveTab(tabs[prevIndex].id);
+    }
+  }, [tabs, activeTabId, setActiveTab]);
 
   useGlobalShortcuts({
     onOpenCreateBranch: () => {
@@ -141,6 +198,14 @@ export const App: React.FC<AppProps> = ({
     onOpenSettings: () => {
       openSettings();
     },
+    onNewTab: handleSelectFolder,
+    onCloseTab: () => {
+      if (activeTabId !== "home") {
+        closeTab(activeTabId);
+      }
+    },
+    onNextTab: handleNextTab,
+    onPrevTab: handlePrevTab,
     onEscape: () => {
       setIsGlobalCreateBranchOpen(false);
       setIsShortcutsHelpOpen(false);
@@ -168,8 +233,18 @@ export const App: React.FC<AppProps> = ({
 
     listenToRepoChanged((payload) => {
       console.log("🔔 [Event] repo-changed payload:", payload);
-      // Invalidate queries khi repo thay đổi theo mục 4.4 của spec
-      queryClient.invalidateQueries();
+      // Invalidate có chọn lọc: chỉ làm mới query của riêng repo bị thay đổi
+      if (payload?.repo_path) {
+        queryClient.invalidateQueries({
+          predicate: (query) => {
+            return query.queryKey.some(
+              (part) => typeof part === "string" && part.includes(payload.repo_path)
+            );
+          },
+        });
+      } else {
+        queryClient.invalidateQueries();
+      }
     }).then((unlisten) => {
       if (cancelled) {
         unlisten();
@@ -184,6 +259,9 @@ export const App: React.FC<AppProps> = ({
     };
   }, []);
 
+  const activeTab = tabs.find((t) => t.id === activeTabId) || tabs[0];
+  const repoToDisplay = activeTab.type === "repo" ? (activeTab.repo || currentRepo) : null;
+
   return (
     <QueryClientProvider client={queryClient}>
       {!splashFinished && (
@@ -193,15 +271,19 @@ export const App: React.FC<AppProps> = ({
         />
       )}
       <div className="flex flex-col h-screen w-screen overflow-hidden">
-        {currentRepo ? (
+        {/* Top Window Tab Bar */}
+        <WindowTabBar onSelectFolder={handleSelectFolder} />
+
+        {/* Main Workspace Area */}
+        {repoToDisplay ? (
           <RepoContent
-            currentRepo={currentRepo}
-            clearRepo={clearRepo}
+            currentRepo={repoToDisplay}
+            clearRepo={handleBackToWelcome}
             isGlobalCreateBranchOpen={isGlobalCreateBranchOpen}
             setIsGlobalCreateBranchOpen={setIsGlobalCreateBranchOpen}
           />
         ) : (
-          <WelcomeScreen onSelectRepo={setRepo} />
+          <WelcomeScreen onSelectRepo={handleSelectRepo} />
         )}
         <ToastContainer />
         <CommandPalette context={commandContext} />
