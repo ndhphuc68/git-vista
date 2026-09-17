@@ -1,9 +1,6 @@
 import React, { useEffect } from "react";
 import clsx from "clsx";
 import {
-  FolderGit2,
-  GitBranch,
-  ArrowLeft,
   RefreshCw,
   History,
   FileDiff,
@@ -16,7 +13,6 @@ import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
-import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import { useTranslation } from "../../i18n";
 import { invokeCommand } from "../../ipc/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,10 +23,10 @@ import {
 import { useRemoteTask } from "../../hooks/useRemoteTask";
 
 interface RepoHeaderProps {
-  onBackToWelcome: () => void;
+  onBackToWelcome?: () => void;
 }
 
-export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
+export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBackToWelcome }) => {
   const { currentRepo } = useRepoStore();
   const { activeScreen, setActiveScreen } = useViewStore();
   const {
@@ -38,7 +34,6 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
     toggleSidebar,
   } = useLayoutStore();
   const { openSettings } = useSettingsStore();
-  const { isMobile } = useWindowDimensions();
   const { t, actions } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -109,16 +104,16 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
     <>
       <header
         data-testid="repo-header"
-        className="flex items-center justify-between px-3 bg-surface border-b border-border-subtle h-[44px] min-h-[44px] max-h-[44px] shrink-0 gap-2 select-none z-20"
+        className="flex items-center justify-between px-3 bg-surface border-b border-border-subtle h-[40px] min-h-[40px] max-h-[40px] shrink-0 gap-3 select-none z-20"
       >
-        {/* Khối Trái: Sidebar toggle, Nút quay lại, Repo Pill, Branch Pill */}
-        <div className="flex items-center gap-2 min-w-0 shrink">
+        {/* Khối Trái: Sidebar toggle & Screen Switcher Tabs */}
+        <div className="flex items-center gap-2.5 min-w-0 shrink">
           <button
             type="button"
             data-testid="toggle-sidebar"
             onClick={toggleSidebar}
             className={clsx(
-              "flex items-center justify-center w-7 h-7 border border-border-subtle rounded-md cursor-pointer shrink-0 transition-colors",
+              "flex items-center justify-center w-7 h-7 border border-border-subtle rounded-md cursor-pointer shrink-0 transition-colors shadow-2xs",
               sidebarOpen ? "bg-accent-subtle text-accent font-semibold" : "bg-transparent text-secondary hover:bg-surface-hover hover:text-primary"
             )}
             title={t.header.toggleSidebar.replace("{shortcut}", shortcutSidebar)}
@@ -126,89 +121,56 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome }) => {
             <PanelLeft size={14} />
           </button>
 
-          <button
-            onClick={onBackToWelcome}
-            className="flex items-center gap-1 px-2 py-1 bg-surface border border-border-subtle rounded-md text-secondary text-xs cursor-pointer shrink-0 hover:bg-surface-hover hover:text-primary transition-colors shadow-2xs btn-press"
-            title={t.header.switchRepo}
-          >
-            <ArrowLeft size={12} />
-            {!isMobile && <span>{t.header.repoBtn}</span>}
-          </button>
-
-          {/* Repo Name Pill */}
+          {/* Segmented Screen Switcher (Lịch sử & Thay đổi) */}
           <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-window border border-border-subtle shadow-2xs text-xs font-bold text-primary max-w-[170px] truncate"
-            title={currentRepo.name}
+            role="tablist"
+            aria-label="Màn hình làm việc"
+            className="flex items-center gap-0.5 bg-window p-0.5 rounded-lg border border-border-subtle shrink-0"
           >
-            <FolderGit2 size={13} className="text-accent shrink-0" />
-            <span className="truncate">{currentRepo.name}</span>
-          </div>
-
-          {/* Active Branch Pill with pulsing indicator */}
-          {currentRepo.head_branch && (
-            <div
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isHistoryActive}
+              data-testid="tab-history"
+              onClick={() => setActiveScreen("history")}
               className={clsx(
-                "flex items-center gap-1.5 px-2.5 py-1 bg-diff-add-bg text-diff-add-text border border-diff-add-border rounded-md text-xs font-semibold font-mono overflow-hidden text-ellipsis whitespace-nowrap shrink max-w-[140px] shadow-2xs",
-                isMobile && "max-w-[80px]"
+                "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs cursor-pointer transition-all duration-150 btn-press",
+                isHistoryActive
+                  ? "bg-surface text-primary shadow-xs border border-border-subtle font-bold"
+                  : "bg-transparent text-secondary hover:text-primary font-medium"
               )}
-              title={`Branch: ${currentRepo.head_branch}`}
+              title={`History (${shortcutLabel1})`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <GitBranch size={12} className="shrink-0 text-emerald-600" />
-              <span className="truncate">{currentRepo.head_branch}</span>
-            </div>
-          )}
-        </div>
+              <History size={13} className={isHistoryActive ? "text-accent" : "text-secondary"} />
+              <span>{t.screens.history}</span>
+            </button>
 
-        {/* Khối Giữa: Tabs Lịch sử & Thay đổi */}
-        <div
-          role="tablist"
-          aria-label="Màn hình làm việc"
-          className="flex items-center gap-0.5 bg-window p-0.5 rounded-lg border border-border-subtle shrink-0"
-        >
-          <button
-            type="button"
-            role="tab"
-            aria-selected={isHistoryActive}
-            data-testid="tab-history"
-            onClick={() => setActiveScreen("history")}
-            className={clsx(
-              "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs cursor-pointer transition-all duration-200 ease-macos btn-press",
-              isHistoryActive
-                ? "bg-surface text-primary shadow-xs border border-border-subtle font-bold"
-                : "bg-transparent text-secondary hover:text-primary font-medium"
-            )}
-            title={`History (${shortcutLabel1})`}
-          >
-            <History size={13} className={isHistoryActive ? "text-accent" : "text-secondary"} />
-            <span>{t.screens.history}</span>
-          </button>
-
-          <button
-            type="button"
-            role="tab"
-            aria-selected={isChangesActive}
-            data-testid="tab-changes"
-            onClick={() => setActiveScreen("changes")}
-            className={clsx(
-              "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs cursor-pointer transition-all duration-200 ease-macos btn-press",
-              isChangesActive
-                ? "bg-surface text-primary shadow-xs border border-border-subtle font-bold"
-                : "bg-transparent text-secondary hover:text-primary font-medium"
-            )}
-            title={`Changes (${shortcutLabel2})`}
-          >
-            <FileDiff size={13} className={isChangesActive ? "text-accent" : "text-secondary"} />
-            <span>{t.screens.changes}</span>
-            {totalChanges > 0 && (
-              <span
-                data-testid="changes-badge"
-                className="inline-flex items-center justify-center px-1.5 min-w-[16px] h-4 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-700 leading-none animate-scale-in"
-              >
-                {totalChanges}
-              </span>
-            )}
-          </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isChangesActive}
+              data-testid="tab-changes"
+              onClick={() => setActiveScreen("changes")}
+              className={clsx(
+                "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs cursor-pointer transition-all duration-150 btn-press",
+                isChangesActive
+                  ? "bg-surface text-primary shadow-xs border border-border-subtle font-bold"
+                  : "bg-transparent text-secondary hover:text-primary font-medium"
+              )}
+              title={`Changes (${shortcutLabel2})`}
+            >
+              <FileDiff size={13} className={isChangesActive ? "text-accent" : "text-secondary"} />
+              <span>{t.screens.changes}</span>
+              {totalChanges > 0 && (
+                <span
+                  data-testid="changes-badge"
+                  className="inline-flex items-center justify-center px-1.5 min-w-[16px] h-4 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-700 leading-none animate-scale-in"
+                >
+                  {totalChanges}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Khối Thao tác Git Kiểu GitKraken (Connected Segmented Cluster) */}
