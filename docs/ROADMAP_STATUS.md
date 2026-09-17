@@ -9,9 +9,9 @@
 | Giai đoạn | Hạng mục | Trọng số | Trạng thái | Tiến độ |
 | :--- | :--- | :---: | :---: | :---: |
 | **Phase 1.1** | 1.1.1: Modal Cài đặt & Cấu hình Git | 35% | ✅ Đã hoàn thành | 100% |
-| | 1.1.2: Quản lý Thẻ (Tag Management) | 35% | ⏳ Kế tiếp (Sẵn sàng) | 0% |
-| | 1.1.3: Cherry-pick & Revert Commit | 30% | 📋 Chờ thực hiện | 0% |
-| **Tổng Phase 1.1** | **Nền tảng cốt lõi (Core Essentials)** | **100%** | 🔄 **Đang triển khai** | **35%** |
+| | 1.1.2: Quản lý Thẻ (Tag Management) | 35% | ✅ Đã hoàn thành | 100% |
+| | 1.1.3: Cherry-pick & Revert Commit | 30% | ⏳ Kế tiếp (Sẵn sàng) | 0% |
+| **Tổng Phase 1.1** | **Nền tảng cốt lõi (Core Essentials)** | **100%** | 🔄 **Đang triển khai** | **70%** |
 | | | | | |
 | **Phase 1.2** | 1.2.1: Word-level Diff & Bỏ qua khoảng trắng | 35% | 📋 Chờ thực hiện | 0% |
 | | 1.2.2: Lịch sử từng file & Git Blame | 35% | 📋 Chờ thực hiện | 0% |
@@ -51,23 +51,24 @@
 
 ---
 
-#### ⏳ 1.1.2: Quản lý Thẻ (Tag Management) — [KẾ TIẾP / READY TO IMPLEMENT]
-- **Mục tiêu:** Cho phép người dùng đánh dấu các phiên bản phát hành phần mềm (v1.0.0, release tags) và điều hướng repo theo thẻ.
-- **Các phần cần làm:**
-  - **Rust Backend:**
-    - `src-tauri/src/read/tags.rs`: Đọc danh sách tag chi tiết (tên tag, commit OID mục tiêu, summary commit, phân loại lightweight vs annotated, thông điệp chú thích, tên người gắn tag, thời gian).
-    - `src-tauri/src/write/tags.rs`: Tạo tag lightweight, tạo tag annotated với tin nhắn, xoá tag nội bộ (local), xoá tag máy chủ (remote), checkout repo về commit của tag (Detached HEAD).
-    - `src-tauri/src/read/graph.rs`: Bổ sung cơ chế bóc tách (`peel_to_commit`) cho các annotated tag để ref badge gắn chính xác vào dòng commit tương ứng trên đồ thị.
-    - Expose các Tauri IPC commands qua Specta.
-  - **Frontend UI & Sidebar:**
-    - Nâng cấp phần "TAGS" trong `BranchSidebar.tsx`: Nút tạo tag nhanh (`+`), hiển thị mã hash commit mục tiêu của tag.
-    - Menu ngữ cảnh (Context Menu) chuột phải vào từng tag:
-      - *Chuyển sang thẻ này (Checkout Tag / Detached HEAD)*.
-      - *Tạo nhánh mới từ thẻ này (Create Branch from Tag)*.
-      - *Đẩy thẻ lên máy chủ (Push Tag to Remote)*.
-      - *Xoá thẻ (Delete Tag)* kèm hộp thoại xác nhận an toàn.
-    - Menu chuột phải vào bất kỳ commit nào trên `CommitGraph`: *Tạo thẻ tại đây (Create Tag here)*.
-    - `CreateTagModal.tsx`: Hộp thoại tạo tag với tuỳ chọn Lightweight hoặc Annotated (nhập message).
+#### ✅ 1.1.2: Quản lý Thẻ (Tag Management) — [HOÀN THÀNH 100%]
+- **Rust Backend:**
+  - `src-tauri/src/read/tags.rs`: Đọc danh sách tag chi tiết (`TagItem`: tên tag, commit OID, commit SHA rút gọn, tóm tắt commit, phân loại lightweight vs annotated, thông điệp chú thích, tên/email người gắn tag, timestamp).
+  - `src-tauri/src/write/tags.rs`: Tạo tag lightweight, tạo tag annotated kèm thông điệp, xoá tag nội bộ (local) và xoá trên máy chủ (remote), checkout repo về commit của tag (Detached HEAD an toàn với safe checkout), đẩy thẻ lên remote (`push_tag`).
+  - `src-tauri/src/read/graph.rs`: Bổ sung cơ chế bóc tách (`r_res.peel_to_commit()`) cho các tag để ref badge gắn chính xác vào commit node tương ứng trên đồ thị.
+  - `src-tauri/src/commands/tag.rs`: Tauri IPC commands `get_tags`, `create_tag`, `delete_tag`, `checkout_tag`, `push_tag` đăng ký qua Specta và phát sinh sự kiện `repo-changed`.
+- **Frontend IPC & Quản lý trạng thái:**
+  - Định nghĩa kiểu dữ liệu `TagItem` trong `src/ipc/bindings.ts`.
+  - Triển khai các hàm IPC `getTags`, `createTag`, `deleteTag`, `checkoutTag`, `pushTag` kèm mock data đầy đủ khi chạy browser dev trong `src/ipc/client.ts`.
+  - Từ điển song ngữ Anh - Việt đầy đủ tại `vi.ts` và `en.ts` cho các modal và context menu của thẻ.
+- **Giao diện người dùng (UI Components):**
+  - `CreateTagModal.tsx`: Hộp thoại tạo tag với commit tóm tắt, tự động chuẩn hoá tên tag, tuỳ chọn Lightweight hoặc Annotated (nhập message), kiểm tra lỗi nhập liệu.
+  - `DeleteTagModal.tsx`: Hộp thoại cảnh báo xoá tag an toàn, kèm tuỳ chọn checkbox "Đồng thời xoá trên máy chủ 'origin' (Remote)".
+  - `BranchSidebar.tsx`: Nâng cấp phần "TAGS" với nút tạo nhanh (`+`), hiển thị mã hash commit rút gọn, menu ngữ cảnh chuột phải và 3-dots: Checkout Tag (Detached HEAD kèm Toast thông báo), Tạo nhánh từ thẻ, Đẩy thẻ lên remote, Xoá thẻ.
+  - `CommitGraph.tsx`: Menu ngữ cảnh chuột phải trên từng dòng commit: "Tạo thẻ tại đây...", "Tạo nhánh tại đây...", "Sao chép mã commit (SHA)".
+- **Kiểm thử:** 100% test pass ở cả 2 tầng:
+  - Backend Rust: 26/26 test suites (bao gồm 7 test cases chi tiết trong `m5_tag_test.rs`).
+  - Frontend Vitest: 54/54 test files (260/260 test cases) và build production (`pnpm build`) sạch 0 lỗi.
 
 ---
 
@@ -148,7 +149,7 @@
 
 ## 🚀 Kế Hoạch Bước Tiếp Theo
 
-Ngay sau báo cáo này, chúng ta sẽ bắt đầu thực hiện **Sub-project 1.1.2: Quản lý Thẻ (Tag Management)**:
-1. Tạo tài liệu thiết kế đặc tả kỹ thuật: `docs/superpowers/specs/2026-09-17-tag-management-design.md`.
-2. Tạo kế hoạch triển khai chi tiết: `docs/superpowers/plans/2026-09-17-tag-management.md`.
-3. Triển khai backend Rust (`read/tags.rs`, `write/tags.rs`, peel commit) -> IPC Specta -> Frontend UI Sidebar, Graph & Modal -> Kiểm thử 100%.
+Ngay sau hạng mục 1.1.2, chúng ta sẽ tiến hành thực hiện **Sub-project 1.1.3: Nhặt & Hoàn tác Commit (Cherry-pick & Revert Commit)**:
+1. Tạo tài liệu thiết kế đặc tả kỹ thuật: `docs/superpowers/specs/2026-09-17-cherry-pick-revert-design.md`.
+2. Tạo kế hoạch triển khai chi tiết: `docs/superpowers/plans/2026-09-17-cherry-pick-revert.md`.
+3. Triển khai backend Rust (`write/cherry_pick.rs`, `write/revert.rs`) -> IPC Specta -> Frontend UI Graph context menu & conflict integration -> Kiểm thử 100%.
