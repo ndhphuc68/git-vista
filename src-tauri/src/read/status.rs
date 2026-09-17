@@ -162,13 +162,19 @@ pub fn get_working_file_diff<P: AsRef<Path>>(
     repo_path: P,
     file_path: &str,
     is_staged: bool,
+    ignore_whitespace: Option<bool>,
 ) -> Result<FileDiffResult, AppError> {
+    let ignore_ws = ignore_whitespace.unwrap_or(false);
     let repo = Repository::open(repo_path.as_ref())?;
     let index = repo.index()?;
 
     let normalized_path = file_path.replace('\\', "/");
     let mut diff_opts = DiffOptions::new();
     diff_opts.pathspec(&normalized_path);
+    if ignore_ws {
+        diff_opts.ignore_whitespace(true);
+        diff_opts.ignore_whitespace_eol(true);
+    }
 
     let diff = if is_staged {
         let head_tree = match repo.head() {

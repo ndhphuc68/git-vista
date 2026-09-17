@@ -138,8 +138,9 @@ pub fn get_commit_file_diff(
     repo_path: String,
     commit_id: String,
     file_path: String,
+    ignore_whitespace: Option<bool>,
 ) -> Result<crate::read::FileDiffResult, AppError> {
-    crate::read::get_file_diff(repo_path, &commit_id, &file_path)
+    crate::read::get_file_diff(repo_path, &commit_id, &file_path, ignore_whitespace)
 }
 
 #[tauri::command]
@@ -154,8 +155,9 @@ pub fn get_working_file_diff(
     repo_path: String,
     file_path: String,
     is_staged: bool,
+    ignore_whitespace: Option<bool>,
 ) -> Result<crate::read::diff::FileDiffResult, AppError> {
-    crate::read::status::get_working_file_diff(repo_path, &file_path, is_staged)
+    crate::read::status::get_working_file_diff(repo_path, &file_path, is_staged, ignore_whitespace)
 }
 
 #[tauri::command]

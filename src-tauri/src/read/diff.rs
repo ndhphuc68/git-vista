@@ -56,20 +56,22 @@ pub struct FileDiffResult {
     pub deletions: u32,
 }
 
+type DiffCacheKey = (PathBuf, String, String, bool);
+
 struct BoundedDiffCache {
-    map: HashMap<(PathBuf, String, String), FileDiffResult>,
-    order: Vec<(PathBuf, String, String)>,
+    map: HashMap<DiffCacheKey, FileDiffResult>,
+    order: Vec<DiffCacheKey>,
 }
 
 const MAX_CACHE_ENTRIES: usize = 500;
 static DIFF_CACHE: Mutex<Option<BoundedDiffCache>> = Mutex::new(None);
 
-fn get_cached_diff(key: &(PathBuf, String, String)) -> Option<FileDiffResult> {
+fn get_cached_diff(key: &DiffCacheKey) -> Option<FileDiffResult> {
     let lock = DIFF_CACHE.lock().unwrap();
     lock.as_ref().and_then(|cache| cache.map.get(key).cloned())
 }
 
-fn set_cached_diff(key: (PathBuf, String, String), result: FileDiffResult) {
+fn set_cached_diff(key: DiffCacheKey, result: FileDiffResult) {
     let mut lock = DIFF_CACHE.lock().unwrap();
     let cache = lock.get_or_insert_with(|| BoundedDiffCache {
         map: HashMap::new(),
@@ -167,9 +169,11 @@ pub fn get_file_diff<P: AsRef<Path>>(
     repo_path: P,
     commit_id_str: &str,
     target_path: &str,
+    ignore_whitespace: Option<bool>,
 ) -> Result<FileDiffResult, AppError> {
+    let ignore_ws = ignore_whitespace.unwrap_or(false);
     let repo_buf = repo_path.as_ref().to_path_buf();
-    let cache_key = (repo_buf, commit_id_str.to_string(), target_path.to_string());
+    let cache_key = (repo_buf, commit_id_str.to_string(), target_path.to_string(), ignore_ws);
     if let Some(cached) = get_cached_diff(&cache_key) {
         return Ok(cached);
     }
@@ -187,6 +191,10 @@ pub fn get_file_diff<P: AsRef<Path>>(
 
     let mut opts = DiffOptions::new();
     opts.pathspec(target_path);
+    if ignore_ws {
+        opts.ignore_whitespace(true);
+        opts.ignore_whitespace_eol(true);
+    }
 
     let diff = repo.diff_tree_to_tree(parent_tree.as_ref(), Some(&commit_tree), Some(&mut opts))?;
 

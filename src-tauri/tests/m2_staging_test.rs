@@ -252,7 +252,7 @@ fn test_stage_single_hunk() {
 
     // Verify staged diff has only hunk 0 (TOP MODIFIED)
     let staged_diff =
-        visual_git_lib::read::status::get_working_file_diff(repo_path, "file1.txt", true).unwrap();
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "file1.txt", true, None).unwrap();
     assert_eq!(staged_diff.hunks.len(), 1);
     assert!(staged_diff.hunks[0]
         .lines
@@ -265,7 +265,7 @@ fn test_stage_single_hunk() {
 
     // Verify unstaged diff has only hunk 1 (BOTTOM MODIFIED)
     let unstaged_diff =
-        visual_git_lib::read::status::get_working_file_diff(repo_path, "file1.txt", false).unwrap();
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "file1.txt", false, None).unwrap();
     assert_eq!(unstaged_diff.hunks.len(), 1);
     assert!(unstaged_diff.hunks[0]
         .lines
@@ -315,7 +315,7 @@ fn test_unstage_single_hunk() {
 
     // Staged diff should only have BOTTOM MODIFIED
     let staged_diff =
-        visual_git_lib::read::status::get_working_file_diff(repo_path, "file1.txt", true).unwrap();
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "file1.txt", true, None).unwrap();
     assert_eq!(staged_diff.hunks.len(), 1);
     assert!(staged_diff.hunks[0]
         .lines
@@ -328,7 +328,7 @@ fn test_unstage_single_hunk() {
 
     // Unstaged diff should only have TOP MODIFIED
     let unstaged_diff =
-        visual_git_lib::read::status::get_working_file_diff(repo_path, "file1.txt", false).unwrap();
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "file1.txt", false, None).unwrap();
     assert_eq!(unstaged_diff.hunks.len(), 1);
     assert!(unstaged_diff.hunks[0]
         .lines
@@ -364,7 +364,7 @@ fn test_stage_lines() {
     // line B (idx 2, add)
     // footer (idx 3, context)
     let unstaged_diff =
-        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", false).unwrap();
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", false, None).unwrap();
     assert_eq!(unstaged_diff.hunks.len(), 1);
     assert_eq!(unstaged_diff.hunks[0].lines.len(), 4);
     assert_eq!(unstaged_diff.hunks[0].lines[1].content.trim(), "line A");
@@ -379,7 +379,7 @@ fn test_stage_lines() {
 
     // Staged diff should only have line A
     let staged_diff =
-        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", true).unwrap();
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", true, None).unwrap();
     assert_eq!(staged_diff.hunks.len(), 1);
     assert!(staged_diff.hunks[0]
         .lines
@@ -392,7 +392,7 @@ fn test_stage_lines() {
 
     // Unstaged diff should now only have line B as added line
     let unstaged_diff_after =
-        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", false).unwrap();
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", false, None).unwrap();
     assert_eq!(unstaged_diff_after.hunks.len(), 1);
     assert!(unstaged_diff_after.hunks[0]
         .lines
@@ -433,7 +433,7 @@ fn test_unstage_lines() {
     // line B (idx 2, add)
     // footer (idx 3, context)
     let staged_diff =
-        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", true).unwrap();
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", true, None).unwrap();
     assert_eq!(staged_diff.hunks.len(), 1);
     assert_eq!(staged_diff.hunks[0].lines[1].content.trim(), "line A");
     assert_eq!(staged_diff.hunks[0].lines[2].content.trim(), "line B");
@@ -447,7 +447,7 @@ fn test_unstage_lines() {
 
     // Staged diff should only have line B as added line
     let staged_diff_after =
-        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", true).unwrap();
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", true, None).unwrap();
     assert_eq!(staged_diff_after.hunks.len(), 1);
     assert!(staged_diff_after.hunks[0]
         .lines
@@ -460,7 +460,7 @@ fn test_unstage_lines() {
 
     // Unstaged diff should only have line A as added line
     let unstaged_diff_after =
-        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", false).unwrap();
+        visual_git_lib::read::status::get_working_file_diff(repo_path, "lines.txt", false, None).unwrap();
     assert_eq!(unstaged_diff_after.hunks.len(), 1);
     assert!(unstaged_diff_after.hunks[0]
         .lines

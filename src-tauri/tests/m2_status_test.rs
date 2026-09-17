@@ -96,7 +96,7 @@ fn test_get_working_file_diff_unstaged_and_staged() {
 
     // 1. Unstaged diff
     fs::write(repo_path.join("file1.txt"), "initial content for file1\nnew line 2\nnew line 3\n").unwrap();
-    let unstaged_diff = get_working_file_diff(repo_path, "file1.txt", false)
+    let unstaged_diff = get_working_file_diff(repo_path, "file1.txt", false, None)
         .expect("unstaged diff should succeed");
     assert_eq!(unstaged_diff.file_path, "file1.txt");
     assert_eq!(unstaged_diff.status, "modified");
@@ -104,7 +104,7 @@ fn test_get_working_file_diff_unstaged_and_staged() {
     assert!(unstaged_diff.additions > 0 || unstaged_diff.deletions > 0);
 
     // Staged diff should currently be empty (no staged changes yet)
-    let staged_diff_before = get_working_file_diff(repo_path, "file1.txt", true)
+    let staged_diff_before = get_working_file_diff(repo_path, "file1.txt", true, None)
         .expect("staged diff should succeed");
     assert!(staged_diff_before.hunks.is_empty());
     assert_eq!(staged_diff_before.additions, 0);
@@ -116,7 +116,7 @@ fn test_get_working_file_diff_unstaged_and_staged() {
     index.write().unwrap();
 
     // Now staged diff should have changes
-    let staged_diff_after = get_working_file_diff(repo_path, "file1.txt", true)
+    let staged_diff_after = get_working_file_diff(repo_path, "file1.txt", true, None)
         .expect("staged diff should succeed");
     assert_eq!(staged_diff_after.file_path, "file1.txt");
     assert_eq!(staged_diff_after.status, "modified");
@@ -124,7 +124,7 @@ fn test_get_working_file_diff_unstaged_and_staged() {
     assert!(staged_diff_after.additions > 0 || staged_diff_after.deletions > 0);
 
     // And unstaged diff should now be empty
-    let unstaged_diff_after = get_working_file_diff(repo_path, "file1.txt", false)
+    let unstaged_diff_after = get_working_file_diff(repo_path, "file1.txt", false, None)
         .expect("unstaged diff should succeed");
     assert!(unstaged_diff_after.hunks.is_empty());
     assert_eq!(unstaged_diff_after.additions, 0);
@@ -139,7 +139,7 @@ fn test_get_working_file_diff_untracked_and_staged_new() {
 
     // Untracked file
     fs::write(repo_path.join("untracked.txt"), "line 1\nline 2\n").unwrap();
-    let diff = get_working_file_diff(repo_path, "untracked.txt", false)
+    let diff = get_working_file_diff(repo_path, "untracked.txt", false, None)
         .expect("untracked diff should succeed");
     assert_eq!(diff.file_path, "untracked.txt");
     assert_eq!(diff.status, "added");
@@ -152,7 +152,7 @@ fn test_get_working_file_diff_untracked_and_staged_new() {
     index.add_path(Path::new("untracked.txt")).unwrap();
     index.write().unwrap();
 
-    let staged_diff = get_working_file_diff(repo_path, "untracked.txt", true)
+    let staged_diff = get_working_file_diff(repo_path, "untracked.txt", true, None)
         .expect("staged new diff should succeed");
     assert_eq!(staged_diff.file_path, "untracked.txt");
     assert_eq!(staged_diff.status, "added");
@@ -169,7 +169,7 @@ fn test_get_working_file_diff_deleted() {
 
     // Delete file1.txt from working tree (unstaged deletion)
     fs::remove_file(repo_path.join("file1.txt")).unwrap();
-    let diff = get_working_file_diff(repo_path, "file1.txt", false)
+    let diff = get_working_file_diff(repo_path, "file1.txt", false, None)
         .expect("unstaged deleted diff should succeed");
     assert_eq!(diff.file_path, "file1.txt");
     assert_eq!(diff.status, "deleted");
@@ -182,7 +182,7 @@ fn test_get_working_file_diff_deleted() {
     index.remove_path(Path::new("file1.txt")).unwrap();
     index.write().unwrap();
 
-    let staged_diff = get_working_file_diff(repo_path, "file1.txt", true)
+    let staged_diff = get_working_file_diff(repo_path, "file1.txt", true, None)
         .expect("staged deleted diff should succeed");
     assert_eq!(staged_diff.file_path, "file1.txt");
     assert_eq!(staged_diff.status, "deleted");

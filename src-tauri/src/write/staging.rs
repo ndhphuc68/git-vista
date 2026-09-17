@@ -243,7 +243,7 @@ pub fn stage_hunk<P: AsRef<Path>>(
 ) -> Result<(), AppError> {
     let repo_path_ref = repo_path.as_ref();
     let file_diff =
-        crate::read::status::get_working_file_diff(repo_path_ref, file_path, is_staged)?;
+        crate::read::status::get_working_file_diff(repo_path_ref, file_path, is_staged, None)?;
     let hunk = file_diff
         .hunks
         .get(hunk_index as usize)
@@ -269,7 +269,7 @@ pub fn stage_lines<P: AsRef<Path>>(
 ) -> Result<(), AppError> {
     let repo_path_ref = repo_path.as_ref();
     let file_diff =
-        crate::read::status::get_working_file_diff(repo_path_ref, file_path, is_staged)?;
+        crate::read::status::get_working_file_diff(repo_path_ref, file_path, is_staged, None)?;
     let hunk = file_diff
         .hunks
         .get(hunk_index as usize)

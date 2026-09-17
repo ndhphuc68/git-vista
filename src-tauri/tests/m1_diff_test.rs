@@ -19,7 +19,7 @@ fn test_commit_details_and_file_diff() {
     let changed_file = &details.files[0];
     assert!(changed_file.additions > 0);
 
-    let diff = get_commit_file_diff(path_str, head_commit_id, changed_file.path.clone())
+    let diff = get_commit_file_diff(path_str, head_commit_id, changed_file.path.clone(), None)
         .expect("Failed to get file diff");
     assert_eq!(diff.file_path, changed_file.path);
     assert!(!diff.hunks.is_empty());
