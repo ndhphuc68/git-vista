@@ -6,17 +6,17 @@ import { useSettingsStore } from "../../store/useSettingsStore";
 import { useTranslation } from "../../i18n";
 
 interface WindowTabBarProps {
-  onSelectFolder?: () => void;
+  onNewTab?: () => void;
 }
 
-export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onSelectFolder }) => {
+export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
   const { tabs, activeTabId, setActiveTab, closeTab, openHomeTab } = useTabStore();
   const { openSettings } = useSettingsStore();
   const { t } = useTranslation();
 
   const handleNewTab = () => {
-    if (onSelectFolder) {
-      onSelectFolder();
+    if (onNewTab) {
+      onNewTab();
     } else {
       openHomeTab();
     }
@@ -27,17 +27,8 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onSelectFolder }) =>
       data-testid="window-tab-bar"
       className="flex items-center justify-between px-2.5 h-[38px] min-h-[38px] max-h-[38px] bg-window border-b border-border-subtle select-none z-30 shrink-0 gap-2"
     >
-      {/* Left side: Window Traffic lights / Branding spacer */}
-      <div className="flex items-center gap-2 pl-1 pr-2 shrink-0">
-        <div className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
-          <span className="w-3 h-3 rounded-full bg-red-500/80 border border-red-600/30 inline-block" />
-          <span className="w-3 h-3 rounded-full bg-amber-500/80 border border-amber-600/30 inline-block" />
-          <span className="w-3 h-3 rounded-full bg-emerald-500/80 border border-emerald-600/30 inline-block" />
-        </div>
-      </div>
-
-      {/* Center: Scrollable Tabs Container */}
-      <div className="flex items-center gap-1 flex-1 min-w-0 overflow-x-auto no-scrollbar py-0.5">
+      {/* Scrollable Tabs Container */}
+      <div className="flex items-center gap-1.5 flex-1 min-w-0 overflow-x-auto no-scrollbar py-0.5">
         {tabs.map((tab) => {
           const isActive = tab.id === activeTabId;
 
@@ -49,14 +40,17 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onSelectFolder }) =>
                 data-testid="tab-home"
                 onClick={() => setActiveTab("home")}
                 className={clsx(
-                  "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium cursor-pointer transition-all duration-150 shrink-0",
+                  "relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs cursor-pointer transition-all duration-150 shrink-0 select-none",
                   isActive
-                    ? "bg-surface text-primary font-semibold shadow-2xs border border-border-subtle"
-                    : "text-secondary hover:bg-surface-hover hover:text-primary"
+                    ? "bg-surface text-primary font-bold shadow-xs border border-border before:absolute before:top-0 before:left-1 before:right-1 before:h-[2.5px] before:bg-accent before:rounded-full"
+                    : "bg-surface/35 hover:bg-surface/80 text-secondary hover:text-primary border border-border-subtle/80 hover:border-border font-medium shadow-2xs"
                 )}
                 title="Home (Welcome)"
               >
-                <Home size={13} className={isActive ? "text-accent" : "text-secondary"} />
+                <Home
+                  size={13}
+                  className={clsx("shrink-0", isActive ? "text-accent" : "text-secondary")}
+                />
                 <span>Home</span>
               </button>
             );
@@ -71,26 +65,29 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onSelectFolder }) =>
               data-testid={`tab-${tab.id}`}
               onClick={() => setActiveTab(tab.id)}
               className={clsx(
-                "group flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs cursor-pointer transition-all duration-150 shrink-0 max-w-[200px] border",
+                "group relative flex items-center gap-2 px-3 py-1.5 rounded-md text-xs cursor-pointer transition-all duration-150 shrink-0 max-w-[220px] border select-none",
                 isActive
-                  ? "bg-surface text-primary font-semibold shadow-2xs border-border-subtle"
-                  : "border-transparent text-secondary hover:bg-surface-hover hover:text-primary"
+                  ? "bg-surface text-primary font-bold shadow-xs border-border before:absolute before:top-0 before:left-1 before:right-1 before:h-[2.5px] before:bg-accent before:rounded-full"
+                  : "bg-surface/35 hover:bg-surface/80 text-secondary hover:text-primary border-border-subtle/80 hover:border-border font-medium shadow-2xs"
               )}
               title={`${repoName} - ${tab.id}`}
             >
               <FolderGit2
                 size={13}
-                className={clsx("shrink-0", isActive ? "text-accent" : "text-tertiary")}
+                className={clsx(
+                  "shrink-0",
+                  isActive ? "text-accent" : "text-secondary group-hover:text-primary"
+                )}
               />
               <span className="truncate">{repoName}</span>
 
               {branchName && (
                 <div
                   className={clsx(
-                    "flex items-center gap-1 px-1.5 py-0.2 rounded text-[10px] font-mono shrink-0 max-w-[80px] truncate",
+                    "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono shrink-0 max-w-[85px] truncate border",
                     isActive
-                      ? "bg-accent-subtle text-accent font-semibold"
-                      : "bg-surface-header/60 text-secondary"
+                      ? "bg-accent-subtle text-accent border-accent/30 font-semibold"
+                      : "bg-surface/80 text-secondary border-border-subtle/70"
                   )}
                   title={`Branch: ${branchName}`}
                 >
@@ -106,7 +103,12 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onSelectFolder }) =>
                   e.stopPropagation();
                   closeTab(tab.id);
                 }}
-                className="flex items-center justify-center w-4 h-4 rounded-full text-secondary opacity-60 group-hover:opacity-100 hover:bg-surface hover:text-primary transition-all ml-0.5 shrink-0"
+                className={clsx(
+                  "flex items-center justify-center w-4 h-4 rounded-full transition-all ml-0.5 shrink-0",
+                  isActive
+                    ? "text-secondary hover:text-primary hover:bg-surface-hover"
+                    : "text-tertiary opacity-70 group-hover:opacity-100 hover:bg-surface-hover hover:text-primary"
+                )}
                 aria-label={`Close tab ${repoName}`}
               >
                 <X size={11} />
@@ -120,8 +122,8 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onSelectFolder }) =>
           type="button"
           data-testid="btn-new-tab"
           onClick={handleNewTab}
-          className="flex items-center justify-center w-6 h-6 rounded-md text-secondary hover:text-primary hover:bg-surface-hover transition-colors shrink-0"
-          title="Mở repository mới (Ctrl+T)"
+          className="flex items-center justify-center w-7 h-7 rounded-md text-secondary hover:text-primary bg-surface/35 hover:bg-surface border border-border-subtle/70 hover:border-border transition-all shrink-0 cursor-pointer shadow-2xs ml-0.5"
+          title="Mở tab mới (Home: Mở / Clone) (Ctrl+T)"
           aria-label="New tab"
         >
           <Plus size={14} />
@@ -134,7 +136,7 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onSelectFolder }) =>
           type="button"
           data-testid="btn-top-settings"
           onClick={() => openSettings()}
-          className="flex items-center justify-center w-7 h-7 rounded-md text-secondary hover:text-primary hover:bg-surface-hover transition-colors"
+          className="flex items-center justify-center w-7 h-7 rounded-md text-secondary hover:text-primary hover:bg-surface-hover transition-colors cursor-pointer"
           title={`${t.settings.title} (Ctrl+,)`}
           aria-label={t.settings.title}
         >

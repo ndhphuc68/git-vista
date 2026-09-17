@@ -145,19 +145,6 @@ export const App: React.FC<AppProps> = ({
     restoreSession();
   }, [restoreSession]);
 
-  const handleSelectFolder = useCallback(async () => {
-    const folder = await invokeCommand.selectRepoFolder();
-    if (folder) {
-      try {
-        const summary = await invokeCommand.openRepository(folder);
-        openRepoTab(summary);
-        setRepo(summary);
-      } catch (err) {
-        console.error("Failed to open repository folder:", err);
-      }
-    }
-  }, [openRepoTab, setRepo]);
-
   const handleSelectRepo = useCallback((repo: RepoSummary) => {
     openRepoTab(repo);
     setRepo(repo);
@@ -200,7 +187,7 @@ export const App: React.FC<AppProps> = ({
     onOpenSettings: () => {
       openSettings();
     },
-    onNewTab: handleSelectFolder,
+    onNewTab: handleBackToWelcome,
     onCloseTab: () => {
       if (activeTabId !== "home") {
         closeTab(activeTabId);
@@ -274,7 +261,7 @@ export const App: React.FC<AppProps> = ({
       )}
       <div className="flex flex-col h-screen w-screen overflow-hidden">
         {/* Top Window Tab Bar */}
-        <WindowTabBar onSelectFolder={handleSelectFolder} />
+        <WindowTabBar onNewTab={handleBackToWelcome} />
 
         {/* Main Workspace Area */}
         {repoToDisplay ? (
