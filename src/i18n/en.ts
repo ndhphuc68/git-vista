@@ -364,6 +364,10 @@ export const en: Translations = {
     copyShaSuccess: "Copied commit SHA to clipboard",
   },
   diff: {
+    ignoreWhitespace: "Ignore whitespace",
+    ignoreWhitespaceActive: "Ignoring whitespace",
+    wordDiff: "Word-level diff",
+    wordDiffActive: "Word-level diff active",
     closeDetail: "Close",
     closeDetailAria: "Close commit details",
     closeDetailTitle: "Close commit details (Esc)",

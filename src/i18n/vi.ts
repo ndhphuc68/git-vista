@@ -362,6 +362,10 @@ export const vi = {
     copyShaSuccess: "Đã sao chép mã commit vào clipboard",
   },
   diff: {
+    ignoreWhitespace: "Bỏ qua khoảng trắng",
+    ignoreWhitespaceActive: "Đang bỏ qua khoảng trắng",
+    wordDiff: "Tô màu chi tiết từ (Word diff)",
+    wordDiffActive: "Đang bật tô màu chi tiết từ",
     closeDetail: "Đóng",
     closeDetailAria: "Đóng chi tiết commit",
     closeDetailTitle: "Đóng chi tiết commit (Phím Esc)",

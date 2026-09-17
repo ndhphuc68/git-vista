@@ -61,8 +61,24 @@ describe("InteractiveDiffViewer", () => {
     await waitFor(() => {
       expect(screen.getByText("src/sample.ts")).toBeInTheDocument();
       expect(screen.getByText("@@ -1,3 +1,4 @@")).toBeInTheDocument();
-      expect(screen.getByText(/const b = 2;/)).toBeInTheDocument();
-      expect(screen.getByText(/const b = 20;/)).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => {
+          const hasText = el?.textContent?.includes("const b = 2;") ?? false;
+          const childrenDontHaveText = Array.from(el?.children || []).every(
+            child => !child.textContent?.includes("const b = 2;")
+          );
+          return hasText && childrenDontHaveText;
+        })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText((_, el) => {
+          const hasText = el?.textContent?.includes("const b = 20;") ?? false;
+          const childrenDontHaveText = Array.from(el?.children || []).every(
+            child => !child.textContent?.includes("const b = 20;")
+          );
+          return hasText && childrenDontHaveText;
+        })
+      ).toBeInTheDocument();
     });
 
     // Stage Hunk button exists
