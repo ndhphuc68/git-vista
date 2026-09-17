@@ -305,6 +305,7 @@ export const en: Translations = {
     error: "Error",
     retry: "Retry",
     esc: "Esc",
+    undo: "Undo",
   },
   sidebar: {
     branches: "BRANCHES",
@@ -607,6 +608,7 @@ export const en: Translations = {
       submitting: "Cherry-picking...",
       submit: "Cherry-pick",
       conflictError: "Conflict occurred during cherry-pick. Please resolve conflicts.",
+      conflictToast: "Conflict occurred during cherry-pick. Please resolve conflicts.",
       genericError: "Failed to cherry-pick: {msg}",
       successToast: "Successfully cherry-picked commit {commit}",
       stagedToast: "Changes staged. Review and commit when ready.",
@@ -621,6 +623,7 @@ export const en: Translations = {
       submitting: "Reverting...",
       submit: "Revert Commit",
       conflictError: "Conflict occurred during revert. Please resolve conflicts.",
+      conflictToast: "Conflict occurred during revert. Please resolve conflicts.",
       genericError: "Failed to revert commit: {msg}",
       successToast: "Successfully reverted commit {commit}",
       stagedToast: "Inverted changes staged.",

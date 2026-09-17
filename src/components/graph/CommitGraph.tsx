@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import clsx from "clsx";
-import { GitBranch, Tag, Copy } from "lucide-react";
+import { GitBranch, Tag, Copy, GitPullRequest, RotateCcw } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
@@ -13,6 +13,8 @@ import { GraphSvgLane } from "./GraphSvgLane";
 import { useTranslation } from "../../i18n";
 import { CreateTagModal } from "../tag";
 import { CreateBranchModal } from "../sidebar/CreateBranchModal";
+import { CherryPickModal } from "../modals/CherryPickModal";
+import { RevertModal } from "../modals/RevertModal";
 
 const PAGE_SIZE = 50;
 const ROW_HEIGHT = 32;
@@ -112,6 +114,8 @@ export const CommitGraph: React.FC = () => {
   } | null>(null);
   const [createTagCommit, setCreateTagCommit] = useState<GraphCommitNode | null>(null);
   const [createBranchCommit, setCreateBranchCommit] = useState<GraphCommitNode | null>(null);
+  const [cherryPickCommit, setCherryPickCommit] = useState<GraphCommitNode | null>(null);
+  const [revertCommit, setRevertCommit] = useState<GraphCommitNode | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -521,6 +525,32 @@ export const CommitGraph: React.FC = () => {
           <button
             type="button"
             role="menuitem"
+            onClick={() => {
+              setCherryPickCommit(contextMenu.commit);
+              setContextMenu(null);
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer transition-colors"
+          >
+            <GitPullRequest size={13} className="shrink-0 text-secondary" />
+            <span>{t.graph.cherryPickHere}</span>
+          </button>
+
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setRevertCommit(contextMenu.commit);
+              setContextMenu(null);
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer transition-colors"
+          >
+            <RotateCcw size={13} className="shrink-0 text-secondary" />
+            <span>{t.graph.revertHere}</span>
+          </button>
+
+          <button
+            type="button"
+            role="menuitem"
             onClick={() => handleCopySha(contextMenu.commit.id)}
             className="flex items-center gap-2 px-3 py-1.5 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer transition-colors border-t border-border-subtle/50 mt-0.5 pt-1.5"
           >
@@ -556,6 +586,109 @@ export const CommitGraph: React.FC = () => {
             setCreateBranchCommit(null);
             queryClient.invalidateQueries({ queryKey: ["commit-graph"] });
             queryClient.invalidateQueries({ queryKey: ["branches"] });
+          }}
+        />
+      )}
+
+      {cherryPickCommit && currentRepo && (
+        <CherryPickModal
+          isOpen={Boolean(cherryPickCommit)}
+          onClose={() => setCherryPickCommit(null)}
+          repoPath={currentRepo.path}
+          currentBranch={currentRepo.head_branch ?? "main"}
+          targetCommit={{
+            id: cherryPickCommit.id,
+            short_id: cherryPickCommit.short_id,
+            summary: cherryPickCommit.summary,
+            author: cherryPickCommit.author_name,
+          }}
+          onSuccess={(result) => {
+            setCherryPickCommit(null);
+            if (result.status === "Committed") {
+              queryClient.invalidateQueries({ queryKey: ["commit-graph"] });
+              queryClient.invalidateQueries({ queryKey: ["repo_status"] });
+              queryClient.invalidateQueries({ queryKey: ["repo_head"] });
+              queryClient.invalidateQueries({ queryKey: ["branches"] });
+              const undoToken = result.undo_token;
+              useToastStore.getState().showSuccess(
+                t.modals.cherryPick.successToast
+                  .replace("{sha}", cherryPickCommit.short_id)
+                  .replace("{commit}", cherryPickCommit.short_id),
+                undoToken
+                  ? async () => {
+                      await invokeCommand.undoCommit(currentRepo.path, undoToken);
+                      queryClient.invalidateQueries();
+                    }
+                  : undefined,
+                t.common.undo
+              );
+            } else if (result.status === "Staged") {
+              queryClient.invalidateQueries({ queryKey: ["repo_status"] });
+              useToastStore.getState().showToast({
+                message: t.modals.cherryPick.stagedToast,
+                type: "info",
+              });
+              setActiveScreen("changes");
+            } else if (result.status === "Conflict") {
+              queryClient.invalidateQueries({ queryKey: ["repo_status"] });
+              queryClient.invalidateQueries({ queryKey: ["repo_state"] });
+              useToastStore.getState().showToast({
+                message: t.modals.cherryPick.conflictToast,
+                type: "error",
+              });
+              setActiveScreen("changes");
+            }
+          }}
+        />
+      )}
+
+      {revertCommit && currentRepo && (
+        <RevertModal
+          isOpen={Boolean(revertCommit)}
+          onClose={() => setRevertCommit(null)}
+          repoPath={currentRepo.path}
+          targetCommit={{
+            id: revertCommit.id,
+            short_id: revertCommit.short_id,
+            summary: revertCommit.summary,
+            author: revertCommit.author_name,
+          }}
+          onSuccess={(result) => {
+            setRevertCommit(null);
+            if (result.status === "Committed") {
+              queryClient.invalidateQueries({ queryKey: ["commit-graph"] });
+              queryClient.invalidateQueries({ queryKey: ["repo_status"] });
+              queryClient.invalidateQueries({ queryKey: ["repo_head"] });
+              queryClient.invalidateQueries({ queryKey: ["branches"] });
+              const undoToken = result.undo_token;
+              useToastStore.getState().showSuccess(
+                t.modals.revert.successToast
+                  .replace("{sha}", revertCommit.short_id)
+                  .replace("{commit}", revertCommit.short_id),
+                undoToken
+                  ? async () => {
+                      await invokeCommand.undoCommit(currentRepo.path, undoToken);
+                      queryClient.invalidateQueries();
+                    }
+                  : undefined,
+                t.common.undo
+              );
+            } else if (result.status === "Staged") {
+              queryClient.invalidateQueries({ queryKey: ["repo_status"] });
+              useToastStore.getState().showToast({
+                message: t.modals.revert.stagedToast,
+                type: "info",
+              });
+              setActiveScreen("changes");
+            } else if (result.status === "Conflict") {
+              queryClient.invalidateQueries({ queryKey: ["repo_status"] });
+              queryClient.invalidateQueries({ queryKey: ["repo_state"] });
+              useToastStore.getState().showToast({
+                message: t.modals.revert.conflictToast,
+                type: "error",
+              });
+              setActiveScreen("changes");
+            }
           }}
         />
       )}

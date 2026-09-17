@@ -303,6 +303,7 @@ export const vi = {
     error: "Lỗi",
     retry: "Thử lại",
     esc: "Esc",
+    undo: "Hoàn tác",
   },
   sidebar: {
     branches: "NHÁNH",
@@ -605,6 +606,7 @@ export const vi = {
       submitting: "Đang cherry-pick...",
       submit: "Cherry-pick",
       conflictError: "Xung đột xảy ra khi cherry-pick. Vui lòng giải quyết xung đột.",
+      conflictToast: "Xung đột xảy ra khi cherry-pick. Vui lòng giải quyết xung đột.",
       genericError: "Lỗi khi cherry-pick: {msg}",
       successToast: "Đã cherry-pick commit {commit} thành công",
       stagedToast: "Đã đưa thay đổi vào Staging. Hãy kiểm tra và tạo commit khi sẵn sàng.",
@@ -619,6 +621,7 @@ export const vi = {
       submitting: "Đang hoàn tác...",
       submit: "Hoàn tác commit",
       conflictError: "Xung đột xảy ra khi revert commit. Vui lòng giải quyết xung đột.",
+      conflictToast: "Xung đột xảy ra khi revert commit. Vui lòng giải quyết xung đột.",
       genericError: "Lỗi khi revert commit: {msg}",
       successToast: "Đã hoàn tác commit {commit} thành công",
       stagedToast: "Đã đưa thay đổi hoàn tác vào Staging.",
