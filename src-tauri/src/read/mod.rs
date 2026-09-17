@@ -9,6 +9,7 @@ pub mod diff;
 pub mod graph;
 pub mod state;
 pub mod status;
+pub mod tags;
 
 pub use branches::*;
 pub use config::*;
@@ -17,6 +18,7 @@ pub use diff::*;
 pub use graph::*;
 pub use state::*;
 pub use status::*;
+pub use tags::*;
 
 use crate::error::AppError;
 use serde::{Deserialize, Serialize};

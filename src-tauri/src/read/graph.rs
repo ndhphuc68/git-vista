@@ -64,11 +64,16 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
     let mut ref_map: HashMap<Oid, Vec<RefBadge>> = HashMap::new();
     if let Ok(references) = repo.references() {
         for r_res in references.flatten() {
-            if let Some(target) = r_res.target() {
-                let shorthand = r_res.shorthand().unwrap_or("").to_string();
-                let ref_type = if r_res.is_tag() {
-                    "tag"
-                } else if r_res.is_remote() {
+            let shorthand = r_res.shorthand().unwrap_or("").to_string();
+            if r_res.is_tag() {
+                if let Ok(peeled_commit) = r_res.peel_to_commit() {
+                    ref_map.entry(peeled_commit.id()).or_default().push(RefBadge {
+                        name: shorthand,
+                        ref_type: "tag".to_string(),
+                    });
+                }
+            } else if let Some(target) = r_res.target() {
+                let ref_type = if r_res.is_remote() {
                     "remote"
                 } else {
                     "local"
