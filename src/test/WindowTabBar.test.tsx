@@ -75,9 +75,11 @@ describe("WindowTabBar", () => {
     const activeTab = screen.getByTestId("tab-d:/projects/alpha");
     const homeTab = screen.getByTestId("tab-home");
 
-    expect(activeTab.className).toContain("font-bold");
-    expect(activeTab.className).toContain("before:bg-accent");
-    expect(homeTab.className).toContain("font-medium");
+    expect(activeTab.className).toContain("bg-surface");
+    expect(activeTab.className).toContain("rounded-t-lg");
+    expect(activeTab.className).toContain("after:bg-surface");
+    expect(activeTab.className).not.toContain("before:bg-accent");
+    expect(homeTab.className).toContain("font-normal");
     expect(homeTab.className).toContain("text-secondary");
   });
 
