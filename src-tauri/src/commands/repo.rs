@@ -59,11 +59,23 @@ pub fn open_repository(app: tauri::AppHandle, path: String) -> Result<RepoSummar
         prune_backups(&summary.path);
         let app_clone = app.clone();
         let repo_path = summary.path.clone();
-        let _ = m.start_watcher(move |reason| {
+        let _ = m.start_watcher_for(&summary.path, move |reason| {
             emit_repo_changed(&app_clone, repo_path.clone(), reason);
         });
         Ok(summary)
     })
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn close_repository(path: String) -> Result<(), AppError> {
+    with_manager(|m| m.close_repository(&path))
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn get_open_repositories() -> Result<Vec<RepoSummary>, AppError> {
+    Ok(with_manager(|m| m.get_open_repositories()))
 }
 
 #[tauri::command]

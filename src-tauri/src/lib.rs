@@ -16,6 +16,8 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         get_repo_head_info,
         simulate_repo_change,
         open_repository,
+        close_repository,
+        get_open_repositories,
         get_recent_repos,
         clear_recent_repos,
         remove_recent_repo,
