@@ -53,6 +53,22 @@ pub fn get_repo_state<P: AsRef<Path>>(repo_path: P) -> Result<RepoStateInfo, App
         } else if let Ok(onto) = fs::read_to_string(git_dir.join("rebase-apply").join("onto")) {
             target_name = Some(onto.trim().to_string());
         }
+    } else if state_str == "cherry_pick" {
+        if let Ok(msg) = fs::read_to_string(git_dir.join("MERGE_MSG")) {
+            if let Some(line) = msg.lines().next() {
+                target_name = Some(line.trim().to_string());
+            }
+        } else if let Ok(head) = fs::read_to_string(git_dir.join("CHERRY_PICK_HEAD")) {
+            target_name = Some(head.trim().chars().take(7).collect());
+        }
+    } else if state_str == "revert" {
+        if let Ok(msg) = fs::read_to_string(git_dir.join("MERGE_MSG")) {
+            if let Some(line) = msg.lines().next() {
+                target_name = Some(line.trim().to_string());
+            }
+        } else if let Ok(head) = fs::read_to_string(git_dir.join("REVERT_HEAD")) {
+            target_name = Some(head.trim().chars().take(7).collect());
+        }
     }
 
     let mut status_opts = StatusOptions::new();

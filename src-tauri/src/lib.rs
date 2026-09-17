@@ -68,7 +68,9 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         create_tag,
         delete_tag,
         checkout_tag,
-        push_tag
+        push_tag,
+        cherry_pick_commit,
+        revert_commit
     ])
 }
 
@@ -101,7 +103,12 @@ pub fn run() {
                 use tauri::Manager;
                 use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
                 if let Some(window) = app.get_webview_window("main") {
-                    let _ = apply_vibrancy(&window, NSVisualEffectMaterial::UnderWindowBackground, None, None);
+                    let _ = apply_vibrancy(
+                        &window,
+                        NSVisualEffectMaterial::UnderWindowBackground,
+                        None,
+                        None,
+                    );
                 }
             }
 
@@ -112,4 +119,3 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-

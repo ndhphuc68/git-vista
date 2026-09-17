@@ -82,7 +82,10 @@ fn test_cherry_pick_clean_auto_commit() {
     let token = res.undo_token.as_ref().unwrap();
     undo_recorded_commit(dir.path(), token).unwrap();
     let repo = git2::Repository::open(dir.path()).unwrap();
-    assert_eq!(repo.head().unwrap().target().unwrap().to_string(), main_commit);
+    assert_eq!(
+        repo.head().unwrap().target().unwrap().to_string(),
+        main_commit
+    );
 }
 
 #[test]
@@ -108,7 +111,10 @@ fn test_revert_clean_auto_commit() {
     let token = res.undo_token.as_ref().unwrap();
     undo_recorded_commit(dir.path(), token).unwrap();
     let repo = git2::Repository::open(dir.path()).unwrap();
-    assert_eq!(repo.head().unwrap().target().unwrap().to_string(), main_commit);
+    assert_eq!(
+        repo.head().unwrap().target().unwrap().to_string(),
+        main_commit
+    );
 }
 
 #[test]
@@ -151,7 +157,11 @@ fn test_cherry_pick_conflict() {
 
     // On main, write different content to file1.txt
     run(&["checkout", "main"]);
-    fs::write(repo_path.join("file1.txt"), "main branch different content\n").unwrap();
+    fs::write(
+        repo_path.join("file1.txt"),
+        "main branch different content\n",
+    )
+    .unwrap();
     run(&["add", "file1.txt"]);
     run(&["commit", "-m", "main different content"]);
 
@@ -167,4 +177,69 @@ fn test_operand_validation() {
     assert!(git_cherry_pick(dir.path(), "--abort", true).is_err());
     assert!(git_revert(dir.path(), "", true).is_err());
     assert!(git_revert(dir.path(), "-m 1", true).is_err());
+}
+
+#[test]
+fn test_cherry_pick_conflict_and_abort() {
+    let (dir, feature_commit, _) = setup_repo();
+    // Intentionally write conflicting content in main
+    fs::write(dir.path().join("feature.txt"), "conflicting main data\n").unwrap();
+    let run = |args: &[&str]| {
+        let output = Command::new("git")
+            .current_dir(dir.path())
+            .args(args)
+            .output()
+            .unwrap();
+        assert!(output.status.success());
+    };
+    run(&["add", "feature.txt"]);
+    run(&["commit", "-m", "conflict setup"]);
+
+    let res = git_cherry_pick(dir.path(), &feature_commit, true).unwrap();
+    assert!(!res.success);
+    assert_eq!(res.status, "Conflict");
+
+    let state = visual_git_lib::read::state::get_repo_state(dir.path()).unwrap();
+    assert_eq!(state.state, "cherry_pick");
+    assert!(state.is_in_progress);
+    assert_eq!(state.target_name.as_deref(), Some("feature commit"));
+
+    // Test aborting the in-progress cherry-pick
+    visual_git_lib::exec::merge::git_abort_operation(dir.path(), "cherry_pick").unwrap();
+    let clean_state = visual_git_lib::read::state::get_repo_state(dir.path()).unwrap();
+    assert_eq!(clean_state.state, "clean");
+}
+
+#[test]
+fn test_revert_conflict_and_abort() {
+    let (dir, _, main_commit) = setup_repo();
+    // Intentionally change file in working tree / commit that conflicts with revert
+    fs::write(
+        dir.path().join("main_extra.txt"),
+        "conflicting modification\n",
+    )
+    .unwrap();
+    let run = |args: &[&str]| {
+        let output = Command::new("git")
+            .current_dir(dir.path())
+            .args(args)
+            .output()
+            .unwrap();
+        assert!(output.status.success());
+    };
+    run(&["add", "main_extra.txt"]);
+    run(&["commit", "-m", "conflict on main_extra"]);
+
+    let res = git_revert(dir.path(), &main_commit, true).unwrap();
+    assert!(!res.success);
+    assert_eq!(res.status, "Conflict");
+
+    let state = visual_git_lib::read::state::get_repo_state(dir.path()).unwrap();
+    assert_eq!(state.state, "revert");
+    assert!(state.is_in_progress);
+    assert!(state.target_name.is_some());
+
+    visual_git_lib::exec::merge::git_abort_operation(dir.path(), "revert").unwrap();
+    let clean_state = visual_git_lib::read::state::get_repo_state(dir.path()).unwrap();
+    assert_eq!(clean_state.state, "clean");
 }
