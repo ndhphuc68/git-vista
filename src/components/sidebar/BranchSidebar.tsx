@@ -24,7 +24,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { invokeCommand } from "../../ipc/client";
-import { StashItem, BranchItem } from "../../ipc/bindings";
+import { StashItem, BranchItem, TagItem } from "../../ipc/bindings";
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
 import { CreateBranchModal } from "./CreateBranchModal";
@@ -34,6 +34,7 @@ import { CheckoutConflictModal } from "./CheckoutConflictModal";
 import { StashDiffView } from "../stash/StashDiffView";
 import { MergeBranchModal } from "../merge/MergeBranchModal";
 import { RebaseBranchModal } from "../merge/RebaseBranchModal";
+import { CreateTagModal, DeleteTagModal } from "../tag";
 import { useTranslation } from "../../i18n";
 
 export interface BranchTreeNode {
@@ -117,6 +118,10 @@ export const BranchSidebar: React.FC = () => {
 
   // Modal states
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [createBranchTarget, setCreateBranchTarget] = useState<string | null>(null);
+  const [createTagModalOpen, setCreateTagModalOpen] = useState(false);
+  const [createTagTarget, setCreateTagTarget] = useState<{ commitId: string; summary?: string } | null>(null);
+  const [deleteTagItem, setDeleteTagItem] = useState<TagItem | null>(null);
   const [renameBranchName, setRenameBranchName] = useState<string | null>(null);
   const [deleteBranchName, setDeleteBranchName] = useState<string | null>(null);
   const [mergeModal, setMergeModal] = useState<{ targetBranch: string } | null>(null);
@@ -128,12 +133,17 @@ export const BranchSidebar: React.FC = () => {
 
   // Context / Action menu state
   const [menuBranch, setMenuBranch] = useState<string | null>(null);
+  const [tagMenuOpenName, setTagMenuOpenName] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const tagMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setMenuBranch(null);
+      }
+      if (tagMenuRef.current && !tagMenuRef.current.contains(e.target as Node)) {
+        setTagMenuOpenName(null);
       }
     };
     window.addEventListener("mousedown", handleGlobalClick);
@@ -171,6 +181,12 @@ export const BranchSidebar: React.FC = () => {
     enabled: !!currentRepo?.path,
   });
 
+  const { data: tagItems = [] } = useQuery({
+    queryKey: ["tags", currentRepo?.path],
+    queryFn: () => invokeCommand.getTags(currentRepo!.path),
+    enabled: Boolean(currentRepo),
+  });
+
   if (!currentRepo) return null;
 
   const invalidateRepo = () => {
@@ -178,6 +194,35 @@ export const BranchSidebar: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: ["commit_graph", currentRepo.path] });
     queryClient.invalidateQueries({ queryKey: ["repo_status", currentRepo.path] });
     queryClient.invalidateQueries({ queryKey: ["repo_head_info", currentRepo.path] });
+    queryClient.invalidateQueries({ queryKey: ["tags", currentRepo.path] });
+  };
+
+  const handleCheckoutTag = async (tag: TagItem) => {
+    setTagMenuOpenName(null);
+    try {
+      await invokeCommand.checkoutTag(currentRepo.path, tag.name);
+      useToastStore.getState().showToast({
+        message: t.sidebar.checkoutTagSuccess.replace("{name}", tag.name),
+        type: "success",
+      });
+      invalidateRepo();
+    } catch (err: unknown) {
+      useToastStore.getState().showError(mapGitError(err));
+    }
+  };
+
+  const handlePushTag = async (tag: TagItem) => {
+    setTagMenuOpenName(null);
+    try {
+      await invokeCommand.pushTag(currentRepo.path, tag.name);
+      useToastStore.getState().showToast({
+        message: t.sidebar.pushTagSuccess.replace("{name}", tag.name),
+        type: "success",
+      });
+      invalidateRepo();
+    } catch (err: unknown) {
+      useToastStore.getState().showError(mapGitError(err));
+    }
   };
 
   const handleCheckout = async (branchName: string) => {
@@ -256,8 +301,8 @@ export const BranchSidebar: React.FC = () => {
   const remoteBranches = (branchData?.remote || []).filter((b) =>
     b.name.toLowerCase().includes(search.toLowerCase())
   );
-  const tags = (branchData?.tags || []).filter((t) =>
-    t.toLowerCase().includes(search.toLowerCase())
+  const filteredTags = tagItems.filter((t) =>
+    t.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
@@ -637,7 +682,10 @@ export const BranchSidebar: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setIsCreateOpen(true)}
+                onClick={() => {
+                  setCreateBranchTarget(null);
+                  setIsCreateOpen(true);
+                }}
                 aria-label={t.sidebar.createBranchTitle}
                 title={t.sidebar.createBranchTitle}
                 className="flex items-center justify-center p-1 bg-transparent border-0 text-secondary hover:text-accent hover:bg-surface-hover rounded-sm cursor-pointer transition-colors"
@@ -681,33 +729,137 @@ export const BranchSidebar: React.FC = () => {
 
           {/* TAGS */}
           <div>
-            <button
-              onClick={() => setTagsOpen(!tagsOpen)}
-              aria-expanded={tagsOpen}
-              aria-label={t.sidebar.tags}
-              className="flex items-center gap-1.5 w-full p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
-            >
-              {tagsOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-              <Tag size={13} />
-              <span>{t.sidebar.tags} ({tags.length})</span>
-            </button>
+            <div className="flex items-center justify-between w-full">
+              <button
+                onClick={() => setTagsOpen(!tagsOpen)}
+                aria-expanded={tagsOpen}
+                aria-label={t.sidebar.tags}
+                className="flex items-center gap-1.5 flex-1 p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
+              >
+                {tagsOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+                <Tag size={13} />
+                <span>{t.sidebar.tags} ({tagItems.length})</span>
+              </button>
+              <button
+                type="button"
+                title={t.sidebar.createTagTitle}
+                aria-label={t.sidebar.createTagTitle}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const headCommit =
+                    branchData?.local.find((b) => b.is_head)?.target_commit_id ||
+                    branchData?.local[0]?.target_commit_id ||
+                    "";
+                  setCreateTagTarget({ commitId: headCommit, summary: "HEAD" });
+                  setCreateTagModalOpen(true);
+                }}
+                className="p-1 hover:bg-surface-hover rounded text-secondary hover:text-primary transition-colors cursor-pointer border-0 bg-transparent"
+              >
+                <Plus size={13} />
+              </button>
+            </div>
 
             {tagsOpen && (
               <div className="flex flex-col gap-0.5 mt-1">
-                {tags.length === 0 ? (
+                {filteredTags.length === 0 ? (
                   <div className="px-2 py-1 text-xs text-tertiary italic">
                     {t.sidebar.emptyTags}
                   </div>
                 ) : (
-                  tags.map((tag) => (
-                    <div
-                      key={tag}
-                      className="flex items-center gap-1.5 px-2 py-1 rounded-sm text-secondary hover:text-primary hover:bg-surface-hover text-xs cursor-default transition-colors"
-                    >
-                      <Tag size={11} className="text-tertiary shrink-0" />
-                      <span className="truncate">{tag}</span>
-                    </div>
-                  ))
+                  filteredTags.map((tag) => {
+                    const isMenuOpen = tagMenuOpenName === tag.name;
+                    return (
+                      <div
+                        key={tag.name}
+                        className="group relative flex items-center justify-between rounded-sm"
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          setTagMenuOpenName(tag.name);
+                        }}
+                      >
+                        <div
+                          className="flex-1 flex items-center gap-1.5 px-2 py-1 rounded-sm text-secondary hover:text-primary hover:bg-surface-hover text-xs cursor-default transition-colors overflow-hidden min-h-[26px]"
+                          title={tag.commit_summary || tag.name}
+                        >
+                          <Tag size={12} className="text-amber-500 shrink-0" />
+                          <span className="font-mono truncate">{tag.name}</span>
+                          <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-surface-hover text-tertiary ml-auto shrink-0">
+                            {tag.short_commit_id || tag.target_commit_id.slice(0, 7)}
+                          </span>
+                        </div>
+
+                        {/* Three dots menu button */}
+                        <div className="relative shrink-0 flex items-center pr-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setTagMenuOpenName(isMenuOpen ? null : tag.name);
+                            }}
+                            aria-label={`Menu thao tác thẻ ${tag.name}`}
+                            className={clsx(
+                              "p-1 bg-transparent border-0 text-secondary hover:text-primary hover:bg-surface-hover rounded-sm cursor-pointer transition-opacity",
+                              isMenuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus:opacity-100"
+                            )}
+                          >
+                            <MoreVertical size={13} />
+                          </button>
+
+                          {/* Dropdown Action Menu */}
+                          {isMenuOpen && (
+                            <div
+                              ref={tagMenuRef}
+                              className="absolute right-0 top-full mt-1 w-52 bg-surface border border-border-subtle rounded-md shadow-xl py-1 z-50 text-xs flex flex-col"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => handleCheckoutTag(tag)}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                              >
+                                <Check size={13} className="text-accent" />
+                                <span>{t.sidebar.checkoutTag}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setTagMenuOpenName(null);
+                                  setCreateBranchTarget(tag.target_commit_id);
+                                  setIsCreateOpen(true);
+                                }}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                              >
+                                <GitBranch size={13} className="text-secondary" />
+                                <span>{t.sidebar.createBranchFromTag}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handlePushTag(tag)}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                              >
+                                <Cloud size={13} className="text-secondary" />
+                                <span>{t.sidebar.pushTag}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setTagMenuOpenName(null);
+                                  setDeleteTagItem(tag);
+                                }}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-diff-remove-text hover:bg-diff-remove-bg cursor-pointer text-left w-full transition-colors"
+                              >
+                                <Trash2 size={13} />
+                                <span>{t.sidebar.deleteTag}</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
                 )}
               </div>
             )}
@@ -803,8 +955,34 @@ export const BranchSidebar: React.FC = () => {
       {/* MODALS */}
       <CreateBranchModal
         isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
+        onClose={() => {
+          setIsCreateOpen(false);
+          setCreateBranchTarget(null);
+        }}
         repoPath={currentRepo.path}
+        targetCommit={createBranchTarget}
+        onSuccess={invalidateRepo}
+      />
+
+      <CreateTagModal
+        isOpen={createTagModalOpen}
+        onClose={() => {
+          setCreateTagModalOpen(false);
+          setCreateTagTarget(null);
+        }}
+        repoPath={currentRepo.path}
+        targetCommitId={createTagTarget?.commitId || ""}
+        targetCommitSummary={createTagTarget?.summary}
+        onSuccess={invalidateRepo}
+      />
+
+      <DeleteTagModal
+        isOpen={Boolean(deleteTagItem)}
+        onClose={() => setDeleteTagItem(null)}
+        repoPath={currentRepo.path}
+        tagName={deleteTagItem?.name || ""}
+        targetCommitId={deleteTagItem?.target_commit_id}
+        hasRemote={Boolean(branchData?.remote && branchData.remote.length > 0)}
         onSuccess={invalidateRepo}
       />
 

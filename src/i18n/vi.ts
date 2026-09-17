@@ -330,6 +330,13 @@ export const vi = {
     rebaseOntoThis: "Rebase nhánh hiện tại lên đây...",
     renameBranch: "Đổi tên...",
     deleteBranch: "Xoá nhánh...",
+    createTagTitle: "Tạo thẻ mới (Tag)...",
+    checkoutTag: "Chuyển sang thẻ này (Detached HEAD)",
+    createBranchFromTag: "Tạo nhánh mới từ thẻ này...",
+    pushTag: "Đẩy thẻ lên máy chủ (Remote)...",
+    deleteTag: "Xoá thẻ...",
+    checkoutTagSuccess: "Đã chuyển sang thẻ {name} (Detached HEAD)",
+    pushTagSuccess: "Đã đẩy thẻ {name} lên máy chủ thành công",
   },
   graph: {
     columns: {

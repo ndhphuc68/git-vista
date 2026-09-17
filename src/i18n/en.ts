@@ -332,6 +332,13 @@ export const en: Translations = {
     rebaseOntoThis: "Rebase current branch onto this...",
     renameBranch: "Rename...",
     deleteBranch: "Delete branch...",
+    createTagTitle: "Create new tag...",
+    checkoutTag: "Checkout this tag (Detached HEAD)",
+    createBranchFromTag: "Create branch from this tag...",
+    pushTag: "Push tag to remote...",
+    deleteTag: "Delete tag...",
+    checkoutTagSuccess: "Checked out tag {name} (Detached HEAD)",
+    pushTagSuccess: "Pushed tag {name} to remote successfully",
   },
   graph: {
     columns: {
