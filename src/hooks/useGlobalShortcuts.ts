@@ -7,6 +7,10 @@ export interface UseGlobalShortcutsOptions {
   onOpenShortcutsHelp?: () => void;
   onToggleTheme?: () => void;
   onOpenSettings?: () => void;
+  onNewTab?: () => void;
+  onCloseTab?: () => void;
+  onNextTab?: () => void;
+  onPrevTab?: () => void;
   onEscape?: () => void;
   enabled?: boolean;
 }
@@ -18,6 +22,10 @@ export function useGlobalShortcuts(options: UseGlobalShortcutsOptions = {}) {
     onOpenShortcutsHelp,
     onToggleTheme,
     onOpenSettings,
+    onNewTab,
+    onCloseTab,
+    onNextTab,
+    onPrevTab,
     onEscape,
     enabled = true,
   } = options;
@@ -67,8 +75,25 @@ export function useGlobalShortcuts(options: UseGlobalShortcutsOptions = {}) {
           }
         } else if (e.key === "t" || e.key === "T") {
           e.preventDefault();
-          if (onToggleTheme) {
+          if (e.shiftKey && onToggleTheme) {
             onToggleTheme();
+          } else if (onNewTab) {
+            onNewTab();
+          } else if (onToggleTheme) {
+            onToggleTheme();
+          }
+        } else if (e.key === "w" || e.key === "W") {
+          if (onCloseTab) {
+            e.preventDefault();
+            onCloseTab();
+          }
+        } else if (e.key === "Tab") {
+          if (e.shiftKey && onPrevTab) {
+            e.preventDefault();
+            onPrevTab();
+          } else if (onNextTab) {
+            e.preventDefault();
+            onNextTab();
           }
         } else if (e.key === "1") {
           e.preventDefault();
@@ -99,6 +124,10 @@ export function useGlobalShortcuts(options: UseGlobalShortcutsOptions = {}) {
     onOpenShortcutsHelp,
     onToggleTheme,
     onOpenSettings,
+    onNewTab,
+    onCloseTab,
+    onNextTab,
+    onPrevTab,
     onEscape,
     setActiveScreen,
   ]);
