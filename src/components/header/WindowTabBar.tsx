@@ -41,9 +41,9 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
                   data-testid="tab-home"
                   onClick={() => setActiveTab("home")}
                   className={clsx(
-                    "group relative flex items-center gap-2 px-3.5 h-[34px] rounded-t-lg text-[13px] cursor-pointer transition-colors shrink-0 select-none min-w-[140px] max-w-[200px]",
+                    "group relative flex items-center gap-2 px-3.5 h-[34px] rounded-t-lg text-[13px] cursor-pointer transition-colors shrink-0 select-none min-w-[140px] max-w-[200px] outline-none focus:outline-none focus-visible:outline-none ring-0",
                     isActive
-                      ? "bg-surface text-primary font-medium shadow-2xs border-t border-l border-r border-[#cbd5e1]/80 dark:border-[#2d3748]/80 after:absolute after:-bottom-[1px] after:left-0 after:right-0 after:h-[2px] after:bg-surface"
+                      ? "bg-surface text-primary font-medium after:absolute after:-bottom-[1px] after:left-0 after:right-0 after:h-[2px] after:bg-surface"
                       : "text-secondary hover:text-primary hover:bg-surface/50 dark:hover:bg-white/[0.04] font-normal"
                   )}
                   title="Home (Welcome)"
@@ -70,9 +70,9 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
                 data-testid={`tab-${tab.id}`}
                 onClick={() => setActiveTab(tab.id)}
                 className={clsx(
-                  "group relative flex items-center gap-2 px-3 h-[34px] rounded-t-lg text-[13px] cursor-pointer transition-colors shrink-0 min-w-[150px] max-w-[240px] select-none",
+                  "group relative flex items-center gap-2 px-3 h-[34px] rounded-t-lg text-[13px] cursor-pointer transition-colors shrink-0 min-w-[150px] max-w-[240px] select-none outline-none focus:outline-none focus-visible:outline-none ring-0",
                   isActive
-                    ? "bg-surface text-primary font-medium shadow-2xs border-t border-l border-r border-[#cbd5e1]/80 dark:border-[#2d3748]/80 after:absolute after:-bottom-[1px] after:left-0 after:right-0 after:h-[2px] after:bg-surface"
+                    ? "bg-surface text-primary font-medium after:absolute after:-bottom-[1px] after:left-0 after:right-0 after:h-[2px] after:bg-surface"
                     : "text-secondary hover:text-primary hover:bg-surface/50 dark:hover:bg-white/[0.04] font-normal"
                 )}
                 title={`${repoName} - ${tab.id}`}
@@ -106,7 +106,7 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
                     e.stopPropagation();
                     closeTab(tab.id);
                   }}
-                  className="ml-auto flex items-center justify-center w-5 h-5 rounded hover:bg-surface-hover dark:hover:bg-white/10 text-secondary hover:text-primary transition-colors shrink-0"
+                  className="ml-auto flex items-center justify-center w-5 h-5 rounded hover:bg-surface-hover dark:hover:bg-white/10 text-secondary hover:text-primary transition-colors shrink-0 outline-none focus:outline-none"
                   aria-label={`Close tab ${repoName}`}
                 >
                   <X size={12} strokeWidth={1.75} />
@@ -117,6 +117,7 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
               )}
             </React.Fragment>
           );
+
         })}
 
         {/* GitVista New Tab Button (+) */}
@@ -124,7 +125,7 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
           type="button"
           data-testid="btn-new-tab"
           onClick={handleNewTab}
-          className="flex items-center justify-center w-7 h-[30px] rounded-md text-secondary hover:text-primary hover:bg-surface/60 dark:hover:bg-white/[0.06] transition-colors ml-1 cursor-pointer shrink-0 mb-0.5"
+          className="flex items-center justify-center w-7 h-[30px] rounded-md text-secondary hover:text-primary hover:bg-surface/60 dark:hover:bg-white/[0.06] transition-colors ml-1 cursor-pointer shrink-0 mb-0.5 outline-none focus:outline-none focus-visible:outline-none"
           title="Mở tab mới (Home: Mở / Clone) (Ctrl+T)"
           aria-label="New tab"
         >
@@ -138,7 +139,7 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
           type="button"
           data-testid="btn-top-settings"
           onClick={() => openSettings()}
-          className="flex items-center justify-center w-7 h-7 rounded-md text-secondary hover:text-primary hover:bg-surface/60 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+          className="flex items-center justify-center w-7 h-7 rounded-md text-secondary hover:text-primary hover:bg-surface/60 dark:hover:bg-white/[0.06] transition-colors cursor-pointer outline-none focus:outline-none focus-visible:outline-none"
           title={`${t.settings.title} (Ctrl+,)`}
           aria-label={t.settings.title}
         >

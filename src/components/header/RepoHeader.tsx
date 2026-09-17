@@ -134,7 +134,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
               data-testid="tab-history"
               onClick={() => setActiveScreen("history")}
               className={clsx(
-                "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs cursor-pointer transition-all duration-150 btn-press",
+                "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs cursor-pointer transition-all duration-150 btn-press outline-none focus:outline-none",
                 isHistoryActive
                   ? "bg-surface text-primary shadow-xs border border-border-subtle font-bold"
                   : "bg-transparent text-secondary hover:text-primary font-medium"
@@ -152,7 +152,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
               data-testid="tab-changes"
               onClick={() => setActiveScreen("changes")}
               className={clsx(
-                "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs cursor-pointer transition-all duration-150 btn-press",
+                "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs cursor-pointer transition-all duration-150 btn-press outline-none focus:outline-none",
                 isChangesActive
                   ? "bg-surface text-primary shadow-xs border border-border-subtle font-bold"
                   : "bg-transparent text-secondary hover:text-primary font-medium"

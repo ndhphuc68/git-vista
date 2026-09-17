@@ -273,4 +273,13 @@
   scrollbar-width: none; /* Firefox */
 }
 
+/* Prevent default browser black focus outline / ring on mouse click while preserving keyboard accessibility */
+button:focus:not(:focus-visible),
+[role="tab"]:focus:not(:focus-visible),
+[data-testid^="tab"]:focus:not(:focus-visible),
+div:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 
