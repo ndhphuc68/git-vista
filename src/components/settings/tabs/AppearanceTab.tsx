@@ -2,6 +2,7 @@ import React from "react";
 import { Sun, Moon, Laptop, Eye, Sparkles, Clock, UserCheck } from "lucide-react";
 import { useTranslation } from "../../../i18n";
 import { useSettingsStore, Theme, Locale, DateFormat, AvatarStyle } from "../../../store/useSettingsStore";
+import { HelpTooltip } from "../HelpTooltip";
 
 export const AppearanceTab: React.FC = () => {
   const { t } = useTranslation();
@@ -55,9 +56,16 @@ export const AppearanceTab: React.FC = () => {
 
       {/* Theme Selector */}
       <div className="space-y-2">
-        <label className="text-xs font-medium text-secondary block">
-          {t.settings.appearance.themeTitle}
-        </label>
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs font-medium text-secondary block">
+            {t.settings.appearance.themeTitle}
+          </label>
+          <HelpTooltip
+            title={t.settings.help.appearanceThemeTitle}
+            description={t.settings.help.appearanceThemeDesc}
+            tag={t.settings.help.tagVisual}
+          />
+        </div>
         <div className="grid grid-cols-3 gap-3">
           {themeOptions.map((opt) => {
             const isSelected = theme === opt.value;
@@ -110,9 +118,16 @@ export const AppearanceTab: React.FC = () => {
 
       {/* Interface Mode */}
       <div className="space-y-2">
-        <label className="text-xs font-medium text-secondary block">
-          {t.settings.appearance.modeTitle}
-        </label>
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs font-medium text-secondary block">
+            {t.settings.appearance.modeTitle}
+          </label>
+          <HelpTooltip
+            title={t.settings.help.appearanceModeTitle}
+            description={t.settings.help.appearanceModeDesc}
+            tag={t.settings.help.tagWorkflow}
+          />
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
             type="button"

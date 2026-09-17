@@ -2,6 +2,8 @@ import React from "react";
 import { Columns, AlignLeft, Type, Hash, Space } from "lucide-react";
 import { useTranslation } from "../../../i18n";
 import { useSettingsStore, DiffViewMode, DiffFontSize, DiffTabSize } from "../../../store/useSettingsStore";
+import { HelpTooltip } from "../HelpTooltip";
+import { DiffModeDiagram, WhitespaceDiagram } from "../helpDiagrams";
 
 export const DiffViewerTab: React.FC = () => {
   const { t } = useTranslation();
@@ -59,9 +61,17 @@ export const DiffViewerTab: React.FC = () => {
 
       {/* View Mode */}
       <div className="space-y-2.5">
-        <label className="text-xs font-medium text-secondary block">
-          {t.settings.diff.viewModeTitle}
-        </label>
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs font-medium text-secondary block">
+            {t.settings.diff.viewModeTitle}
+          </label>
+          <HelpTooltip
+            title={t.settings.help.diffModeTitle}
+            description={t.settings.help.diffModeDesc}
+            tag={t.settings.help.tagVisual}
+            diagram={<DiffModeDiagram />}
+          />
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {viewModeOptions.map((opt) => {
             const isSelected = diffViewMode === opt.value;
@@ -99,6 +109,10 @@ export const DiffViewerTab: React.FC = () => {
           <label className="text-xs font-medium text-secondary block">
             {t.settings.diff.fontSizeTitle}
           </label>
+          <HelpTooltip
+            title={t.settings.help.diffFontSizeTitle}
+            description={t.settings.help.diffFontSizeDesc}
+          />
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {fontSizeOptions.map((opt) => {
@@ -157,9 +171,17 @@ export const DiffViewerTab: React.FC = () => {
         {/* Ignore Whitespace */}
         <div className="flex items-center justify-between p-3 rounded-lg bg-surface-header/20 border border-border-subtle">
           <div>
-            <span className="text-xs font-semibold text-primary block">
-              {t.settings.diff.whitespaceTitle}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-semibold text-primary block">
+                {t.settings.diff.whitespaceTitle}
+              </span>
+              <HelpTooltip
+                title={t.settings.help.diffWhitespaceTitle}
+                description={t.settings.help.diffWhitespaceDesc}
+                tag={t.settings.help.tagRecommended}
+                diagram={<WhitespaceDiagram />}
+              />
+            </div>
             <span className="text-[11px] text-secondary block mt-0.5">
               {t.settings.diff.whitespaceIgnoreDesc}
             </span>

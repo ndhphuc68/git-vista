@@ -6,6 +6,7 @@ import {
   DefaultEditor,
   DefaultTerminal,
 } from "../../../store/useSettingsStore";
+import { HelpTooltip } from "../HelpTooltip";
 
 export const ExternalToolsTab: React.FC = () => {
   const { t } = useTranslation();
@@ -49,9 +50,16 @@ export const ExternalToolsTab: React.FC = () => {
         <div className="flex items-center gap-2">
           <Code2 size={16} className="text-accent" />
           <div>
-            <label className="text-xs font-semibold text-primary block">
-              {t.settings.tools.editorTitle}
-            </label>
+            <div className="flex items-center gap-1.5">
+              <label className="text-xs font-semibold text-primary block">
+                {t.settings.tools.editorTitle}
+              </label>
+              <HelpTooltip
+                title={t.settings.help.toolsEditorTitle}
+                description={t.settings.help.toolsEditorDesc}
+                tag={t.settings.help.tagIntegration}
+              />
+            </div>
             <span className="text-[11px] text-secondary block">
               {t.settings.tools.editorDesc}
             </span>
@@ -110,9 +118,16 @@ export const ExternalToolsTab: React.FC = () => {
         <div className="flex items-center gap-2">
           <TerminalIcon size={16} className="text-accent" />
           <div>
-            <label className="text-xs font-semibold text-primary block">
-              {t.settings.tools.terminalTitle}
-            </label>
+            <div className="flex items-center gap-1.5">
+              <label className="text-xs font-semibold text-primary block">
+                {t.settings.tools.terminalTitle}
+              </label>
+              <HelpTooltip
+                title={t.settings.help.toolsTerminalTitle}
+                description={t.settings.help.toolsTerminalDesc}
+                tag={t.settings.help.tagIntegration}
+              />
+            </div>
             <span className="text-[11px] text-secondary block">
               {t.settings.tools.terminalDesc}
             </span>

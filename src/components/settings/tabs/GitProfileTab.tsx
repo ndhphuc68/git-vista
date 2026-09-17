@@ -4,6 +4,7 @@ import { useTranslation } from "../../../i18n";
 import { invokeCommand, GitConfigDto } from "../../../ipc/client";
 import { useToastStore } from "../../../store/useToastStore";
 import { useSettingsStore, CommitMessageLimit } from "../../../store/useSettingsStore";
+import { HelpTooltip } from "../HelpTooltip";
 
 interface GitProfileTabProps {
   currentRepoPath: string | null;
@@ -203,9 +204,16 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
       {/* Inherit vs Override Toggle (When in Repo Scope) */}
       {activeScope === "repo" && currentRepoPath && (
         <div className="space-y-2.5">
-          <label className="text-xs font-medium text-secondary block">
-            {t.settings.profile.scopeLabel}
-          </label>
+          <div className="flex items-center gap-1.5">
+            <label className="text-xs font-medium text-secondary block">
+              {t.settings.profile.scopeLabel}
+            </label>
+            <HelpTooltip
+              title={t.settings.help.profileScopeTitle}
+              description={t.settings.help.profileScopeDesc}
+              tag={t.settings.help.tagWorkflow}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <label
               className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
@@ -341,7 +349,14 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
           <div className="flex items-start gap-2">
             <ShieldCheck size={16} className="text-accent mt-0.5 shrink-0" />
             <div>
-              <div className="text-xs font-semibold text-primary">{t.settings.profile.gpgTitle}</div>
+              <div className="flex items-center gap-1.5">
+                <div className="text-xs font-semibold text-primary">{t.settings.profile.gpgTitle}</div>
+                <HelpTooltip
+                  title={t.settings.help.profileGpgTitle}
+                  description={t.settings.help.profileGpgDesc}
+                  tag={t.settings.help.tagSafety}
+                />
+              </div>
               <p className="text-[11px] text-secondary mt-0.5">{t.settings.profile.gpgDesc}</p>
             </div>
           </div>

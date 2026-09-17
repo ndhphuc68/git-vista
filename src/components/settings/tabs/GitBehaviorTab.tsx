@@ -4,6 +4,13 @@ import { useTranslation } from "../../../i18n";
 import { invokeCommand } from "../../../ipc/client";
 import { useToastStore } from "../../../store/useToastStore";
 import { useSettingsStore } from "../../../store/useSettingsStore";
+import { HelpTooltip } from "../HelpTooltip";
+import {
+  PullStrategyDiagram,
+  FetchPruneDiagram,
+  AutostashDiagram,
+  ConfirmationsDiagram,
+} from "../helpDiagrams";
 
 interface GitBehaviorTabProps {
   currentRepoPath: string | null;
@@ -203,9 +210,17 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
 
       {/* Pull Strategy */}
       <div className="space-y-2">
-        <label className="text-xs font-medium text-secondary block">
-          {t.settings.behavior.pullRebaseTitle}
-        </label>
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs font-medium text-secondary block">
+            {t.settings.behavior.pullRebaseTitle}
+          </label>
+          <HelpTooltip
+            title={t.settings.help.pullStrategyTitle}
+            description={t.settings.help.pullStrategyDesc}
+            tag={t.settings.help.tagWorkflow}
+            diagram={<PullStrategyDiagram />}
+          />
+        </div>
 
         {activeScope === "repo" && currentRepoPath ? (
           /* Repo Scope Options: Inherit vs Merge vs Rebase */
@@ -338,9 +353,17 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
           <div className="flex items-start gap-2.5">
             <Scissors size={16} className="text-accent mt-0.5 shrink-0" />
             <div>
-              <span className="text-xs font-semibold text-primary block">
-                {t.settings.behavior.fetchPruneTitle}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-semibold text-primary block">
+                  {t.settings.behavior.fetchPruneTitle}
+                </span>
+                <HelpTooltip
+                  title={t.settings.help.fetchPruneTitle}
+                  description={t.settings.help.fetchPruneDesc}
+                  tag={t.settings.help.tagRecommended}
+                  diagram={<FetchPruneDiagram />}
+                />
+              </div>
               <span className="text-[11px] text-secondary block mt-0.5">
                 {t.settings.behavior.fetchPruneDesc}
               </span>
@@ -370,9 +393,17 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
           <div className="flex items-start gap-2.5">
             <Archive size={16} className="text-accent mt-0.5 shrink-0" />
             <div>
-              <span className="text-xs font-semibold text-primary block">
-                {t.settings.behavior.rebaseAutostashTitle}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-semibold text-primary block">
+                  {t.settings.behavior.rebaseAutostashTitle}
+                </span>
+                <HelpTooltip
+                  title={t.settings.help.rebaseAutostashTitle}
+                  description={t.settings.help.rebaseAutostashDesc}
+                  tag={t.settings.help.tagRecommended}
+                  diagram={<AutostashDiagram />}
+                />
+              </div>
               <span className="text-[11px] text-secondary block mt-0.5">
                 {t.settings.behavior.rebaseAutostashDesc}
               </span>
@@ -405,6 +436,12 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
           <span className="text-xs font-semibold text-primary block">
             {t.settings.behavior.confirmationsTitle}
           </span>
+          <HelpTooltip
+            title={t.settings.help.confirmationsTitle}
+            description={t.settings.help.confirmationsDesc}
+            tag={t.settings.help.tagSafety}
+            diagram={<ConfirmationsDiagram />}
+          />
         </div>
 
         <div className="space-y-2">
@@ -489,6 +526,11 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
           <label className="text-xs font-medium text-primary">
             {t.settings.behavior.autoFetchTitle}
           </label>
+          <HelpTooltip
+            title={t.settings.help.autoFetchTitle}
+            description={t.settings.help.autoFetchDesc}
+            tag={t.settings.help.tagRecommended}
+          />
         </div>
         <p className="text-[11px] text-secondary">
           {t.settings.behavior.autoFetchDesc}
