@@ -9,9 +9,11 @@ pub mod conflict;
 pub mod discard;
 pub mod staging;
 pub mod stash;
+pub mod tags;
 pub mod undo;
 
 pub use backup::*;
 pub use config::*;
 pub use conflict::*;
+pub use tags::*;
 pub use undo::*;

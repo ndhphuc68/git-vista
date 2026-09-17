@@ -3,7 +3,9 @@ mod common;
 use common::fixtures::{create_clean_repo, test_signature};
 use std::fs;
 use std::path::Path;
+use visual_git_lib::error::AppError;
 use visual_git_lib::read::{get_repo_commit_graph, list_repo_tags};
+use visual_git_lib::write::{checkout_tag, create_tag, delete_tag};
 
 #[test]
 fn test_list_repo_tags_empty_repo() {
@@ -136,4 +138,112 @@ fn test_graph_peels_annotated_tags() {
         lw_badge.is_some(),
         "Lightweight tag badge should be present on commit node"
     );
+}
+
+#[test]
+fn test_create_tag_lightweight_and_annotated_validation() {
+    let (dir, repo) = create_clean_repo().expect("Failed to create clean repo");
+    let c1 = repo.head().unwrap().peel_to_commit().unwrap();
+    let c1_oid = c1.id().to_string();
+
+    // 1. Validation: empty name
+    let err_empty = create_tag(dir.path(), "", &c1_oid, None).unwrap_err();
+    assert!(matches!(err_empty, AppError::InvalidOperation(msg) if msg.contains("empty")));
+
+    // 2. Validation: whitespace only name
+    let err_ws = create_tag(dir.path(), "   ", &c1_oid, None).unwrap_err();
+    assert!(matches!(err_ws, AppError::InvalidOperation(msg) if msg.contains("empty")));
+
+    // 3. Validation: starts with '-'
+    let err_dash = create_tag(dir.path(), "-v1.0.0", &c1_oid, None).unwrap_err();
+    assert!(matches!(err_dash, AppError::InvalidOperation(msg) if msg.contains("'-'")));
+
+    // 4. Validation: invalid ref name characters
+    let err_invalid = create_tag(dir.path(), "tag with spaces", &c1_oid, None).unwrap_err();
+    assert!(matches!(err_invalid, AppError::InvalidOperation(msg) if msg.contains("Invalid tag name")));
+
+    // 5. Validation: invalid commit OID
+    let err_oid = create_tag(dir.path(), "valid-tag", "not-a-valid-oid", None).unwrap_err();
+    assert!(matches!(err_oid, AppError::Git(msg) if msg.contains("Invalid commit OID")));
+
+    // 6. Create lightweight tag
+    create_tag(dir.path(), "v1.0.0-lw", &c1_oid, None).expect("Failed to create lightweight tag");
+    let lw_ref = repo
+        .find_reference("refs/tags/v1.0.0-lw")
+        .expect("Lightweight tag ref should exist");
+    assert_eq!(lw_ref.peel_to_commit().unwrap().id(), c1.id());
+
+    // 7. Create annotated tag
+    create_tag(
+        dir.path(),
+        "v1.0.0-annotated",
+        &c1_oid,
+        Some("Release candidate 1.0.0"),
+    )
+    .expect("Failed to create annotated tag");
+    let ann_ref = repo
+        .find_reference("refs/tags/v1.0.0-annotated")
+        .expect("Annotated tag ref should exist");
+    assert_eq!(ann_ref.peel_to_commit().unwrap().id(), c1.id());
+    let tag_obj = ann_ref
+        .peel(git2::ObjectType::Tag)
+        .expect("Should peel to git2 Tag object");
+    let tag = tag_obj.as_tag().expect("Target object should be a Tag");
+    assert_eq!(tag.message(), Ok(Some("Release candidate 1.0.0")));
+    assert_eq!(tag.target_id(), c1.id());
+}
+
+#[test]
+fn test_checkout_tag_detached_head() {
+    let (dir, repo) = create_clean_repo().expect("Failed to create clean repo");
+    let c1 = repo.head().unwrap().peel_to_commit().unwrap();
+    let c1_oid = c1.id().to_string();
+
+    // Create tag on c1
+    create_tag(dir.path(), "v1.0.0", &c1_oid, None).expect("Failed to create tag");
+
+    // Add a second commit so HEAD is ahead of the tag
+    let file2 = dir.path().join("file2.txt");
+    fs::write(&file2, "second commit\n").unwrap();
+    let mut idx = repo.index().unwrap();
+    idx.add_path(Path::new("file2.txt")).unwrap();
+    let tree2_id = idx.write_tree().unwrap();
+    let tree2 = repo.find_tree(tree2_id).unwrap();
+    let sig = test_signature();
+    let c2_oid = repo
+        .commit(Some("HEAD"), &sig, &sig, "Second commit", &tree2, &[&c1])
+        .expect("Failed to commit");
+
+    // Repo is initially on branch, not detached
+    assert!(!repo.head_detached().unwrap());
+    assert_eq!(repo.head().unwrap().peel_to_commit().unwrap().id(), c2_oid);
+
+    // Checkout the tag
+    checkout_tag(dir.path(), "v1.0.0").expect("Failed to checkout tag");
+
+    // HEAD should now be detached pointing to c1
+    assert!(repo.head_detached().unwrap());
+    let current_head = repo.head().unwrap().peel_to_commit().unwrap();
+    assert_eq!(current_head.id(), c1.id());
+}
+
+#[test]
+fn test_delete_tag_local() {
+    let (dir, repo) = create_clean_repo().expect("Failed to create clean repo");
+    let c1 = repo.head().unwrap().peel_to_commit().unwrap();
+    let c1_oid = c1.id().to_string();
+
+    // 1. Validation: empty tag name
+    let err_empty = delete_tag(dir.path(), "", false).unwrap_err();
+    assert!(matches!(err_empty, AppError::InvalidOperation(_)));
+
+    // 2. Create tag
+    create_tag(dir.path(), "v1.0.0-to-delete", &c1_oid, None).expect("Failed to create tag");
+    assert!(repo.find_reference("refs/tags/v1.0.0-to-delete").is_ok());
+
+    // 3. Delete tag locally (delete_remote: false)
+    delete_tag(dir.path(), "v1.0.0-to-delete", false).expect("Failed to delete tag");
+
+    // 4. Verify ref is deleted
+    assert!(repo.find_reference("refs/tags/v1.0.0-to-delete").is_err());
 }
