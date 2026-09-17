@@ -1,6 +1,7 @@
 //! Module `exec`: Nơi duy nhất được phép spawn process thực thi `git` CLI (push, pull, fetch, rebase, merge).
 //! Đảm bảo thừa hưởng credentials, SSH agent, hook, và xử lý timeout/cancel tập trung.
 
+pub mod commit_actions;
 pub mod merge;
 pub mod remote;
 
