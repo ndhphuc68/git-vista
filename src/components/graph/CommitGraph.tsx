@@ -493,7 +493,7 @@ export const CommitGraph: React.FC = () => {
             left: `${contextMenu.x}px`,
             zIndex: 50,
           }}
-          className="w-52 bg-surface border border-border-subtle rounded-md shadow-xl py-1 text-xs flex flex-col animate-fade-in"
+          className="min-w-56 w-max bg-surface border border-border-subtle rounded-lg shadow-2xl py-1.5 text-xs flex flex-col animate-fade-in"
           onClick={(e) => e.stopPropagation()}
         >
           <button
@@ -503,9 +503,9 @@ export const CommitGraph: React.FC = () => {
               setCreateTagCommit(contextMenu.commit);
               setContextMenu(null);
             }}
-            className="flex items-center gap-2 px-3 py-1.5 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer transition-colors"
+            className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors"
           >
-            <Tag size={13} className="shrink-0 text-secondary" />
+            <Tag size={14} className="shrink-0 text-secondary" />
             <span>{t.graph.createTagHere}</span>
           </button>
 
@@ -516,9 +516,9 @@ export const CommitGraph: React.FC = () => {
               setCreateBranchCommit(contextMenu.commit);
               setContextMenu(null);
             }}
-            className="flex items-center gap-2 px-3 py-1.5 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer transition-colors"
+            className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors"
           >
-            <GitBranch size={13} className="shrink-0 text-secondary" />
+            <GitBranch size={14} className="shrink-0 text-secondary" />
             <span>{t.graph.createBranchHere}</span>
           </button>
 
@@ -529,9 +529,9 @@ export const CommitGraph: React.FC = () => {
               setCherryPickCommit(contextMenu.commit);
               setContextMenu(null);
             }}
-            className="flex items-center gap-2 px-3 py-1.5 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer transition-colors"
+            className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors"
           >
-            <GitPullRequest size={13} className="shrink-0 text-secondary" />
+            <GitPullRequest size={14} className="shrink-0 text-secondary" />
             <span>{t.graph.cherryPickHere}</span>
           </button>
 
@@ -542,9 +542,9 @@ export const CommitGraph: React.FC = () => {
               setRevertCommit(contextMenu.commit);
               setContextMenu(null);
             }}
-            className="flex items-center gap-2 px-3 py-1.5 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer transition-colors"
+            className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors"
           >
-            <RotateCcw size={13} className="shrink-0 text-secondary" />
+            <RotateCcw size={14} className="shrink-0 text-secondary" />
             <span>{t.graph.revertHere}</span>
           </button>
 
@@ -552,9 +552,9 @@ export const CommitGraph: React.FC = () => {
             type="button"
             role="menuitem"
             onClick={() => handleCopySha(contextMenu.commit.id)}
-            className="flex items-center gap-2 px-3 py-1.5 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer transition-colors border-t border-border-subtle/50 mt-0.5 pt-1.5"
+            className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors border-t border-border-subtle/50 mt-1 pt-2"
           >
-            <Copy size={13} className="shrink-0 text-secondary" />
+            <Copy size={14} className="shrink-0 text-secondary" />
             <span>{t.graph.copySha}</span>
           </button>
         </div>

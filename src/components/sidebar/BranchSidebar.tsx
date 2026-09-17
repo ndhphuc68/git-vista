@@ -421,7 +421,7 @@ export const BranchSidebar: React.FC = () => {
           {isMenuOpen && (
             <div
               ref={menuRef}
-              className="absolute right-0 top-full mt-1 w-44 bg-surface border border-border-subtle rounded-md shadow-xl py-1 z-50 text-xs flex flex-col"
+              className="absolute right-0 top-full mt-1 min-w-56 w-max bg-surface border border-border-subtle rounded-lg shadow-2xl py-1.5 z-50 text-xs flex flex-col animate-fade-in"
               onClick={(e) => e.stopPropagation()}
             >
               {!branch.is_head && (
@@ -429,9 +429,9 @@ export const BranchSidebar: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => handleCheckout(branch.name)}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                    className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
                   >
-                    <Check size={13} className="text-accent" />
+                    <Check size={14} className="text-accent shrink-0" />
                     <span>{t.sidebar.checkoutBranch}</span>
                   </button>
 
@@ -441,9 +441,9 @@ export const BranchSidebar: React.FC = () => {
                       setMenuBranch(null);
                       setMergeModal({ targetBranch: branch.name });
                     }}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                    className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
                   >
-                    <GitMerge size={13} className="text-secondary" />
+                    <GitMerge size={14} className="text-secondary shrink-0" />
                     <span>{t.sidebar.mergeIntoCurrent}</span>
                   </button>
 
@@ -453,9 +453,9 @@ export const BranchSidebar: React.FC = () => {
                       setMenuBranch(null);
                       setRebaseModal({ upstreamBranch: branch.name });
                     }}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                    className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
                   >
-                    <GitCommit size={13} className="text-secondary" />
+                    <GitCommit size={14} className="text-secondary shrink-0" />
                     <span>{t.sidebar.rebaseOntoThis}</span>
                   </button>
                 </>
@@ -467,9 +467,9 @@ export const BranchSidebar: React.FC = () => {
                   setMenuBranch(null);
                   setRenameBranchName(branch.name);
                 }}
-                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
               >
-                <Edit3 size={13} className="text-secondary" />
+                <Edit3 size={14} className="text-secondary shrink-0" />
                 <span>{t.sidebar.renameBranch}</span>
               </button>
 
@@ -480,9 +480,9 @@ export const BranchSidebar: React.FC = () => {
                     setMenuBranch(null);
                     setDeleteBranchName(branch.name);
                   }}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-diff-remove-text hover:bg-diff-remove-bg cursor-pointer text-left w-full transition-colors"
+                  className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-diff-remove-text hover:bg-diff-remove-bg cursor-pointer text-left w-full whitespace-nowrap transition-colors"
                 >
-                  <Trash2 size={13} />
+                  <Trash2 size={14} className="shrink-0" />
                   <span>{t.sidebar.deleteBranch}</span>
                 </button>
               )}
@@ -583,15 +583,15 @@ export const BranchSidebar: React.FC = () => {
           {isMenuOpen && (
             <div
               ref={menuRef}
-              className="absolute right-0 top-full mt-1 w-44 bg-surface border border-border-subtle rounded-md shadow-xl py-1 z-50 text-xs flex flex-col"
+              className="absolute right-0 top-full mt-1 min-w-56 w-max bg-surface border border-border-subtle rounded-lg shadow-2xl py-1.5 z-50 text-xs flex flex-col animate-fade-in"
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 type="button"
                 onClick={() => handleCheckout(branch.name)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
               >
-                <Check size={13} className="text-accent" />
+                <Check size={14} className="text-accent shrink-0" />
                 <span>{t.sidebar.checkoutBranch}</span>
               </button>
 
@@ -601,9 +601,9 @@ export const BranchSidebar: React.FC = () => {
                   setMenuBranch(null);
                   setMergeModal({ targetBranch: branch.name });
                 }}
-                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
               >
-                <GitMerge size={13} className="text-secondary" />
+                <GitMerge size={14} className="text-secondary shrink-0" />
                 <span>{t.sidebar.mergeIntoCurrent}</span>
               </button>
 
@@ -613,9 +613,9 @@ export const BranchSidebar: React.FC = () => {
                   setMenuBranch(null);
                   setRebaseModal({ upstreamBranch: branch.name });
                 }}
-                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
               >
-                <GitCommit size={13} className="text-secondary" />
+                <GitCommit size={14} className="text-secondary shrink-0" />
                 <span>{t.sidebar.rebaseOntoThis}</span>
               </button>
             </div>
@@ -809,15 +809,15 @@ export const BranchSidebar: React.FC = () => {
                           {isMenuOpen && (
                             <div
                               ref={tagMenuRef}
-                              className="absolute right-0 top-full mt-1 w-52 bg-surface border border-border-subtle rounded-md shadow-xl py-1 z-50 text-xs flex flex-col"
+                              className="absolute right-0 top-full mt-1 min-w-56 w-max bg-surface border border-border-subtle rounded-lg shadow-2xl py-1.5 z-50 text-xs flex flex-col animate-fade-in"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <button
                                 type="button"
                                 onClick={() => handleCheckoutTag(tag)}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                                className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
                               >
-                                <Check size={13} className="text-accent" />
+                                <Check size={14} className="text-accent shrink-0" />
                                 <span>{t.sidebar.checkoutTag}</span>
                               </button>
 
@@ -828,18 +828,18 @@ export const BranchSidebar: React.FC = () => {
                                   setCreateBranchTarget(tag.target_commit_id);
                                   setIsCreateOpen(true);
                                 }}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                                className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
                               >
-                                <GitBranch size={13} className="text-secondary" />
+                                <GitBranch size={14} className="text-secondary shrink-0" />
                                 <span>{t.sidebar.createBranchFromTag}</span>
                               </button>
 
                               <button
                                 type="button"
                                 onClick={() => handlePushTag(tag)}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full transition-colors"
+                                className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
                               >
-                                <Cloud size={13} className="text-secondary" />
+                                <Cloud size={14} className="text-secondary shrink-0" />
                                 <span>{t.sidebar.pushTag}</span>
                               </button>
 
@@ -849,9 +849,9 @@ export const BranchSidebar: React.FC = () => {
                                   setTagMenuOpenName(null);
                                   setDeleteTagItem(tag);
                                 }}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-transparent border-0 text-diff-remove-text hover:bg-diff-remove-bg cursor-pointer text-left w-full transition-colors"
+                                className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-diff-remove-text hover:bg-diff-remove-bg cursor-pointer text-left w-full whitespace-nowrap transition-colors"
                               >
-                                <Trash2 size={13} />
+                                <Trash2 size={14} className="shrink-0" />
                                 <span>{t.sidebar.deleteTag}</span>
                               </button>
                             </div>

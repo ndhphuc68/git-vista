@@ -48,16 +48,16 @@ describe("CommitGraph Context Menu", () => {
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
     expect(
-      screen.getByText(/Create tag here\.\.\.|Tạo thẻ tại đây\.\.\./i)
+      screen.getByText(/Create tag here|Tạo thẻ tại đây/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Create branch here\.\.\.|Tạo nhánh tại đây\.\.\./i)
+      screen.getByText(/Create branch here|Tạo nhánh tại đây/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Cherry-pick into current branch\.\.\.|Cherry-pick vào nhánh hiện tại\.\.\./i)
+      screen.getByText(/Cherry-pick into current branch|Cherry-pick vào nhánh hiện tại/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Revert this commit\.\.\.|Hoàn tác \(Revert\) commit này\.\.\./i)
+      screen.getByText(/Revert this commit|Hoàn tác \(Revert\) commit này/i)
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Copy commit SHA|Sao chép mã commit \(SHA\)/i)
@@ -74,7 +74,7 @@ describe("CommitGraph Context Menu", () => {
     const commitRow = await screen.findByText("feat(m1): visual git viewer");
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
-    const createTagAction = screen.getByText(/Create tag here\.\.\.|Tạo thẻ tại đây\.\.\./i);
+    const createTagAction = screen.getByText(/Create tag here|Tạo thẻ tại đây/i);
     fireEvent.click(createTagAction);
 
     // Modal should be opened with target commit info
@@ -95,7 +95,7 @@ describe("CommitGraph Context Menu", () => {
     const commitRow = await screen.findByText("feat(m1): visual git viewer");
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
-    const createBranchAction = screen.getByText(/Create branch here\.\.\.|Tạo nhánh tại đây\.\.\./i);
+    const createBranchAction = screen.getByText(/Create branch here|Tạo nhánh tại đây/i);
     fireEvent.click(createBranchAction);
 
     await waitFor(() => {
@@ -114,7 +114,7 @@ describe("CommitGraph Context Menu", () => {
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
     const cherryPickAction = screen.getByText(
-      /Cherry-pick into current branch\.\.\.|Cherry-pick vào nhánh hiện tại\.\.\./i
+      /Cherry-pick into current branch|Cherry-pick vào nhánh hiện tại/i
     );
     fireEvent.click(cherryPickAction);
 
@@ -138,7 +138,7 @@ describe("CommitGraph Context Menu", () => {
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
     const revertAction = screen.getByText(
-      /Revert this commit\.\.\.|Hoàn tác \(Revert\) commit này\.\.\./i
+      /Revert this commit|Hoàn tác \(Revert\) commit này/i
     );
     fireEvent.click(revertAction);
 
@@ -171,7 +171,7 @@ describe("CommitGraph Context Menu", () => {
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
     const cherryPickAction = screen.getByText(
-      /Cherry-pick into current branch\.\.\.|Cherry-pick vào nhánh hiện tại\.\.\./i
+      /Cherry-pick into current branch|Cherry-pick vào nhánh hiện tại/i
     );
     fireEvent.click(cherryPickAction);
 
@@ -221,7 +221,7 @@ describe("CommitGraph Context Menu", () => {
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
     const cherryPickAction = screen.getByText(
-      /Cherry-pick into current branch\.\.\.|Cherry-pick vào nhánh hiện tại\.\.\./i
+      /Cherry-pick into current branch|Cherry-pick vào nhánh hiện tại/i
     );
     fireEvent.click(cherryPickAction);
 
@@ -258,7 +258,7 @@ describe("CommitGraph Context Menu", () => {
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
     const cherryPickAction = screen.getByText(
-      /Cherry-pick into current branch\.\.\.|Cherry-pick vào nhánh hiện tại\.\.\./i
+      /Cherry-pick into current branch|Cherry-pick vào nhánh hiện tại/i
     );
     fireEvent.click(cherryPickAction);
 
@@ -298,7 +298,7 @@ describe("CommitGraph Context Menu", () => {
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
     const revertAction = screen.getByText(
-      /Revert this commit\.\.\.|Hoàn tác \(Revert\) commit này\.\.\./i
+      /Revert this commit|Hoàn tác \(Revert\) commit này/i
     );
     fireEvent.click(revertAction);
 
@@ -345,7 +345,7 @@ describe("CommitGraph Context Menu", () => {
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
     const revertAction = screen.getByText(
-      /Revert this commit\.\.\.|Hoàn tác \(Revert\) commit này\.\.\./i
+      /Revert this commit|Hoàn tác \(Revert\) commit này/i
     );
     fireEvent.click(revertAction);
 
@@ -382,7 +382,7 @@ describe("CommitGraph Context Menu", () => {
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
     const revertAction = screen.getByText(
-      /Revert this commit\.\.\.|Hoàn tác \(Revert\) commit này\.\.\./i
+      /Revert this commit|Hoàn tác \(Revert\) commit này/i
     );
     fireEvent.click(revertAction);
 
@@ -413,13 +413,13 @@ describe("CommitGraph Context Menu", () => {
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
     expect(
-      screen.getByText(/Create tag here\.\.\.|Tạo thẻ tại đây\.\.\./i)
+      screen.getByText(/Create tag here|Tạo thẻ tại đây/i)
     ).toBeInTheDocument();
 
     fireEvent.keyDown(window, { key: "Escape" });
 
     expect(
-      screen.queryByText(/Create tag here\.\.\.|Tạo thẻ tại đây\.\.\./i)
+      screen.queryByText(/Create tag here|Tạo thẻ tại đây/i)
     ).not.toBeInTheDocument();
   });
 
