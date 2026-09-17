@@ -58,3 +58,7 @@ Desktop.ini
 test-results/
 playwright-report/
 wdio-logs/
+
+# Ensure repository documentation is tracked
+!docs/
+!docs/**
