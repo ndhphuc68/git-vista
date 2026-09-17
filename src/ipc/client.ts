@@ -16,6 +16,7 @@ import {
   RepoStateInfo,
   MergeResult,
   RebaseResult,
+  CommitActionResult,
   ConflictHunk,
   ConflictFileData,
   ConfigScope,
@@ -802,6 +803,50 @@ export const invokeCommand = {
     return await invoke<RebaseResult>("rebase_branch", { repoPath, upstreamBranch });
   },
 
+  cherryPickCommit: async (
+    repoPath: string,
+    commitId: string,
+    autoCommit: boolean = true
+  ): Promise<CommitActionResult> => {
+    if (!isTauri()) {
+      return {
+        success: true,
+        status: autoCommit ? "Committed" : "Staged",
+        new_commit_id: autoCommit ? "mock_cherry_pick_" + commitId.slice(0, 7) : null,
+        undo_token: autoCommit ? "refs/gitui-backup/commit-undo-mock" : null,
+        output: "Mock cherry-pick output",
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<CommitActionResult>("cherry_pick_commit", {
+      repoPath,
+      commitId,
+      autoCommit,
+    });
+  },
+
+  revertCommit: async (
+    repoPath: string,
+    commitId: string,
+    autoCommit: boolean = true
+  ): Promise<CommitActionResult> => {
+    if (!isTauri()) {
+      return {
+        success: true,
+        status: autoCommit ? "Committed" : "Staged",
+        new_commit_id: autoCommit ? "mock_revert_" + commitId.slice(0, 7) : null,
+        undo_token: autoCommit ? "refs/gitui-backup/commit-undo-mock" : null,
+        output: "Mock revert output",
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<CommitActionResult>("revert_commit", {
+      repoPath,
+      commitId,
+      autoCommit,
+    });
+  },
+
   abortInProgress: async (
     repoPath: string,
     operation: string
@@ -1030,6 +1075,7 @@ export type {
   RepoStateInfo,
   MergeResult,
   RebaseResult,
+  CommitActionResult,
   ConflictHunk,
   ConflictFileData,
   ConfigScope,

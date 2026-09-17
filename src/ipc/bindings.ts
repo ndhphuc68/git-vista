@@ -188,6 +188,15 @@ export interface RebaseResult {
   output: string;
 }
 
+export interface CommitActionResult {
+  success: boolean;
+  status: "Committed" | "Staged" | "Conflict" | "Error" | string;
+  new_commit_id?: string | null;
+  undo_token?: string | null;
+  output: string;
+}
+
+
 export interface ConflictHunk {
   id: string;
   is_conflict: boolean;
