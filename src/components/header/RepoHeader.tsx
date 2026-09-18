@@ -242,9 +242,9 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
             {/* Refresh button */}
             <button
               onClick={() =>
-                // Nút refresh thủ công của người dùng: cố ý làm mới toàn bộ cache,
-                // không chỉ riêng repo hiện tại.
-                queryClient.invalidateQueries()
+                // Nhãn nút là "Tải lại dữ liệu repo" (số ít): chỉ làm mới cache
+                // của repo hiện tại, không đụng đến các repo khác đang mở ở tab khác.
+                queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo?.path ?? "") })
               }
               className="flex items-center justify-center w-7 h-7 bg-surface border border-border-subtle rounded-md text-secondary cursor-pointer hover:bg-surface-hover hover:text-primary transition-colors shadow-2xs"
               title={t.header.refreshRepo}
