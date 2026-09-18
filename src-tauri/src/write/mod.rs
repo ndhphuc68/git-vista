@@ -7,6 +7,7 @@ pub mod commit;
 pub mod config;
 pub mod conflict;
 pub mod discard;
+pub mod github_config;
 pub mod remote;
 pub mod staging;
 pub mod stash;

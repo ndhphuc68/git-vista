@@ -9,6 +9,7 @@ pub mod config;
 pub mod conflict;
 pub mod diff;
 pub mod file_history;
+pub mod github;
 pub mod graph;
 pub mod rebase;
 pub mod remote;

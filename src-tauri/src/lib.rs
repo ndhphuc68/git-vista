@@ -82,7 +82,11 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         get_rebase_commits,
         execute_interactive_rebase,
         compare_commits,
-        get_compare_file_diff
+        get_compare_file_diff,
+        get_github_repo_info,
+        get_github_token,
+        save_github_token,
+        remove_github_token
     ])
 }
 
