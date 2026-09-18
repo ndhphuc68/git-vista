@@ -318,6 +318,43 @@ export interface InteractiveRebaseResult {
   output: string;
 }
 
+export type CompareMode = "MergeBase" | "Direct";
+
+export interface CompareCommitItem {
+  id: string;
+  short_id: string;
+  summary: string;
+  author_name: string;
+  author_email: string;
+  timestamp: number;
+  parent_ids: string[];
+}
+
+export interface CompareFileItem {
+  path: string;
+  old_path?: string | null;
+  status: string;
+  additions: number;
+  deletions: number;
+  is_binary: boolean;
+}
+
+export interface CompareSummary {
+  base_rev: string;
+  target_rev: string;
+  resolved_base_oid: string;
+  resolved_target_oid: string;
+  effective_base_oid: string;
+  merge_base_oid?: string | null;
+  mode: CompareMode;
+  ahead_count: number;
+  behind_count: number;
+  commits: CompareCommitItem[];
+  files: CompareFileItem[];
+  total_additions: number;
+  total_deletions: number;
+}
+
 export interface Commands {
   get_commit_file_diff: (
     repoPath: string,
@@ -342,4 +379,18 @@ export interface Commands {
     offset?: number | null,
     limit?: number | null
   ) => Promise<FileHistoryResult>;
+  compare_commits: (
+    repoPath: string,
+    baseRev: string,
+    targetRev: string,
+    mode: CompareMode
+  ) => Promise<CompareSummary>;
+  get_compare_file_diff: (
+    repoPath: string,
+    baseRev: string,
+    targetRev: string,
+    filePath: string,
+    mode: CompareMode,
+    ignoreWhitespace?: boolean | null
+  ) => Promise<FileDiffResult>;
 }

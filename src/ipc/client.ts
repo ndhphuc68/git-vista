@@ -30,6 +30,10 @@ import {
   RebaseActionKind,
   RebasePlanStep,
   InteractiveRebaseResult,
+  CompareMode,
+  CompareCommitItem,
+  CompareFileItem,
+  CompareSummary,
 } from "./bindings";
 
 let mockTags: TagItem[] = [
@@ -212,6 +216,112 @@ export function resetMockGitConfig() {
     rebaseAutostash: false,
   };
   mockLocalConfigs = {};
+}
+
+let mockCompareSummary: CompareSummary = {
+  base_rev: "main",
+  target_rev: "feature/auth",
+  resolved_base_oid: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
+  resolved_target_oid: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+  effective_base_oid: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
+  merge_base_oid: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
+  mode: "MergeBase",
+  ahead_count: 2,
+  behind_count: 0,
+  commits: [
+    {
+      id: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+      short_id: "a1b2c3d",
+      summary: "feat: implement user authentication flow",
+      author_name: "GitVista User",
+      author_email: "user@gitvista.dev",
+      timestamp: Math.floor(Date.now() / 1000) - 3600,
+      parent_ids: ["b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1"],
+    },
+    {
+      id: "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1",
+      short_id: "b2c3d4e",
+      summary: "chore: setup oauth config",
+      author_name: "GitVista User",
+      author_email: "user@gitvista.dev",
+      timestamp: Math.floor(Date.now() / 1000) - 7200,
+      parent_ids: ["c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0"],
+    },
+  ],
+  files: [
+    {
+      path: "src/auth.ts",
+      old_path: null,
+      status: "Modified",
+      additions: 45,
+      deletions: 12,
+      is_binary: false,
+    },
+    {
+      path: "src/config.ts",
+      old_path: null,
+      status: "Added",
+      additions: 20,
+      deletions: 0,
+      is_binary: false,
+    },
+  ],
+  total_additions: 65,
+  total_deletions: 12,
+};
+
+export function resetMockCompareData() {
+  mockCompareSummary = {
+    base_rev: "main",
+    target_rev: "feature/auth",
+    resolved_base_oid: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
+    resolved_target_oid: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+    effective_base_oid: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
+    merge_base_oid: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
+    mode: "MergeBase",
+    ahead_count: 2,
+    behind_count: 0,
+    commits: [
+      {
+        id: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+        short_id: "a1b2c3d",
+        summary: "feat: implement user authentication flow",
+        author_name: "GitVista User",
+        author_email: "user@gitvista.dev",
+        timestamp: Math.floor(Date.now() / 1000) - 3600,
+        parent_ids: ["b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1"],
+      },
+      {
+        id: "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1",
+        short_id: "b2c3d4e",
+        summary: "chore: setup oauth config",
+        author_name: "GitVista User",
+        author_email: "user@gitvista.dev",
+        timestamp: Math.floor(Date.now() / 1000) - 7200,
+        parent_ids: ["c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0"],
+      },
+    ],
+    files: [
+      {
+        path: "src/auth.ts",
+        old_path: null,
+        status: "Modified",
+        additions: 45,
+        deletions: 12,
+        is_binary: false,
+      },
+      {
+        path: "src/config.ts",
+        old_path: null,
+        status: "Added",
+        additions: 20,
+        deletions: 0,
+        is_binary: false,
+      },
+    ],
+    total_additions: 65,
+    total_deletions: 12,
+  };
 }
 
 // Helper kiểm tra môi trường chạy có phải trong Tauri runtime không
@@ -1443,6 +1553,72 @@ export const invokeCommand = {
       value,
     });
   },
+
+  compareCommits: async (
+    repoPath: string,
+    baseRev: string,
+    targetRev: string,
+    mode: CompareMode
+  ): Promise<CompareSummary> => {
+    if (!isTauri()) {
+      return {
+        ...mockCompareSummary,
+        base_rev: baseRev,
+        target_rev: targetRev,
+        mode,
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<CompareSummary>("compare_commits", {
+      repoPath,
+      baseRev,
+      targetRev,
+      mode,
+    });
+  },
+
+  getCompareFileDiff: async (
+    repoPath: string,
+    baseRev: string,
+    targetRev: string,
+    filePath: string,
+    mode: CompareMode,
+    ignoreWhitespace?: boolean
+  ): Promise<FileDiffResult> => {
+    if (!isTauri()) {
+      return {
+        file_path: filePath,
+        status: "modified",
+        additions: 3,
+        deletions: 1,
+        hunks: [
+          {
+            header: "@@ -1,4 +1,6 @@",
+            old_start: 1,
+            old_lines: 4,
+            new_start: 1,
+            new_lines: 6,
+            lines: [
+              { line_type: "context", content: " import { useState } from 'react';\n", old_lineno: 1, new_lineno: 1 },
+              { line_type: "delete", content: "- const isAuth = false;\n", old_lineno: 2, new_lineno: null },
+              { line_type: "add", content: "+ const isAuth = true;\n", old_lineno: null, new_lineno: 2 },
+              { line_type: "add", content: "+ export const token = 'jwt-token';\n", old_lineno: null, new_lineno: 3 },
+              { line_type: "context", content: " export default function Auth() {}\n", old_lineno: 3, new_lineno: 4 },
+            ],
+          },
+        ],
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<FileDiffResult>("get_compare_file_diff", {
+      repoPath,
+      baseRev,
+      targetRev,
+      filePath,
+      mode,
+      ignoreWhitespace: ignoreWhitespace ?? false,
+    });
+  },
 };
 
 export async function listenToRepoChanged(
@@ -1507,5 +1683,9 @@ export type {
   RebaseActionKind,
   RebasePlanStep,
   InteractiveRebaseResult,
+  CompareMode,
+  CompareCommitItem,
+  CompareFileItem,
+  CompareSummary,
 };
 
