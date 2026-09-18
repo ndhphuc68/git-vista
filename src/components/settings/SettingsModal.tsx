@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Settings, X, User, Palette, Sliders, Globe, FolderGit2, FileCode, Terminal } from "lucide-react";
+import { Settings, X, User, Palette, Sliders, Globe, FolderGit2, FileCode, Terminal, GitPullRequest } from "lucide-react";
 import { useTranslation } from "../../i18n";
 import { useSettingsStore, SettingsTab } from "../../store/useSettingsStore";
 import { useTabStore } from "../../store/useTabStore";
@@ -9,6 +9,7 @@ import { AppearanceTab } from "./tabs/AppearanceTab";
 import { GitBehaviorTab } from "./tabs/GitBehaviorTab";
 import { DiffViewerTab } from "./tabs/DiffViewerTab";
 import { ExternalToolsTab } from "./tabs/ExternalToolsTab";
+import { GitHubSettingsTab } from "./tabs/GitHubSettingsTab";
 
 interface SettingsModalProps {
   currentRepoPath: string | null;
@@ -64,6 +65,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
     { id: "diff", label: t.settings.tabs.diff, icon: <FileCode size={16} /> },
     { id: "behavior", label: t.settings.tabs.behavior, icon: <Sliders size={16} /> },
     { id: "tools", label: t.settings.tabs.tools, icon: <Terminal size={16} /> },
+    { id: "github", label: t.settings.tabs.github, icon: <GitPullRequest size={16} /> },
   ];
 
   const getRepoDisplayName = (path: string) => {
@@ -234,6 +236,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
                   />
                 )}
                 {activeTab === "tools" && <ExternalToolsTab />}
+                {activeTab === "github" && <GitHubSettingsTab />}
               </div>
             </div>
           </div>

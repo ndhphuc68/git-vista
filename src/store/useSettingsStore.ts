@@ -3,7 +3,7 @@ import { create } from "zustand";
 export type Theme = "light" | "dark" | "system";
 export type Locale = "vi" | "en";
 export type AppMode = "simple" | "advanced";
-export type SettingsTab = "profile" | "appearance" | "diff" | "behavior" | "tools";
+export type SettingsTab = "profile" | "appearance" | "diff" | "behavior" | "tools" | "github";
 
 export type DateFormat = "relative" | "absolute";
 export type AvatarStyle = "initials" | "gravatar" | "none";
