@@ -28,6 +28,7 @@ import { PullRequestDetailDrawer, CreatePullRequestModal } from "./components/pu
 import { usePullRequestStore } from "./store/usePullRequestStore";
 import { useCommandPaletteStore } from "./store/useCommandPaletteStore";
 import { type CommandContext } from "./utils/commandRegistry";
+import { qk } from "./domain/queryKeys";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,19 +57,21 @@ const RepoContent: React.FC<RepoContentProps> = ({
     useViewStore();
 
   const { data: repoState } = useQuery({
-    queryKey: ["repo_state", currentRepo.path],
+    queryKey: qk.repo.state(currentRepo.path),
     queryFn: () => invokeCommand.getRepoState(currentRepo.path),
     enabled: Boolean(currentRepo),
   });
 
   const handleAbort = async (operation: string) => {
     await invokeCommand.abortInProgress(currentRepo.path, operation);
-    queryClient.invalidateQueries();
+    // Thao tác Git trên repo hiện tại: chỉ làm mới cache của repo này
+    queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleContinue = async (operation: string) => {
     await invokeCommand.continueInProgress(currentRepo.path, operation);
-    queryClient.invalidateQueries();
+    // Thao tác Git trên repo hiện tại: chỉ làm mới cache của repo này
+    queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   return (
@@ -96,7 +99,8 @@ const RepoContent: React.FC<RepoContentProps> = ({
                 true
               );
               closeConflictResolver();
-              queryClient.invalidateQueries();
+              // Thao tác Git trên repo hiện tại: chỉ làm mới cache của repo này
+              queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
             }}
           />
         ) : (
@@ -107,7 +111,10 @@ const RepoContent: React.FC<RepoContentProps> = ({
         isOpen={isGlobalCreateBranchOpen}
         onClose={() => setIsGlobalCreateBranchOpen(false)}
         repoPath={currentRepo.path}
-        onSuccess={() => queryClient.invalidateQueries()}
+        onSuccess={() =>
+          // Tạo nhánh mới trên repo hiện tại: chỉ làm mới cache của repo này
+          queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) })
+        }
       />
       <FileInspectorDrawer repoPath={currentRepo.path} />
       <PullRequestDetailDrawer repoPath={currentRepo.path} />
@@ -280,6 +287,8 @@ export const App: React.FC<AppProps> = ({
           },
         });
       } else {
+        // Sự kiện repo-changed không kèm repo_path (không rõ repo nào bị ảnh hưởng):
+        // cố ý xoá sạch toàn bộ cache thay vì đoán sai phạm vi và để lại dữ liệu cũ.
         queryClient.invalidateQueries();
       }
     }).then((unlisten) => {
@@ -338,7 +347,8 @@ export const App: React.FC<AppProps> = ({
             baseCommitId={useRepoStore.getState().selectedCommitId || "HEAD~5"}
             onRebaseSuccess={() => {
               setIsGlobalInteractiveRebaseOpen(false);
-              queryClient.invalidateQueries();
+              // Rebase tương tác trên repo hiện tại: chỉ làm mới cache của repo này
+              queryClient.invalidateQueries({ queryKey: qk.repo.all(repoToDisplay.path) });
             }}
           />
         )}

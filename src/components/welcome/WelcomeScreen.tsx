@@ -21,6 +21,7 @@ import { type RepoSummary } from "../../ipc/bindings";
 import { useTranslation } from "../../i18n";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { CloneModal } from "./CloneModal";
+import { qk } from "../../domain/queryKeys";
 
 interface WelcomeScreenProps {
   onSelectRepo: (repo: RepoSummary) => void;
@@ -81,7 +82,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRepo }) =>
   const queryClient = useQueryClient();
 
   const { data: recents = [], isLoading } = useQuery({
-    queryKey: ["recent-repos"],
+    queryKey: qk.recentRepos(),
     queryFn: () => invokeCommand.getRecentRepos(),
   });
 
@@ -111,7 +112,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRepo }) =>
   const handleClearRecents = async () => {
     try {
       await invokeCommand.clearRecentRepos();
-      await queryClient.invalidateQueries({ queryKey: ["recent-repos"] });
+      await queryClient.invalidateQueries({ queryKey: qk.recentRepos() });
     } catch (err) {
       console.warn("Error clearing recents:", err);
     }
@@ -121,7 +122,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRepo }) =>
     e.stopPropagation();
     try {
       await invokeCommand.removeRecentRepo(path);
-      await queryClient.invalidateQueries({ queryKey: ["recent-repos"] });
+      await queryClient.invalidateQueries({ queryKey: qk.recentRepos() });
     } catch (err) {
       console.warn("Error removing recent repo:", err);
     }
