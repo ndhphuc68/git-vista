@@ -258,9 +258,16 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
   };
 
   return (
-    <Transition show={isOpen} duration={150}>
+    <Transition
+      show={isOpen}
+      duration={150}
+      className="fixed inset-0 z-[9999]"
+      enterClass="animate-fade-in"
+      exitClass="opacity-0 transition-opacity duration-150 ease-macos pointer-events-none"
+      unmountOnExit={true}
+    >
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
         onClick={onClose}
         role="dialog"
         aria-modal="true"

@@ -107,9 +107,16 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
 
   return (
     <>
-      <Transition show={isOpen} duration={150}>
+      <Transition
+        show={isOpen}
+        duration={150}
+        className="fixed inset-0 z-[9999]"
+        enterClass="animate-fade-in"
+        exitClass="opacity-0 transition-opacity duration-150 ease-macos pointer-events-none"
+        unmountOnExit={true}
+      >
         <div
-          className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
           onClick={onClose}
           role="dialog"
           aria-modal="true"
@@ -120,7 +127,7 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle bg-surface-hover/20">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle bg-surface-hover/20 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-lg bg-accent/10 text-accent">
                   <Cloud size={20} />
@@ -157,7 +164,7 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
             </div>
 
             {/* Content List */}
-            <div className="p-6 overflow-y-auto flex flex-col gap-3 flex-1">
+            <div className="p-6 overflow-y-auto flex flex-col gap-3 flex-1 min-h-0">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-12 text-secondary gap-2.5">
                   <Loader2 size={24} className="animate-spin text-accent" />
@@ -309,7 +316,7 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end px-6 py-3 border-t border-border-subtle bg-surface-hover/10">
+            <div className="flex items-center justify-end px-6 py-3 border-t border-border-subtle bg-surface-hover/10 shrink-0">
               <button
                 type="button"
                 onClick={onClose}

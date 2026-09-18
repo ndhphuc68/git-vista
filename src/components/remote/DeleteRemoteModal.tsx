@@ -68,20 +68,27 @@ export const DeleteRemoteModal: React.FC<DeleteRemoteModalProps> = ({
   };
 
   return (
-    <Transition show={isOpen} duration={150}>
+    <Transition
+      show={isOpen}
+      duration={150}
+      className="fixed inset-0 z-[10000]"
+      enterClass="animate-fade-in"
+      exitClass="opacity-0 transition-opacity duration-150 ease-macos pointer-events-none"
+      unmountOnExit={true}
+    >
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+        className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
         onClick={onClose}
         role="dialog"
         aria-modal="true"
         aria-labelledby="delete-remote-title"
       >
         <div
-          className="relative w-full max-w-md bg-surface border border-border-subtle rounded-xl shadow-2xl overflow-hidden flex flex-col animate-scale-in"
+          className="relative w-full max-w-md max-h-[90vh] bg-surface border border-border-subtle rounded-xl shadow-2xl overflow-hidden flex flex-col animate-scale-in"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border-subtle bg-red-500/5">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border-subtle bg-red-500/5 shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-lg bg-red-500/10 text-red-500">
                 <Trash2 size={18} />
@@ -101,7 +108,7 @@ export const DeleteRemoteModal: React.FC<DeleteRemoteModalProps> = ({
           </div>
 
           {/* Body */}
-          <div className="p-5 flex flex-col gap-4">
+          <div className="p-5 flex flex-col gap-4 overflow-y-auto min-h-0">
             {error && (
               <div className="flex items-start gap-2.5 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-xs">
                 <AlertCircle size={15} className="shrink-0 mt-0.5" />
@@ -133,7 +140,7 @@ export const DeleteRemoteModal: React.FC<DeleteRemoteModalProps> = ({
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-border-subtle">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-border-subtle shrink-0">
               <button
                 type="button"
                 onClick={onClose}

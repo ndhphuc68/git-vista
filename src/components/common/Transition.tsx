@@ -14,8 +14,8 @@ export interface TransitionProps {
 export const Transition: React.FC<TransitionProps> = ({
   show,
   children,
-  enterClass = "animate-scale-in",
-  exitClass = "opacity-0 scale-95 transition-all duration-200 ease-macos pointer-events-none",
+  enterClass = "animate-fade-in",
+  exitClass = "opacity-0 transition-opacity duration-200 ease-macos pointer-events-none",
   duration = 200,
   unmountOnExit = true,
   className,

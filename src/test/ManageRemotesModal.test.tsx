@@ -78,6 +78,20 @@ describe("ManageRemotesModal", () => {
     });
   });
 
+  it("renders with fullscreen overlay and animate-fade-in on the transition wrapper", () => {
+    renderWithClient(
+      <ManageRemotesModal isOpen={true} onClose={vi.fn()} repoPath="/test/repo" />
+    );
+
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toHaveClass("fixed", "inset-0");
+
+    const transitionContainer = dialog.parentElement;
+    expect(transitionContainer).toHaveClass("fixed", "inset-0", "z-[9999]");
+    expect(transitionContainer).toHaveClass("animate-fade-in");
+    expect(transitionContainer).not.toHaveClass("animate-scale-in");
+  });
+
   it("opens AddEditRemoteModal and submits new remote", async () => {
     renderWithClient(
       <AddEditRemoteModal
