@@ -21,6 +21,7 @@ import { ShortcutsHelpModal } from "./components/shortcuts/ShortcutsHelpModal";
 import { SplashScreen } from "./components/splash/SplashScreen";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import { FileInspectorDrawer } from "./components/inspector/FileInspectorDrawer";
+import { ManageRemotesModal } from "./components/remote/ManageRemotesModal";
 import { useCommandPaletteStore } from "./store/useCommandPaletteStore";
 import { CommandContext } from "./utils/commandRegistry";
 
@@ -117,6 +118,7 @@ export const App: React.FC<AppProps> = ({
 }) => {
   const [splashFinished, setSplashFinished] = useState(skipSplash);
   const [isGlobalCreateBranchOpen, setIsGlobalCreateBranchOpen] = useState(false);
+  const [isGlobalManageRemotesOpen, setIsGlobalManageRemotesOpen] = useState(false);
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const { currentRepo, setRepo, clearRepo } = useRepoStore();
   const { tabs, activeTabId, setActiveTab, openRepoTab, openHomeTab, closeTab, restoreSession } = useTabStore();
@@ -201,6 +203,7 @@ export const App: React.FC<AppProps> = ({
     onPrevTab: handlePrevTab,
     onEscape: () => {
       setIsGlobalCreateBranchOpen(false);
+      setIsGlobalManageRemotesOpen(false);
       setIsShortcutsHelpOpen(false);
       closeSettings();
       closeCommandPalette();
@@ -213,6 +216,9 @@ export const App: React.FC<AppProps> = ({
     navigate: (screen) => setActiveScreen(screen),
     openCreateBranch: () => {
       if (repoToDisplay) setIsGlobalCreateBranchOpen(true);
+    },
+    openManageRemotes: () => {
+      if (repoToDisplay) setIsGlobalManageRemotesOpen(true);
     },
     openShortcutsHelp: () => setIsShortcutsHelpOpen(true),
     toggleTheme: handleToggleTheme,
@@ -282,6 +288,13 @@ export const App: React.FC<AppProps> = ({
           onClose={() => setIsShortcutsHelpOpen(false)}
         />
         <SettingsModal currentRepoPath={repoToDisplay?.path ?? null} />
+        {repoToDisplay && (
+          <ManageRemotesModal
+            isOpen={isGlobalManageRemotesOpen}
+            onClose={() => setIsGlobalManageRemotesOpen(false)}
+            repoPath={repoToDisplay.path}
+          />
+        )}
       </div>
     </QueryClientProvider>
   );

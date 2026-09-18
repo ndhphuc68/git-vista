@@ -25,6 +25,7 @@ export interface CommandContext {
   push?: () => void | Promise<void>;
   stageAll?: () => void | Promise<void>;
   commit?: () => void | Promise<void>;
+  openManageRemotes?: () => void;
 }
 
 export function normalizeText(text: string): string {
@@ -113,6 +114,14 @@ export function getAppCommands(
       shortcut: "Ctrl+Enter",
       keywords: ["commit", "ghi lai", "ghi lại", "tao commit", "tạo commit", "lưu thay đổi", "luu thay doi"],
       action: () => context.commit?.(),
+    },
+    {
+      id: "git-manage-remotes",
+      title: t.palette.commands.gitManageRemotesTitle,
+      description: t.palette.commands.gitManageRemotesDesc,
+      category: "git",
+      keywords: ["remote", "may chu", "máy chủ", "origin", "upstream", "url", "prune", "don dep"],
+      action: () => context.openManageRemotes?.(),
     },
     {
       id: "settings-theme",

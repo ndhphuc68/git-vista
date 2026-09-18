@@ -80,7 +80,7 @@ export const PruneConfirmModal: React.FC<PruneConfirmModalProps> = ({
   };
 
   return (
-    <Transition show={isOpen} transition="fade" duration={150}>
+    <Transition show={isOpen} duration={150}>
       <div
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
         onClick={onClose}

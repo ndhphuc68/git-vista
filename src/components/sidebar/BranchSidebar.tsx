@@ -19,12 +19,15 @@ import {
   GitMerge,
   GitCommit,
   Folder,
+  Settings2,
+  Scissors,
+  Edit2,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { invokeCommand } from "../../ipc/client";
-import { StashItem, BranchItem, TagItem } from "../../ipc/bindings";
+import { StashItem, BranchItem, TagItem, RemoteItem } from "../../ipc/bindings";
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
 import { CreateBranchModal } from "./CreateBranchModal";
@@ -35,6 +38,12 @@ import { StashDiffView } from "../stash/StashDiffView";
 import { MergeBranchModal } from "../merge/MergeBranchModal";
 import { RebaseBranchModal } from "../merge/RebaseBranchModal";
 import { CreateTagModal, DeleteTagModal } from "../tag";
+import {
+  ManageRemotesModal,
+  AddEditRemoteModal,
+  DeleteRemoteModal,
+  PruneConfirmModal,
+} from "../remote";
 import { useTranslation } from "../../i18n";
 
 export interface BranchTreeNode {
@@ -134,8 +143,17 @@ export const BranchSidebar: React.FC = () => {
   // Context / Action menu state
   const [menuBranch, setMenuBranch] = useState<string | null>(null);
   const [tagMenuOpenName, setTagMenuOpenName] = useState<string | null>(null);
+  const [remoteMenuName, setRemoteMenuName] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const tagMenuRef = useRef<HTMLDivElement>(null);
+  const remoteMenuRef = useRef<HTMLDivElement>(null);
+
+  // Remotes modal states
+  const [manageRemotesOpen, setManageRemotesOpen] = useState(false);
+  const [addRemoteOpen, setAddRemoteOpen] = useState(false);
+  const [pruneTargetRemote, setPruneTargetRemote] = useState<string | null>(null);
+  const [editTargetRemote, setEditTargetRemote] = useState<RemoteItem | null>(null);
+  const [deleteTargetRemote, setDeleteTargetRemote] = useState<RemoteItem | null>(null);
 
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent) => {
@@ -145,6 +163,9 @@ export const BranchSidebar: React.FC = () => {
       if (tagMenuRef.current && !tagMenuRef.current.contains(e.target as Node)) {
         setTagMenuOpenName(null);
       }
+      if (remoteMenuRef.current && !remoteMenuRef.current.contains(e.target as Node)) {
+        setRemoteMenuName(null);
+      }
     };
     window.addEventListener("mousedown", handleGlobalClick);
     return () => window.removeEventListener("mousedown", handleGlobalClick);
@@ -153,6 +174,12 @@ export const BranchSidebar: React.FC = () => {
   const { data: branchData } = useQuery({
     queryKey: ["branches", currentRepo?.path],
     queryFn: () => invokeCommand.getBranches(currentRepo!.path),
+    enabled: Boolean(currentRepo),
+  });
+
+  const { data: remotesList = [] } = useQuery({
+    queryKey: ["remotes", currentRepo?.path],
+    queryFn: () => invokeCommand.getRemotes(currentRepo!.path),
     enabled: Boolean(currentRepo),
   });
 
@@ -498,29 +525,120 @@ export const BranchSidebar: React.FC = () => {
       const isExpanded = search.trim() !== "" || expandedFolders[node.fullPath] !== false;
       const count = countBranchesInNode(node);
       const isRemoteRoot = depth === 0;
+      const isRemoteMenuOpen = remoteMenuName === node.name;
 
       return (
-        <div key={node.fullPath} className="flex flex-col mt-0.5">
-          <button
-            type="button"
-            onClick={() => toggleFolder(node.fullPath)}
-            className="flex items-center justify-between px-2 py-1 rounded-sm hover:bg-surface-hover text-primary font-semibold text-xs cursor-pointer border-0 bg-transparent text-left group transition-colors"
-          >
-            <div className="flex items-center gap-1.5 truncate">
-              <span className="text-secondary group-hover:text-primary">
-                {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+        <div
+          key={node.fullPath}
+          className="group/remote relative flex flex-col mt-0.5"
+          onContextMenu={(e) => {
+            if (isRemoteRoot) {
+              e.preventDefault();
+              e.stopPropagation();
+              setRemoteMenuName(node.name);
+            }
+          }}
+        >
+          <div className="flex items-center justify-between rounded-sm hover:bg-surface-hover group transition-colors pr-1">
+            <button
+              type="button"
+              onClick={() => toggleFolder(node.fullPath)}
+              className="flex items-center justify-between flex-1 px-2 py-1 text-primary font-semibold text-xs cursor-pointer border-0 bg-transparent text-left truncate"
+            >
+              <div className="flex items-center gap-1.5 truncate">
+                <span className="text-secondary group-hover:text-primary">
+                  {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                </span>
+                {isRemoteRoot ? (
+                  <Cloud size={13} className="text-sky-500 shrink-0" />
+                ) : (
+                  <Folder size={13} className="text-amber-500 shrink-0 fill-amber-500/20" />
+                )}
+                <span className="truncate">{node.name}</span>
+              </div>
+              <span className="text-[10px] font-mono text-tertiary px-1.5 bg-surface-hover rounded-full ml-1">
+                {count}
               </span>
-              {isRemoteRoot ? (
-                <Cloud size={13} className="text-sky-500 shrink-0" />
-              ) : (
-                <Folder size={13} className="text-amber-500 shrink-0 fill-amber-500/20" />
-              )}
-              <span className="truncate">{node.name}</span>
-            </div>
-            <span className="text-[10px] font-mono text-tertiary px-1.5 bg-surface-hover rounded-full">
-              {count}
-            </span>
-          </button>
+            </button>
+
+            {isRemoteRoot && (
+              <div className="relative shrink-0 flex items-center">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setRemoteMenuName(isRemoteMenuOpen ? null : node.name);
+                  }}
+                  aria-label={`Menu thao tác remote ${node.name}`}
+                  className={clsx(
+                    "p-1 bg-transparent border-0 text-secondary hover:text-primary hover:bg-surface-hover rounded-sm cursor-pointer transition-opacity",
+                    isRemoteMenuOpen ? "opacity-100" : "opacity-0 group-hover/remote:opacity-100 focus:opacity-100"
+                  )}
+                >
+                  <MoreVertical size={13} />
+                </button>
+
+                {isRemoteMenuOpen && (
+                  <div
+                    ref={remoteMenuRef}
+                    className="absolute right-0 top-full mt-1 min-w-56 w-max bg-surface border border-border-subtle rounded-lg shadow-2xl py-1.5 z-50 text-xs flex flex-col animate-fade-in"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRemoteMenuName(null);
+                        setPruneTargetRemote(node.name);
+                      }}
+                      className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
+                    >
+                      <Scissors size={14} className="text-sky-500 shrink-0" />
+                      <span>{t.sidebar.pruneRemote}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRemoteMenuName(null);
+                        const r = remotesList.find((x) => x.name === node.name) || {
+                          name: node.name,
+                          fetch_url: null,
+                          push_url: null,
+                          branch_count: count,
+                          is_default: false,
+                        };
+                        setEditTargetRemote(r);
+                        setAddRemoteOpen(true);
+                      }}
+                      className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
+                    >
+                      <Edit2 size={14} className="text-secondary shrink-0" />
+                      <span>{t.sidebar.editRemote}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRemoteMenuName(null);
+                        const r = remotesList.find((x) => x.name === node.name) || {
+                          name: node.name,
+                          fetch_url: null,
+                          push_url: null,
+                          branch_count: count,
+                          is_default: false,
+                        };
+                        setDeleteTargetRemote(r);
+                      }}
+                      className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-diff-remove-text hover:bg-diff-remove-bg cursor-pointer text-left w-full whitespace-nowrap transition-colors"
+                    >
+                      <Trash2 size={14} className="shrink-0" />
+                      <span>{t.sidebar.removeRemote}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {isExpanded && (
             <div className="tree-guide border-l border-border-subtle ml-3 pl-2 flex flex-col gap-0.5 mt-0.5">
@@ -703,16 +821,45 @@ export const BranchSidebar: React.FC = () => {
 
           {/* REMOTES */}
           <div>
-            <button
-              onClick={() => setRemoteOpen(!remoteOpen)}
-              aria-expanded={remoteOpen}
-              aria-label={t.sidebar.remotes}
-              className="flex items-center gap-1.5 w-full p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
-            >
-              {remoteOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-              <Cloud size={13} />
-              <span>{t.sidebar.remotes} ({remoteBranches.length})</span>
-            </button>
+            <div className="flex items-center justify-between w-full">
+              <button
+                onClick={() => setRemoteOpen(!remoteOpen)}
+                aria-expanded={remoteOpen}
+                aria-label={t.sidebar.remotes}
+                className="flex items-center gap-1.5 flex-1 p-1 bg-transparent border-0 text-secondary hover:text-primary font-semibold text-xs cursor-pointer transition-colors"
+              >
+                {remoteOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+                <Cloud size={13} />
+                <span>{t.sidebar.remotes} ({remoteBranches.length})</span>
+              </button>
+              <div className="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  title={t.sidebar.manageRemotesTitle}
+                  aria-label={t.sidebar.manageRemotesTitle}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setManageRemotesOpen(true);
+                  }}
+                  className="flex items-center justify-center p-1 bg-transparent border-0 text-secondary hover:text-accent hover:bg-surface-hover rounded-sm cursor-pointer transition-colors"
+                >
+                  <Settings2 size={13} />
+                </button>
+                <button
+                  type="button"
+                  title={t.sidebar.addRemoteTitle}
+                  aria-label={t.sidebar.addRemoteTitle}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditTargetRemote(null);
+                    setAddRemoteOpen(true);
+                  }}
+                  className="flex items-center justify-center p-1 bg-transparent border-0 text-secondary hover:text-accent hover:bg-surface-hover rounded-sm cursor-pointer transition-colors"
+                >
+                  <Plus size={13} />
+                </button>
+              </div>
+            </div>
 
             {remoteOpen && (
               <div className="flex flex-col gap-0.5 mt-1">
@@ -1047,6 +1194,49 @@ export const BranchSidebar: React.FC = () => {
             return res;
           }}
         />
+      )}
+
+      {currentRepo && (
+        <>
+          <ManageRemotesModal
+            isOpen={manageRemotesOpen}
+            onClose={() => setManageRemotesOpen(false)}
+            repoPath={currentRepo.path}
+          />
+          <AddEditRemoteModal
+            isOpen={addRemoteOpen}
+            onClose={() => {
+              setAddRemoteOpen(false);
+              setEditTargetRemote(null);
+            }}
+            repoPath={currentRepo.path}
+            initialRemote={editTargetRemote}
+            onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: ["remotes", currentRepo.path] });
+              queryClient.invalidateQueries({ queryKey: ["branches", currentRepo.path] });
+            }}
+          />
+          <PruneConfirmModal
+            isOpen={Boolean(pruneTargetRemote)}
+            onClose={() => setPruneTargetRemote(null)}
+            repoPath={currentRepo.path}
+            remoteName={pruneTargetRemote || ""}
+            onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: ["remotes", currentRepo.path] });
+              queryClient.invalidateQueries({ queryKey: ["branches", currentRepo.path] });
+            }}
+          />
+          <DeleteRemoteModal
+            isOpen={Boolean(deleteTargetRemote)}
+            onClose={() => setDeleteTargetRemote(null)}
+            repoPath={currentRepo.path}
+            remote={deleteTargetRemote}
+            onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: ["remotes", currentRepo.path] });
+              queryClient.invalidateQueries({ queryKey: ["branches", currentRepo.path] });
+            }}
+          />
+        </>
       )}
     </>
   );
