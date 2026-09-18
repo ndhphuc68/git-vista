@@ -30,10 +30,10 @@
 | | 1.2.2: Lịch sử từng file & Git Blame (File History & Blame) | 35% | ✅ Đã hoàn thành | 100% |
 | | 1.2.3: Quản lý Remote & Dọn dẹp nhánh mồ côi (Remote Prune) | 30% | ✅ Đã hoàn thành | 100% |
 | | | | | |
-| **Phase 2.0** | **Công cụ sức mạnh nâng cao (Advanced Power Tools)** | **100%** | 🔄 **Đang triển khai** | **40%** |
+| **Phase 2.0** | **Công cụ sức mạnh nâng cao (Advanced Power Tools)** | **100%** | 🔄 **Đang triển khai** | **70%** |
 | | 2.0.1: Rebase tương tác trực quan (Visual Interactive Rebase) | 40% | ✅ Đã hoàn thành | 100% |
-| | 2.0.2: So sánh 2 Commit / 2 Nhánh bất kỳ (Compare 2 Commits) | 30% | ⏳ Kế tiếp (Sẵn sàng) | 0% |
-| | 2.0.3: Tích hợp GitHub / GitLab Pull Requests | 30% | 📋 Chờ thực hiện | 0% |
+| | 2.0.2: So sánh 2 Commit / 2 Nhánh bất kỳ (Compare 2 Commits) | 30% | ✅ Đã hoàn thành | 100% |
+| | 2.0.3: Tích hợp GitHub / GitLab Pull Requests | 30% | ⏳ Kế tiếp (Sẵn sàng) | 0% |
 
 ---
 
@@ -207,8 +207,30 @@
   - Context menu chuột phải trên `CommitGraph.tsx`: Lựa chọn *"Interactive Rebase từ commit này..."* (`t.graph.interactiveRebaseHere`).
   - Command Palette (`Ctrl+K`): Lệnh `git-interactive-rebase` mở hộp thoại rebase tương tác từ bất cứ đâu.
 
-#### 📋 2.0.2: So Sánh 2 Commit / 2 Nhánh Bất Kỳ (Compare 2 Commits/Branches) — [CHỜ THỰC HIỆN]
-- Giữ phím `Ctrl`/`Cmd` chọn 2 điểm mốc bất kỳ trên `CommitGraph` để xem danh sách commit chênh lệch và tổng hợp thay đổi của toàn bộ các file giữa 2 mốc.
+#### ✅ 2.0.2: So Sánh 2 Commit / 2 Nhánh Bất Kỳ (Compare 2 Commits/Branches) — [HOÀN THÀNH 100%]
+- **Rust Backend:**
+  - `src-tauri/src/read/compare.rs`: Triển khai 2 chế độ so sánh linh hoạt:
+    * **Merge-Base (`A...B`, Three-dot)**: Tìm mốc tổ tiên chung gần nhất (`repo.merge_base`), hiển thị các thay đổi kể từ khi nhánh rẽ nhánh (chuẩn GitHub/GitLab PR review).
+    * **Direct (`A..B`, Two-dot)**: So sánh trực tiếp tree-to-tree giữa 2 điểm mốc commit bất kỳ.
+    * Đọc danh sách commit khác biệt (`commits`), danh sách tập tin thay đổi (`files`) kèm thống kê `additions` / `deletions`, số lượng `ahead_count` / `behind_count`.
+    * Trích xuất diff chi tiết từng file (`get_compare_file_diff`) hỗ trợ hunk lines và bỏ qua khoảng trắng (`ignore_whitespace`).
+  - `src-tauri/src/commands/compare.rs`: Đăng ký các lệnh Specta IPC `compare_commits` và `get_compare_file_diff`.
+  - Kiểm thử `tests/compare_test.rs`: 4/4 integration test suites kiểm tra đầy đủ chế độ Direct, Merge-Base, xử lý mốc tham chiếu giống hệt nhau (`identical`), và diff chi tiết từng file.
+- **Frontend IPC & i18n:**
+  - Định nghĩa kiểu dữ liệu `CompareMode`, `CompareCommitItem`, `CompareFileItem`, `CompareSummary` tại `src/ipc/bindings.ts` và `src/ipc/client.ts`.
+  - Triển khai mock mode và các hàm reset mock tại `src/ipc/client.ts`.
+  - Bản dịch song ngữ 100% tiếng Việt & tiếng Anh tại `src/i18n/vi.ts` và `src/i18n/en.ts` (`compare.*`, `graph.compareWith`, `sidebar.compareWithCurrent`, `palette.commands.gitCompare*`).
+  - Unit tests `src/test/ipcCompare.test.ts` kiểm tra tính tương thích IPC và đảm bảo 100% đồng nhất từ khoá song ngữ.
+- **Giao diện Người dùng (UI Components):**
+  - `CompareHeader.tsx`: Hộp nhập liệu gợi ý mốc Base và Target (autocomplete từ nhánh và tag), nút đổi chiều so sánh tức thì (`⇄ Swap`), chuyển đổi chế độ `Merge-Base` và `Direct`, hiển thị thống kê tổng quan (ahead/behind, số dòng thêm/xoá, số file thay đổi, hoặc huy hiệu thông báo 2 mốc giống hệt nhau).
+  - `CompareCommitList.tsx`: Danh sách commit phân nhánh với mã SHA ngắn, tác giả, thời gian tương đối và thông điệp commit.
+  - `CompareFileList.tsx`: Danh sách tập tin thay đổi với thanh tìm kiếm nhanh, huy hiệu trạng thái Added (xanh lá), Modified (vàng), Deleted (đỏ), Renamed (tím), số dòng thay đổi và highlight khi chọn file.
+  - `CompareDiffViewer.tsx`: Trình xem diff tích hợp tái sử dụng `DiffLineContent`, hỗ trợ Word Diff, bỏ qua khoảng trắng và mở File Inspector (Git Blame / File History).
+  - `CompareModal.tsx`: Hộp thoại modal 2 cột chuyên nghiệp, hỗ trợ responsive, phím tắt `Esc` đóng modal, ngăn ngừa re-render loop với hằng số tĩnh rỗng (`EMPTY_COMMITS`, `EMPTY_FILES`). Kiểm thử `src/test/CompareModal.test.tsx` (7/7 tests pass).
+- **Điểm mở & Tích hợp (Entry Points):**
+  - **CommitGraph**: Menu ngữ cảnh chuột phải có lựa chọn *"So sánh với..."* (`t.graph.compareWith`); Hỗ trợ multi-select nhanh: Giữ `Ctrl`/`Cmd` và nhấp vào commit thứ hai để mở ngay so sánh giữa 2 commit.
+  - **BranchSidebar**: Menu ngữ cảnh chuột phải trên cả nhánh local và remote có lựa chọn *"So sánh với nhánh hiện tại ({branch})..."* (`t.sidebar.compareWithCurrent`).
+  - **Command Palette (`Ctrl+K`)**: Lệnh `git-compare` (*"Git: So sánh 2 Commit hoặc Nhánh"*) mở trực tiếp hộp thoại so sánh.
 
 #### 📋 2.0.3: Tích Hợp GitHub / GitLab Pull Requests — [CHỜ THỰC HIỆN]
 - Kết nối thông qua Personal Access Token (PAT), xem danh sách Pull Requests, trạng thái review, CI checks và checkout nhánh PR về máy chỉ với một cú click chuột.
@@ -221,13 +243,13 @@ Hệ thống mã nguồn GitVista hiện tại đạt trạng thái kiểm thử
 
 | Tầng hệ thống | Công cụ kiểm thử | Số lượng kiểm thử | Trạng thái |
 | :--- | :--- | :---: | :---: |
-| **Backend (Rust)** | `cargo test` | **32 test suites / 95 tests** | ✅ **100% PASS** |
-| **Frontend (React/TS)** | `vitest` | **67 test files / 339 tests** | ✅ **100% PASS** |
+| **Backend (Rust)** | `cargo test` | **33 test suites / 99 tests** | ✅ **100% PASS** |
+| **Frontend (React/TS)** | `vitest` | **69 test files / 349 tests** | ✅ **100% PASS** |
 | **Đóng gói Sản phẩm** | `pnpm build` (TypeScript + Vite) | **0 lỗi / 0 cảnh báo** | ✅ **100% SẠCH** |
 
 ---
 
 ## 🚀 Bước Đi Kế Tiếp
 
-Hoàn thành trọn vẹn Phase 2.0.1 (Visual Interactive Rebase), sẵn sàng chuẩn bị cho:
-**Phase 2.0.2: So Sánh 2 Commit / 2 Nhánh Bất Kỳ (Compare 2 Commits/Branches)**.
+Hoàn thành trọn vẹn Phase 2.0.2 (Compare 2 Commits/Branches), sẵn sàng chuẩn bị cho:
+**Phase 2.0.3: Tích Hợp GitHub / GitLab Pull Requests**.
