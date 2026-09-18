@@ -4,6 +4,7 @@
 
 pub mod blame;
 pub mod branches;
+pub mod compare;
 pub mod config;
 pub mod conflict;
 pub mod diff;
@@ -17,6 +18,7 @@ pub mod tags;
 
 pub use blame::*;
 pub use branches::*;
+pub use compare::*;
 pub use config::*;
 pub use conflict::*;
 pub use diff::*;

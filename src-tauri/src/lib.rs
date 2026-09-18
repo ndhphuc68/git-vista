@@ -80,7 +80,9 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         set_remote_url,
         prune_remote,
         get_rebase_commits,
-        execute_interactive_rebase
+        execute_interactive_rebase,
+        compare_commits,
+        get_compare_file_diff
     ])
 }
 

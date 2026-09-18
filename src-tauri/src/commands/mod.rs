@@ -1,5 +1,6 @@
 pub mod app;
 pub mod commit_actions;
+pub mod compare;
 pub mod config;
 pub mod conflict;
 pub mod merge;
@@ -12,6 +13,7 @@ pub mod undo;
 
 pub use app::*;
 pub use commit_actions::*;
+pub use compare::*;
 pub use config::*;
 pub use conflict::*;
 pub use merge::*;
