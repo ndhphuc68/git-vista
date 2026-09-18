@@ -86,7 +86,8 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         get_github_repo_info,
         get_github_token,
         save_github_token,
-        remove_github_token
+        remove_github_token,
+        checkout_pull_request
     ])
 }
 

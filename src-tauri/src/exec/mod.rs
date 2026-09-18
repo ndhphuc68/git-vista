@@ -2,6 +2,7 @@
 //! Đảm bảo thừa hưởng credentials, SSH agent, hook, và xử lý timeout/cancel tập trung.
 
 pub mod commit_actions;
+pub mod github_checkout;
 pub mod merge;
 pub mod rebase;
 pub mod remote;
