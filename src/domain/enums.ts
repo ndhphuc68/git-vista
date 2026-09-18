@@ -8,7 +8,14 @@
  * phía Rust sẽ gây lỗi lúc chạy.
  */
 
-/** Loại thay đổi của một file trong diff. Nguồn: bindings.ts FileChange.change_type */
+/**
+ * Loại thay đổi của một file trong diff (Git diff).
+ * Nguồn: bindings.ts FileChange.change_type từ src-tauri/src/read/diff.rs
+ *
+ * CẢNH BÁO: GitHub API dùng từ vựng khác cho cùng khái niệm.
+ * PullRequestFileItem.status ở bindings.ts:462 dùng "removed" thay vì "deleted".
+ * KHÔNG dùng CHANGE_TYPE để so sánh với GitHub status — chúng KHÔNG khớp.
+ */
 export const CHANGE_TYPE = {
   ADDED: "added",
   MODIFIED: "modified",
