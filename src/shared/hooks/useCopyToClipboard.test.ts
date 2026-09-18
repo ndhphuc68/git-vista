@@ -56,16 +56,38 @@ describe("useCopyToClipboard", () => {
   });
 
   it("huỷ timer khi unmount, tránh setState trên component đã gỡ", async () => {
+    const clearSpy = vi.spyOn(globalThis, "clearTimeout");
     const { result, unmount } = renderHook(() => useCopyToClipboard());
 
     await act(async () => {
       await result.current.copy("nội dung");
     });
 
+    clearSpy.mockClear();
     unmount();
 
-    expect(() => {
-      vi.advanceTimersByTime(2000);
-    }).not.toThrow();
+    expect(clearSpy).toHaveBeenCalled();
+    clearSpy.mockRestore();
+  });
+
+  it("copy lần hai không bị timer của lần đầu cắt ngắn phản hồi", async () => {
+    const { result } = renderHook(() => useCopyToClipboard());
+
+    await act(async () => {
+      await result.current.copy("lần một");
+    });
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+
+    await act(async () => {
+      await result.current.copy("lần hai");
+    });
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+
+    // Mốc 3000ms tính từ đầu, nhưng timer lần hai mới chạy 1500ms nên vẫn còn hiệu lực
+    expect(result.current.copied).toBe(true);
   });
 });
