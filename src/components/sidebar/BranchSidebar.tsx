@@ -31,6 +31,7 @@ import { invokeCommand } from "../../ipc/client";
 import { type StashItem, type BranchItem, type TagItem, type RemoteItem } from "../../ipc/bindings";
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
+import { qk } from "../../domain/queryKeys";
 import { CreateBranchModal } from "./CreateBranchModal";
 import { RenameBranchModal } from "./RenameBranchModal";
 import { PullRequestsSection } from "./PullRequestsSection";
@@ -202,19 +203,19 @@ export const BranchSidebar: React.FC = () => {
   }, []);
 
   const { data: branchData } = useQuery({
-    queryKey: ["branches", currentRepo?.path],
+    queryKey: qk.branches(currentRepo?.path ?? ""),
     queryFn: () => invokeCommand.getBranches(currentRepo!.path),
     enabled: Boolean(currentRepo),
   });
 
   const { data: remotesList = [] } = useQuery({
-    queryKey: ["remotes", currentRepo?.path],
+    queryKey: qk.remotes(currentRepo?.path ?? ""),
     queryFn: () => invokeCommand.getRemotes(currentRepo!.path),
     enabled: Boolean(currentRepo),
   });
 
   const { data: repoStatus } = useQuery({
-    queryKey: ["repo_status", currentRepo?.path],
+    queryKey: qk.repo.status(currentRepo?.path ?? ""),
     queryFn: () => invokeCommand.getRepoStatus(currentRepo!.path),
     enabled: Boolean(currentRepo),
   });
@@ -233,13 +234,13 @@ export const BranchSidebar: React.FC = () => {
     "main";
 
   const { data: stashes = [] } = useQuery({
-    queryKey: ["stashes", currentRepo?.path],
+    queryKey: qk.stashes(currentRepo?.path ?? ""),
     queryFn: () => invokeCommand.getStashes(currentRepo!.path),
     enabled: !!currentRepo?.path,
   });
 
   const { data: tagItems = [] } = useQuery({
-    queryKey: ["tags", currentRepo?.path],
+    queryKey: qk.tags(currentRepo?.path ?? ""),
     queryFn: () => invokeCommand.getTags(currentRepo!.path),
     enabled: Boolean(currentRepo),
   });
@@ -260,11 +261,11 @@ export const BranchSidebar: React.FC = () => {
   if (!currentRepo) return null;
 
   const invalidateRepo = () => {
-    queryClient.invalidateQueries({ queryKey: ["branches", currentRepo.path] });
-    queryClient.invalidateQueries({ queryKey: ["commit_graph", currentRepo.path] });
-    queryClient.invalidateQueries({ queryKey: ["repo_status", currentRepo.path] });
-    queryClient.invalidateQueries({ queryKey: ["repo_head_info", currentRepo.path] });
-    queryClient.invalidateQueries({ queryKey: ["tags", currentRepo.path] });
+    queryClient.invalidateQueries({ queryKey: qk.branches(currentRepo.path) });
+    queryClient.invalidateQueries({ queryKey: qk.commitGraph(currentRepo.path) });
+    queryClient.invalidateQueries({ queryKey: qk.repo.status(currentRepo.path) });
+    queryClient.invalidateQueries({ queryKey: qk.repo.head(currentRepo.path) });
+    queryClient.invalidateQueries({ queryKey: qk.tags(currentRepo.path) });
   };
 
   const handleCheckoutTag = async (tag: TagItem) => {
@@ -315,14 +316,15 @@ export const BranchSidebar: React.FC = () => {
   };
 
   const invalidateStashes = () => {
-    queryClient.invalidateQueries({ queryKey: ["stashes", currentRepo.path] });
+    queryClient.invalidateQueries({ queryKey: qk.stashes(currentRepo.path) });
   };
 
   const handleApplyStash = async (index: number) => {
     try {
       await invokeCommand.applyStash(currentRepo.path, index);
       invalidateStashes();
-      queryClient.invalidateQueries({ queryKey: ["repoStatus", currentRepo.path] });
+      // Da fix loi: dung camelCase lech cap voi ["repo_status", ...], gio dung chung qk.repo.status
+      queryClient.invalidateQueries({ queryKey: qk.repo.status(currentRepo.path) });
     } catch (err: unknown) {
       alert(`Khong the ap dung stash: ${err instanceof Error ? err.message : String(err)}`);
     }
@@ -332,7 +334,8 @@ export const BranchSidebar: React.FC = () => {
     try {
       await invokeCommand.popStash(currentRepo.path, index);
       invalidateStashes();
-      queryClient.invalidateQueries({ queryKey: ["repoStatus", currentRepo.path] });
+      // Da fix loi: dung camelCase lech cap voi ["repo_status", ...], gio dung chung qk.repo.status
+      queryClient.invalidateQueries({ queryKey: qk.repo.status(currentRepo.path) });
       setSelectedStash(null);
     } catch (err: unknown) {
       alert(`Khong the pop stash: ${err instanceof Error ? err.message : String(err)}`);
@@ -1296,8 +1299,8 @@ export const BranchSidebar: React.FC = () => {
             repoPath={currentRepo.path}
             initialRemote={editTargetRemote}
             onSuccess={() => {
-              queryClient.invalidateQueries({ queryKey: ["remotes", currentRepo.path] });
-              queryClient.invalidateQueries({ queryKey: ["branches", currentRepo.path] });
+              queryClient.invalidateQueries({ queryKey: qk.remotes(currentRepo.path) });
+              queryClient.invalidateQueries({ queryKey: qk.branches(currentRepo.path) });
             }}
           />
           <PruneConfirmModal
@@ -1306,8 +1309,8 @@ export const BranchSidebar: React.FC = () => {
             repoPath={currentRepo.path}
             remoteName={pruneTargetRemote || ""}
             onSuccess={() => {
-              queryClient.invalidateQueries({ queryKey: ["remotes", currentRepo.path] });
-              queryClient.invalidateQueries({ queryKey: ["branches", currentRepo.path] });
+              queryClient.invalidateQueries({ queryKey: qk.remotes(currentRepo.path) });
+              queryClient.invalidateQueries({ queryKey: qk.branches(currentRepo.path) });
             }}
           />
           <DeleteRemoteModal
@@ -1316,8 +1319,8 @@ export const BranchSidebar: React.FC = () => {
             repoPath={currentRepo.path}
             remote={deleteTargetRemote}
             onSuccess={() => {
-              queryClient.invalidateQueries({ queryKey: ["remotes", currentRepo.path] });
-              queryClient.invalidateQueries({ queryKey: ["branches", currentRepo.path] });
+              queryClient.invalidateQueries({ queryKey: qk.remotes(currentRepo.path) });
+              queryClient.invalidateQueries({ queryKey: qk.branches(currentRepo.path) });
             }}
           />
         </>
