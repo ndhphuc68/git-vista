@@ -34,6 +34,8 @@ import {
   CompareCommitItem,
   CompareFileItem,
   CompareSummary,
+  GitHubRepoInfo,
+  CheckoutPrResult,
 } from "./bindings";
 
 let mockTags: TagItem[] = [
@@ -1617,6 +1619,62 @@ export const invokeCommand = {
       filePath,
       mode,
       ignoreWhitespace: ignoreWhitespace ?? false,
+    });
+  },
+
+  getGitHubRepoInfo: async (repoPath: string): Promise<GitHubRepoInfo> => {
+    if (!isTauri()) {
+      return {
+        is_github: true,
+        owner: "antigravity-ai",
+        repo: "git-vista",
+        default_branch: "main",
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<GitHubRepoInfo>("get_github_repo_info", { repoPath });
+  },
+
+  getGitHubToken: async (): Promise<string | null> => {
+    if (!isTauri()) {
+      return localStorage.getItem("gitvista_github_token");
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<string | null>("get_github_token");
+  },
+
+  saveGitHubToken: async (token: string): Promise<void> => {
+    if (!isTauri()) {
+      localStorage.setItem("gitvista_github_token", token);
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<void>("save_github_token", { token });
+  },
+
+  removeGitHubToken: async (): Promise<void> => {
+    if (!isTauri()) {
+      localStorage.removeItem("gitvista_github_token");
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<void>("remove_github_token");
+  },
+
+  checkoutPullRequest: async (
+    repoPath: string,
+    prNumber: number
+  ): Promise<CheckoutPrResult> => {
+    if (!isTauri()) {
+      return {
+        branch_name: `pr/${prNumber}`,
+        message: `Đã chuyển sang nhánh pr/${prNumber} thành công.`,
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<CheckoutPrResult>("checkout_pull_request", {
+      repoPath,
+      prNumber,
     });
   },
 };
