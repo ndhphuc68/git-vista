@@ -162,6 +162,27 @@ pub fn get_working_file_diff(
 
 #[tauri::command]
 #[specta::specta]
+pub fn get_file_blame(
+    repo_path: String,
+    file_path: String,
+    commit_id: Option<String>,
+) -> Result<crate::read::FileBlameResult, AppError> {
+    crate::read::get_file_blame(repo_path, &file_path, commit_id.as_deref())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn get_file_history(
+    repo_path: String,
+    file_path: String,
+    offset: Option<u32>,
+    limit: Option<u32>,
+) -> Result<crate::read::FileHistoryResult, AppError> {
+    crate::read::get_file_history(repo_path, &file_path, offset, limit)
+}
+
+#[tauri::command]
+#[specta::specta]
 pub fn stage_file(
     app: tauri::AppHandle,
     repo_path: String,

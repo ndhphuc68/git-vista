@@ -70,7 +70,9 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         checkout_tag,
         push_tag,
         cherry_pick_commit,
-        revert_commit
+        revert_commit,
+        get_file_blame,
+        get_file_history
     ])
 }
 
