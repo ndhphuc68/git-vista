@@ -11,9 +11,7 @@ function renderWithClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-  );
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
 }
 
 describe("File Inspector - Store and Components", () => {
@@ -46,9 +44,7 @@ describe("File Inspector - Store and Components", () => {
   });
 
   it("renders BlameView with author details and code lines", async () => {
-    renderWithClient(
-      <BlameView repoPath="/mock/repo" filePath="src/index.ts" commitId={null} />
-    );
+    renderWithClient(<BlameView repoPath="/mock/repo" filePath="src/index.ts" commitId={null} />);
 
     await waitFor(() => {
       expect(screen.getByText("GitVista Team")).toBeDefined();
@@ -59,9 +55,7 @@ describe("File Inspector - Store and Components", () => {
   });
 
   it("renders FileHistoryView with commit list", async () => {
-    renderWithClient(
-      <FileHistoryView repoPath="/mock/repo" filePath="src/index.ts" />
-    );
+    renderWithClient(<FileHistoryView repoPath="/mock/repo" filePath="src/index.ts" />);
 
     await waitFor(() => {
       expect(screen.getByText("PhucNDH")).toBeDefined();

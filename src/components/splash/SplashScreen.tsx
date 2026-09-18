@@ -54,9 +54,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
       className={clsx(
         "fixed inset-0 z-50 flex flex-col items-center justify-center bg-window select-none",
         "transition-all duration-300 ease-macos",
-        isExiting
-          ? "opacity-0 scale-[1.03] pointer-events-none"
-          : "opacity-100 scale-100"
+        isExiting ? "opacity-0 scale-[1.03] pointer-events-none" : "opacity-100 scale-100"
       )}
     >
       {/* Ambient background glow */}
@@ -81,9 +79,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
         {/* Brand Name & Tagline */}
         <div className="flex flex-col items-center gap-1 animate-slide-up">
           <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-extrabold tracking-tight text-primary">
-              GitVista
-            </h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-primary">GitVista</h1>
             <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-accent-subtle text-accent border border-accent/20">
               v0.1
             </span>

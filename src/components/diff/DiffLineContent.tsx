@@ -1,5 +1,5 @@
 import React from "react";
-import { WordDiffToken } from "../../utils/wordDiff";
+import { type WordDiffToken } from "../../utils/wordDiff";
 
 interface DiffLineContentProps {
   content: string;

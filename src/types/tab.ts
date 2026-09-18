@@ -1,4 +1,4 @@
-import { RepoSummary } from "../ipc/bindings";
+import { type RepoSummary } from "../ipc/bindings";
 
 export type ScreenType = "history" | "changes" | "conflict";
 

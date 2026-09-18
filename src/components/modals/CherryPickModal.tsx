@@ -63,19 +63,14 @@ export const CherryPickModal: React.FC<CherryPickModalProps> = ({
     setError(null);
 
     try {
-      const res = await invokeCommand.cherryPickCommit(
-        repoPath,
-        targetCommit.id,
-        autoCommit
-      );
+      const res = await invokeCommand.cherryPickCommit(repoPath, targetCommit.id, autoCommit);
 
       if (res.success || res.status === "Conflict") {
         if (onSuccess) onSuccess(res);
         onClose();
       } else {
         const errorMsg =
-          res.output ||
-          t.modals.cherryPick.genericError.replace("{msg}", res.status);
+          res.output || t.modals.cherryPick.genericError.replace("{msg}", res.status);
         setError(errorMsg);
       }
     } catch (err: unknown) {
@@ -110,10 +105,7 @@ export const CherryPickModal: React.FC<CherryPickModalProps> = ({
           <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
             <div className="flex items-center gap-2">
               <GitPullRequest size={16} className="text-accent" />
-              <h3
-                id="cherry-pick-title"
-                className="text-xs font-semibold text-primary m-0"
-              >
+              <h3 id="cherry-pick-title" className="text-xs font-semibold text-primary m-0">
                 {t.modals.cherryPick.title}
               </h3>
             </div>
@@ -137,10 +129,7 @@ export const CherryPickModal: React.FC<CherryPickModalProps> = ({
                   {targetCommit.short_id || targetCommit.id.substring(0, 7)}
                 </span>
               </div>
-              <div
-                className="font-medium text-primary line-clamp-2"
-                title={targetCommit.summary}
-              >
+              <div className="font-medium text-primary line-clamp-2" title={targetCommit.summary}>
                 {targetCommit.summary}
               </div>
               <div className="flex items-center justify-between text-[11px] text-tertiary">
@@ -173,9 +162,7 @@ export const CherryPickModal: React.FC<CherryPickModalProps> = ({
                   aria-label={t.modals.cherryPick.autoCommitLabel}
                   className="accent-accent cursor-pointer rounded-sm"
                 />
-                <span className="font-medium">
-                  {t.modals.cherryPick.autoCommitLabel}
-                </span>
+                <span className="font-medium">{t.modals.cherryPick.autoCommitLabel}</span>
               </label>
               <span className="text-[11px] text-secondary pl-6">
                 {t.modals.cherryPick.autoCommitDesc}

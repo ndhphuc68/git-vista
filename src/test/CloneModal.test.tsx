@@ -13,23 +13,13 @@ describe("CloneModal", () => {
 
   it("renders nothing when isOpen is false", () => {
     const { container } = render(
-      <CloneModal
-        isOpen={false}
-        onClose={mockOnClose}
-        onCloneSuccess={mockOnCloneSuccess}
-      />
+      <CloneModal isOpen={false} onClose={mockOnClose} onCloneSuccess={mockOnCloneSuccess} />
     );
     expect(container.firstChild).toBeNull();
   });
 
   it("renders URL and Target Directory inputs when isOpen is true", () => {
-    render(
-      <CloneModal
-        isOpen={true}
-        onClose={mockOnClose}
-        onCloneSuccess={mockOnCloneSuccess}
-      />
-    );
+    render(<CloneModal isOpen={true} onClose={mockOnClose} onCloneSuccess={mockOnCloneSuccess} />);
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByLabelText(/URL kho chứa|Repository URL/i)).toBeInTheDocument();
@@ -37,13 +27,7 @@ describe("CloneModal", () => {
   });
 
   it("auto-suggests target directory when URL is entered", () => {
-    render(
-      <CloneModal
-        isOpen={true}
-        onClose={mockOnClose}
-        onCloneSuccess={mockOnCloneSuccess}
-      />
-    );
+    render(<CloneModal isOpen={true} onClose={mockOnClose} onCloneSuccess={mockOnCloneSuccess} />);
 
     const urlInput = screen.getByLabelText(/URL kho chứa|Repository URL/i);
     fireEvent.change(urlInput, {
@@ -57,13 +41,7 @@ describe("CloneModal", () => {
   it("allows selecting folder using directory picker", async () => {
     vi.spyOn(invokeCommand, "selectRepoFolder").mockResolvedValue("D:/Projects");
 
-    render(
-      <CloneModal
-        isOpen={true}
-        onClose={mockOnClose}
-        onCloneSuccess={mockOnCloneSuccess}
-      />
-    );
+    render(<CloneModal isOpen={true} onClose={mockOnClose} onCloneSuccess={mockOnCloneSuccess} />);
 
     const browseBtn = screen.getByRole("button", { name: /chọn thư mục|browse folder/i });
     fireEvent.click(browseBtn);
@@ -84,13 +62,7 @@ describe("CloneModal", () => {
       head_commit_id: "abc",
     });
 
-    render(
-      <CloneModal
-        isOpen={true}
-        onClose={mockOnClose}
-        onCloneSuccess={mockOnCloneSuccess}
-      />
-    );
+    render(<CloneModal isOpen={true} onClose={mockOnClose} onCloneSuccess={mockOnCloneSuccess} />);
 
     const urlInput = screen.getByLabelText(/URL kho chứa|Repository URL/i);
     fireEvent.change(urlInput, {
@@ -117,13 +89,7 @@ describe("CloneModal", () => {
   });
 
   it("closes modal on cancel button click", () => {
-    render(
-      <CloneModal
-        isOpen={true}
-        onClose={mockOnClose}
-        onCloneSuccess={mockOnCloneSuccess}
-      />
-    );
+    render(<CloneModal isOpen={true} onClose={mockOnClose} onCloneSuccess={mockOnCloneSuccess} />);
 
     const cancelBtn = screen.getByRole("button", { name: /huỷ|cancel/i });
     fireEvent.click(cancelBtn);

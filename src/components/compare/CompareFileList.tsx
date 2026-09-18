@@ -28,8 +28,7 @@ export const CompareFileList: React.FC<CompareFileListProps> = ({
     const q = searchQuery.toLowerCase();
     return files.filter(
       (f) =>
-        f.path.toLowerCase().includes(q) ||
-        (f.old_path && f.old_path.toLowerCase().includes(q))
+        f.path.toLowerCase().includes(q) || (f.old_path && f.old_path.toLowerCase().includes(q))
     );
   }, [files, searchQuery]);
 
@@ -125,10 +124,7 @@ export const CompareFileList: React.FC<CompareFileListProps> = ({
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   {renderStatusBadge(file.status)}
                   <div className="flex flex-col min-w-0 flex-1">
-                    <span
-                      className="font-mono text-xs truncate"
-                      title={file.path}
-                    >
+                    <span className="font-mono text-xs truncate" title={file.path}>
                       {file.path}
                     </span>
                     {file.old_path && (

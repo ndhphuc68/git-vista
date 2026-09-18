@@ -6,8 +6,17 @@ fn create_conflict_repo() -> (tempfile::TempDir, String) {
     let dir = tempfile::tempdir().unwrap();
     let p = dir.path();
     let run = |args: &[&str]| {
-        let out = Command::new("git").current_dir(p).args(args).output().unwrap();
-        assert!(out.status.success(), "git {:?} failed: {}", args, String::from_utf8_lossy(&out.stderr));
+        let out = Command::new("git")
+            .current_dir(p)
+            .args(args)
+            .output()
+            .unwrap();
+        assert!(
+            out.status.success(),
+            "git {:?} failed: {}",
+            args,
+            String::from_utf8_lossy(&out.stderr)
+        );
     };
 
     run(&["init"]);
@@ -28,7 +37,11 @@ fn create_conflict_repo() -> (tempfile::TempDir, String) {
     run(&["commit", "-am", "main commit"]);
 
     // Merge gây conflict (không assert success)
-    let _ = Command::new("git").current_dir(p).args(["merge", "feature"]).output().unwrap();
+    let _ = Command::new("git")
+        .current_dir(p)
+        .args(["merge", "feature"])
+        .output()
+        .unwrap();
 
     let path_str = dir.path().to_str().unwrap().to_string();
     (dir, path_str)

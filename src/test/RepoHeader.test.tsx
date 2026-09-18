@@ -111,15 +111,9 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
 
   it("displays change count badge when there are uncommitted changes", async () => {
     vi.spyOn(invokeCommand, "getRepoStatus").mockResolvedValue({
-      staged: [
-        { path: "staged.txt", status: "Modified", is_staged: true, old_path: null },
-      ],
-      unstaged: [
-        { path: "unstaged.txt", status: "Modified", is_staged: false, old_path: null },
-      ],
-      untracked: [
-        { path: "untracked.txt", status: "New", is_staged: false, old_path: null },
-      ],
+      staged: [{ path: "staged.txt", status: "Modified", is_staged: true, old_path: null }],
+      unstaged: [{ path: "unstaged.txt", status: "Modified", is_staged: false, old_path: null }],
+      untracked: [{ path: "untracked.txt", status: "New", is_staged: false, old_path: null }],
       conflicted: [],
     });
 
@@ -153,25 +147,45 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
     expect(useViewStore.getState().activeScreen).toBe("history");
 
     // Cmd+2
-    const eventCmd2 = new KeyboardEvent("keydown", { key: "2", metaKey: true, bubbles: true, cancelable: true });
+    const eventCmd2 = new KeyboardEvent("keydown", {
+      key: "2",
+      metaKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
     fireEvent(window, eventCmd2);
     expect(useViewStore.getState().activeScreen).toBe("changes");
     expect(eventCmd2.defaultPrevented).toBe(true);
 
     // Ctrl+1
-    const eventCtrl1 = new KeyboardEvent("keydown", { key: "1", ctrlKey: true, bubbles: true, cancelable: true });
+    const eventCtrl1 = new KeyboardEvent("keydown", {
+      key: "1",
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
     fireEvent(window, eventCtrl1);
     expect(useViewStore.getState().activeScreen).toBe("history");
     expect(eventCtrl1.defaultPrevented).toBe(true);
 
     // Ctrl+2
-    const eventCtrl2 = new KeyboardEvent("keydown", { key: "2", ctrlKey: true, bubbles: true, cancelable: true });
+    const eventCtrl2 = new KeyboardEvent("keydown", {
+      key: "2",
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
     fireEvent(window, eventCtrl2);
     expect(useViewStore.getState().activeScreen).toBe("changes");
     expect(eventCtrl2.defaultPrevented).toBe(true);
 
     // Cmd+1
-    const eventCmd1 = new KeyboardEvent("keydown", { key: "1", metaKey: true, bubbles: true, cancelable: true });
+    const eventCmd1 = new KeyboardEvent("keydown", {
+      key: "1",
+      metaKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
     fireEvent(window, eventCmd1);
     expect(useViewStore.getState().activeScreen).toBe("history");
     expect(eventCmd1.defaultPrevented).toBe(true);
@@ -194,7 +208,12 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
     unmount();
 
     expect(useViewStore.getState().activeScreen).toBe("history");
-    const eventCmd2 = new KeyboardEvent("keydown", { key: "2", metaKey: true, bubbles: true, cancelable: true });
+    const eventCmd2 = new KeyboardEvent("keydown", {
+      key: "2",
+      metaKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
     fireEvent(window, eventCmd2);
     expect(useViewStore.getState().activeScreen).toBe("history");
     expect(eventCmd2.defaultPrevented).toBe(false);
@@ -312,4 +331,3 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
     expect(pushSpy).toHaveBeenCalled();
   });
 });
-

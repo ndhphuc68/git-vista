@@ -14,7 +14,9 @@ export const FetchPruneDiagram: React.FC = () => {
             <Cloud size={14} className="text-blue-500 shrink-0" />
             <span>Remote (GitHub/GitLab):</span>
           </div>
-          <span className="text-red-500 font-semibold line-through">origin/feature-old (đã xóa)</span>
+          <span className="text-red-500 font-semibold line-through">
+            origin/feature-old (đã xóa)
+          </span>
         </div>
 
         {/* Local status */}

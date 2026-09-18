@@ -84,7 +84,11 @@ impl RepoManager {
         self.start_watcher_for(&current, on_changed)
     }
 
-    pub fn start_watcher_for<P: AsRef<Path>, F>(&mut self, path: P, on_changed: F) -> Result<(), AppError>
+    pub fn start_watcher_for<P: AsRef<Path>, F>(
+        &mut self,
+        path: P,
+        on_changed: F,
+    ) -> Result<(), AppError>
     where
         F: Fn(String) + Send + Sync + 'static,
     {
@@ -118,7 +122,10 @@ impl RepoManager {
     }
 
     pub fn close_repository<P: AsRef<Path>>(&mut self, path: P) -> Result<(), AppError> {
-        let canonical = path.as_ref().canonicalize().unwrap_or_else(|_| path.as_ref().to_path_buf());
+        let canonical = path
+            .as_ref()
+            .canonicalize()
+            .unwrap_or_else(|_| path.as_ref().to_path_buf());
         if let Some(mut watcher) = self.watchers.remove(&canonical) {
             watcher.stop();
         }
@@ -130,7 +137,10 @@ impl RepoManager {
     }
 
     pub fn is_open<P: AsRef<Path>>(&self, path: P) -> bool {
-        let canonical = path.as_ref().canonicalize().unwrap_or_else(|_| path.as_ref().to_path_buf());
+        let canonical = path
+            .as_ref()
+            .canonicalize()
+            .unwrap_or_else(|_| path.as_ref().to_path_buf());
         self.active_repos.contains_key(&canonical)
     }
 

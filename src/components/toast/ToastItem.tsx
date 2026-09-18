@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { CheckCircle2, AlertCircle, Info } from "lucide-react";
 import clsx from "clsx";
-import { ToastItem as ToastItemType, useToastStore } from "../../store/useToastStore";
+import { type ToastItem as ToastItemType, useToastStore } from "../../store/useToastStore";
 import { useTranslation } from "../../i18n";
 
 export interface ToastItemProps {

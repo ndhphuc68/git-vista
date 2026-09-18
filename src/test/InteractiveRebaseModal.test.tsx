@@ -52,9 +52,7 @@ function renderWithClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
   });
-  return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-  );
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
 }
 
 describe("InteractiveRebaseModal", () => {
@@ -132,7 +130,9 @@ describe("InteractiveRebaseModal", () => {
     fireEvent.click(rewordButtons[1]!); // Reword Commit Two
 
     // Textarea appears
-    const textarea = screen.getByPlaceholderText(/nhập thông điệp commit mới|enter new commit message/i);
+    const textarea = screen.getByPlaceholderText(
+      /nhập thông điệp commit mới|enter new commit message/i
+    );
     expect(textarea).toBeInTheDocument();
 
     fireEvent.change(textarea, {

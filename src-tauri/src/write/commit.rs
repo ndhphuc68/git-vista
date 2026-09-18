@@ -41,7 +41,9 @@ pub fn create_commit<P: AsRef<Path>>(
 
     let repo = Repository::open(repo_path.as_ref())?;
     if repo.state() != RepositoryState::Clean {
-        return Err(AppError::InvalidOperation("Finish the current Git operation before committing".into()));
+        return Err(AppError::InvalidOperation(
+            "Finish the current Git operation before committing".into(),
+        ));
     }
     // Keep HEAD and its branch stable while creating the commit and recovery record.
     let mut transaction = repo.transaction()?;
@@ -64,7 +66,9 @@ pub fn create_commit<P: AsRef<Path>>(
     let tree = repo.find_tree(tree_oid)?;
 
     let new_commit_id = if amend {
-        let head_commit = previous.as_ref().ok_or_else(|| AppError::InvalidOperation("No commit to amend".into()))?;
+        let head_commit = previous
+            .as_ref()
+            .ok_or_else(|| AppError::InvalidOperation("No commit to amend".into()))?;
         create_backup_ref(&repo, "amend", head_commit.id())?;
         head_commit.amend(
             None,
@@ -76,9 +80,7 @@ pub fn create_commit<P: AsRef<Path>>(
         )?
     } else {
         match previous {
-            Some(ref parent) => {
-                repo.commit(None, &sig, &sig, &message, &tree, &[parent])?
-            }
+            Some(ref parent) => repo.commit(None, &sig, &sig, &message, &tree, &[parent])?,
             None => repo.commit(None, &sig, &sig, &message, &tree, &[])?,
         }
     };
@@ -91,16 +93,31 @@ pub fn create_commit<P: AsRef<Path>>(
     let message = serde_json::to_string(&recovery).map_err(|e| AppError::Io(e.to_string()))?;
     let new_commit = repo.find_commit(new_commit_id)?;
     let mut parents = vec![&new_commit];
-    if let Some(ref old_commit) = previous { parents.push(old_commit); }
+    if let Some(ref old_commit) = previous {
+        parents.push(old_commit);
+    }
     // Both pre- and post-operation commits remain reachable through this safety ref.
     let receipt = repo.commit(None, &sig, &sig, &message, &tree, &parents)?;
     static NEXT: AtomicU64 = AtomicU64::new(0);
-    let unique = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_nanos();
-    let action = format!("commit-undo-{}-{}-{}", std::process::id(), unique, NEXT.fetch_add(1, Ordering::Relaxed));
+    let unique = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_nanos();
+    let action = format!(
+        "commit-undo-{}-{}-{}",
+        std::process::id(),
+        unique,
+        NEXT.fetch_add(1, Ordering::Relaxed)
+    );
     let token = create_backup_ref(&repo, &action, receipt)?;
     let mut details = get_commit_info(repo_path.as_ref(), &new_commit_id.to_string())?;
     details.undo_token = Some(token);
-    transaction.set_target(&head_ref, new_commit_id, Some(&sig), &format!("commit: {}", summary_trimmed))?;
+    transaction.set_target(
+        &head_ref,
+        new_commit_id,
+        Some(&sig),
+        &format!("commit: {}", summary_trimmed),
+    )?;
     transaction.commit()?;
     Ok(details)
 }

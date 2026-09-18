@@ -1,7 +1,13 @@
 import React from "react";
 import { Sun, Moon, Laptop, Eye, Sparkles, Clock, UserCheck } from "lucide-react";
 import { useTranslation } from "../../../i18n";
-import { useSettingsStore, Theme, Locale, DateFormat, AvatarStyle } from "../../../store/useSettingsStore";
+import {
+  useSettingsStore,
+  type Theme,
+  type Locale,
+  type DateFormat,
+  type AvatarStyle,
+} from "../../../store/useSettingsStore";
 import { HelpTooltip } from "../HelpTooltip";
 
 export const AppearanceTab: React.FC = () => {
@@ -46,12 +52,8 @@ export const AppearanceTab: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-base font-semibold text-primary mb-1">
-          {t.settings.appearance.title}
-        </h3>
-        <p className="text-xs text-secondary">
-          {t.settings.appearance.subtitle}
-        </p>
+        <h3 className="text-base font-semibold text-primary mb-1">{t.settings.appearance.title}</h3>
+        <p className="text-xs text-secondary">{t.settings.appearance.subtitle}</p>
       </div>
 
       {/* Theme Selector */}
@@ -138,9 +140,14 @@ export const AppearanceTab: React.FC = () => {
                 : "border-border-subtle bg-surface-header/30 hover:bg-surface-hover text-secondary"
             }`}
           >
-            <Sparkles size={16} className={`mt-0.5 ${mode === "simple" ? "text-accent" : "text-secondary"}`} />
+            <Sparkles
+              size={16}
+              className={`mt-0.5 ${mode === "simple" ? "text-accent" : "text-secondary"}`}
+            />
             <div>
-              <div className="text-xs font-semibold text-primary">{t.settings.appearance.modeSimple}</div>
+              <div className="text-xs font-semibold text-primary">
+                {t.settings.appearance.modeSimple}
+              </div>
               <div className="text-[11px] text-secondary mt-0.5">
                 {t.settings.appearance.modeSimpleDesc}
               </div>
@@ -156,9 +163,14 @@ export const AppearanceTab: React.FC = () => {
                 : "border-border-subtle bg-surface-header/30 hover:bg-surface-hover text-secondary"
             }`}
           >
-            <Laptop size={16} className={`mt-0.5 ${mode === "advanced" ? "text-accent" : "text-secondary"}`} />
+            <Laptop
+              size={16}
+              className={`mt-0.5 ${mode === "advanced" ? "text-accent" : "text-secondary"}`}
+            />
             <div>
-              <div className="text-xs font-semibold text-primary">{t.settings.appearance.modeAdvanced}</div>
+              <div className="text-xs font-semibold text-primary">
+                {t.settings.appearance.modeAdvanced}
+              </div>
               <div className="text-[11px] text-secondary mt-0.5">
                 {t.settings.appearance.modeAdvancedDesc}
               </div>

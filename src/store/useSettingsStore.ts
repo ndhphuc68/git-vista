@@ -100,8 +100,12 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
   const savedDateFormat = getStorage("gitvista_date_format", "relative") as DateFormat;
   const savedAvatarStyle = getStorage("gitvista_avatar_style", "initials") as AvatarStyle;
   const savedDiffViewMode = getStorage("gitvista_diff_view_mode", "unified") as DiffViewMode;
-  const savedDiffFontSize = parseInt(getStorage("gitvista_diff_font_size", "13"), 10) as DiffFontSize;
-  const savedDiffIgnoreWhitespace = getStorage("gitvista_diff_ignore_whitespace", "false") === "true";
+  const savedDiffFontSize = parseInt(
+    getStorage("gitvista_diff_font_size", "13"),
+    10
+  ) as DiffFontSize;
+  const savedDiffIgnoreWhitespace =
+    getStorage("gitvista_diff_ignore_whitespace", "false") === "true";
   const savedDiffTabSize = parseInt(getStorage("gitvista_diff_tab_size", "4"), 10) as DiffTabSize;
   const savedDiffShowLineNumbers = getStorage("gitvista_diff_show_line_numbers", "true") === "true";
   const savedConfirmDiscard = getStorage("gitvista_confirm_discard", "true") === "true";
@@ -110,7 +114,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
   const savedCommitMessageLimit = parseInt(getStorage("gitvista_commit_message_limit", "72"), 10);
   const savedDefaultEditor = getStorage("gitvista_default_editor", "code") as ExternalEditor;
   const savedCustomEditorCommand = getStorage("gitvista_custom_editor_command", "");
-  const savedDefaultTerminal = getStorage("gitvista_default_terminal", "powershell") as ExternalTerminal;
+  const savedDefaultTerminal = getStorage(
+    "gitvista_default_terminal",
+    "powershell"
+  ) as ExternalTerminal;
 
   const resolved = savedTheme === "system" ? getSystemTheme() : savedTheme;
   applyThemeAttributes(resolved, savedColorblind);
@@ -161,7 +168,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
     },
 
     setColorblind: (colorblind: boolean) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("colorblind", String(colorblind));
+      if (typeof localStorage !== "undefined")
+        localStorage.setItem("colorblind", String(colorblind));
       applyThemeAttributes(get().resolvedTheme, colorblind);
       set({ colorblind });
     },
@@ -184,72 +192,86 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
     setActiveTab: (tab: SettingsTab) => set({ activeTab: tab }),
 
     setDateFormat: (dateFormat: DateFormat) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("gitvista_date_format", dateFormat);
+      if (typeof localStorage !== "undefined")
+        localStorage.setItem("gitvista_date_format", dateFormat);
       set({ dateFormat });
     },
 
     setAvatarStyle: (avatarStyle: AvatarStyle) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("gitvista_avatar_style", avatarStyle);
+      if (typeof localStorage !== "undefined")
+        localStorage.setItem("gitvista_avatar_style", avatarStyle);
       set({ avatarStyle });
     },
 
     setDiffViewMode: (diffViewMode: DiffViewMode) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("gitvista_diff_view_mode", diffViewMode);
+      if (typeof localStorage !== "undefined")
+        localStorage.setItem("gitvista_diff_view_mode", diffViewMode);
       set({ diffViewMode });
     },
 
     setDiffFontSize: (diffFontSize: DiffFontSize) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("gitvista_diff_font_size", String(diffFontSize));
+      if (typeof localStorage !== "undefined")
+        localStorage.setItem("gitvista_diff_font_size", String(diffFontSize));
       set({ diffFontSize });
     },
 
     setDiffIgnoreWhitespace: (diffIgnoreWhitespace: boolean) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("gitvista_diff_ignore_whitespace", String(diffIgnoreWhitespace));
+      if (typeof localStorage !== "undefined")
+        localStorage.setItem("gitvista_diff_ignore_whitespace", String(diffIgnoreWhitespace));
       set({ diffIgnoreWhitespace });
     },
 
     setDiffTabSize: (diffTabSize: DiffTabSize) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("gitvista_diff_tab_size", String(diffTabSize));
+      if (typeof localStorage !== "undefined")
+        localStorage.setItem("gitvista_diff_tab_size", String(diffTabSize));
       set({ diffTabSize });
     },
 
     setDiffShowLineNumbers: (diffShowLineNumbers: boolean) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("gitvista_diff_show_line_numbers", String(diffShowLineNumbers));
+      if (typeof localStorage !== "undefined")
+        localStorage.setItem("gitvista_diff_show_line_numbers", String(diffShowLineNumbers));
       set({ diffShowLineNumbers });
     },
 
     setConfirmDiscard: (confirmDiscard: boolean) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("gitvista_confirm_discard", String(confirmDiscard));
+      if (typeof localStorage !== "undefined")
+        localStorage.setItem("gitvista_confirm_discard", String(confirmDiscard));
       set({ confirmDiscard });
     },
 
     setConfirmDeleteBranch: (confirmDeleteBranch: boolean) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("gitvista_confirm_delete_branch", String(confirmDeleteBranch));
+      if (typeof localStorage !== "undefined")
+        localStorage.setItem("gitvista_confirm_delete_branch", String(confirmDeleteBranch));
       set({ confirmDeleteBranch });
     },
 
     setConfirmForcePush: (confirmForcePush: boolean) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("gitvista_confirm_force_push", String(confirmForcePush));
+      if (typeof localStorage !== "undefined")
+        localStorage.setItem("gitvista_confirm_force_push", String(confirmForcePush));
       set({ confirmForcePush });
     },
 
     setCommitMessageLimit: (commitMessageLimit: number) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("gitvista_commit_message_limit", String(commitMessageLimit));
+      if (typeof localStorage !== "undefined")
+        localStorage.setItem("gitvista_commit_message_limit", String(commitMessageLimit));
       set({ commitMessageLimit });
     },
 
     setDefaultEditor: (defaultEditor: ExternalEditor) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("gitvista_default_editor", defaultEditor);
+      if (typeof localStorage !== "undefined")
+        localStorage.setItem("gitvista_default_editor", defaultEditor);
       set({ defaultEditor });
     },
 
     setCustomEditorCommand: (customEditorCommand: string) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("gitvista_custom_editor_command", customEditorCommand);
+      if (typeof localStorage !== "undefined")
+        localStorage.setItem("gitvista_custom_editor_command", customEditorCommand);
       set({ customEditorCommand });
     },
 
     setDefaultTerminal: (defaultTerminal: ExternalTerminal) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("gitvista_default_terminal", defaultTerminal);
+      if (typeof localStorage !== "undefined")
+        localStorage.setItem("gitvista_default_terminal", defaultTerminal);
       set({ defaultTerminal });
     },
   };

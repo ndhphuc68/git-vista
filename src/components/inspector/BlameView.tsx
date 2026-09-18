@@ -30,7 +30,11 @@ export const BlameView: React.FC<BlameViewProps> = ({
   const { setSelectedCommit } = useRepoStore();
   const [copiedSha, setCopiedSha] = useState<string | null>(null);
 
-  const { data: blame, isLoading, error } = useQuery({
+  const {
+    data: blame,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["file-blame", repoPath, filePath, commitId],
     queryFn: () => invokeCommand.getFileBlame(repoPath, filePath, commitId),
   });
@@ -153,7 +157,10 @@ export const BlameView: React.FC<BlameViewProps> = ({
                         title={t.inspector.jumpToCommit}
                       >
                         <span>{line.short_id}</span>
-                        <ExternalLink size={9} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <ExternalLink
+                          size={9}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        />
                       </button>
 
                       {/* Copy SHA icon */}

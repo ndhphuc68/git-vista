@@ -191,4 +191,3 @@ pub fn get_working_file_diff<P: AsRef<Path>>(
 
     parse_diff_to_file_diff_result(&diff, file_path)
 }
-

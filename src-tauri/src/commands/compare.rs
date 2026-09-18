@@ -1,7 +1,7 @@
 use crate::error::AppError;
 use crate::read::compare::{
-    get_compare_file_diff as read_compare_file_diff,
-    get_compare_summary as read_compare_summary, CompareMode, CompareSummary,
+    get_compare_file_diff as read_compare_file_diff, get_compare_summary as read_compare_summary,
+    CompareMode, CompareSummary,
 };
 use crate::read::diff::FileDiffResult;
 

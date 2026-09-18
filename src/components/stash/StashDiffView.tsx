@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Play, PlayCircle, Trash2 } from "lucide-react";
-import { StashItem, CommitDetails } from "../../ipc/bindings";
+import { type StashItem, type CommitDetails } from "../../ipc/bindings";
 import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
 
@@ -95,7 +95,9 @@ export const StashDiffView: React.FC<StashDiffViewProps> = ({
         {error ? (
           <div className="p-3 text-xs text-secondary text-center">
             <p className="text-tertiary mb-1">{t.modals.stashDiff.loadError}</p>
-            <p className="font-mono text-[10px] text-tertiary">{stashItem.commit_id.substring(0, 12)}</p>
+            <p className="font-mono text-[10px] text-tertiary">
+              {stashItem.commit_id.substring(0, 12)}
+            </p>
           </div>
         ) : commitDetails ? (
           <div className="flex flex-col gap-0.5">
@@ -114,15 +116,11 @@ export const StashDiffView: React.FC<StashDiffViewProps> = ({
                       file.status === "deleted"
                         ? "text-diff-remove-text"
                         : file.status === "added"
-                        ? "text-diff-add-text"
-                        : "text-secondary"
+                          ? "text-diff-add-text"
+                          : "text-secondary"
                     }
                   >
-                    {file.status === "deleted"
-                      ? "D"
-                      : file.status === "added"
-                      ? "A"
-                      : "M"}
+                    {file.status === "deleted" ? "D" : file.status === "added" ? "A" : "M"}
                   </span>
                   <span className="text-primary truncate">{file.path}</span>
                   <span className="ml-auto shrink-0 text-[10px] text-tertiary">
@@ -133,9 +131,7 @@ export const StashDiffView: React.FC<StashDiffViewProps> = ({
             )}
           </div>
         ) : (
-          <div className="text-xs text-tertiary text-center py-4">
-            {t.common.loading}
-          </div>
+          <div className="text-xs text-tertiary text-center py-4">{t.common.loading}</div>
         )}
       </div>
     </div>

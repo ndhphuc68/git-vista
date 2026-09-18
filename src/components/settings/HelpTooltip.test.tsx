@@ -35,9 +35,12 @@ describe("HelpTooltip Component", () => {
 
     fireEvent.mouseLeave(trigger);
 
-    await waitFor(() => {
-      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
-    }, { timeout: 1000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+      },
+      { timeout: 1000 }
+    );
   });
 
   it("can toggle open/close via click", async () => {
@@ -67,10 +70,7 @@ describe("HelpTooltip Component", () => {
 
   it("closes on Escape key press", async () => {
     render(
-      <HelpTooltip
-        title="Autostash Rebase"
-        description="Tự động cất trữ thay đổi khi rebase"
-      />
+      <HelpTooltip title="Autostash Rebase" description="Tự động cất trữ thay đổi khi rebase" />
     );
 
     const trigger = screen.getByRole("button", { name: /Trợ giúp: Autostash Rebase/i });

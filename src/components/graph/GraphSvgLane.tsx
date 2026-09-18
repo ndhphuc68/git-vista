@@ -1,14 +1,7 @@
 import React from "react";
-import { GraphEdge } from "../../ipc/bindings";
+import { type GraphEdge } from "../../ipc/bindings";
 
-const LANE_COLORS = [
-  "#2F6FEB",
-  "#8E44AD",
-  "#27AE60",
-  "#E67E22",
-  "#E74C3C",
-  "#16A085",
-];
+const LANE_COLORS = ["#2F6FEB", "#8E44AD", "#27AE60", "#E67E22", "#E74C3C", "#16A085"];
 
 const DEFAULT_COL_WIDTH = 16;
 const DEFAULT_ROW_HEIGHT = 32;

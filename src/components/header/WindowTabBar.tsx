@@ -50,7 +50,10 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
                 >
                   <Home
                     size={14}
-                    className={clsx("shrink-0", isActive ? "text-accent" : "text-secondary group-hover:text-primary")}
+                    className={clsx(
+                      "shrink-0",
+                      isActive ? "text-accent" : "text-secondary group-hover:text-primary"
+                    )}
                   />
                   <span className="truncate">Home</span>
                 </div>
@@ -79,7 +82,10 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
               >
                 <FolderGit2
                   size={15}
-                  className={clsx("shrink-0", isActive ? "text-accent" : "text-secondary group-hover:text-primary")}
+                  className={clsx(
+                    "shrink-0",
+                    isActive ? "text-accent" : "text-secondary group-hover:text-primary"
+                  )}
                 />
                 <span className="truncate">{repoName}</span>
 
@@ -94,7 +100,10 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
                     title={`Branch: ${branchName}`}
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                    <GitBranch size={9} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    <GitBranch
+                      size={9}
+                      className="shrink-0 text-emerald-600 dark:text-emerald-400"
+                    />
                     <span className="truncate">{branchName}</span>
                   </span>
                 )}
@@ -117,7 +126,6 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
               )}
             </React.Fragment>
           );
-
         })}
 
         {/* GitVista New Tab Button (+) */}
@@ -149,4 +157,3 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
     </div>
   );
 };
-

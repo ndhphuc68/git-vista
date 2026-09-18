@@ -85,10 +85,7 @@ export const RebaseBranchModal: React.FC<RebaseBranchModalProps> = ({
         <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
           <div className="flex items-center gap-2">
             <GitCommit size={16} className="text-accent" />
-            <h3
-              id="rebase-branch-title"
-              className="text-xs font-semibold text-primary m-0"
-            >
+            <h3 id="rebase-branch-title" className="text-xs font-semibold text-primary m-0">
               {t.modals.rebase.title}
             </h3>
           </div>
@@ -109,9 +106,7 @@ export const RebaseBranchModal: React.FC<RebaseBranchModalProps> = ({
             <span className="font-semibold text-accent">{upstreamBranch}</span>
           </div>
 
-          <p className="text-xs text-secondary leading-normal m-0">
-            {t.modals.rebase.desc}
-          </p>
+          <p className="text-xs text-secondary leading-normal m-0">{t.modals.rebase.desc}</p>
 
           {hasUncommittedChanges && (
             <div className="flex items-start gap-2 p-2.5 bg-diff-remove-bg border border-diff-remove-text/30 rounded-sm text-diff-remove-text text-xs">

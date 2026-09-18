@@ -1,7 +1,12 @@
 import React from "react";
 import { Columns, AlignLeft, Type, Hash, Space } from "lucide-react";
 import { useTranslation } from "../../../i18n";
-import { useSettingsStore, DiffViewMode, DiffFontSize, DiffTabSize } from "../../../store/useSettingsStore";
+import {
+  useSettingsStore,
+  type DiffViewMode,
+  type DiffFontSize,
+  type DiffTabSize,
+} from "../../../store/useSettingsStore";
 import { HelpTooltip } from "../HelpTooltip";
 import { DiffModeDiagram, WhitespaceDiagram } from "../helpDiagrams";
 
@@ -20,7 +25,12 @@ export const DiffViewerTab: React.FC = () => {
     setDiffShowLineNumbers,
   } = useSettingsStore();
 
-  const viewModeOptions: { value: DiffViewMode; title: string; desc: string; icon: React.ReactNode }[] = [
+  const viewModeOptions: {
+    value: DiffViewMode;
+    title: string;
+    desc: string;
+    icon: React.ReactNode;
+  }[] = [
     {
       value: "unified",
       title: t.settings.diff.viewModeUnified,
@@ -51,12 +61,8 @@ export const DiffViewerTab: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-base font-semibold text-primary mb-1">
-          {t.settings.diff.title}
-        </h3>
-        <p className="text-xs text-secondary">
-          {t.settings.diff.subtitle}
-        </p>
+        <h3 className="text-base font-semibold text-primary mb-1">{t.settings.diff.title}</h3>
+        <p className="text-xs text-secondary">{t.settings.diff.subtitle}</p>
       </div>
 
       {/* View Mode */}
@@ -87,7 +93,9 @@ export const DiffViewerTab: React.FC = () => {
                     : "border-border-subtle bg-surface-header/30 hover:bg-surface-hover text-secondary"
                 }`}
               >
-                <div className={`p-1.5 rounded-md ${isSelected ? "text-accent bg-accent/15" : "text-secondary bg-surface"}`}>
+                <div
+                  className={`p-1.5 rounded-md ${isSelected ? "text-accent bg-accent/15" : "text-secondary bg-surface"}`}
+                >
                   {opt.icon}
                 </div>
                 <div>
@@ -240,9 +248,7 @@ export const DiffViewerTab: React.FC = () => {
 
       {/* Live Preview Box */}
       <div className="pt-2">
-        <label className="text-xs font-medium text-secondary block mb-2">
-          Preview
-        </label>
+        <label className="text-xs font-medium text-secondary block mb-2">Preview</label>
         <div
           className="rounded-lg border border-border-subtle bg-surface-header/40 p-3 font-mono overflow-x-auto leading-relaxed select-none"
           style={{ fontSize: `${diffFontSize}px`, tabSize: diffTabSize }}
@@ -259,14 +265,14 @@ export const DiffViewerTab: React.FC = () => {
               </div>
               <div className="text-secondary flex gap-3">
                 <span className="text-secondary/50 select-none w-6 text-right">42</span>
-                <span>  console.log(greeting);</span>
+                <span> console.log(greeting);</span>
               </div>
             </div>
           ) : (
             <div className="space-y-1">
               <div className="text-red-400/90">- const greeting = "hello";</div>
               <div className="text-emerald-400/90">+ const greeting = "Hello, GitVista!";</div>
-              <div className="text-secondary">  console.log(greeting);</div>
+              <div className="text-secondary"> console.log(greeting);</div>
             </div>
           )}
         </div>

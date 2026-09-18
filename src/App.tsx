@@ -7,7 +7,7 @@ import { WindowTabBar } from "./components/header/WindowTabBar";
 import { ChangesScreen } from "./components/changes/ChangesScreen";
 import { InProgressOperationBanner } from "./components/banner/InProgressOperationBanner";
 import { listenToRepoChanged, invokeCommand } from "./ipc/client";
-import { RepoSummary } from "./ipc/bindings";
+import { type RepoSummary } from "./ipc/bindings";
 import { useRepoStore } from "./store/useRepoStore";
 import { useTabStore } from "./store/useTabStore";
 import { useViewStore } from "./store/useViewStore";
@@ -27,7 +27,7 @@ import { CompareModal } from "./components/compare";
 import { PullRequestDetailDrawer, CreatePullRequestModal } from "./components/pullrequests";
 import { usePullRequestStore } from "./store/usePullRequestStore";
 import { useCommandPaletteStore } from "./store/useCommandPaletteStore";
-import { CommandContext } from "./utils/commandRegistry";
+import { type CommandContext } from "./utils/commandRegistry";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,7 +52,8 @@ const RepoContent: React.FC<RepoContentProps> = ({
   setIsGlobalCreateBranchOpen,
 }) => {
   const queryClient = useQueryClient();
-  const { activeScreen, setActiveScreen, activeConflictFile, closeConflictResolver } = useViewStore();
+  const { activeScreen, setActiveScreen, activeConflictFile, closeConflictResolver } =
+    useViewStore();
 
   const { data: repoState } = useQuery({
     queryKey: ["repo_state", currentRepo.path],
@@ -131,11 +132,13 @@ export const App: React.FC<AppProps> = ({
   const [compareTargetRev, setCompareTargetRev] = useState<string | undefined>(undefined);
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const { currentRepo, setRepo, clearRepo } = useRepoStore();
-  const { tabs, activeTabId, setActiveTab, openRepoTab, openHomeTab, closeTab, restoreSession } = useTabStore();
+  const { tabs, activeTabId, setActiveTab, openRepoTab, openHomeTab, closeTab, restoreSession } =
+    useTabStore();
   const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0];
-  const repoToDisplay = activeTab?.type === "repo" ? (activeTab.repo || currentRepo) : null;
+  const repoToDisplay = activeTab?.type === "repo" ? activeTab.repo || currentRepo : null;
   const { setActiveScreen } = useViewStore();
-  const { resolvedTheme, setTheme, mode, setMode, openSettings, closeSettings } = useSettingsStore();
+  const { resolvedTheme, setTheme, mode, setMode, openSettings, closeSettings } =
+    useSettingsStore();
   const { open: openCommandPalette, close: closeCommandPalette } = useCommandPaletteStore();
 
   const handleToggleTheme = () => {
@@ -161,10 +164,13 @@ export const App: React.FC<AppProps> = ({
     restoreSession();
   }, [restoreSession]);
 
-  const handleSelectRepo = useCallback((repo: RepoSummary) => {
-    openRepoTab(repo);
-    setRepo(repo);
-  }, [openRepoTab, setRepo]);
+  const handleSelectRepo = useCallback(
+    (repo: RepoSummary) => {
+      openRepoTab(repo);
+      setRepo(repo);
+    },
+    [openRepoTab, setRepo]
+  );
 
   const handleBackToWelcome = useCallback(() => {
     openHomeTab();
@@ -293,10 +299,7 @@ export const App: React.FC<AppProps> = ({
   return (
     <QueryClientProvider client={queryClient}>
       {!splashFinished && (
-        <SplashScreen
-          onFinish={() => setSplashFinished(true)}
-          skipSplash={skipSplash}
-        />
+        <SplashScreen onFinish={() => setSplashFinished(true)} skipSplash={skipSplash} />
       )}
       <div className="flex flex-col h-screen w-screen overflow-hidden">
         {/* Top Window Tab Bar */}

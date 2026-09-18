@@ -28,7 +28,12 @@ pub fn create_backup_ref(
         } else {
             format!("{}.{}", base, NEXT.fetch_add(1, Ordering::Relaxed))
         };
-        match repo.reference(&ref_name, target_oid, false, "gitui automatic safety backup") {
+        match repo.reference(
+            &ref_name,
+            target_oid,
+            false,
+            "gitui automatic safety backup",
+        ) {
             Ok(_) => return Ok(ref_name),
             // An existing ref for the same target is already a valid backup.
             Err(_) if repo.refname_to_id(&ref_name).ok() == Some(target_oid) => {

@@ -1,7 +1,7 @@
 ﻿import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { StagingFileList } from "../components/changes/StagingFileList";
-import { StatusFileItem } from "../ipc/bindings";
+import { type StatusFileItem } from "../ipc/bindings";
 
 describe("StagingFileList with Conflicted files", () => {
   const mockConflicted: StatusFileItem[] = [

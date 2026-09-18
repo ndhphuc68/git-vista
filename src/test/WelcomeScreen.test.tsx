@@ -107,9 +107,7 @@ describe("WelcomeScreen", () => {
 
   it("handles Ctrl+O and Ctrl+N shortcuts on WelcomeScreen", async () => {
     const { invokeCommand } = await import("../ipc/client");
-    const selectFolderSpy = vi
-      .spyOn(invokeCommand, "selectRepoFolder")
-      .mockResolvedValue(null);
+    const selectFolderSpy = vi.spyOn(invokeCommand, "selectRepoFolder").mockResolvedValue(null);
 
     render(
       <QueryClientProvider client={queryClient}>
@@ -222,6 +220,3 @@ describe("WelcomeScreen", () => {
     expect(useSettingsStore.getState().isSettingsOpen).toBe(true);
   });
 });
-
-
-

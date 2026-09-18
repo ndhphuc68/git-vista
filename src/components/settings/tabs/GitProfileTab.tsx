@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Globe, FolderGit2, Check, ShieldCheck, Key, FileText } from "lucide-react";
 import { useTranslation } from "../../../i18n";
-import { invokeCommand, GitConfigDto } from "../../../ipc/client";
+import { invokeCommand, type GitConfigDto } from "../../../ipc/client";
 import { useToastStore } from "../../../store/useToastStore";
-import { useSettingsStore, CommitMessageLimit } from "../../../store/useSettingsStore";
+import { useSettingsStore, type CommitMessageLimit } from "../../../store/useSettingsStore";
 import { HelpTooltip } from "../HelpTooltip";
 
 interface GitProfileTabProps {
@@ -86,9 +86,24 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
       if (activeScope === "repo" && currentRepoPath) {
         if (isOverride) {
           await invokeCommand.setGitConfig(currentRepoPath, "local", "user.name", userName.trim());
-          await invokeCommand.setGitConfig(currentRepoPath, "local", "user.email", userEmail.trim());
-          await invokeCommand.setGitConfig(currentRepoPath, "local", "commit.gpgsign", String(gpgSign));
-          await invokeCommand.setGitConfig(currentRepoPath, "local", "user.signingkey", gpgKey.trim());
+          await invokeCommand.setGitConfig(
+            currentRepoPath,
+            "local",
+            "user.email",
+            userEmail.trim()
+          );
+          await invokeCommand.setGitConfig(
+            currentRepoPath,
+            "local",
+            "commit.gpgsign",
+            String(gpgSign)
+          );
+          await invokeCommand.setGitConfig(
+            currentRepoPath,
+            "local",
+            "user.signingkey",
+            gpgKey.trim()
+          );
         } else {
           // Clear local override to inherit
           await invokeCommand.setGitConfig(currentRepoPath, "local", "user.name", "");
@@ -99,7 +114,12 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
       } else {
         await invokeCommand.setGitConfig(null, "global", "user.name", userName.trim());
         await invokeCommand.setGitConfig(null, "global", "user.email", userEmail.trim());
-        await invokeCommand.setGitConfig(null, "global", "init.defaultBranch", defaultBranch.trim() || "main");
+        await invokeCommand.setGitConfig(
+          null,
+          "global",
+          "init.defaultBranch",
+          defaultBranch.trim() || "main"
+        );
         await invokeCommand.setGitConfig(null, "global", "commit.gpgsign", String(gpgSign));
         await invokeCommand.setGitConfig(null, "global", "user.signingkey", gpgKey.trim());
       }
@@ -168,7 +188,9 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
             <div>
               <div className="text-xs font-semibold text-primary">
                 {t.settings.profile.repoSettingsBanner}{" "}
-                <span className="font-mono text-accent">{currentRepoPath.split(/[/\\]/).filter(Boolean).pop() || currentRepoPath}</span>
+                <span className="font-mono text-accent">
+                  {currentRepoPath.split(/[/\\]/).filter(Boolean).pop() || currentRepoPath}
+                </span>
               </div>
               <p className="text-[11px] text-secondary mt-0.5">
                 {t.settings.profile.repoSettingsDesc}
@@ -241,7 +263,9 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
               <div className="text-xs font-medium">
                 <div>{t.settings.profile.inheritGlobalOption}</div>
                 <div className="text-[11px] text-secondary mt-0.5">
-                  {globalConfig?.userName ? `(${globalConfig.userName} <${globalConfig.userEmail}>)` : ""}
+                  {globalConfig?.userName
+                    ? `(${globalConfig.userName} <${globalConfig.userEmail}>)`
+                    : ""}
                 </div>
               </div>
             </label>
@@ -330,7 +354,10 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
 
         {activeScope === "global" && (
           <div>
-            <label htmlFor="default-branch" className="text-xs font-medium text-primary block mb-1.5">
+            <label
+              htmlFor="default-branch"
+              className="text-xs font-medium text-primary block mb-1.5"
+            >
               {t.settings.profile.defaultBranchLabel}
             </label>
             <input
@@ -350,7 +377,9 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
             <ShieldCheck size={16} className="text-accent mt-0.5 shrink-0" />
             <div>
               <div className="flex items-center gap-1.5">
-                <div className="text-xs font-semibold text-primary">{t.settings.profile.gpgTitle}</div>
+                <div className="text-xs font-semibold text-primary">
+                  {t.settings.profile.gpgTitle}
+                </div>
                 <HelpTooltip
                   title={t.settings.help.profileGpgTitle}
                   description={t.settings.help.profileGpgDesc}
@@ -409,7 +438,9 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
           <div className="flex items-start gap-2">
             <FileText size={16} className="text-accent mt-0.5 shrink-0" />
             <div>
-              <div className="text-xs font-semibold text-primary">{t.settings.profile.commitConventionsTitle}</div>
+              <div className="text-xs font-semibold text-primary">
+                {t.settings.profile.commitConventionsTitle}
+              </div>
               <label className="text-[11px] text-secondary mt-0.5 block">
                 {t.settings.profile.commitLengthLabel}
               </label>

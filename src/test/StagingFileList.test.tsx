@@ -87,9 +87,7 @@ describe("StagingFileList & DiscardConfirmModal", () => {
     fireEvent.click(discardBtn);
 
     // Modal should be open with warning
-    expect(
-      screen.getByRole("heading", { name: /Huỷ thay đổi/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Huỷ thay đổi/i })).toBeInTheDocument();
     expect(
       screen.getByText(/Các thay đổi trong file này sẽ bị huỷ vĩnh viễn/i)
     ).toBeInTheDocument();

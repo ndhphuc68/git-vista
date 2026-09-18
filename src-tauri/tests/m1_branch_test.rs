@@ -10,10 +10,12 @@ fn test_get_branches_lists_local_and_head() {
 
     let result = get_branches(path_str).expect("Failed to get branches");
     assert!(!result.local.is_empty());
-    assert!(result.local.iter().any(|b| b.name == "master" || b.name == "main"));
+    assert!(result
+        .local
+        .iter()
+        .any(|b| b.name == "master" || b.name == "main"));
     assert!(result.local.iter().any(|b| b.name == "feature-branch"));
 
     let head_branch = result.local.iter().find(|b| b.is_head);
     assert!(head_branch.is_some());
 }
-

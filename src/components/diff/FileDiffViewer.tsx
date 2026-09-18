@@ -7,7 +7,7 @@ import { useTranslation } from "../../i18n";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { useInspectorStore } from "../../store/useInspectorStore";
 import { pairHunkLines } from "../../utils/wordDiff";
-import { DiffHunk } from "../../ipc/bindings";
+import { type DiffHunk } from "../../ipc/bindings";
 import { DiffLineContent } from "./DiffLineContent";
 
 interface FileDiffViewerProps {
@@ -45,8 +45,8 @@ const FileDiffHunk: React.FC<FileDiffHunkProps> = ({ hunk, showWordDiff }) => {
                 isAdd
                   ? "bg-diff-add-bg text-diff-add-text"
                   : isDel
-                  ? "bg-diff-remove-bg text-diff-remove-text"
-                  : "bg-transparent text-primary"
+                    ? "bg-diff-remove-bg text-diff-remove-text"
+                    : "bg-transparent text-primary"
               )}
             >
               {/* Line numbers gutter */}
@@ -94,7 +94,8 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
 
   const { data: diff, isLoading } = useQuery({
     queryKey: ["file-diff", repoPath, commitId, filePath, diffIgnoreWhitespace],
-    queryFn: () => invokeCommand.getCommitFileDiff(repoPath, commitId, filePath, diffIgnoreWhitespace),
+    queryFn: () =>
+      invokeCommand.getCommitFileDiff(repoPath, commitId, filePath, diffIgnoreWhitespace),
   });
 
   if (isLoading) {
@@ -183,9 +184,7 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
     return (
       <div className="flex flex-col font-mono text-xs overflow-x-auto rounded-md border border-border-subtle bg-surface shadow-2xs">
         {renderToolbar()}
-        <div className="p-8 text-tertiary text-xs text-center">
-          {t.diff.noTextChanges}
-        </div>
+        <div className="p-8 text-tertiary text-xs text-center">{t.diff.noTextChanges}</div>
       </div>
     );
   }

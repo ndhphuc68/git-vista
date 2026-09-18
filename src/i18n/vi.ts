@@ -133,7 +133,8 @@ export const vi = {
       fontSize16: "Lớn (16px)",
       whitespaceTitle: "Xử lý khoảng trắng (Whitespace)",
       whitespaceIgnore: "Bỏ qua thay đổi khoảng trắng (--ignore-all-space)",
-      whitespaceIgnoreDesc: "Không đánh dấu các thay đổi chỉ do thêm hoặc bớt dấu cách / tab thụt lề.",
+      whitespaceIgnoreDesc:
+        "Không đánh dấu các thay đổi chỉ do thêm hoặc bớt dấu cách / tab thụt lề.",
       tabSizeTitle: "Độ rộng Tab thụt lề",
       tabSize2: "2 khoảng trắng",
       tabSize4: "4 khoảng trắng (Mặc định)",
@@ -161,7 +162,8 @@ export const vi = {
       fetchPruneTitle: "Dọn dẹp nhánh khi Fetch (fetch.prune)",
       fetchPruneDesc: "Tự động xóa các tham chiếu nhánh remote đã bị xóa khỏi server.",
       rebaseAutostashTitle: "Tự động Stash khi Rebase (rebase.autoStash)",
-      rebaseAutostashDesc: "Tự động cất trữ thay đổi đang dở dang và áp dụng lại sau khi rebase thành công.",
+      rebaseAutostashDesc:
+        "Tự động cất trữ thay đổi đang dở dang và áp dụng lại sau khi rebase thành công.",
       confirmationsTitle: "Hộp thoại cảnh báo & Xác nhận an toàn",
       confirmDiscardLabel: "Xác nhận trước khi hủy bỏ thay đổi (Discard changes)",
       confirmDeleteBranchLabel: "Xác nhận trước khi xóa nhánh (Delete branch)",
@@ -192,33 +194,47 @@ export const vi = {
       tagVisual: "Trực quan",
       tagIntegration: "Tích hợp",
       pullStrategyTitle: "Chiến lược Git Pull",
-      pullStrategyDesc: "Quyết định cách tích hợp commit mới từ máy chủ về máy của bạn. 'Rebase' giữ lịch sử commit thẳng hàng, đẹp đẽ. 'Merge' tạo commit gộp, lưu lại vết rẽ nhánh.",
+      pullStrategyDesc:
+        "Quyết định cách tích hợp commit mới từ máy chủ về máy của bạn. 'Rebase' giữ lịch sử commit thẳng hàng, đẹp đẽ. 'Merge' tạo commit gộp, lưu lại vết rẽ nhánh.",
       autoFetchTitle: "Tự động tìm nạp (Background Fetch)",
-      autoFetchDesc: "Định kỳ âm thầm kiểm tra máy chủ Git xem đồng đội có đẩy commit mới lên không mà không làm ảnh hưởng đến mã nguồn đang viết dở của bạn.",
+      autoFetchDesc:
+        "Định kỳ âm thầm kiểm tra máy chủ Git xem đồng đội có đẩy commit mới lên không mà không làm ảnh hưởng đến mã nguồn đang viết dở của bạn.",
       fetchPruneTitle: "Dọn dẹp nhánh khi Fetch (Prune)",
-      fetchPruneDesc: "Khi ai đó xóa một nhánh trên GitHub/GitLab (vd: sau khi merge PR), Git cục bộ trên máy bạn vẫn lưu nhánh tham chiếu cũ. Bật tính năng này sẽ tự động dọn sạch các nhánh đã xóa.",
+      fetchPruneDesc:
+        "Khi ai đó xóa một nhánh trên GitHub/GitLab (vd: sau khi merge PR), Git cục bộ trên máy bạn vẫn lưu nhánh tham chiếu cũ. Bật tính năng này sẽ tự động dọn sạch các nhánh đã xóa.",
       rebaseAutostashTitle: "Tự động Stash khi Rebase",
-      rebaseAutostashDesc: "Khi bạn đang code dở mà muốn Pull Rebase, Git sẽ tự động đóng gói các thay đổi chưa lưu (Stash), thực hiện rebase mượt mà, rồi tự động bung lại code đang viết dở.",
+      rebaseAutostashDesc:
+        "Khi bạn đang code dở mà muốn Pull Rebase, Git sẽ tự động đóng gói các thay đổi chưa lưu (Stash), thực hiện rebase mượt mà, rồi tự động bung lại code đang viết dở.",
       confirmationsTitle: "Bảo vệ & Hộp thoại xác nhận",
-      confirmationsDesc: "Bật cảnh báo trước các thao tác nguy hiểm như xóa branch hay Force Push để ngăn ngừa nguy cơ mất code vô ý.",
+      confirmationsDesc:
+        "Bật cảnh báo trước các thao tác nguy hiểm như xóa branch hay Force Push để ngăn ngừa nguy cơ mất code vô ý.",
       diffModeTitle: "Bố cục hiển thị Diff",
-      diffModeDesc: "Split (2 cột) rất dễ đọc trên màn hình lớn khi muốn so sánh dòng cũ và mới bên cạnh nhau. Unified (1 cột) gọn gàng, thuận tiện khi cuộn xem nhanh hoặc màn hình nhỏ.",
+      diffModeDesc:
+        "Split (2 cột) rất dễ đọc trên màn hình lớn khi muốn so sánh dòng cũ và mới bên cạnh nhau. Unified (1 cột) gọn gàng, thuận tiện khi cuộn xem nhanh hoặc màn hình nhỏ.",
       diffWhitespaceTitle: "Bỏ qua khoảng trắng khi Diff",
-      diffWhitespaceDesc: "Khi ai đó đổi format code (space thành tab, căn chỉnh lề), Diff có thể hiện ra hàng trăm dòng thay đổi giả. Bật tùy chọn này giúp bạn chỉ thấy những dòng code thay đổi logic thật sự.",
+      diffWhitespaceDesc:
+        "Khi ai đó đổi format code (space thành tab, căn chỉnh lề), Diff có thể hiện ra hàng trăm dòng thay đổi giả. Bật tùy chọn này giúp bạn chỉ thấy những dòng code thay đổi logic thật sự.",
       diffFontSizeTitle: "Cỡ chữ hiển thị Diff",
-      diffFontSizeDesc: "Điều chỉnh kích thước phông chữ của trình xem diff sao cho vừa mắt bạn nhất khi review code.",
+      diffFontSizeDesc:
+        "Điều chỉnh kích thước phông chữ của trình xem diff sao cho vừa mắt bạn nhất khi review code.",
       profileScopeTitle: "Phạm vi cấu hình Profile (Global vs Repo)",
-      profileScopeDesc: "Global áp dụng cho tất cả repository trên máy bạn. Repo chỉ áp dụng riêng cho dự án hiện tại (hữu ích khi dùng tài khoản công ty và cá nhân trên cùng một máy).",
+      profileScopeDesc:
+        "Global áp dụng cho tất cả repository trên máy bạn. Repo chỉ áp dụng riêng cho dự án hiện tại (hữu ích khi dùng tài khoản công ty và cá nhân trên cùng một máy).",
       profileGpgTitle: "Ký số Commit (GPG Signing)",
-      profileGpgDesc: "Đính kèm chữ ký điện tử mật mã vào commit để chứng minh commit đó chính là do bạn tạo ra (hiển thị tích xanh Verified trên GitHub).",
+      profileGpgDesc:
+        "Đính kèm chữ ký điện tử mật mã vào commit để chứng minh commit đó chính là do bạn tạo ra (hiển thị tích xanh Verified trên GitHub).",
       appearanceThemeTitle: "Chủ đề màu sắc",
-      appearanceThemeDesc: "Chuyển đổi linh hoạt giữa giao diện Sáng (Light) và Tối (Dark) hoặc tự động theo hệ điều hành.",
+      appearanceThemeDesc:
+        "Chuyển đổi linh hoạt giữa giao diện Sáng (Light) và Tối (Dark) hoặc tự động theo hệ điều hành.",
       appearanceModeTitle: "Chế độ giao diện (Simple vs Advanced)",
-      appearanceModeDesc: "Chế độ Simple ẩn bớt các nút lệnh phức tạp cho người mới. Chế độ Advanced mở khóa toàn bộ sức mạnh Git: Rebase tương tác, Reflog, Cherry-pick.",
+      appearanceModeDesc:
+        "Chế độ Simple ẩn bớt các nút lệnh phức tạp cho người mới. Chế độ Advanced mở khóa toàn bộ sức mạnh Git: Rebase tương tác, Reflog, Cherry-pick.",
       toolsEditorTitle: "Trình soạn thảo mã (IDE)",
-      toolsEditorDesc: "Cho phép GitVista mở thư mục dự án hoặc tệp xung đột trực tiếp bằng phần mềm lập trình bạn quen dùng.",
+      toolsEditorDesc:
+        "Cho phép GitVista mở thư mục dự án hoặc tệp xung đột trực tiếp bằng phần mềm lập trình bạn quen dùng.",
       toolsTerminalTitle: "Cửa sổ dòng lệnh (Terminal)",
-      toolsTerminalDesc: "Mở nhanh Terminal tại đúng thư mục dự án khi bạn cần gõ lệnh Git nâng cao.",
+      toolsTerminalDesc:
+        "Mở nhanh Terminal tại đúng thư mục dự án khi bạn cần gõ lệnh Git nâng cao.",
     },
     github: {
       title: "Tích hợp GitHub",
@@ -539,7 +555,8 @@ export const vi = {
       title: "Xoá nhánh",
       confirmMessage: "Bạn có chắc chắn muốn xoá nhánh sau đây không?",
       unmergedTitle: "Cảnh báo: Nhánh chưa được gộp (Unmerged)",
-      unmergedWarning: "Nhánh này chứa các commit chưa được gộp vào nhánh HEAD. Nếu bạn xoá, các commit này sẽ không còn xuất hiện trên nhánh nào nữa.",
+      unmergedWarning:
+        "Nhánh này chứa các commit chưa được gộp vào nhánh HEAD. Nếu bạn xoá, các commit này sẽ không còn xuất hiện trên nhánh nào nữa.",
       backupNoticePrefix: "An toàn: Hệ thống sẽ tự động tạo một ref sao lưu trong",
       backupNoticeSuffix: "để bạn có thể khôi phục bất kỳ lúc nào trong 30 ngày.",
       safeDelete: "Xoá nhánh",
@@ -551,8 +568,10 @@ export const vi = {
     },
     checkoutConflict: {
       title: "Xung đột khi chuyển nhánh",
-      description: "Không thể chuyển sang nhánh {target} vì bạn đang có các file sửa đổi dở dang bị trùng lặp và có thể bị ghi đè.",
-      advice: "Để tiếp tục chuyển nhánh một cách an toàn, bạn có thể lưu tạm các thay đổi vào Stash hoặc chuyển sang màn hình Thay đổi để commit.",
+      description:
+        "Không thể chuyển sang nhánh {target} vì bạn đang có các file sửa đổi dở dang bị trùng lặp và có thể bị ghi đè.",
+      advice:
+        "Để tiếp tục chuyển nhánh một cách an toàn, bạn có thể lưu tạm các thay đổi vào Stash hoặc chuyển sang màn hình Thay đổi để commit.",
       close: "Đóng",
       stashAndCheckout: "Lưu tạm (Stash) rồi chuyển nhánh",
       stashingAndCheckout: "Đang lưu & chuyển...",
@@ -563,7 +582,8 @@ export const vi = {
     merge: {
       title: "Gộp nhánh (Merge)",
       desc: "Gộp các thay đổi từ nhánh nguồn vào nhánh đích hiện tại của bạn.",
-      uncommittedWarn: "Bạn có thay đổi chưa commit. Hãy stash hoặc commit trước khi gộp để tránh mất dữ liệu.",
+      uncommittedWarn:
+        "Bạn có thay đổi chưa commit. Hãy stash hoặc commit trước khi gộp để tránh mất dữ liệu.",
       noFfLabel: "Không fast-forward (--no-ff)",
       cancel: "Huỷ",
       merging: "Đang gộp...",
@@ -646,7 +666,8 @@ export const vi = {
       desc: "Thao tác này sẽ tạo một commit mới đảo ngược lại toàn bộ thay đổi của commit này mà không làm mất lịch sử.",
       targetCommit: "Commit cần hoàn tác:",
       autoCommitLabel: "Tự động commit thay đổi (Auto-commit)",
-      autoCommitDesc: "Tạo commit hoàn tác ngay lập tức. Nếu bỏ chọn, thay đổi đảo ngược sẽ được đưa vào Staging.",
+      autoCommitDesc:
+        "Tạo commit hoàn tác ngay lập tức. Nếu bỏ chọn, thay đổi đảo ngược sẽ được đưa vào Staging.",
       cancel: "Huỷ",
       submitting: "Đang hoàn tác...",
       submit: "Hoàn tác commit",
@@ -696,15 +717,18 @@ export const vi = {
       deleteModal: {
         title: "Xoá máy chủ từ xa",
         confirmMessage: "Bạn có chắc chắn muốn gỡ bỏ remote sau khỏi kho lưu trữ không?",
-        warning: "Thao tác này chỉ gỡ bỏ liên kết cấu hình remote và các nhánh tracking liên quan trong kho nội bộ. Không ảnh hưởng đến dữ liệu trên máy chủ từ xa.",
+        warning:
+          "Thao tác này chỉ gỡ bỏ liên kết cấu hình remote và các nhánh tracking liên quan trong kho nội bộ. Không ảnh hưởng đến dữ liệu trên máy chủ từ xa.",
         confirmBtn: "Xoá Remote",
         deleting: "Đang xoá...",
         successToast: "Đã xoá remote {name}",
       },
       pruneModal: {
         title: "Dọn dẹp nhánh mồ côi (Remote Prune)",
-        confirmMessage: "Thao tác dọn dẹp sẽ quét máy chủ từ xa và tự động gỡ bỏ các nhánh remote-tracking cục bộ đã không còn tồn tại trên server.",
-        safeNotice: "An toàn: Các nhánh làm việc cá nhân (Local branches) của bạn hoàn toàn không bị ảnh hưởng.",
+        confirmMessage:
+          "Thao tác dọn dẹp sẽ quét máy chủ từ xa và tự động gỡ bỏ các nhánh remote-tracking cục bộ đã không còn tồn tại trên server.",
+        safeNotice:
+          "An toàn: Các nhánh làm việc cá nhân (Local branches) của bạn hoàn toàn không bị ảnh hưởng.",
         confirmBtn: "Dọn dẹp ngay",
         pruning: "Đang dọn dẹp...",
         successToast: "Dọn dẹp thành công: {count} nhánh đã được loại bỏ.",
@@ -733,10 +757,12 @@ export const vi = {
         dropDesc: "Loại bỏ commit khỏi lịch sử",
       },
       validation: {
-        firstCannotSquash: "Không thể Squash hoặc Fixup commit đầu tiên (không có commit trước đó để gộp).",
+        firstCannotSquash:
+          "Không thể Squash hoặc Fixup commit đầu tiên (không có commit trước đó để gộp).",
         cannotDropAll: "Không thể loại bỏ tất cả các commit trong lần rebase này.",
         emptyMessage: "Thông điệp commit không được để trống khi Reword hoặc Squash.",
-        dirtyWorkingTree: "Thư mục làm việc đang có thay đổi chưa lưu. Hãy stash hoặc bật tuỳ chọn Tự động Stash.",
+        dirtyWorkingTree:
+          "Thư mục làm việc đang có thay đổi chưa lưu. Hãy stash hoặc bật tuỳ chọn Tự động Stash.",
       },
       preview: {
         title: "Xem trước kết quả (Live Preview)",
@@ -752,7 +778,8 @@ export const vi = {
       startBtn: "Bắt đầu Rebase",
       rebasing: "Đang thực thi Rebase...",
       successToast: "Interactive Rebase thành công! HEAD đã được cập nhật.",
-      conflictToast: "Rebase phát sinh xung đột. Hãy giải quyết conflict trong Trình giải quyết xung đột.",
+      conflictToast:
+        "Rebase phát sinh xung đột. Hãy giải quyết conflict trong Trình giải quyết xung đột.",
       errorToast: "Interactive Rebase thất bại: {msg}",
       undoSuccessToast: "Đã hoàn tác Interactive Rebase! Nhánh đã phục hồi về trạng thái ban đầu.",
     },
@@ -834,7 +861,8 @@ export const vi = {
       gitPruneRemotesTitle: "Dọn dẹp nhánh mồ côi (Prune Remotes)",
       gitPruneRemotesDesc: "Xoá các nhánh remote-tracking đã bị xoá trên máy chủ",
       gitInteractiveRebaseTitle: "Git: Visual Interactive Rebase",
-      gitInteractiveRebaseDesc: "Mở giao diện kéo thả sắp xếp commit, Pick, Reword, Squash, Drop trực quan",
+      gitInteractiveRebaseDesc:
+        "Mở giao diện kéo thả sắp xếp commit, Pick, Reword, Squash, Drop trực quan",
       gitCompareTitle: "Git: So sánh 2 Commit hoặc Nhánh",
       gitCompareDesc: "Mở giao diện so sánh trực quan Diff và danh sách Commit giữa hai điểm mốc",
       gitCreatePrTitle: "Git: Tạo Pull Request mới",
@@ -891,13 +919,15 @@ export const vi = {
   errors: {
     authFailedTitle: "Lỗi xác thực Git",
     authFailedMessage: "Không thể kết nối hoặc không có quyền truy cập vào máy chủ Git.",
-    authFailedHint: "Vui lòng kiểm tra lại SSH key hoặc Personal Access Token trên tài khoản của bạn.",
+    authFailedHint:
+      "Vui lòng kiểm tra lại SSH key hoặc Personal Access Token trên tài khoản của bạn.",
     remoteNewCommitsTitle: "Nhánh từ xa đã có commit mới",
     remoteNewCommitsMessage: "Máy chủ từ xa chứa các thay đổi mà bạn chưa có ở máy cục bộ.",
     remoteNewCommitsHint: "Hãy thực hiện 'Lấy về (Pull)' các commit mới trước khi Gửi lên (Push).",
     checkoutConflictTitle: "Xung đột khi chuyển nhánh",
     checkoutConflictMessage: "Bạn đang có các thay đổi chưa lưu có thể bị ghi đè khi đổi nhánh.",
-    checkoutConflictHint: "Hãy Commit các thay đổi hoặc bấm 'Lưu tạm (Stash)' trước khi chuyển nhánh.",
+    checkoutConflictHint:
+      "Hãy Commit các thay đổi hoặc bấm 'Lưu tạm (Stash)' trước khi chuyển nhánh.",
     networkErrorTitle: "Không thể kết nối mạng",
     networkErrorMessage: "Không thể liên lạc với máy chủ từ xa.",
     networkErrorHint: "Vui lòng kiểm tra lại kết nối Internet của bạn và thử lại.",
@@ -994,5 +1024,3 @@ export const vi = {
 };
 
 export type Translations = typeof vi;
-
-

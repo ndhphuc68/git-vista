@@ -39,46 +39,185 @@ export const PullStrategyDiagram: React.FC = () => {
         {mode === "rebase" ? (
           <svg className="w-full h-full max-w-[340px]" viewBox="0 0 340 85" fill="none">
             {/* Base line */}
-            <path d="M 20 42 L 315 42" stroke="currentColor" strokeWidth="2.5" className="text-border-strong" />
-            
-            {/* Main commits */}
-            <circle cx="45" cy="42" r="9" className="fill-blue-500 stroke-surface" strokeWidth="2.5" />
-            <text x="45" y="65" fontSize="10" fontWeight="bold" textAnchor="middle" className="fill-secondary font-mono">C1</text>
+            <path
+              d="M 20 42 L 315 42"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              className="text-border-strong"
+            />
 
-            <circle cx="115" cy="42" r="9" className="fill-blue-500 stroke-surface" strokeWidth="2.5" />
-            <text x="115" y="65" fontSize="10" fontWeight="bold" textAnchor="middle" className="fill-secondary font-mono">C2 (remote)</text>
+            {/* Main commits */}
+            <circle
+              cx="45"
+              cy="42"
+              r="9"
+              className="fill-blue-500 stroke-surface"
+              strokeWidth="2.5"
+            />
+            <text
+              x="45"
+              y="65"
+              fontSize="10"
+              fontWeight="bold"
+              textAnchor="middle"
+              className="fill-secondary font-mono"
+            >
+              C1
+            </text>
+
+            <circle
+              cx="115"
+              cy="42"
+              r="9"
+              className="fill-blue-500 stroke-surface"
+              strokeWidth="2.5"
+            />
+            <text
+              x="115"
+              y="65"
+              fontSize="10"
+              fontWeight="bold"
+              textAnchor="middle"
+              className="fill-secondary font-mono"
+            >
+              C2 (remote)
+            </text>
 
             {/* Rebased commits with pulse animation */}
-            <circle cx="195" cy="42" r="10" className="fill-emerald-500 stroke-surface animate-pulse" strokeWidth="2.5" />
-            <text x="195" y="66" fontSize="11" fontWeight="bold" textAnchor="middle" className="fill-emerald-600 dark:fill-emerald-400 font-mono">C3'</text>
+            <circle
+              cx="195"
+              cy="42"
+              r="10"
+              className="fill-emerald-500 stroke-surface animate-pulse"
+              strokeWidth="2.5"
+            />
+            <text
+              x="195"
+              y="66"
+              fontSize="11"
+              fontWeight="bold"
+              textAnchor="middle"
+              className="fill-emerald-600 dark:fill-emerald-400 font-mono"
+            >
+              C3'
+            </text>
 
-            <circle cx="270" cy="42" r="10" className="fill-emerald-500 stroke-surface animate-pulse" strokeWidth="2.5" />
-            <text x="270" y="66" fontSize="11" fontWeight="bold" textAnchor="middle" className="fill-emerald-600 dark:fill-emerald-400 font-mono">C4'</text>
+            <circle
+              cx="270"
+              cy="42"
+              r="10"
+              className="fill-emerald-500 stroke-surface animate-pulse"
+              strokeWidth="2.5"
+            />
+            <text
+              x="270"
+              y="66"
+              fontSize="11"
+              fontWeight="bold"
+              textAnchor="middle"
+              className="fill-emerald-600 dark:fill-emerald-400 font-mono"
+            >
+              C4'
+            </text>
 
             {/* Arrow and badge */}
-            <path d="M 315 42 L 308 36 M 315 42 L 308 48" stroke="currentColor" strokeWidth="2.5" className="text-border-strong" />
-            <text x="232" y="22" fontSize="11" fontWeight="bold" textAnchor="middle" className="fill-emerald-600 dark:fill-emerald-400">
+            <path
+              d="M 315 42 L 308 36 M 315 42 L 308 48"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              className="text-border-strong"
+            />
+            <text
+              x="232"
+              y="22"
+              fontSize="11"
+              fontWeight="bold"
+              textAnchor="middle"
+              className="fill-emerald-600 dark:fill-emerald-400"
+            >
               1 đường thẳng duy nhất
             </text>
           </svg>
         ) : (
           <svg className="w-full h-full max-w-[340px]" viewBox="0 0 340 85" fill="none">
             {/* Main line */}
-            <path d="M 20 28 L 310 28" stroke="currentColor" strokeWidth="2.5" className="text-border-strong" />
+            <path
+              d="M 20 28 L 310 28"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              className="text-border-strong"
+            />
             {/* Branch line */}
-            <path d="M 50 28 C 80 28, 80 62, 110 62 L 195 62 C 225 62, 225 28, 255 28" stroke="currentColor" strokeWidth="2.5" strokeDasharray="4 4" className="text-amber-500/80" />
+            <path
+              d="M 50 28 C 80 28, 80 62, 110 62 L 195 62 C 225 62, 225 28, 255 28"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeDasharray="4 4"
+              className="text-amber-500/80"
+            />
 
             {/* Commits */}
-            <circle cx="50" cy="28" r="8" className="fill-blue-500 stroke-surface" strokeWidth="2.5" />
-            <circle cx="130" cy="28" r="8" className="fill-blue-500 stroke-surface" strokeWidth="2.5" />
-            <text x="130" y="17" fontSize="10" fontWeight="bold" textAnchor="middle" className="fill-secondary font-mono">remote</text>
+            <circle
+              cx="50"
+              cy="28"
+              r="8"
+              className="fill-blue-500 stroke-surface"
+              strokeWidth="2.5"
+            />
+            <circle
+              cx="130"
+              cy="28"
+              r="8"
+              className="fill-blue-500 stroke-surface"
+              strokeWidth="2.5"
+            />
+            <text
+              x="130"
+              y="17"
+              fontSize="10"
+              fontWeight="bold"
+              textAnchor="middle"
+              className="fill-secondary font-mono"
+            >
+              remote
+            </text>
 
-            <circle cx="150" cy="62" r="8" className="fill-amber-500 stroke-surface" strokeWidth="2.5" />
-            <text x="150" y="80" fontSize="10" fontWeight="bold" textAnchor="middle" className="fill-amber-600 dark:fill-amber-400 font-mono">local</text>
+            <circle
+              cx="150"
+              cy="62"
+              r="8"
+              className="fill-amber-500 stroke-surface"
+              strokeWidth="2.5"
+            />
+            <text
+              x="150"
+              y="80"
+              fontSize="10"
+              fontWeight="bold"
+              textAnchor="middle"
+              className="fill-amber-600 dark:fill-amber-400 font-mono"
+            >
+              local
+            </text>
 
             {/* Merge commit */}
-            <circle cx="255" cy="28" r="10" className="fill-purple-500 stroke-surface animate-bounce" strokeWidth="2.5" />
-            <text x="255" y="16" fontSize="11" fontWeight="bold" textAnchor="middle" className="fill-purple-600 dark:fill-purple-400 font-mono">Merge Commit</text>
+            <circle
+              cx="255"
+              cy="28"
+              r="10"
+              className="fill-purple-500 stroke-surface animate-bounce"
+              strokeWidth="2.5"
+            />
+            <text
+              x="255"
+              y="16"
+              fontSize="11"
+              fontWeight="bold"
+              textAnchor="middle"
+              className="fill-purple-600 dark:fill-purple-400 font-mono"
+            >
+              Merge Commit
+            </text>
           </svg>
         )}
       </div>

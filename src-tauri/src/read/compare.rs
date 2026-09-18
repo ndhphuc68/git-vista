@@ -88,7 +88,12 @@ pub fn get_commits_in_range(
     for oid_res in revwalk {
         let oid = oid_res?;
         let commit = repo.find_commit(oid)?;
-        let short_id = commit.as_object().short_id()?.as_str().unwrap_or("").to_string();
+        let short_id = commit
+            .as_object()
+            .short_id()?
+            .as_str()
+            .unwrap_or("")
+            .to_string();
         let summary = commit.summary().ok().flatten().unwrap_or("").to_string();
         let author = commit.author();
         let author_name = author.name().unwrap_or("Unknown").to_string();
@@ -140,7 +145,10 @@ pub fn get_tree_diff_files(
             .unwrap_or_default();
 
         let old_path = if delta.status() == Delta::Renamed {
-            delta.old_file().path().map(|p| p.to_string_lossy().to_string())
+            delta
+                .old_file()
+                .path()
+                .map(|p| p.to_string_lossy().to_string())
         } else {
             None
         };

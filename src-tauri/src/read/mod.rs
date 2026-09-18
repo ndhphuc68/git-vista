@@ -74,10 +74,9 @@ pub fn get_head_info<P: AsRef<Path>>(repo_path: P) -> Result<RepoHeadInfo, AppEr
             if let Ok(local_branch) = repo.find_branch(shorthand, git2::BranchType::Local) {
                 if let Ok(upstream_branch) = local_branch.upstream() {
                     upstream = upstream_branch.name().ok().flatten().map(|s| s.to_string());
-                    if let (Some(local_oid), Some(upstream_oid)) = (
-                        local_branch.get().target(),
-                        upstream_branch.get().target(),
-                    ) {
+                    if let (Some(local_oid), Some(upstream_oid)) =
+                        (local_branch.get().target(), upstream_branch.get().target())
+                    {
                         if let Ok((a, b)) = repo.graph_ahead_behind(local_oid, upstream_oid) {
                             ahead = a as u32;
                             behind = b as u32;
@@ -99,4 +98,3 @@ pub fn get_head_info<P: AsRef<Path>>(repo_path: P) -> Result<RepoHeadInfo, AppEr
         upstream,
     })
 }
-

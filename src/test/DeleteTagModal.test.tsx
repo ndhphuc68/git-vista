@@ -16,12 +16,7 @@ describe("DeleteTagModal", () => {
 
   it("does not render when isOpen is false", () => {
     render(
-      <DeleteTagModal
-        isOpen={false}
-        onClose={vi.fn()}
-        repoPath="/test/repo"
-        tagName="v1.0.0"
-      />
+      <DeleteTagModal isOpen={false} onClose={vi.fn()} repoPath="/test/repo" tagName="v1.0.0" />
     );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
@@ -39,9 +34,7 @@ describe("DeleteTagModal", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText("v1.0.0")).toBeInTheDocument();
     expect(screen.getByText("f1e2d3c")).toBeInTheDocument();
-    expect(
-      screen.getByText(/bạn có chắc chắn muốn xoá thẻ sau đây không/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/bạn có chắc chắn muốn xoá thẻ sau đây không/i)).toBeInTheDocument();
   });
 
   it("shows remote delete checkbox only when hasRemote is true", () => {
@@ -88,11 +81,7 @@ describe("DeleteTagModal", () => {
     fireEvent.click(deleteBtn);
 
     await waitFor(() => {
-      expect(invokeCommand.deleteTag).toHaveBeenCalledWith(
-        "/test/repo",
-        "v1.0.0",
-        false
-      );
+      expect(invokeCommand.deleteTag).toHaveBeenCalledWith("/test/repo", "v1.0.0", false);
       expect(onSuccess).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
     });
@@ -121,11 +110,7 @@ describe("DeleteTagModal", () => {
     fireEvent.click(deleteBtn);
 
     await waitFor(() => {
-      expect(invokeCommand.deleteTag).toHaveBeenCalledWith(
-        "/test/repo",
-        "v1.0.0",
-        true
-      );
+      expect(invokeCommand.deleteTag).toHaveBeenCalledWith("/test/repo", "v1.0.0", true);
       expect(onSuccess).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
     });
@@ -137,33 +122,21 @@ describe("DeleteTagModal", () => {
     );
 
     render(
-      <DeleteTagModal
-        isOpen={true}
-        onClose={vi.fn()}
-        repoPath="/test/repo"
-        tagName="v1.0.0"
-      />
+      <DeleteTagModal isOpen={true} onClose={vi.fn()} repoPath="/test/repo" tagName="v1.0.0" />
     );
 
     const deleteBtn = screen.getByRole("button", { name: /xoá thẻ/i });
     fireEvent.click(deleteBtn);
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/không thể xoá thẻ: Remote rejected/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/không thể xoá thẻ: Remote rejected/i)).toBeInTheDocument();
     });
   });
 
   it("closes when cancel button is clicked or Escape key is pressed", () => {
     const onClose = vi.fn();
     render(
-      <DeleteTagModal
-        isOpen={true}
-        onClose={onClose}
-        repoPath="/test/repo"
-        tagName="v1.0.0"
-      />
+      <DeleteTagModal isOpen={true} onClose={onClose} repoPath="/test/repo" tagName="v1.0.0" />
     );
 
     const cancelBtn = screen.getByRole("button", { name: /huỷ/i });

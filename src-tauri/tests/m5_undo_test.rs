@@ -70,7 +70,9 @@ fn undo_delete_branch_rejects_arbitrary_commit_ids() {
 fn undo_delete_branch_rejects_a_receipt_for_another_branch() {
     let (_dir, path) = create_repo();
     let repo = git2::Repository::open(&path).unwrap();
-    let head = repo.find_commit(repo.head().unwrap().target().unwrap()).unwrap();
+    let head = repo
+        .find_commit(repo.head().unwrap().target().unwrap())
+        .unwrap();
     repo.branch("foo", &head, false).unwrap();
     repo.branch("foo-bar", &head, false).unwrap();
     let _foo_receipt = delete_branch(&path, "foo", false).unwrap();
@@ -84,7 +86,9 @@ fn undo_delete_branch_rejects_a_receipt_for_another_branch() {
 fn branch_delete_receipts_are_single_use() {
     let (_dir, path) = create_repo();
     let repo = git2::Repository::open(&path).unwrap();
-    let head = repo.find_commit(repo.head().unwrap().target().unwrap()).unwrap();
+    let head = repo
+        .find_commit(repo.head().unwrap().target().unwrap())
+        .unwrap();
     repo.branch("feature", &head, false).unwrap();
     let first_receipt = delete_branch(&path, "feature", false).unwrap();
     undo_delete_branch(&path, "feature", &first_receipt).unwrap();

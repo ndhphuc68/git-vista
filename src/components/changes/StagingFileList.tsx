@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import clsx from "clsx";
 import { Plus, Minus, Trash2, CheckCircle2, AlertCircle, FileText, History } from "lucide-react";
-import { RepoStatusResult, StatusFileItem, FileStatus } from "../../ipc/bindings";
+import { type RepoStatusResult, type StatusFileItem, type FileStatus } from "../../ipc/bindings";
 import { DiscardConfirmModal } from "./DiscardConfirmModal";
 import { useTranslation } from "../../i18n";
 import { useInspectorStore } from "../../store/useInspectorStore";
@@ -115,7 +115,9 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
         <div className="flex items-center justify-between px-3 py-2 bg-window text-xs font-semibold text-secondary tracking-[0.5px]">
           <div className="flex items-center gap-1.5">
             <CheckCircle2 size={13} className="text-diff-add-text" />
-            <span>{t.changes.stagedTitle} ({stagedFiles.length})</span>
+            <span>
+              {t.changes.stagedTitle} ({stagedFiles.length})
+            </span>
           </div>
           {stagedFiles.length > 0 && (
             <button
@@ -133,9 +135,7 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
 
         <div className="flex flex-col">
           {stagedFiles.length === 0 ? (
-            <div className="p-3 text-tertiary text-xs italic">
-              {t.changes.noStagedFiles}
-            </div>
+            <div className="p-3 text-tertiary text-xs italic">{t.changes.noStagedFiles}</div>
           ) : (
             stagedFiles.map((file) => {
               const isSelected =
@@ -223,7 +223,9 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
           <div className="flex items-center justify-between px-3 py-2 bg-diff-remove-bg/40 text-xs font-semibold tracking-[0.5px]">
             <div className="flex items-center gap-1.5">
               <AlertCircle size={13} className="text-diff-remove-text" />
-              <span>{t.changes.conflictedTitle} ({conflictedFiles.length})</span>
+              <span>
+                {t.changes.conflictedTitle} ({conflictedFiles.length})
+              </span>
             </div>
           </div>
 
@@ -269,7 +271,9 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
         <div className="flex items-center justify-between px-3 py-2 bg-window text-xs font-semibold text-secondary tracking-[0.5px]">
           <div className="flex items-center gap-1.5">
             <AlertCircle size={13} className="text-accent" />
-            <span>{t.changes.changesTitle} ({changesFiles.length})</span>
+            <span>
+              {t.changes.changesTitle} ({changesFiles.length})
+            </span>
           </div>
           {changesFiles.length > 0 && (
             <button
@@ -287,9 +291,7 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
 
         <div className="flex flex-col">
           {changesFiles.length === 0 ? (
-            <div className="p-3 text-tertiary text-xs italic">
-              {t.changes.noChanges}
-            </div>
+            <div className="p-3 text-tertiary text-xs italic">{t.changes.noChanges}</div>
           ) : (
             changesFiles.map((file) => {
               const isSelected =
@@ -402,4 +404,3 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
     </div>
   );
 };
-

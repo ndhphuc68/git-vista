@@ -43,7 +43,9 @@ describe("CheckoutConflictModal", () => {
 
   it("renders stash and checkout button and handles stash-and-checkout action", async () => {
     const saveStashSpy = vi.spyOn(invokeCommand, "saveStash").mockResolvedValue("stash123");
-    const checkoutBranchSpy = vi.spyOn(invokeCommand, "checkoutBranch").mockResolvedValue(undefined);
+    const checkoutBranchSpy = vi
+      .spyOn(invokeCommand, "checkoutBranch")
+      .mockResolvedValue(undefined);
     const onClose = vi.fn();
     const onSuccess = vi.fn();
 
@@ -64,7 +66,11 @@ describe("CheckoutConflictModal", () => {
     fireEvent.click(stashBtn);
 
     await waitFor(() => {
-      expect(saveStashSpy).toHaveBeenCalledWith("/test/repo", expect.stringContaining("feature/next"), true);
+      expect(saveStashSpy).toHaveBeenCalledWith(
+        "/test/repo",
+        expect.stringContaining("feature/next"),
+        true
+      );
       expect(checkoutBranchSpy).toHaveBeenCalledWith("/test/repo", "feature/next");
       expect(onClose).toHaveBeenCalled();
       expect(onSuccess).toHaveBeenCalled();

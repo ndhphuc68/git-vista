@@ -57,7 +57,7 @@ export const CreateTagModal: React.FC<CreateTagModalProps> = ({
   }, [isOpen, onClose]);
 
   const sanitizeTagName = (val: string) => {
-    return val.replace(/\s+/g, "-").replace(/[~^:?*\[\\@{}]/g, "");
+    return val.replace(/\s+/g, "-").replace(/[~^:?*[\\@{}]/g, "");
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,10 +126,7 @@ export const CreateTagModal: React.FC<CreateTagModalProps> = ({
           <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
             <div className="flex items-center gap-2">
               <Tag size={16} className="text-accent" />
-              <h3
-                id="create-tag-title"
-                className="text-xs font-semibold text-primary m-0"
-              >
+              <h3 id="create-tag-title" className="text-xs font-semibold text-primary m-0">
                 {t.modals.createTag.title}
               </h3>
             </div>
@@ -161,10 +158,7 @@ export const CreateTagModal: React.FC<CreateTagModalProps> = ({
             )}
 
             <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="tag-name-input"
-                className="text-xs font-medium text-primary"
-              >
+              <label htmlFor="tag-name-input" className="text-xs font-medium text-primary">
                 {t.modals.createTag.nameLabel}
               </label>
               <input
@@ -194,10 +188,7 @@ export const CreateTagModal: React.FC<CreateTagModalProps> = ({
 
             {isAnnotated && (
               <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="tag-message-input"
-                  className="text-xs font-medium text-primary"
-                >
+                <label htmlFor="tag-message-input" className="text-xs font-medium text-primary">
                   {t.modals.createTag.messageLabel}
                 </label>
                 <textarea

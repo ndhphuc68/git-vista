@@ -73,9 +73,19 @@ fn test_interactive_rebase_reorder_and_drop() {
     // Now there should be 3 commits: [New_C1, New_C2, Initial] (C3 was dropped)
     assert_eq!(resulting_oids.len(), 3);
     let new_head = fresh_repo.find_commit(resulting_oids[0]).unwrap();
-    assert!(new_head.summary().ok().flatten().unwrap().contains("Commit #1")); // C1 was placed second (so it's on top)
+    assert!(new_head
+        .summary()
+        .ok()
+        .flatten()
+        .unwrap()
+        .contains("Commit #1")); // C1 was placed second (so it's on top)
     let parent = new_head.parent(0).unwrap();
-    assert!(parent.summary().ok().flatten().unwrap().contains("Commit #2")); // C2 was placed first
+    assert!(parent
+        .summary()
+        .ok()
+        .flatten()
+        .unwrap()
+        .contains("Commit #2")); // C2 was placed first
     assert_eq!(parent.parent(0).unwrap().id(), base_oid);
 }
 
@@ -114,8 +124,14 @@ fn test_interactive_rebase_reword() {
     let fresh_repo = git2::Repository::open(repo_path).unwrap();
     let head = fresh_repo.head().unwrap().peel_to_commit().unwrap();
     let c1_reworded = head.parent(0).unwrap();
-    assert_eq!(c1_reworded.summary().ok().flatten().unwrap(), "Reworded Commit #1 Summary");
-    assert!(c1_reworded.message().unwrap().contains("Detailed new body line"));
+    assert_eq!(
+        c1_reworded.summary().ok().flatten().unwrap(),
+        "Reworded Commit #1 Summary"
+    );
+    assert!(c1_reworded
+        .message()
+        .unwrap()
+        .contains("Detailed new body line"));
 }
 
 #[test]
@@ -158,7 +174,10 @@ fn test_interactive_rebase_squash_fixup() {
     // Head is the combined commit, parent is base -> total 2 commits in repo
     assert_eq!(resulting_oids.len(), 2);
     let head = fresh_repo.head().unwrap().peel_to_commit().unwrap();
-    assert_eq!(head.summary().ok().flatten().unwrap(), "Combined Commit 1 and 2");
+    assert_eq!(
+        head.summary().ok().flatten().unwrap(),
+        "Combined Commit 1 and 2"
+    );
     assert_eq!(head.parent(0).unwrap().id(), base_oid);
 
     // Both files exist in the tree of head

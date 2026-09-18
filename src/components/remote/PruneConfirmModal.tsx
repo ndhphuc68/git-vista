@@ -62,12 +62,10 @@ export const PruneConfirmModal: React.FC<PruneConfirmModalProps> = ({
             )
           );
       } else {
-        useToastStore
-          .getState()
-          .showToast({
-            type: "info",
-            message: t.modals.remotes.pruneModal.nonePrunedToast,
-          });
+        useToastStore.getState().showToast({
+          type: "info",
+          message: t.modals.remotes.pruneModal.nonePrunedToast,
+        });
       }
 
       onSuccess?.(res.pruned_branches);
@@ -98,10 +96,7 @@ export const PruneConfirmModal: React.FC<PruneConfirmModalProps> = ({
               <div className="p-2 rounded-lg bg-sky-500/10 text-sky-500">
                 <Scissors size={18} />
               </div>
-              <h3
-                id="prune-remote-title"
-                className="text-sm font-semibold text-primary m-0"
-              >
+              <h3 id="prune-remote-title" className="text-sm font-semibold text-primary m-0">
                 {t.modals.remotes.pruneModal.title}
               </h3>
             </div>

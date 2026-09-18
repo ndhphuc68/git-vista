@@ -31,9 +31,7 @@ describe("Simple vs Advanced Mode", () => {
 
     // Switch to advanced mode
     useSettingsStore.getState().setMode("advanced");
-    rerender(
-      <CommitBox repoPath="/test/repo" stagedCount={1} onCommit={vi.fn()} />
-    );
+    rerender(<CommitBox repoPath="/test/repo" stagedCount={1} onCommit={vi.fn()} />);
 
     expect(screen.getByText(/Commit \(1 files\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Amend \(Sửa commit gần nhất\)/i)).toBeInTheDocument();

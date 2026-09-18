@@ -57,11 +57,13 @@ fn test_fixture_conflict_repo() {
 #[test]
 fn test_fixture_detached_head_repo() {
     let (dir, repo) = create_detached_head_repo().expect("Failed to create detached head repo");
-    assert!(repo.head_detached().unwrap(), "Repo phải ở trạng thái detached HEAD");
+    assert!(
+        repo.head_detached().unwrap(),
+        "Repo phải ở trạng thái detached HEAD"
+    );
 
     let head_info = get_head_info(dir.path()).expect("Failed to read head info");
     assert!(head_info.is_detached);
     assert!(head_info.branch_name.is_none());
     assert!(head_info.head_commit_id.is_some());
 }
-

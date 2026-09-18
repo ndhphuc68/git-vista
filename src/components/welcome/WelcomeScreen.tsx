@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { invokeCommand } from "../../ipc/client";
-import { RepoSummary } from "../../ipc/bindings";
+import { type RepoSummary } from "../../ipc/bindings";
 import { useTranslation } from "../../i18n";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { CloneModal } from "./CloneModal";
@@ -57,9 +57,7 @@ function formatRelativeTime(
   return t.daysAgo.replace("{d}", String(diffDay));
 }
 
-export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
-  onSelectRepo,
-}) => {
+export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRepo }) => {
   const { t } = useTranslation();
   const { openSettings } = useSettingsStore();
   const [error, setError] = useState<string | null>(null);
@@ -71,7 +69,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   // Lưu trữ các repo được ghim vào localStorage
   const [pinnedPaths, setPinnedPaths] = useState<string[]>(() => {
     try {
-      const saved = typeof localStorage !== "undefined" && localStorage.getItem("gitvista_pinned_repos");
+      const saved =
+        typeof localStorage !== "undefined" && localStorage.getItem("gitvista_pinned_repos");
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -144,9 +143,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   const togglePin = (e: React.MouseEvent, path: string) => {
     e.stopPropagation();
     setPinnedPaths((prev) => {
-      const next = prev.includes(path)
-        ? prev.filter((p) => p !== path)
-        : [...prev, path];
+      const next = prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path];
       try {
         if (typeof localStorage !== "undefined") {
           localStorage.setItem("gitvista_pinned_repos", JSON.stringify(next));
@@ -196,9 +193,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       list = recents.filter(
-        (item) =>
-          item.name.toLowerCase().includes(q) ||
-          item.path.toLowerCase().includes(q)
+        (item) => item.name.toLowerCase().includes(q) || item.path.toLowerCase().includes(q)
       );
     }
     return [...list].sort((a, b) => {
@@ -265,9 +260,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                   v0.1
                 </span>
               </div>
-              <p className="text-secondary text-xs sm:text-sm mt-0.5">
-                {t.welcome.tagline}
-              </p>
+              <p className="text-secondary text-xs sm:text-sm mt-0.5">{t.welcome.tagline}</p>
             </div>
           </div>
 
@@ -287,7 +280,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               className="px-3 py-1.5 rounded-xl bg-surface hover:bg-surface-hover border border-border-subtle text-xs font-medium text-secondary hover:text-primary transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
               title={t.welcome.shortcuts}
             >
-              <kbd className="font-mono text-[10px] bg-window px-1.5 py-0.2 rounded border border-border-subtle">?</kbd>
+              <kbd className="font-mono text-[10px] bg-window px-1.5 py-0.2 rounded border border-border-subtle">
+                ?
+              </kbd>
               <span>{t.welcome.shortcuts}</span>
             </button>
           </div>
@@ -445,12 +440,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               <div className="w-12 h-12 rounded-xl bg-window border border-border-subtle flex items-center justify-center text-tertiary mb-2.5">
                 <FolderOpen size={22} />
               </div>
-              <p className="text-sm font-medium text-secondary">
-                {t.welcome.emptyRecentsTitle}
-              </p>
-              <p className="text-xs text-tertiary mt-1">
-                {t.welcome.emptyRecentsDesc}
-              </p>
+              <p className="text-sm font-medium text-secondary">{t.welcome.emptyRecentsTitle}</p>
+              <p className="text-xs text-tertiary mt-1">{t.welcome.emptyRecentsDesc}</p>
             </div>
           ) : sortedRecents.length === 0 ? (
             /* Empty state when search produces no results */
@@ -529,7 +520,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                           title={isPinned ? t.welcome.unpin : t.welcome.pin}
                           aria-label={isPinned ? t.welcome.unpin : t.welcome.pin}
                         >
-                          <Star size={14} className={isPinned ? "fill-amber-500 text-amber-500" : ""} />
+                          <Star
+                            size={14}
+                            className={isPinned ? "fill-amber-500 text-amber-500" : ""}
+                          />
                         </button>
 
                         {/* Remove recent button */}
@@ -589,4 +583,3 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
     </div>
   );
 };
-

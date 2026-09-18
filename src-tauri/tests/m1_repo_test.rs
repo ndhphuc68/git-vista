@@ -16,4 +16,3 @@ fn test_open_repository_and_recent_tracking() {
     let recents = get_recent_repos().expect("Failed to read recent repos");
     assert!(recents.iter().any(|r| r.path == summary.path));
 }
-

@@ -39,9 +39,7 @@ function createTestQueryClient() {
 
 function renderWithClient(ui: React.ReactElement) {
   const queryClient = createTestQueryClient();
-  return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-  );
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
 }
 
 describe("ManageRemotesModal", () => {
@@ -64,31 +62,17 @@ describe("ManageRemotesModal", () => {
   });
 
   it("does not render when isOpen is false", () => {
-    renderWithClient(
-      <ManageRemotesModal
-        isOpen={false}
-        onClose={vi.fn()}
-        repoPath="/test/repo"
-      />
-    );
+    renderWithClient(<ManageRemotesModal isOpen={false} onClose={vi.fn()} repoPath="/test/repo" />);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("renders list of remotes with badges and URLs", async () => {
-    renderWithClient(
-      <ManageRemotesModal
-        isOpen={true}
-        onClose={vi.fn()}
-        repoPath="/test/repo"
-      />
-    );
+    renderWithClient(<ManageRemotesModal isOpen={true} onClose={vi.fn()} repoPath="/test/repo" />);
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByText("origin")).toBeInTheDocument();
-      expect(
-        screen.getByText("https://github.com/gitvista/git-vista.git")
-      ).toBeInTheDocument();
+      expect(screen.getByText("https://github.com/gitvista/git-vista.git")).toBeInTheDocument();
       expect(screen.getByText(/5 nhánh/i)).toBeInTheDocument();
       expect(screen.getByText(/Mặc định/i)).toBeInTheDocument();
     });
@@ -143,10 +127,7 @@ describe("ManageRemotesModal", () => {
     fireEvent.click(pruneBtn);
 
     await waitFor(() => {
-      expect(invokeCommand.pruneRemote).toHaveBeenCalledWith(
-        "/test/repo",
-        "origin"
-      );
+      expect(invokeCommand.pruneRemote).toHaveBeenCalledWith("/test/repo", "origin");
       expect(onSuccess).toHaveBeenCalledWith(["origin/stale-branch"]);
     });
   });
@@ -170,10 +151,7 @@ describe("ManageRemotesModal", () => {
     fireEvent.click(deleteBtn);
 
     await waitFor(() => {
-      expect(invokeCommand.removeRemote).toHaveBeenCalledWith(
-        "/test/repo",
-        "origin"
-      );
+      expect(invokeCommand.removeRemote).toHaveBeenCalledWith("/test/repo", "origin");
       expect(onSuccess).toHaveBeenCalled();
     });
   });

@@ -2,10 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 
-const SampleTailwindCard: React.FC<{ title: string; subtitle: string }> = ({
-  title,
-  subtitle,
-}) => {
+const SampleTailwindCard: React.FC<{ title: string; subtitle: string }> = ({ title, subtitle }) => {
   return (
     <div
       data-testid="tailwind-card"

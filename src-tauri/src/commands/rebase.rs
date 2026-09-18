@@ -1,5 +1,8 @@
 use crate::error::AppError;
-use crate::read::rebase::{get_rebase_commits as read_rebase_commits, InteractiveRebaseResult, RebaseCommitItem, RebasePlanStep};
+use crate::read::rebase::{
+    get_rebase_commits as read_rebase_commits, InteractiveRebaseResult, RebaseCommitItem,
+    RebasePlanStep,
+};
 use tauri::{AppHandle, Emitter};
 
 fn emit_repo_changed(app: &AppHandle, repo_path: String, reason: String) {

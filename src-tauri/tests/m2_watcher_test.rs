@@ -24,7 +24,9 @@ fn wait_for_count(counter: &AtomicUsize, expected: usize, timeout: Duration) -> 
 fn test_path_filtering_unit() {
     // 1. Ignored patterns
     assert!(is_ignored_path(Path::new("d:/repo/.git/objects/12/3456")));
-    assert!(is_ignored_path(Path::new("d:\\repo\\.git\\objects\\pack\\pack-1.pack")));
+    assert!(is_ignored_path(Path::new(
+        "d:\\repo\\.git\\objects\\pack\\pack-1.pack"
+    )));
     assert!(is_ignored_path(Path::new(".git/objects/abc")));
     assert!(is_ignored_path(Path::new("d:/repo/.git/index.lock")));
     assert!(is_ignored_path(Path::new("d:\\repo\\.git\\index.lock")));
@@ -43,7 +45,9 @@ fn test_path_filtering_unit() {
 
     // 2. Watched patterns (must NOT be ignored)
     assert!(!is_ignored_path(Path::new("d:/repo/.git/HEAD")));
-    assert!(!is_ignored_path(Path::new("d:/repo/.git/refs/heads/master")));
+    assert!(!is_ignored_path(Path::new(
+        "d:/repo/.git/refs/heads/master"
+    )));
     assert!(!is_ignored_path(Path::new("d:/repo/.git/refs/tags/v1.0")));
     assert!(!is_ignored_path(Path::new("d:/repo/.git/index")));
     assert!(!is_ignored_path(Path::new("d:/repo/src/main.rs")));
@@ -126,7 +130,10 @@ fn test_watcher_debounce_consolidation() {
 
     // Wait for debounce period (200ms after last write) + margin
     let triggered = wait_for_count(&event_count, 1, Duration::from_millis(1500));
-    assert!(triggered, "Watcher should have triggered once after rapid writes");
+    assert!(
+        triggered,
+        "Watcher should have triggered once after rapid writes"
+    );
 
     // Wait extra time to ensure no second trigger arrives
     std::thread::sleep(Duration::from_millis(350));
@@ -160,7 +167,8 @@ fn test_watcher_filters_git_objects_and_index_lock() {
     fs::write(objects_dir.join("test_obj"), "obj_data").expect("Failed to write object");
 
     // 2. Modify .git/index.lock
-    fs::write(repo_path.join(".git").join("index.lock"), "locked").expect("Failed to write index.lock");
+    fs::write(repo_path.join(".git").join("index.lock"), "locked")
+        .expect("Failed to write index.lock");
 
     // Wait for potential (unwanted) debounce
     std::thread::sleep(Duration::from_millis(400));
@@ -171,10 +179,14 @@ fn test_watcher_filters_git_objects_and_index_lock() {
     );
 
     // 3. Now modify a valid workdir file to verify watcher is still functioning
-    fs::write(repo_path.join("valid_after_filter.txt"), "valid").expect("Failed to write valid file");
+    fs::write(repo_path.join("valid_after_filter.txt"), "valid")
+        .expect("Failed to write valid file");
 
     let triggered = wait_for_count(&event_count, 1, Duration::from_millis(1500));
-    assert!(triggered, "Watcher should trigger for valid workdir file after ignored events");
+    assert!(
+        triggered,
+        "Watcher should trigger for valid workdir file after ignored events"
+    );
     assert_eq!(event_count.load(Ordering::SeqCst), 1);
 
     drop(watcher);
@@ -199,7 +211,8 @@ fn test_watcher_stop_prevents_notifications() {
     watcher.stop();
 
     // Modify a file after stop
-    fs::write(repo_path.join("after_stop.txt"), "should not trigger").expect("Failed to write file");
+    fs::write(repo_path.join("after_stop.txt"), "should not trigger")
+        .expect("Failed to write file");
 
     // Wait to verify no notification occurs
     std::thread::sleep(Duration::from_millis(400));

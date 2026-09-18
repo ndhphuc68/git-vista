@@ -1,8 +1,13 @@
-import React, { useState, useRef, useMemo } from "react";
-import { useQuery, useQueryClient, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React, { useState, useRef, useMemo, useContext } from "react";
+import {
+  useQuery,
+  QueryClient,
+  QueryClientContext,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import { ArrowLeft, Check, ChevronUp, ChevronDown, RefreshCw } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
-import { ConflictFileData } from "../../ipc/bindings";
+import { type ConflictFileData } from "../../ipc/bindings";
 import { useTranslation } from "../../i18n";
 
 export interface ConflictResolverScreenProps {
@@ -283,18 +288,19 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
                   <div className="flex items-center justify-between px-3 py-1.5 border-b border-border-subtle bg-surface-subtle">
                     <span className="text-[11px] font-semibold text-primary flex items-center gap-1.5">
                       {isResolved ? (
-                        <span className="text-diff-add-text font-bold">{t.conflictResolver.selectedBadge}</span>
+                        <span className="text-diff-add-text font-bold">
+                          {t.conflictResolver.selectedBadge}
+                        </span>
                       ) : (
-                        <span className="text-secondary font-normal italic">{t.conflictResolver.unselectedBadge}</span>
+                        <span className="text-secondary font-normal italic">
+                          {t.conflictResolver.unselectedBadge}
+                        </span>
                       )}
                     </span>
                     <button
                       type="button"
                       onClick={() =>
-                        handleSetResolution(
-                          hunk.id,
-                          (hunk.ours || "") + (hunk.theirs || "")
-                        )
+                        handleSetResolution(hunk.id, (hunk.ours || "") + (hunk.theirs || ""))
                       }
                       className="px-2 py-0.5 text-[11px] font-medium bg-surface text-secondary hover:text-primary border border-border-subtle rounded-sm hover:bg-surface-hover transition-all cursor-pointer"
                     >
@@ -341,14 +347,9 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
 };
 
 export const ConflictResolverScreen: React.FC<ConflictResolverScreenProps> = (props) => {
-  let hasClient = true;
-  try {
-    useQueryClient();
-  } catch {
-    hasClient = false;
-  }
+  const queryClient = useContext(QueryClientContext);
 
-  if (!hasClient) {
+  if (!queryClient) {
     return (
       <QueryClientProvider client={defaultFallbackQueryClient}>
         <ConflictResolverInner {...props} />

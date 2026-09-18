@@ -8,11 +8,14 @@ fn emit_repo_changed(app: &tauri::AppHandle, repo_path: &str, reason: &str) {
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default()
         .as_millis() as f64;
-    let _ = app.emit("repo-changed", crate::events::RepoChangedPayload {
-        repo_path: repo_path.to_string(),
-        reason: reason.to_string(),
-        timestamp_ms: now,
-    });
+    let _ = app.emit(
+        "repo-changed",
+        crate::events::RepoChangedPayload {
+            repo_path: repo_path.to_string(),
+            reason: reason.to_string(),
+            timestamp_ms: now,
+        },
+    );
 }
 
 #[tauri::command]

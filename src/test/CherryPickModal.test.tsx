@@ -209,7 +209,9 @@ describe("CherryPickModal", () => {
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(screen.getByText("Repository is dirty. Please clean working tree first.")).toBeInTheDocument();
+      expect(
+        screen.getByText("Repository is dirty. Please clean working tree first.")
+      ).toBeInTheDocument();
       expect(onSuccess).not.toHaveBeenCalled();
       expect(onClose).not.toHaveBeenCalled();
     });

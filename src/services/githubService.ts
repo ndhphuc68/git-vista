@@ -1,11 +1,11 @@
 import {
-  GitHubPullRequest,
-  PullRequestDetail,
-  CreatePullRequestPayload,
-  GitHubUserSummary,
-  CheckRunItem,
-  CheckStatus,
-  PullRequestFileItem,
+  type GitHubPullRequest,
+  type PullRequestDetail,
+  type CreatePullRequestPayload,
+  type GitHubUserSummary,
+  type CheckRunItem,
+  type CheckStatus,
+  type PullRequestFileItem,
 } from "../ipc/bindings";
 
 const GITHUB_API_BASE = "https://api.github.com";

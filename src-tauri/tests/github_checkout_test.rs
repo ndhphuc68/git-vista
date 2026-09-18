@@ -1,9 +1,9 @@
 mod common;
 
 use common::fixtures::TestRepoFixture;
+use std::fs;
 use visual_git_lib::error::AppError;
 use visual_git_lib::exec::github_checkout::checkout_pull_request;
-use std::fs;
 
 #[test]
 fn test_checkout_pull_request_rejects_dirty_working_tree() {

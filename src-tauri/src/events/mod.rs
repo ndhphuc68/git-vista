@@ -15,4 +15,3 @@ pub struct TaskProgressPayload {
     pub progress_percent: u32,
     pub status_text: String,
 }
-

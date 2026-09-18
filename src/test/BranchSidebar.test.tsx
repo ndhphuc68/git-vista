@@ -121,4 +121,3 @@ describe("BranchSidebar", () => {
     expect(screen.queryByText(/Đổi tên/i)).not.toBeInTheDocument();
   });
 });
-

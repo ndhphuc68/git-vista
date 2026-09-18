@@ -69,11 +69,7 @@ describe("DiffViewer Word Diff and Ignore Whitespace Integration", () => {
 
       render(
         <QueryClientProvider client={queryClient}>
-          <FileDiffViewer
-            repoPath="/test/repo"
-            commitId="commit-1"
-            filePath="src/example.ts"
-          />
+          <FileDiffViewer repoPath="/test/repo" commitId="commit-1" filePath="src/example.ts" />
         </QueryClientProvider>
       );
 
@@ -82,14 +78,21 @@ describe("DiffViewer Word Diff and Ignore Whitespace Integration", () => {
       });
 
       // Word diff spans should be present
-      const highlightedRemoved = document.querySelectorAll(".text-diff-remove-text.bg-red-500\\/30");
+      const highlightedRemoved = document.querySelectorAll(
+        ".text-diff-remove-text.bg-red-500\\/30"
+      );
       const highlightedAdded = document.querySelectorAll(".text-diff-add-text.bg-emerald-500\\/30");
 
       expect(highlightedRemoved.length).toBeGreaterThan(0);
       expect(highlightedAdded.length).toBeGreaterThan(0);
 
       // Verify invokeCommand received ignoreWhitespace parameter
-      expect(getCommitDiffSpy).toHaveBeenCalledWith("/test/repo", "commit-1", "src/example.ts", false);
+      expect(getCommitDiffSpy).toHaveBeenCalledWith(
+        "/test/repo",
+        "commit-1",
+        "src/example.ts",
+        false
+      );
     });
 
     it("renders Ignore Whitespace and Word Diff toolbar buttons and toggles them", async () => {
@@ -97,11 +100,7 @@ describe("DiffViewer Word Diff and Ignore Whitespace Integration", () => {
 
       render(
         <QueryClientProvider client={queryClient}>
-          <FileDiffViewer
-            repoPath="/test/repo"
-            commitId="commit-1"
-            filePath="src/example.ts"
-          />
+          <FileDiffViewer repoPath="/test/repo" commitId="commit-1" filePath="src/example.ts" />
         </QueryClientProvider>
       );
 
@@ -112,7 +111,9 @@ describe("DiffViewer Word Diff and Ignore Whitespace Integration", () => {
       // Word Diff button initially on
       const wordDiffButton = screen.getByTitle(/word diff|tô màu chi tiết từ/i);
       expect(wordDiffButton).toBeInTheDocument();
-      expect(document.querySelectorAll(".text-diff-add-text.bg-emerald-500\\/30").length).toBeGreaterThan(0);
+      expect(
+        document.querySelectorAll(".text-diff-add-text.bg-emerald-500\\/30").length
+      ).toBeGreaterThan(0);
 
       // Clicking Word Diff toggles it off
       fireEvent.click(wordDiffButton);
@@ -120,7 +121,9 @@ describe("DiffViewer Word Diff and Ignore Whitespace Integration", () => {
 
       // Clicking Word Diff toggles it back on
       fireEvent.click(wordDiffButton);
-      expect(document.querySelectorAll(".text-diff-add-text.bg-emerald-500\\/30").length).toBeGreaterThan(0);
+      expect(
+        document.querySelectorAll(".text-diff-add-text.bg-emerald-500\\/30").length
+      ).toBeGreaterThan(0);
 
       // Ignore Whitespace button
       const ignoreWsButton = screen.getByTitle(/khoảng trắng|whitespace/i);
@@ -168,7 +171,9 @@ describe("DiffViewer Word Diff and Ignore Whitespace Integration", () => {
       expect(getWorkingDiffSpy).toHaveBeenCalledWith("/test/repo", "src/sample.ts", false, false);
 
       // Verify word diff tokens are highlighted
-      const highlightedRemoved = document.querySelectorAll(".text-diff-remove-text.bg-red-500\\/30");
+      const highlightedRemoved = document.querySelectorAll(
+        ".text-diff-remove-text.bg-red-500\\/30"
+      );
       const highlightedAdded = document.querySelectorAll(".text-diff-add-text.bg-emerald-500\\/30");
       expect(highlightedRemoved.length).toBeGreaterThan(0);
       expect(highlightedAdded.length).toBeGreaterThan(0);
@@ -179,7 +184,9 @@ describe("DiffViewer Word Diff and Ignore Whitespace Integration", () => {
       fireEvent.click(wordDiffButton);
       expect(document.querySelectorAll(".text-diff-add-text.bg-emerald-500\\/30").length).toBe(0);
       fireEvent.click(wordDiffButton);
-      expect(document.querySelectorAll(".text-diff-add-text.bg-emerald-500\\/30").length).toBeGreaterThan(0);
+      expect(
+        document.querySelectorAll(".text-diff-add-text.bg-emerald-500\\/30").length
+      ).toBeGreaterThan(0);
 
       // Verify Stage Hunk button works
       const stageHunkBtn = screen.getByTestId("stage-hunk-0");

@@ -15,7 +15,12 @@ fn emit_repo_changed(app: &tauri::AppHandle, repo_path: &str, reason: &str) {
     let _ = app.emit("repo-changed", payload);
 }
 
-fn emit_task_progress(app: &tauri::AppHandle, task_id: &str, progress_percent: u32, status_text: &str) {
+fn emit_task_progress(
+    app: &tauri::AppHandle,
+    task_id: &str,
+    progress_percent: u32,
+    status_text: &str,
+) {
     let payload = crate::events::TaskProgressPayload {
         task_id: task_id.to_string(),
         progress_percent,

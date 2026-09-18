@@ -40,13 +40,19 @@ export const DiffModeDiagram: React.FC = () => {
           <div className="grid grid-cols-2 gap-2 h-full">
             {/* Left Col (Old) */}
             <div className="bg-red-500/10 border border-red-500/25 rounded-md p-2 flex flex-col justify-center">
-              <span className="text-secondary opacity-75 text-[10px] font-sans font-medium mb-0.5">Bản cũ (Trước):</span>
+              <span className="text-secondary opacity-75 text-[10px] font-sans font-medium mb-0.5">
+                Bản cũ (Trước):
+              </span>
               <span className="text-red-500 font-semibold">- const status = 0;</span>
             </div>
             {/* Right Col (New) */}
             <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-md p-2 flex flex-col justify-center">
-              <span className="text-secondary opacity-75 text-[10px] font-sans font-medium mb-0.5">Bản mới (Sau):</span>
-              <span className="text-emerald-600 dark:text-emerald-400 font-bold">+ const status = 1;</span>
+              <span className="text-secondary opacity-75 text-[10px] font-sans font-medium mb-0.5">
+                Bản mới (Sau):
+              </span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                + const status = 1;
+              </span>
             </div>
           </div>
         ) : (

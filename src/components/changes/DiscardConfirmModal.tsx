@@ -31,7 +31,6 @@ export const DiscardConfirmModal: React.FC<DiscardConfirmModalProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onCancel]);
 
-
   if (!isOpen || !filePath) return null;
 
   return (
@@ -49,10 +48,7 @@ export const DiscardConfirmModal: React.FC<DiscardConfirmModalProps> = ({
         <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
           <div className="flex items-center gap-2">
             <AlertTriangle size={18} className="text-diff-remove-text" />
-            <h3
-              id="discard-modal-title"
-              className="text-xs font-semibold text-primary m-0"
-            >
+            <h3 id="discard-modal-title" className="text-xs font-semibold text-primary m-0">
               {t.discard.title}
             </h3>
           </div>
@@ -66,9 +62,7 @@ export const DiscardConfirmModal: React.FC<DiscardConfirmModalProps> = ({
         </div>
 
         <div className="p-4 flex flex-col gap-3">
-          <p className="text-xs text-primary leading-normal m-0">
-            {t.discard.description}
-          </p>
+          <p className="text-xs text-primary leading-normal m-0">{t.discard.description}</p>
 
           <div className="px-3 py-2 bg-window rounded-sm border border-border-subtle font-mono text-xs text-primary break-all">
             {filePath}

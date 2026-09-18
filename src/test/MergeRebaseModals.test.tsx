@@ -34,7 +34,9 @@ describe("MergeBranchModal Component", () => {
 
 describe("RebaseBranchModal Component", () => {
   it("renders branch names and calls onRebase", async () => {
-    const handleRebase = vi.fn().mockResolvedValue({ success: true, status: "Success", output: "" });
+    const handleRebase = vi
+      .fn()
+      .mockResolvedValue({ success: true, status: "Success", output: "" });
     const handleClose = vi.fn();
 
     render(

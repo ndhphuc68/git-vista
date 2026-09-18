@@ -6,7 +6,8 @@
 
 :root {
   /* Typography */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", Inter, sans-serif;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", Inter, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code", monospace;
 
   --font-size-xs: 12px;
@@ -54,32 +55,32 @@
 /* Light Theme (Mặc định) */
 :root,
 [data-theme="light"] {
-  --bg-window: #F5F3F1;
-  --bg-surface: #FFFFFF;
-  --bg-surface-hover: #F0EDE9;
-  --bg-surface-active: #E6E2DE;
-  --border-subtle: #E3DFDA;
-  --border-strong: #CCC7C2;
+  --bg-window: #f5f3f1;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f0ede9;
+  --bg-surface-active: #e6e2de;
+  --border-subtle: #e3dfda;
+  --border-strong: #ccc7c2;
 
-  --text-primary: #1A1918;
-  --text-secondary: #6B6764;
-  --text-tertiary: #96918C;
+  --text-primary: #1a1918;
+  --text-secondary: #6b6764;
+  --text-tertiary: #96918c;
 
-  --accent: #2F6FEB;
-  --accent-hover: #2558BC;
-  --accent-subtle: #EBF2FE;
-  --accent-contrast: #FFFFFF;
+  --accent: #2f6feb;
+  --accent-hover: #2558bc;
+  --accent-subtle: #ebf2fe;
+  --accent-contrast: #ffffff;
 
-  --diff-add-bg: #DAFBE1;
-  --diff-add-text: #0E4429;
-  --diff-add-border: #80E39F;
+  --diff-add-bg: #dafbe1;
+  --diff-add-text: #0e4429;
+  --diff-add-border: #80e39f;
 
-  --diff-remove-bg: #FFEBE9;
-  --diff-remove-text: #82071E;
-  --diff-remove-border: #FF8182;
+  --diff-remove-bg: #ffebe9;
+  --diff-remove-text: #82071e;
+  --diff-remove-border: #ff8182;
 
-  --skeleton-bg: #E8E5E1;
-  --skeleton-shine: #F2EFEA;
+  --skeleton-bg: #e8e5e1;
+  --skeleton-shine: #f2efea;
 
   --shadow-sm: 0 1px 2px rgba(26, 25, 24, 0.05);
   --shadow-md: 0 4px 12px rgba(26, 25, 24, 0.08);
@@ -87,31 +88,31 @@
 
 /* Dark Theme */
 [data-theme="dark"] {
-  --bg-window: #1C1B1A;
+  --bg-window: #1c1b1a;
   --bg-surface: #252423;
-  --bg-surface-hover: #302E2D;
-  --bg-surface-active: #3C3A38;
+  --bg-surface-hover: #302e2d;
+  --bg-surface-active: #3c3a38;
   --border-subtle: #333130;
-  --border-strong: #4A4745;
+  --border-strong: #4a4745;
 
-  --text-primary: #EDEBE9;
-  --text-secondary: #98938E;
-  --text-tertiary: #6E6A66;
+  --text-primary: #edebe9;
+  --text-secondary: #98938e;
+  --text-tertiary: #6e6a66;
 
-  --accent: #4D8DFF;
-  --accent-hover: #70A4FF;
-  --accent-subtle: #1C2C4A;
-  --accent-contrast: #0E1A2E;
+  --accent: #4d8dff;
+  --accent-hover: #70a4ff;
+  --accent-subtle: #1c2c4a;
+  --accent-contrast: #0e1a2e;
 
-  --diff-add-bg: #12261E;
-  --diff-add-text: #3FB950;
-  --diff-add-border: #1B4B32;
+  --diff-add-bg: #12261e;
+  --diff-add-text: #3fb950;
+  --diff-add-border: #1b4b32;
 
-  --diff-remove-bg: #2D1416;
-  --diff-remove-text: #F85149;
-  --diff-remove-border: #5C1D24;
+  --diff-remove-bg: #2d1416;
+  --diff-remove-text: #f85149;
+  --diff-remove-border: #5c1d24;
 
-  --skeleton-bg: #2B2A29;
+  --skeleton-bg: #2b2a29;
   --skeleton-shine: #383634;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -121,24 +122,24 @@
 /* Colorblind Mode Override: Xanh lá/Đỏ chuyển sang Xanh dương/Cam */
 [data-colorblind="true"] {
   /* Light Colorblind */
-  --diff-add-bg: #E0F2FE;
-  --diff-add-text: #0369A1;
-  --diff-add-border: #7DD3FC;
+  --diff-add-bg: #e0f2fe;
+  --diff-add-text: #0369a1;
+  --diff-add-border: #7dd3fc;
 
-  --diff-remove-bg: #FEF3C7;
-  --diff-remove-text: #B45309;
-  --diff-remove-border: #FCD34D;
+  --diff-remove-bg: #fef3c7;
+  --diff-remove-text: #b45309;
+  --diff-remove-border: #fcd34d;
 }
 
 [data-theme="dark"][data-colorblind="true"] {
   /* Dark Colorblind */
-  --diff-add-bg: #0C283E;
-  --diff-add-text: #38BDF8;
-  --diff-add-border: #0369A1;
+  --diff-add-bg: #0c283e;
+  --diff-add-text: #38bdf8;
+  --diff-add-border: #0369a1;
 
-  --diff-remove-bg: #3E240C;
-  --diff-remove-text: #FBBF24;
-  --diff-remove-border: #B45309;
+  --diff-remove-bg: #3e240c;
+  --diff-remove-text: #fbbf24;
+  --diff-remove-border: #b45309;
 }
 
 /* Tôn trọng người dùng tắt hiệu ứng chuyển động */
@@ -152,4 +153,3 @@
     scroll-behavior: auto !important;
   }
 }
-

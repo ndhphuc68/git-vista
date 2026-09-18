@@ -16,9 +16,7 @@ import { useSettingsStore } from "../../store/useSettingsStore";
 import { useTranslation } from "../../i18n";
 import { invokeCommand } from "../../ipc/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  RemoteProgressBanner,
-} from "../common/RemoteProgressBanner";
+import { RemoteProgressBanner } from "../common/RemoteProgressBanner";
 
 import { useRemoteTask } from "../../hooks/useRemoteTask";
 
@@ -29,10 +27,7 @@ interface RepoHeaderProps {
 export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBackToWelcome }) => {
   const { currentRepo } = useRepoStore();
   const { activeScreen, setActiveScreen } = useViewStore();
-  const {
-    sidebarOpen,
-    toggleSidebar,
-  } = useLayoutStore();
+  const { sidebarOpen, toggleSidebar } = useLayoutStore();
   const { openSettings } = useSettingsStore();
   const { t, actions } = useTranslation();
   const queryClient = useQueryClient();
@@ -55,9 +50,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
 
   const isMac =
     typeof navigator !== "undefined" &&
-    /(Mac|iPhone|iPod|iPad)/i.test(
-      navigator.platform || navigator.userAgent || ""
-    );
+    /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform || navigator.userAgent || "");
   const shortcutLabel1 = isMac ? "Cmd+1" : "Ctrl+1";
   const shortcutLabel2 = isMac ? "Cmd+2" : "Ctrl+2";
   const shortcutSidebar = isMac ? "Cmd+B" : "Ctrl+B";
@@ -72,10 +65,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
       } else if ((e.metaKey || e.ctrlKey) && e.key === "2") {
         e.preventDefault();
         setActiveScreen("changes");
-      } else if (
-        (e.metaKey || e.ctrlKey) &&
-        (e.key === "b" || e.key === "B")
-      ) {
+      } else if ((e.metaKey || e.ctrlKey) && (e.key === "b" || e.key === "B")) {
         e.preventDefault();
         toggleSidebar();
       }
@@ -114,7 +104,9 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
             onClick={toggleSidebar}
             className={clsx(
               "flex items-center justify-center w-7 h-7 border border-border-subtle rounded-md cursor-pointer shrink-0 transition-colors shadow-2xs",
-              sidebarOpen ? "bg-accent-subtle text-accent font-semibold" : "bg-transparent text-secondary hover:bg-surface-hover hover:text-primary"
+              sidebarOpen
+                ? "bg-accent-subtle text-accent font-semibold"
+                : "bg-transparent text-secondary hover:bg-surface-hover hover:text-primary"
             )}
             title={t.header.toggleSidebar.replace("{shortcut}", shortcutSidebar)}
           >
@@ -185,7 +177,12 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
               className="flex items-center gap-1.5 px-2.5 py-1 text-secondary hover:text-primary hover:bg-surface-hover text-xs font-medium cursor-pointer transition-colors disabled:opacity-50 btn-press"
               title={t.header.fetchTitle}
             >
-              <RefreshCw size={12} className={isRemotePending && activeRemoteTask?.operation === "fetch" ? "animate-spin" : ""} />
+              <RefreshCw
+                size={12}
+                className={
+                  isRemotePending && activeRemoteTask?.operation === "fetch" ? "animate-spin" : ""
+                }
+              />
               <span>{actions.fetch}</span>
             </button>
 
@@ -241,7 +238,6 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
 
           {/* Khối Công Cụ Phải: Refresh & Settings */}
           <div className="flex items-center gap-1 pl-1 border-l border-border-subtle relative">
-
             {/* Refresh button */}
             <button
               onClick={() => queryClient.invalidateQueries()}

@@ -71,6 +71,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check frontend formatting
+        run: pnpm exec prettier . --check
+
+      - name: Check Rust formatting
+        run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+
+      - name: Frontend lint
+        run: pnpm lint
+
       - name: TypeScript Typecheck & Frontend Build
         run: pnpm build
 
@@ -85,4 +94,3 @@ jobs:
 
       - name: Tầng 3 - Performance Benchmark Guard
         run: cargo test --test m5_benchmark_test --manifest-path src-tauri/Cargo.toml -- --nocapture
-

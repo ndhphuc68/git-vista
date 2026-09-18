@@ -9,7 +9,7 @@ import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import { invokeCommand } from "../../ipc/client";
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
-import { StagingFileList, SelectedWorkingFile } from "./StagingFileList";
+import { StagingFileList, type SelectedWorkingFile } from "./StagingFileList";
 import { CommitBox } from "./CommitBox";
 import { InteractiveDiffViewer } from "./InteractiveDiffViewer";
 import { CreateStashModal } from "../stash/CreateStashModal";
@@ -18,14 +18,11 @@ import { useTranslation } from "../../i18n";
 export const ChangesScreen: React.FC = () => {
   const { t } = useTranslation();
   const { currentRepo } = useRepoStore();
-  const { sidebarOpen, activeChangesView, setActiveChangesView } =
-    useLayoutStore();
+  const { sidebarOpen, activeChangesView, setActiveChangesView } = useLayoutStore();
   const { openConflictResolver } = useViewStore();
   const { isMobile, isLaptop } = useWindowDimensions();
   const queryClient = useQueryClient();
-  const [selectedFile, setSelectedFile] = useState<SelectedWorkingFile | null>(
-    null
-  );
+  const [selectedFile, setSelectedFile] = useState<SelectedWorkingFile | null>(null);
   const [showCreateStash, setShowCreateStash] = useState(false);
 
   const { data: status } = useQuery({
@@ -51,10 +48,7 @@ export const ChangesScreen: React.FC = () => {
 
     const stillExists =
       selectedFile &&
-      allFiles.some(
-        (f) =>
-          f.path === selectedFile.path && f.is_staged === selectedFile.is_staged
-      );
+      allFiles.some((f) => f.path === selectedFile.path && f.is_staged === selectedFile.is_staged);
     if (!stillExists) {
       const first = allFiles[0];
       if (first) {
@@ -123,23 +117,13 @@ export const ChangesScreen: React.FC = () => {
 
   const handleStageHunk = async (hunkIndex: number) => {
     if (!selectedFile) return;
-    await invokeCommand.stageHunk(
-      currentRepo.path,
-      selectedFile.path,
-      hunkIndex,
-      false
-    );
+    await invokeCommand.stageHunk(currentRepo.path, selectedFile.path, hunkIndex, false);
     await queryClient.invalidateQueries();
   };
 
   const handleUnstageHunk = async (hunkIndex: number) => {
     if (!selectedFile) return;
-    await invokeCommand.stageHunk(
-      currentRepo.path,
-      selectedFile.path,
-      hunkIndex,
-      true
-    );
+    await invokeCommand.stageHunk(currentRepo.path, selectedFile.path, hunkIndex, true);
     await queryClient.invalidateQueries();
   };
 
@@ -155,10 +139,7 @@ export const ChangesScreen: React.FC = () => {
     await queryClient.invalidateQueries();
   };
 
-  const handleUnstageLines = async (
-    hunkIndex: number,
-    lineIndices: number[]
-  ) => {
+  const handleUnstageLines = async (hunkIndex: number, lineIndices: number[]) => {
     if (!selectedFile) return;
     await invokeCommand.stageLines(
       currentRepo.path,
@@ -170,17 +151,8 @@ export const ChangesScreen: React.FC = () => {
     await queryClient.invalidateQueries();
   };
 
-  const handleCommit = async (
-    summary: string,
-    description?: string,
-    amend?: boolean
-  ) => {
-    const result = await invokeCommand.createCommit(
-      currentRepo.path,
-      summary,
-      description,
-      amend
-    );
+  const handleCommit = async (summary: string, description?: string, amend?: boolean) => {
+    const result = await invokeCommand.createCommit(currentRepo.path, summary, description, amend);
     await queryClient.invalidateQueries();
     return result;
   };
@@ -249,8 +221,8 @@ export const ChangesScreen: React.FC = () => {
               isMobile
                 ? "w-full min-w-full max-w-full border-r-0"
                 : isLaptop
-                ? "w-70 min-w-65 max-w-95 border-r border-border-subtle"
-                : "w-80 min-w-65 max-w-95 border-r border-border-subtle",
+                  ? "w-70 min-w-65 max-w-95 border-r border-border-subtle"
+                  : "w-80 min-w-65 max-w-95 border-r border-border-subtle",
               "flex flex-col h-full bg-surface shrink-0"
             )}
           >
@@ -275,7 +247,9 @@ export const ChangesScreen: React.FC = () => {
                 repoPath={currentRepo.path}
                 stagedCount={stagedCount}
                 onCommit={handleCommit}
-                onSuccess={() => { void queryClient.invalidateQueries(); }}
+                onSuccess={() => {
+                  void queryClient.invalidateQueries();
+                }}
               />
             </div>
 
@@ -313,9 +287,7 @@ export const ChangesScreen: React.FC = () => {
             ) : (
               <div className="flex flex-col items-center justify-center h-full gap-3 text-tertiary text-xs text-center p-4">
                 <FileText size={36} className="text-tertiary" />
-                <span>
-                  {t.changes.selectFileHint}
-                </span>
+                <span>{t.changes.selectFileHint}</span>
               </div>
             )}
           </section>

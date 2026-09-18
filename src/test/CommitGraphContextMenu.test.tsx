@@ -47,21 +47,15 @@ describe("CommitGraph Context Menu", () => {
 
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
-    expect(
-      screen.getByText(/Create tag here|Tạo thẻ tại đây/i)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Create branch here|Tạo nhánh tại đây/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Create tag here|Tạo thẻ tại đây/i)).toBeInTheDocument();
+    expect(screen.getByText(/Create branch here|Tạo nhánh tại đây/i)).toBeInTheDocument();
     expect(
       screen.getByText(/Cherry-pick into current branch|Cherry-pick vào nhánh hiện tại/i)
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Revert this commit|Hoàn tác \(Revert\) commit này/i)
     ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Copy commit SHA|Sao chép mã commit \(SHA\)/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Copy commit SHA|Sao chép mã commit \(SHA\)/i)).toBeInTheDocument();
   });
 
   it("verifies clicking 'Create Tag here...' opens CreateTagModal targeting that commit", async () => {
@@ -137,15 +131,15 @@ describe("CommitGraph Context Menu", () => {
     const commitRow = await screen.findByText("feat(m1): visual git viewer");
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
-    const revertAction = screen.getByText(
-      /Revert this commit|Hoàn tác \(Revert\) commit này/i
-    );
+    const revertAction = screen.getByText(/Revert this commit|Hoàn tác \(Revert\) commit này/i);
     fireEvent.click(revertAction);
 
     await waitFor(() => {
       const dialog = screen.getByRole("dialog");
       expect(dialog).toBeInTheDocument();
-      expect(within(dialog).getByRole("heading", { name: /Revert Commit|Hoàn tác Commit/i })).toBeInTheDocument();
+      expect(
+        within(dialog).getByRole("heading", { name: /Revert Commit|Hoàn tác Commit/i })
+      ).toBeInTheDocument();
       expect(within(dialog).getByText("1111111")).toBeInTheDocument();
       expect(within(dialog).getByText("feat(m1): visual git viewer")).toBeInTheDocument();
     });
@@ -297,13 +291,13 @@ describe("CommitGraph Context Menu", () => {
     const commitRow = await screen.findByText("feat(m1): visual git viewer");
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
-    const revertAction = screen.getByText(
-      /Revert this commit|Hoàn tác \(Revert\) commit này/i
-    );
+    const revertAction = screen.getByText(/Revert this commit|Hoàn tác \(Revert\) commit này/i);
     fireEvent.click(revertAction);
 
     const dialog = await screen.findByRole("dialog");
-    const submitBtn = within(dialog).getByRole("button", { name: /Revert Commit|Hoàn tác commit/i });
+    const submitBtn = within(dialog).getByRole("button", {
+      name: /Revert Commit|Hoàn tác commit/i,
+    });
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
@@ -344,13 +338,13 @@ describe("CommitGraph Context Menu", () => {
     const commitRow = await screen.findByText("feat(m1): visual git viewer");
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
-    const revertAction = screen.getByText(
-      /Revert this commit|Hoàn tác \(Revert\) commit này/i
-    );
+    const revertAction = screen.getByText(/Revert this commit|Hoàn tác \(Revert\) commit này/i);
     fireEvent.click(revertAction);
 
     const dialog = await screen.findByRole("dialog");
-    const submitBtn = within(dialog).getByRole("button", { name: /Revert Commit|Hoàn tác commit/i });
+    const submitBtn = within(dialog).getByRole("button", {
+      name: /Revert Commit|Hoàn tác commit/i,
+    });
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
@@ -381,13 +375,13 @@ describe("CommitGraph Context Menu", () => {
     const commitRow = await screen.findByText("feat(m1): visual git viewer");
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
-    const revertAction = screen.getByText(
-      /Revert this commit|Hoàn tác \(Revert\) commit này/i
-    );
+    const revertAction = screen.getByText(/Revert this commit|Hoàn tác \(Revert\) commit này/i);
     fireEvent.click(revertAction);
 
     const dialog = await screen.findByRole("dialog");
-    const submitBtn = within(dialog).getByRole("button", { name: /Revert Commit|Hoàn tác commit/i });
+    const submitBtn = within(dialog).getByRole("button", {
+      name: /Revert Commit|Hoàn tác commit/i,
+    });
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
@@ -412,15 +406,11 @@ describe("CommitGraph Context Menu", () => {
     const commitRow = await screen.findByText("feat(m1): visual git viewer");
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
-    expect(
-      screen.getByText(/Create tag here|Tạo thẻ tại đây/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Create tag here|Tạo thẻ tại đây/i)).toBeInTheDocument();
 
     fireEvent.keyDown(window, { key: "Escape" });
 
-    expect(
-      screen.queryByText(/Create tag here|Tạo thẻ tại đây/i)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/Create tag here|Tạo thẻ tại đây/i)).not.toBeInTheDocument();
   });
 
   it("verifies clicking 'Copy SHA' copies commit SHA and triggers toast", async () => {

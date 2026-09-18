@@ -1,5 +1,5 @@
 import { useSettingsStore } from "../store/useSettingsStore";
-import { vi, Translations } from "./vi";
+import { vi, type Translations } from "./vi";
 import { en } from "./en";
 
 const dictionaries: Record<"vi" | "en", Translations> = {
@@ -55,5 +55,3 @@ export function useTranslation() {
     mode,
   };
 }
-
-

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { AlertTriangle, Play, XCircle, FileText } from "lucide-react";
-import { RepoStateInfo } from "../../ipc/bindings";
+import { type RepoStateInfo } from "../../ipc/bindings";
 import { useTranslation } from "../../i18n";
 
 export interface InProgressOperationBannerProps {
@@ -78,7 +78,8 @@ export const InProgressOperationBanner: React.FC<InProgressOperationBannerProps>
           <span>{t.banner.inProgress.replace("{operation}", opLabel)}</span>
           {repoState.target_name && (
             <span className="font-normal text-amber-200/80">
-              (nhánh <strong className="font-semibold text-amber-100">{repoState.target_name}</strong>)
+              (nhánh{" "}
+              <strong className="font-semibold text-amber-100">{repoState.target_name}</strong>)
             </span>
           )}
         </div>
@@ -98,9 +99,7 @@ export const InProgressOperationBanner: React.FC<InProgressOperationBannerProps>
         </span>
 
         {actionError && (
-          <span className="text-diff-remove-text text-[11px] font-mono ml-2">
-            {actionError}
-          </span>
+          <span className="text-diff-remove-text text-[11px] font-mono ml-2">{actionError}</span>
         )}
       </div>
 

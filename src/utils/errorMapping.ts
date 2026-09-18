@@ -13,12 +13,21 @@ function errorDetails(error: unknown): string {
     if ("message" in error) {
       if (typeof error.message === "string") return error.message;
       const message = error.message;
-      if (message && typeof message === "object" && "stderr" in message && typeof message.stderr === "string") {
+      if (
+        message &&
+        typeof message === "object" &&
+        "stderr" in message &&
+        typeof message.stderr === "string"
+      ) {
         const code = "code" in message ? message.code : undefined;
         return typeof code === "number" ? `${message.stderr}\n(exit code ${code})` : message.stderr;
       }
     }
-    try { return JSON.stringify(error); } catch { /* Fall back for circular objects. */ }
+    try {
+      return JSON.stringify(error);
+    } catch {
+      /* Fall back for circular objects. */
+    }
   }
   return String(error);
 }
@@ -53,10 +62,7 @@ export function mapGitError(
     };
   }
 
-  if (
-    lower.includes("checkout_conflict") ||
-    lower.includes("local changes would be overwritten")
-  ) {
+  if (lower.includes("checkout_conflict") || lower.includes("local changes would be overwritten")) {
     return {
       title: t.errors.checkoutConflictTitle,
       message: t.errors.checkoutConflictMessage,

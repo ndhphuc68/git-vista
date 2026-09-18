@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useTabStore } from "../store/useTabStore";
-import { RepoSummary } from "../ipc/bindings";
+import { type RepoSummary } from "../ipc/bindings";
 
 const mockRepo1: RepoSummary = {
   path: "d:/projects/repo1",

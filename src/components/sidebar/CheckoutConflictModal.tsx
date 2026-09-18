@@ -85,10 +85,7 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
         <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
           <div className="flex items-center gap-2">
             <AlertTriangle size={16} className="text-diff-remove-text" />
-            <h3
-              id="checkout-conflict-title"
-              className="text-xs font-semibold text-primary m-0"
-            >
+            <h3 id="checkout-conflict-title" className="text-xs font-semibold text-primary m-0">
               {t.modals.checkoutConflict.title}
             </h3>
           </div>

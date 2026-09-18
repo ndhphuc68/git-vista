@@ -14,7 +14,8 @@ export const ConfirmationsDiagram: React.FC = () => {
             <span>Hộp thoại xác nhận an toàn</span>
           </div>
           <p className="text-xs text-secondary mt-1 leading-relaxed">
-            Ngăn chặn nguy cơ mất dữ liệu vĩnh viễn khi hủy bỏ thay đổi (Discard) hoặc đẩy cưỡng bức (Force Push) vô ý.
+            Ngăn chặn nguy cơ mất dữ liệu vĩnh viễn khi hủy bỏ thay đổi (Discard) hoặc đẩy cưỡng bức
+            (Force Push) vô ý.
           </p>
         </div>
       </div>

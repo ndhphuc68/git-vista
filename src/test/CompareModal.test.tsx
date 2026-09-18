@@ -71,8 +71,18 @@ const mockDiffResult: FileDiffResult = {
       new_start: 1,
       new_lines: 3,
       lines: [
-        { line_type: "add", content: "+export const LoginForm = () => {\n", old_lineno: null, new_lineno: 1 },
-        { line_type: "add", content: "+  return <form>Login</form>;\n", old_lineno: null, new_lineno: 2 },
+        {
+          line_type: "add",
+          content: "+export const LoginForm = () => {\n",
+          old_lineno: null,
+          new_lineno: 1,
+        },
+        {
+          line_type: "add",
+          content: "+  return <form>Login</form>;\n",
+          old_lineno: null,
+          new_lineno: 2,
+        },
         { line_type: "add", content: "+};\n", old_lineno: null, new_lineno: 3 },
       ],
     },
@@ -147,7 +157,9 @@ describe("CompareModal Component", () => {
       />
     );
 
-    const swapButton = screen.getByRole("button", { name: /Đổi chiều so sánh|Swap base and target/i });
+    const swapButton = screen.getByRole("button", {
+      name: /Đổi chiều so sánh|Swap base and target/i,
+    });
     fireEvent.click(swapButton);
 
     const baseInput = screen.getByRole("combobox", { name: /Gốc \(Base\)|Base/i });
@@ -194,7 +206,9 @@ describe("CompareModal Component", () => {
       />
     );
 
-    const directButton = screen.getByRole("button", { name: /Trực tiếp \(A\.\.B\)|Direct \(A\.\.B\)/i });
+    const directButton = screen.getByRole("button", {
+      name: /Trực tiếp \(A\.\.B\)|Direct \(A\.\.B\)/i,
+    });
     fireEvent.click(directButton);
 
     await waitFor(() => {

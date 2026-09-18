@@ -36,10 +36,16 @@ impl TestRepoFixture {
         let file_path = dir.path().join("file1.txt");
         fs::write(&file_path, "initial content for file1\n").expect("Failed to write file1.txt");
         let mut index = repo.index().expect("Failed to get index");
-        index.add_path(Path::new("file1.txt")).expect("Failed to add file1.txt");
+        index
+            .add_path(Path::new("file1.txt"))
+            .expect("Failed to add file1.txt");
         index.write().expect("Failed to write index");
         {
-            let head = repo.head().expect("Failed to get HEAD").peel_to_commit().expect("Failed to peel HEAD");
+            let head = repo
+                .head()
+                .expect("Failed to get HEAD")
+                .peel_to_commit()
+                .expect("Failed to peel HEAD");
             commit_index(&repo, "Add file1.txt", &[&head]).expect("Failed to commit file1.txt");
         }
 
@@ -80,7 +86,9 @@ pub fn create_clean_repo() -> Result<(TempDir, Repository), Box<dyn std::error::
 }
 
 /// 2. Tạo repo với số lượng commit chỉ định
-pub fn create_repo_with_commits(count: usize) -> Result<(TempDir, Repository), Box<dyn std::error::Error>> {
+pub fn create_repo_with_commits(
+    count: usize,
+) -> Result<(TempDir, Repository), Box<dyn std::error::Error>> {
     let (dir, repo) = create_clean_repo()?;
 
     let mut parent_oid = {
@@ -139,7 +147,10 @@ pub fn create_conflict_repo() -> Result<(TempDir, Repository), Box<dyn std::erro
     // Trên nhánh feature: sửa dòng 2
     repo.set_head("refs/heads/feature-branch")?;
     repo.checkout_head(Some(git2::build::CheckoutBuilder::default().force()))?;
-    fs::write(&target_file, "Dòng 1: gốc\nDòng 2: sửa bởi nhánh FEATURE\nDòng 3: gốc\n")?;
+    fs::write(
+        &target_file,
+        "Dòng 1: gốc\nDòng 2: sửa bởi nhánh FEATURE\nDòng 3: gốc\n",
+    )?;
 
     {
         let mut index = repo.index()?;
@@ -150,9 +161,13 @@ pub fn create_conflict_repo() -> Result<(TempDir, Repository), Box<dyn std::erro
     }
 
     // Quay lại nhánh main/master: sửa dòng 2 khác đi
-    repo.set_head("refs/heads/master").or_else(|_| repo.set_head("refs/heads/main"))?;
+    repo.set_head("refs/heads/master")
+        .or_else(|_| repo.set_head("refs/heads/main"))?;
     repo.checkout_head(Some(git2::build::CheckoutBuilder::default().force()))?;
-    fs::write(&target_file, "Dòng 1: gốc\nDòng 2: sửa bởi nhánh MAIN\nDòng 3: gốc\n")?;
+    fs::write(
+        &target_file,
+        "Dòng 1: gốc\nDòng 2: sửa bởi nhánh MAIN\nDòng 3: gốc\n",
+    )?;
 
     {
         let mut index = repo.index()?;

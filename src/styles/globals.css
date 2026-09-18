@@ -81,8 +81,9 @@
     -moz-osx-font-smoothing: grayscale;
     user-select: none;
     -webkit-user-select: none;
-    transition: background-color var(--duration-normal) var(--ease-macos),
-                color var(--duration-normal) var(--ease-macos);
+    transition:
+      background-color var(--duration-normal) var(--ease-macos),
+      color var(--duration-normal) var(--ease-macos);
   }
 
   /* Allow text selection in code, diffs, and text inputs */
@@ -95,7 +96,9 @@
     user-select: text;
     -webkit-user-select: text;
     font-family: var(--font-mono);
-    font-feature-settings: "calt" 1, "liga" 1;
+    font-feature-settings:
+      "calt" 1,
+      "liga" 1;
     font-variant-ligatures: contextual;
   }
 
@@ -207,7 +210,8 @@
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.4;
     transform: scale(1);
   }
@@ -239,7 +243,9 @@
 }
 
 .btn-press {
-  transition: transform var(--duration-instant) ease-out, filter var(--duration-instant) ease-out;
+  transition:
+    transform var(--duration-instant) ease-out,
+    filter var(--duration-instant) ease-out;
 }
 
 .btn-press:active {
@@ -247,7 +253,10 @@
 }
 
 .card-lift {
-  transition: transform var(--duration-fast) var(--ease-macos), box-shadow var(--duration-fast) var(--ease-macos), border-color var(--duration-fast) var(--ease-macos);
+  transition:
+    transform var(--duration-fast) var(--ease-macos),
+    box-shadow var(--duration-fast) var(--ease-macos),
+    border-color var(--duration-fast) var(--ease-macos);
 }
 
 .card-lift:hover {
@@ -281,5 +290,3 @@ div:focus:not(:focus-visible) {
   outline: none !important;
   box-shadow: none !important;
 }
-
-

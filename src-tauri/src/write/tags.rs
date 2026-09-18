@@ -12,14 +12,21 @@ pub fn create_tag<P: AsRef<Path>>(
 ) -> Result<(), AppError> {
     let trimmed_name = name.trim();
     if trimmed_name.is_empty() {
-        return Err(AppError::InvalidOperation("Tag name cannot be empty".to_string()));
+        return Err(AppError::InvalidOperation(
+            "Tag name cannot be empty".to_string(),
+        ));
     }
     if trimmed_name.starts_with('-') {
-        return Err(AppError::InvalidOperation("Tag name cannot start with '-'".to_string()));
+        return Err(AppError::InvalidOperation(
+            "Tag name cannot start with '-'".to_string(),
+        ));
     }
     let ref_name = format!("refs/tags/{}", trimmed_name);
     if !git2::Reference::is_valid_name(&ref_name) {
-        return Err(AppError::InvalidOperation(format!("Invalid tag name '{}'", trimmed_name)));
+        return Err(AppError::InvalidOperation(format!(
+            "Invalid tag name '{}'",
+            trimmed_name
+        )));
     }
 
     let repo = Repository::open(repo_path.as_ref())?;
@@ -28,7 +35,8 @@ pub fn create_tag<P: AsRef<Path>>(
     let target_obj = repo.find_object(oid, Some(git2::ObjectType::Commit))?;
 
     if let Some(msg) = message.filter(|m| !m.trim().is_empty()) {
-        let sig = repo.signature()
+        let sig = repo
+            .signature()
             .or_else(|_| git2::Signature::now("Visual Git Client", "app@visualgit.local"))
             .map_err(|e| AppError::Git(format!("Failed to determine tagger signature: {}", e)))?;
         repo.tag(trimmed_name, &target_obj, &sig, msg, false)?;
@@ -46,7 +54,9 @@ pub fn delete_tag<P: AsRef<Path>>(
 ) -> Result<(), AppError> {
     let trimmed_name = name.trim();
     if trimmed_name.is_empty() {
-        return Err(AppError::InvalidOperation("Tag name cannot be empty".to_string()));
+        return Err(AppError::InvalidOperation(
+            "Tag name cannot be empty".to_string(),
+        ));
     }
 
     let repo = Repository::open(repo_path.as_ref())?;
@@ -56,7 +66,12 @@ pub fn delete_tag<P: AsRef<Path>>(
         let path = repo_path.as_ref();
         let output = Command::new("git")
             .current_dir(path)
-            .args(["push", "origin", "--delete", &format!("refs/tags/{}", trimmed_name)])
+            .args([
+                "push",
+                "origin",
+                "--delete",
+                &format!("refs/tags/{}", trimmed_name),
+            ])
             .output();
 
         if let Ok(out) = output {
@@ -75,10 +90,7 @@ pub fn delete_tag<P: AsRef<Path>>(
     Ok(())
 }
 
-pub fn checkout_tag<P: AsRef<Path>>(
-    repo_path: P,
-    name: &str,
-) -> Result<(), AppError> {
+pub fn checkout_tag<P: AsRef<Path>>(repo_path: P, name: &str) -> Result<(), AppError> {
     let trimmed_name = name.trim();
     let repo = Repository::open(repo_path.as_ref())?;
 

@@ -26,7 +26,11 @@ describe("GitHub Service & Translation Parity", () => {
         title: "Feature PR",
         state: "open",
         draft: false,
-        user: { login: "alice", avatar_url: "https://avatar.url", html_url: "https://github.com/alice" },
+        user: {
+          login: "alice",
+          avatar_url: "https://avatar.url",
+          html_url: "https://github.com/alice",
+        },
         created_at: "2026-09-18T10:00:00Z",
         updated_at: "2026-09-18T10:30:00Z",
         head: { ref: "feature-branch", sha: "abc1234" },
@@ -189,8 +193,14 @@ describe("GitHub Service & Translation Parity", () => {
     const enPR = enAny.pullRequests as Record<string, unknown>;
     expect(Object.keys(viPR).sort()).toEqual(Object.keys(enPR).sort());
 
-    const viSettings = (viAny.settings as Record<string, unknown>).github as Record<string, unknown>;
-    const enSettings = (enAny.settings as Record<string, unknown>).github as Record<string, unknown>;
+    const viSettings = (viAny.settings as Record<string, unknown>).github as Record<
+      string,
+      unknown
+    >;
+    const enSettings = (enAny.settings as Record<string, unknown>).github as Record<
+      string,
+      unknown
+    >;
     expect(viSettings).toBeDefined();
     expect(enSettings).toBeDefined();
     expect(Object.keys(viSettings).sort()).toEqual(Object.keys(enSettings).sort());

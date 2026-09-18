@@ -64,12 +64,14 @@ pub fn get_file_blame<P: AsRef<Path>>(
     let content_str: String = if let Some(oid) = target_oid {
         let commit = repo.find_commit(oid)?;
         let tree = commit.tree()?;
-        let entry = tree
-            .get_path(Path::new(file_path))
-            .map_err(|_| AppError::NotFound(format!("Path '{}' not found at commit {}", file_path, oid)))?;
+        let entry = tree.get_path(Path::new(file_path)).map_err(|_| {
+            AppError::NotFound(format!("Path '{}' not found at commit {}", file_path, oid))
+        })?;
         let blob = repo.find_blob(entry.id())?;
         if blob.is_binary() {
-            return Err(AppError::InvalidOperation("Binary file is not supported for blame".to_string()));
+            return Err(AppError::InvalidOperation(
+                "Binary file is not supported for blame".to_string(),
+            ));
         }
         std::str::from_utf8(blob.content())
             .map_err(|e| AppError::InvalidOperation(format!("UTF-8 decode error: {}", e)))?
@@ -80,24 +82,31 @@ pub fn get_file_blame<P: AsRef<Path>>(
         if disk_path.exists() {
             let bytes = std::fs::read(&disk_path)?;
             if bytes.contains(&0) {
-                return Err(AppError::InvalidOperation("Binary file is not supported for blame".to_string()));
+                return Err(AppError::InvalidOperation(
+                    "Binary file is not supported for blame".to_string(),
+                ));
             }
             String::from_utf8_lossy(&bytes).to_string()
         } else if let Ok(head) = repo.head() {
             let commit = head.peel_to_commit()?;
             let tree = commit.tree()?;
-            let entry = tree
-                .get_path(Path::new(file_path))
-                .map_err(|_| AppError::NotFound(format!("Path '{}' not found in HEAD", file_path)))?;
+            let entry = tree.get_path(Path::new(file_path)).map_err(|_| {
+                AppError::NotFound(format!("Path '{}' not found in HEAD", file_path))
+            })?;
             let blob = repo.find_blob(entry.id())?;
             if blob.is_binary() {
-                return Err(AppError::InvalidOperation("Binary file is not supported for blame".to_string()));
+                return Err(AppError::InvalidOperation(
+                    "Binary file is not supported for blame".to_string(),
+                ));
             }
             std::str::from_utf8(blob.content())
                 .map_err(|e| AppError::InvalidOperation(format!("UTF-8 decode error: {}", e)))?
                 .to_string()
         } else {
-            return Err(AppError::NotFound(format!("File '{}' not found", file_path)));
+            return Err(AppError::NotFound(format!(
+                "File '{}' not found",
+                file_path
+            )));
         }
     };
 

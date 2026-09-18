@@ -11,7 +11,9 @@ fn get_token_file_path() -> Result<PathBuf, AppError> {
         .map(PathBuf::from)
         .or_else(|_| std::env::var("HOME").map(|h| PathBuf::from(h).join(".config")))
         .or_else(|_| std::env::var("USERPROFILE").map(|u| PathBuf::from(u).join(".config")))
-        .map_err(|_| AppError::InvalidOperation("Không thể xác định thư mục cấu hình người dùng".into()))?;
+        .map_err(|_| {
+            AppError::InvalidOperation("Không thể xác định thư mục cấu hình người dùng".into())
+        })?;
 
     let dir = base_dir.join("gitvista");
     if !dir.exists() {

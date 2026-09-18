@@ -46,28 +46,24 @@ export const useLayoutStore = create<LayoutState>((set) => ({
 
   setDetailPanelOpen: (open) =>
     set((state) => ({
-      detailPanelOpen:
-        typeof open === "function" ? open(state.detailPanelOpen) : open,
+      detailPanelOpen: typeof open === "function" ? open(state.detailPanelOpen) : open,
     })),
 
   setControlsOpen: (open) =>
     set((state) => ({
-      controlsOpen:
-        typeof open === "function" ? open(state.controlsOpen) : open,
+      controlsOpen: typeof open === "function" ? open(state.controlsOpen) : open,
     })),
 
   setDevToolsOpen: (open) =>
     set((state) => ({
-      devToolsOpen:
-        typeof open === "function" ? open(state.devToolsOpen) : open,
+      devToolsOpen: typeof open === "function" ? open(state.devToolsOpen) : open,
     })),
 
   setActiveChangesView: (view) => set({ activeChangesView: view }),
 
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
 
-  toggleDetailPanel: () =>
-    set((state) => ({ detailPanelOpen: !state.detailPanelOpen })),
+  toggleDetailPanel: () => set((state) => ({ detailPanelOpen: !state.detailPanelOpen })),
 
   toggleControls: () => set((state) => ({ controlsOpen: !state.controlsOpen })),
 

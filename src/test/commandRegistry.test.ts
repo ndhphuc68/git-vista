@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getAppCommands, filterCommands, CommandContext } from "../utils/commandRegistry";
+import { getAppCommands, filterCommands, type CommandContext } from "../utils/commandRegistry";
 import { useCommandPaletteStore } from "../store/useCommandPaletteStore";
 
 describe("Command Palette Store & Registry", () => {
@@ -79,7 +79,9 @@ describe("Command Palette Store & Registry", () => {
     const commands = getAppCommands(ctx);
 
     const filtered = filterCommands(commands, "nhanh");
-    expect(filtered.some((c) => c.id.includes("branch") || c.title.toLowerCase().includes("nhánh"))).toBe(true);
+    expect(
+      filtered.some((c) => c.id.includes("branch") || c.title.toLowerCase().includes("nhánh"))
+    ).toBe(true);
 
     const themeFiltered = filterCommands(commands, "theme");
     expect(themeFiltered.some((c) => c.id.includes("theme"))).toBe(true);

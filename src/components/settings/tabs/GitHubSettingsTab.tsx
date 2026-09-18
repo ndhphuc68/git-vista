@@ -13,7 +13,7 @@ import {
 import { useTranslation } from "../../../i18n";
 import { invokeCommand } from "../../../ipc/client";
 import { testGitHubToken } from "../../../services/githubService";
-import { GitHubUserSummary } from "../../../ipc/bindings";
+import { type GitHubUserSummary } from "../../../ipc/bindings";
 
 export const GitHubSettingsTab: React.FC = () => {
   const { t } = useTranslation();
@@ -119,12 +119,8 @@ export const GitHubSettingsTab: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-base font-semibold text-primary mb-1">
-          {t.settings.github.title}
-        </h3>
-        <p className="text-xs text-secondary">
-          {t.settings.github.description}
-        </p>
+        <h3 className="text-base font-semibold text-primary mb-1">{t.settings.github.title}</h3>
+        <p className="text-xs text-secondary">{t.settings.github.description}</p>
       </div>
 
       {/* Account Card if Connected */}
@@ -206,9 +202,7 @@ export const GitHubSettingsTab: React.FC = () => {
           </button>
         </div>
 
-        <p className="text-[11px] text-secondary">
-          {t.settings.github.tokenHelp}
-        </p>
+        <p className="text-[11px] text-secondary">{t.settings.github.tokenHelp}</p>
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2 pt-2">

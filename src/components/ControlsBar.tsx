@@ -12,10 +12,10 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { useSettingsStore, Theme, Locale } from "../store/useSettingsStore";
+import { useSettingsStore, type Theme, type Locale } from "../store/useSettingsStore";
 import { useLayoutStore } from "../store/useLayoutStore";
 import { useTranslation } from "../i18n";
-import { invokeCommand, RepoChangedPayload, SystemInfo } from "../ipc/client";
+import { invokeCommand, type RepoChangedPayload, type SystemInfo } from "../ipc/client";
 
 interface ControlsBarProps {
   lastEvent: RepoChangedPayload | null;
@@ -23,16 +23,8 @@ interface ControlsBarProps {
 
 export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
   const { t, actions } = useTranslation();
-  const {
-    theme,
-    colorblind,
-    locale,
-    mode,
-    setTheme,
-    setColorblind,
-    setLocale,
-    setMode,
-  } = useSettingsStore();
+  const { theme, colorblind, locale, mode, setTheme, setColorblind, setLocale, setMode } =
+    useSettingsStore();
 
   const { devToolsOpen, toggleDevTools } = useLayoutStore();
 
@@ -108,8 +100,8 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
                   {tVal === "light"
                     ? t.settings.themeLight
                     : tVal === "dark"
-                    ? t.settings.themeDark
-                    : t.settings.themeSystem}
+                      ? t.settings.themeDark
+                      : t.settings.themeSystem}
                 </span>
               </button>
             ))}
@@ -120,14 +112,14 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
             onClick={() => setColorblind(!colorblind)}
             className={clsx(
               "px-1.5 py-0.5 rounded-md text-xs flex items-center gap-1 border border-border-subtle cursor-pointer transition-colors",
-              colorblind ? "bg-accent-subtle text-accent font-medium" : "bg-window text-secondary hover:text-primary"
+              colorblind
+                ? "bg-accent-subtle text-accent font-medium"
+                : "bg-window text-secondary hover:text-primary"
             )}
             title={t.settings.colorblind}
           >
             <Eye size={11} />
-            <span>
-              {colorblind ? t.settings.colorblindOn : t.settings.colorblindOff}
-            </span>
+            <span>{colorblind ? t.settings.colorblindOn : t.settings.colorblindOff}</span>
           </button>
 
           {/* Language Switcher */}
@@ -155,9 +147,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
             className="px-1.5 py-0.5 rounded-md text-xs flex items-center gap-1 border border-border-subtle bg-window text-primary cursor-pointer hover:bg-surface-hover transition-colors"
           >
             <Terminal size={11} />
-            <span>
-              {mode === "simple" ? t.settings.modeSimple : t.settings.modeAdvanced}
-            </span>
+            <span>{mode === "simple" ? t.settings.modeSimple : t.settings.modeAdvanced}</span>
           </button>
 
           {/* DevTools Toggle Button */}
@@ -167,7 +157,9 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
             onClick={toggleDevTools}
             className={clsx(
               "px-1.5 py-0.5 rounded-md text-xs flex items-center gap-1 border border-border-subtle cursor-pointer transition-colors",
-              devToolsOpen ? "bg-accent-subtle text-accent font-medium" : "bg-window text-secondary hover:text-primary"
+              devToolsOpen
+                ? "bg-accent-subtle text-accent font-medium"
+                : "bg-window text-secondary hover:text-primary"
             )}
             title="Công cụ nhà phát triển & IPC"
           >

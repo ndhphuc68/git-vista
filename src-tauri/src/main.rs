@@ -4,4 +4,3 @@
 fn main() {
     visual_git_lib::run();
 }
-

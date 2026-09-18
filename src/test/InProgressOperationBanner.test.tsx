@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { InProgressOperationBanner } from "../components/banner/InProgressOperationBanner";
-import { RepoStateInfo } from "../ipc/bindings";
+import { type RepoStateInfo } from "../ipc/bindings";
 
 describe("InProgressOperationBanner Component", () => {
   const mockState: RepoStateInfo = {

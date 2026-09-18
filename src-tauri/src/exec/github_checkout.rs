@@ -35,10 +35,7 @@ pub fn checkout_pull_request<P: AsRef<Path>>(
     let refspec = format!("pull/{}/head:{}", pr_number, branch_name);
 
     // 2. Thực thi: git fetch origin pull/<number>/head:pr/<number> --force
-    let fetch_res = run_git_command(
-        repo_ref,
-        &["fetch", "origin", &refspec, "--force"],
-    );
+    let fetch_res = run_git_command(repo_ref, &["fetch", "origin", &refspec, "--force"]);
 
     if let Err(e) = fetch_res {
         return Err(AppError::Git(format!(
@@ -48,10 +45,7 @@ pub fn checkout_pull_request<P: AsRef<Path>>(
     }
 
     // 3. Thực thi: git checkout pr/<number>
-    let checkout_res = run_git_command(
-        repo_ref,
-        &["checkout", &branch_name],
-    );
+    let checkout_res = run_git_command(repo_ref, &["checkout", &branch_name]);
 
     if let Err(e) = checkout_res {
         return Err(AppError::Git(format!(

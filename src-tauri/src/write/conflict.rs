@@ -1,4 +1,4 @@
-﻿use crate::error::AppError;
+use crate::error::AppError;
 use std::path::Path;
 
 pub fn resolve_conflict_file<P: AsRef<Path>>(

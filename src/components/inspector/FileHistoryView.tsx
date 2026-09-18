@@ -16,15 +16,16 @@ interface FileHistoryViewProps {
   filePath: string;
 }
 
-export const FileHistoryView: React.FC<FileHistoryViewProps> = ({
-  repoPath,
-  filePath,
-}) => {
+export const FileHistoryView: React.FC<FileHistoryViewProps> = ({ repoPath, filePath }) => {
   const { t } = useTranslation();
   const [filterText, setFilterText] = useState("");
   const [selectedCommitId, setSelectedCommitId] = useState<string | null>(null);
 
-  const { data: history, isLoading, error } = useQuery({
+  const {
+    data: history,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["file-history", repoPath, filePath],
     queryFn: () => invokeCommand.getFileHistory(repoPath, filePath, 0, 100),
   });
@@ -116,8 +117,8 @@ export const FileHistoryView: React.FC<FileHistoryViewProps> = ({
                 c.change_type === "added"
                   ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
                   : c.change_type === "deleted"
-                  ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30"
-                  : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30";
+                    ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30"
+                    : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30";
 
               return (
                 <button
@@ -148,8 +149,8 @@ export const FileHistoryView: React.FC<FileHistoryViewProps> = ({
                           c.change_type === "added"
                             ? t.inspector.changeTypeAdded
                             : c.change_type === "deleted"
-                            ? t.inspector.changeTypeDeleted
-                            : t.inspector.changeTypeModified
+                              ? t.inspector.changeTypeDeleted
+                              : t.inspector.changeTypeModified
                         }
                       >
                         {c.change_type.slice(0, 1)}
@@ -191,11 +192,7 @@ export const FileHistoryView: React.FC<FileHistoryViewProps> = ({
       {/* Right Pane: File Diff at selected commit */}
       <div className="flex-1 min-w-0 h-full overflow-y-auto p-3">
         {selectedCommitId ? (
-          <FileDiffViewer
-            repoPath={repoPath}
-            commitId={selectedCommitId}
-            filePath={filePath}
-          />
+          <FileDiffViewer repoPath={repoPath} commitId={selectedCommitId} filePath={filePath} />
         ) : (
           <div className="flex items-center justify-center h-64 text-tertiary text-xs">
             {t.inspector.noHistoryData}

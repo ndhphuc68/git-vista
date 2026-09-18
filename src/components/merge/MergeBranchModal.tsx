@@ -86,10 +86,7 @@ export const MergeBranchModal: React.FC<MergeBranchModalProps> = ({
         <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
           <div className="flex items-center gap-2">
             <GitMerge size={16} className="text-accent" />
-            <h3
-              id="merge-branch-title"
-              className="text-xs font-semibold text-primary m-0"
-            >
+            <h3 id="merge-branch-title" className="text-xs font-semibold text-primary m-0">
               {t.modals.merge.title}
             </h3>
           </div>
@@ -110,9 +107,7 @@ export const MergeBranchModal: React.FC<MergeBranchModalProps> = ({
             <span className="font-semibold text-primary">{currentBranch}</span>
           </div>
 
-          <p className="text-xs text-secondary leading-normal m-0">
-            {t.modals.merge.desc}
-          </p>
+          <p className="text-xs text-secondary leading-normal m-0">{t.modals.merge.desc}</p>
 
           {hasUncommittedChanges && (
             <div className="flex items-start gap-2 p-2.5 bg-diff-remove-bg border border-diff-remove-text/30 rounded-sm text-diff-remove-text text-xs">

@@ -1,4 +1,4 @@
-import { Translations } from "./vi";
+import { type Translations } from "./vi";
 
 export const en: Translations = {
   appTitle: "GitVista",
@@ -109,7 +109,8 @@ export const en: Translations = {
       modeSimple: "Simple (Friendly)",
       modeSimpleDesc: "Streamlined UI focusing on essential daily Git actions.",
       modeAdvanced: "Advanced (Standard Git)",
-      modeAdvancedDesc: "Full power with detailed graph, cherry-pick, rebase, and granular staging.",
+      modeAdvancedDesc:
+        "Full power with detailed graph, cherry-pick, rebase, and granular staging.",
       colorblindTitle: "Colorblind Accessibility",
       colorblindDesc: "Enhance contrast and color distinctiveness for color-impaired vision.",
       dateFormatTitle: "Date & Time Format",
@@ -135,7 +136,8 @@ export const en: Translations = {
       fontSize16: "Large (16px)",
       whitespaceTitle: "Whitespace Handling",
       whitespaceIgnore: "Ignore whitespace changes (--ignore-all-space)",
-      whitespaceIgnoreDesc: "Do not highlight changes caused only by space or indentation adjustments.",
+      whitespaceIgnoreDesc:
+        "Do not highlight changes caused only by space or indentation adjustments.",
       tabSizeTitle: "Tab Indentation Width",
       tabSize2: "2 spaces",
       tabSize4: "4 spaces (Default)",
@@ -161,9 +163,11 @@ export const en: Translations = {
       autoFetch5m: "Every 5 minutes",
       autoFetch15m: "Every 15 minutes",
       fetchPruneTitle: "Prune Branches on Fetch (fetch.prune)",
-      fetchPruneDesc: "Automatically remove remote-tracking references that no longer exist on remote.",
+      fetchPruneDesc:
+        "Automatically remove remote-tracking references that no longer exist on remote.",
       rebaseAutostashTitle: "Auto-Stash during Rebase (rebase.autoStash)",
-      rebaseAutostashDesc: "Automatically stash unstaged changes before rebasing and pop afterwards.",
+      rebaseAutostashDesc:
+        "Automatically stash unstaged changes before rebasing and pop afterwards.",
       confirmationsTitle: "Confirmations & Safety Checks",
       confirmDiscardLabel: "Confirm before discarding changes",
       confirmDeleteBranchLabel: "Confirm before deleting a branch",
@@ -194,33 +198,47 @@ export const en: Translations = {
       tagVisual: "Visual",
       tagIntegration: "Integration",
       pullStrategyTitle: "Git Pull Strategy",
-      pullStrategyDesc: "Controls how incoming remote commits are integrated into your local branch. 'Rebase' maintains a clean linear history. 'Merge' preserves branch topology by creating a merge commit.",
+      pullStrategyDesc:
+        "Controls how incoming remote commits are integrated into your local branch. 'Rebase' maintains a clean linear history. 'Merge' preserves branch topology by creating a merge commit.",
       autoFetchTitle: "Background Fetch",
-      autoFetchDesc: "Periodically checks the remote server for new commits silently without touching or interfering with your uncommitted working directory.",
+      autoFetchDesc:
+        "Periodically checks the remote server for new commits silently without touching or interfering with your uncommitted working directory.",
       fetchPruneTitle: "Fetch Prune",
-      fetchPruneDesc: "When a branch is deleted on GitHub/GitLab (e.g. after merging a PR), local tracking references remain. Prune automatically cleans up these dead references.",
+      fetchPruneDesc:
+        "When a branch is deleted on GitHub/GitLab (e.g. after merging a PR), local tracking references remain. Prune automatically cleans up these dead references.",
       rebaseAutostashTitle: "Autostash on Rebase",
-      rebaseAutostashDesc: "Automatically stashes uncommitted dirty changes before rebasing and pops them back after rebase finishes, avoiding stash conflicts.",
+      rebaseAutostashDesc:
+        "Automatically stashes uncommitted dirty changes before rebasing and pops them back after rebase finishes, avoiding stash conflicts.",
       confirmationsTitle: "Safety Confirmations",
-      confirmationsDesc: "Shows confirmation dialogs before destructive actions (like discarding uncommitted changes or force pushing) to prevent irreversible data loss.",
+      confirmationsDesc:
+        "Shows confirmation dialogs before destructive actions (like discarding uncommitted changes or force pushing) to prevent irreversible data loss.",
       diffModeTitle: "Diff Display Mode",
-      diffModeDesc: "Split (2 columns) allows side-by-side comparison on wide screens. Unified (1 column) shows changes inline, ideal for compact viewing.",
+      diffModeDesc:
+        "Split (2 columns) allows side-by-side comparison on wide screens. Unified (1 column) shows changes inline, ideal for compact viewing.",
       diffWhitespaceTitle: "Ignore Whitespace in Diff",
-      diffWhitespaceDesc: "Hides indentation and space changes so you only see actual logic and code modifications during review.",
+      diffWhitespaceDesc:
+        "Hides indentation and space changes so you only see actual logic and code modifications during review.",
       diffFontSizeTitle: "Diff Font Size",
-      diffFontSizeDesc: "Adjusts code editor text size for optimal readability during diff inspection.",
+      diffFontSizeDesc:
+        "Adjusts code editor text size for optimal readability during diff inspection.",
       profileScopeTitle: "Config Scope (Global vs Repo)",
-      profileScopeDesc: "Global applies across all repositories on your system. Repo overrides config only for the active project (useful for work vs personal emails).",
+      profileScopeDesc:
+        "Global applies across all repositories on your system. Repo overrides config only for the active project (useful for work vs personal emails).",
       profileGpgTitle: "GPG Commit Signing",
-      profileGpgDesc: "Cryptographically signs commits with your GPG key to verify author identity (displays 'Verified' badge on GitHub).",
+      profileGpgDesc:
+        "Cryptographically signs commits with your GPG key to verify author identity (displays 'Verified' badge on GitHub).",
       appearanceThemeTitle: "Color Theme",
-      appearanceThemeDesc: "Switch between Light, Dark, or System mode to match your desktop environment.",
+      appearanceThemeDesc:
+        "Switch between Light, Dark, or System mode to match your desktop environment.",
       appearanceModeTitle: "UI Mode (Simple vs Advanced)",
-      appearanceModeDesc: "Simple mode streamlines UI for clarity; Advanced mode unlocks deep Git tools like reflog, interactive rebase, and commit graphing.",
+      appearanceModeDesc:
+        "Simple mode streamlines UI for clarity; Advanced mode unlocks deep Git tools like reflog, interactive rebase, and commit graphing.",
       toolsEditorTitle: "Default Code Editor",
-      toolsEditorDesc: "Enables GitVista to open repositories and conflicted files directly in your preferred editor.",
+      toolsEditorDesc:
+        "Enables GitVista to open repositories and conflicted files directly in your preferred editor.",
       toolsTerminalTitle: "Default Terminal",
-      toolsTerminalDesc: "Opens your preferred shell console directly in the repository root for advanced command-line operations.",
+      toolsTerminalDesc:
+        "Opens your preferred shell console directly in the repository root for advanced command-line operations.",
     },
     github: {
       title: "GitHub Integration",
@@ -513,7 +531,8 @@ export const en: Translations = {
     selectedBadge: "✓ Resolved",
     unselectedBadge: "Unresolved",
     editorPlaceholder: "// Select ours/theirs or manually edit code here...",
-    unresolvedWarning: "There are {count} unresolved conflict hunks remaining. Are you sure you want to save?",
+    unresolvedWarning:
+      "There are {count} unresolved conflict hunks remaining. Are you sure you want to save?",
   },
   modals: {
     createBranch: {
@@ -541,7 +560,8 @@ export const en: Translations = {
       title: "Delete Branch",
       confirmMessage: "Are you sure you want to delete the following branch?",
       unmergedTitle: "Warning: Unmerged branch",
-      unmergedWarning: "This branch contains commits not yet merged into HEAD. If you delete it, these commits will no longer appear on any branch.",
+      unmergedWarning:
+        "This branch contains commits not yet merged into HEAD. If you delete it, these commits will no longer appear on any branch.",
       backupNoticePrefix: "Safe: The system will automatically create a backup ref in",
       backupNoticeSuffix: "so you can restore it at any time within 30 days.",
       safeDelete: "Delete branch",
@@ -553,8 +573,10 @@ export const en: Translations = {
     },
     checkoutConflict: {
       title: "Checkout Conflict",
-      description: "Cannot switch to branch {target} because you have uncommitted changes that would be overwritten.",
-      advice: "To switch branches safely, stash your changes or switch to the Changes screen to commit them.",
+      description:
+        "Cannot switch to branch {target} because you have uncommitted changes that would be overwritten.",
+      advice:
+        "To switch branches safely, stash your changes or switch to the Changes screen to commit them.",
       close: "Close",
       stashAndCheckout: "Stash & Checkout",
       stashingAndCheckout: "Stashing & switching...",
@@ -565,7 +587,8 @@ export const en: Translations = {
     merge: {
       title: "Merge Branch",
       desc: "Merge changes from source branch into your current destination branch.",
-      uncommittedWarn: "You have uncommitted changes. Stash or commit them before merging to avoid data loss.",
+      uncommittedWarn:
+        "You have uncommitted changes. Stash or commit them before merging to avoid data loss.",
       noFfLabel: "No fast-forward (--no-ff)",
       cancel: "Cancel",
       merging: "Merging...",
@@ -648,7 +671,8 @@ export const en: Translations = {
       desc: "This will create a new commit that inverts all changes from this commit without rewriting history.",
       targetCommit: "Target Commit:",
       autoCommitLabel: "Auto-commit changes",
-      autoCommitDesc: "Create revert commit immediately. If unchecked, inverted changes will be staged.",
+      autoCommitDesc:
+        "Create revert commit immediately. If unchecked, inverted changes will be staged.",
       cancel: "Cancel",
       submitting: "Reverting...",
       submit: "Revert Commit",
@@ -663,7 +687,8 @@ export const en: Translations = {
       subtitle: "View, add, configure URLs, and prune remote Git repositories.",
       addRemoteBtn: "Add Remote",
       emptyTitle: "No remotes configured",
-      emptyDesc: "Add a remote repository to synchronize code with GitHub, GitLab, or your private server.",
+      emptyDesc:
+        "Add a remote repository to synchronize code with GitHub, GitLab, or your private server.",
       fetchUrlLabel: "Fetch URL",
       pushUrlLabel: "Push URL",
       branchCount: "{count} branches",
@@ -697,15 +722,18 @@ export const en: Translations = {
       },
       deleteModal: {
         title: "Delete Remote Repository",
-        confirmMessage: "Are you sure you want to remove the following remote from this repository?",
-        warning: "This only removes the remote configuration and its local tracking branches. It does not affect data on the remote server.",
+        confirmMessage:
+          "Are you sure you want to remove the following remote from this repository?",
+        warning:
+          "This only removes the remote configuration and its local tracking branches. It does not affect data on the remote server.",
         confirmBtn: "Delete Remote",
         deleting: "Deleting...",
         successToast: "Remote {name} deleted",
       },
       pruneModal: {
         title: "Prune Stale Remote Branches",
-        confirmMessage: "Pruning will scan the remote repository and delete local remote-tracking branches that no longer exist on the server.",
+        confirmMessage:
+          "Pruning will scan the remote repository and delete local remote-tracking branches that no longer exist on the server.",
         safeNotice: "Safe: Your local personal branches will not be affected at all.",
         confirmBtn: "Prune Now",
         pruning: "Pruning...",
@@ -735,10 +763,12 @@ export const en: Translations = {
         dropDesc: "Remove commit from history",
       },
       validation: {
-        firstCannotSquash: "The first commit cannot be squashed or fixed up (no previous commit to meld into).",
+        firstCannotSquash:
+          "The first commit cannot be squashed or fixed up (no previous commit to meld into).",
         cannotDropAll: "Cannot drop all commits in this rebase.",
         emptyMessage: "Commit message cannot be empty when rewording or squashing.",
-        dirtyWorkingTree: "Working tree has uncommitted changes. Please stash or enable Auto-stash.",
+        dirtyWorkingTree:
+          "Working tree has uncommitted changes. Please stash or enable Auto-stash.",
       },
       preview: {
         title: "Live Preview",
@@ -754,7 +784,8 @@ export const en: Translations = {
       startBtn: "Start Rebase",
       rebasing: "Rebasing...",
       successToast: "Interactive Rebase succeeded! HEAD updated.",
-      conflictToast: "Rebase encountered conflicts. Please resolve conflicts in the Conflict Resolver.",
+      conflictToast:
+        "Rebase encountered conflicts. Please resolve conflicts in the Conflict Resolver.",
       errorToast: "Interactive Rebase failed: {msg}",
       undoSuccessToast: "Interactive Rebase undone! Branch restored to original state.",
     },
@@ -782,7 +813,8 @@ export const en: Translations = {
     copyDetails: "Copy technical details",
     copyFailed: "Could not copy. Select and copy the technical details below.",
     dismiss: "Dismiss",
-    genericHint: "Review the technical details, check the repository and remote settings, then retry.",
+    genericHint:
+      "Review the technical details, check the repository and remote settings, then retry.",
     retry: "Retry",
     stillRunning: "The operation is still running. Wait for it to finish or try cancelling again.",
     technicalDetails: "Technical details",
@@ -836,7 +868,8 @@ export const en: Translations = {
       gitPruneRemotesTitle: "Prune Stale Remote Branches",
       gitPruneRemotesDesc: "Remove remote-tracking branches that were deleted on the server",
       gitInteractiveRebaseTitle: "Git: Visual Interactive Rebase",
-      gitInteractiveRebaseDesc: "Open visual interactive rebase to reorder, pick, reword, squash, or drop commits",
+      gitInteractiveRebaseDesc:
+        "Open visual interactive rebase to reorder, pick, reword, squash, or drop commits",
       gitCompareTitle: "Git: Compare 2 Commits or Branches",
       gitCompareDesc: "Open visual compare dialog to view diff and commits between two revisions",
       gitCreatePrTitle: "Git: Create New Pull Request",
@@ -994,5 +1027,3 @@ export const en: Translations = {
     createSuccess: "Pull Request #{number} created successfully!",
   },
 };
-
-

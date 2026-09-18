@@ -238,12 +238,9 @@ fn delete_branch_does_not_create_a_receipt_when_the_branch_is_locked() {
     let mut blocker = repo.transaction().unwrap();
     blocker.lock_ref("refs/heads/feature/locked").unwrap();
 
-    assert!(visual_git_lib::write::branch::delete_branch(
-        repo_path,
-        "feature/locked",
-        false
-    )
-    .is_err());
+    assert!(
+        visual_git_lib::write::branch::delete_branch(repo_path, "feature/locked", false).is_err()
+    );
     assert!(repo
         .find_branch("feature/locked", git2::BranchType::Local)
         .is_ok());

@@ -33,7 +33,8 @@ pub fn parse_github_remote_url(url: &str) -> Option<(String, String)> {
     }
 
     // Check HTTPS: https://github.com/owner/repo(.git) or http:// or ssh://git@github.com/
-    if let Some(rest) = trimmed.strip_prefix("https://github.com/")
+    if let Some(rest) = trimmed
+        .strip_prefix("https://github.com/")
         .or_else(|| trimmed.strip_prefix("http://github.com/"))
         .or_else(|| trimmed.strip_prefix("ssh://git@github.com/"))
     {
@@ -83,9 +84,10 @@ pub fn get_github_repo_info<P: AsRef<Path>>(repo_path: P) -> Result<GitHubRepoIn
     }
 
     // Tìm default branch (HEAD shorthand)
-    let default_branch = repo.head().ok().and_then(|h| {
-        h.shorthand().ok().map(|s| s.to_string())
-    });
+    let default_branch = repo
+        .head()
+        .ok()
+        .and_then(|h| h.shorthand().ok().map(|s| s.to_string()));
 
     Ok(GitHubRepoInfo {
         is_github,

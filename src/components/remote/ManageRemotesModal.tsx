@@ -46,7 +46,11 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
   // Copy feedback state
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  const { data: remotes = [], isLoading, refetch } = useQuery({
+  const {
+    data: remotes = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["remotes", repoPath],
     queryFn: () => invokeCommand.getRemotes(repoPath),
     enabled: isOpen && Boolean(repoPath),
@@ -71,9 +75,7 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
   const handleCopy = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
     setCopiedKey(key);
-    useToastStore
-      .getState()
-      .showToast({ type: "info", message: t.modals.remotes.copiedToast });
+    useToastStore.getState().showToast({ type: "info", message: t.modals.remotes.copiedToast });
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
@@ -130,9 +132,7 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
                   >
                     {t.modals.remotes.title}
                   </h2>
-                  <p className="text-xs text-secondary m-0 mt-0.5">
-                    {t.modals.remotes.subtitle}
-                  </p>
+                  <p className="text-xs text-secondary m-0 mt-0.5">{t.modals.remotes.subtitle}</p>
                 </div>
               </div>
 
@@ -264,12 +264,7 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
                         {remote.fetch_url && (
                           <button
                             type="button"
-                            onClick={() =>
-                              handleCopy(
-                                remote.fetch_url!,
-                                `${remote.name}-fetch`
-                              )
-                            }
+                            onClick={() => handleCopy(remote.fetch_url!, `${remote.name}-fetch`)}
                             title={t.modals.remotes.copyUrlTooltip}
                             className="p-1 rounded text-tertiary hover:text-primary hover:bg-surface-hover transition-colors border-0 bg-transparent cursor-pointer shrink-0"
                           >
@@ -295,12 +290,7 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
                           </div>
                           <button
                             type="button"
-                            onClick={() =>
-                              handleCopy(
-                                remote.push_url!,
-                                `${remote.name}-push`
-                              )
-                            }
+                            onClick={() => handleCopy(remote.push_url!, `${remote.name}-push`)}
                             title={t.modals.remotes.copyUrlTooltip}
                             className="p-1 rounded text-tertiary hover:text-primary hover:bg-surface-hover transition-colors border-0 bg-transparent cursor-pointer shrink-0"
                           >

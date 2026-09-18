@@ -29,14 +29,8 @@ fn test_list_repo_tags_lightweight_and_annotated() {
         &git2::Time::new(1_000_000, 0),
     )
     .unwrap();
-    repo.tag(
-        "v1.0.0",
-        c1_obj,
-        &sig_tag,
-        "Release v1.0.0",
-        false,
-    )
-    .expect("Failed to create annotated tag");
+    repo.tag("v1.0.0", c1_obj, &sig_tag, "Release v1.0.0", false)
+        .expect("Failed to create annotated tag");
 
     // Add a second commit with later timestamp
     let file2 = dir.path().join("file2.txt");
@@ -90,7 +84,11 @@ fn test_list_repo_tags_lightweight_and_annotated() {
     assert_eq!(older.short_commit_id, c1.id().to_string()[..7]);
     assert_eq!(older.commit_summary, "Initial commit");
     assert!(older.is_annotated);
-    assert!(older.message.as_deref().unwrap().starts_with("Release v1.0.0"));
+    assert!(older
+        .message
+        .as_deref()
+        .unwrap()
+        .starts_with("Release v1.0.0"));
     assert_eq!(older.tagger_name.as_deref(), Some("Tester"));
     assert_eq!(older.tagger_email.as_deref(), Some("tester@visualgit.dev"));
     assert!(older.timestamp_sec.is_some());
@@ -160,7 +158,9 @@ fn test_create_tag_lightweight_and_annotated_validation() {
 
     // 4. Validation: invalid ref name characters
     let err_invalid = create_tag(dir.path(), "tag with spaces", &c1_oid, None).unwrap_err();
-    assert!(matches!(err_invalid, AppError::InvalidOperation(msg) if msg.contains("Invalid tag name")));
+    assert!(
+        matches!(err_invalid, AppError::InvalidOperation(msg) if msg.contains("Invalid tag name"))
+    );
 
     // 5. Validation: invalid commit OID
     let err_oid = create_tag(dir.path(), "valid-tag", "not-a-valid-oid", None).unwrap_err();

@@ -1,11 +1,5 @@
 import React, { useMemo } from "react";
-import {
-  GitCommit,
-  Trash2,
-  Layers,
-  Edit3,
-  GitBranch,
-} from "lucide-react";
+import { GitCommit, Trash2, Layers, Edit3, GitBranch } from "lucide-react";
 import clsx from "clsx";
 import type { RebasePlanStep, RebaseCommitItem } from "../../ipc/bindings";
 import { useTranslation } from "../../i18n";
@@ -146,7 +140,7 @@ export const RebaseLivePreview: React.FC<RebaseLivePreviewProps> = ({
         <div className="flex items-start gap-3 relative pb-4">
           {/* Vertical connecting line */}
           <div className="absolute left-[9px] top-4 bottom-0 w-[2px] bg-border-subtle" />
-          
+
           <div className="w-5 h-5 rounded-full bg-surface-subtle border-2 border-border-strong flex items-center justify-center shrink-0 z-10 shadow-2xs">
             <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
           </div>
@@ -222,8 +216,8 @@ export const RebaseLivePreview: React.FC<RebaseLivePreviewProps> = ({
                 {item.squashedSubCommits.length > 0 && (
                   <div className="mt-1.5 pt-1.5 border-t border-border-subtle flex flex-col gap-0.5">
                     <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                      <Layers size={10} />
-                      +{item.squashedSubCommits.length} squashed into this commit:
+                      <Layers size={10} />+{item.squashedSubCommits.length} squashed into this
+                      commit:
                     </span>
                     {item.squashedSubCommits.map((sub, sIdx) => (
                       <div

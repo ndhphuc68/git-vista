@@ -76,6 +76,8 @@ describe("GitHubSettingsTab", () => {
       expect(invokeCommand.removeGitHubToken).toHaveBeenCalled();
     });
 
-    expect(await screen.findByPlaceholderText(t.settings.github.tokenPlaceholder)).toBeInTheDocument();
+    expect(
+      await screen.findByPlaceholderText(t.settings.github.tokenPlaceholder)
+    ).toBeInTheDocument();
   });
 });

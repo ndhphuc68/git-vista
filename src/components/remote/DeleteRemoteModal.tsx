@@ -57,9 +57,7 @@ export const DeleteRemoteModal: React.FC<DeleteRemoteModalProps> = ({
       await invokeCommand.removeRemote(repoPath, remote.name);
       useToastStore
         .getState()
-        .showSuccess(
-          t.modals.remotes.deleteModal.successToast.replace("{name}", remote.name)
-        );
+        .showSuccess(t.modals.remotes.deleteModal.successToast.replace("{name}", remote.name));
       onSuccess?.();
       onClose();
     } catch (err) {
@@ -88,10 +86,7 @@ export const DeleteRemoteModal: React.FC<DeleteRemoteModalProps> = ({
               <div className="p-2 rounded-lg bg-red-500/10 text-red-500">
                 <Trash2 size={18} />
               </div>
-              <h3
-                id="delete-remote-title"
-                className="text-sm font-semibold text-primary m-0"
-              >
+              <h3 id="delete-remote-title" className="text-sm font-semibold text-primary m-0">
                 {t.modals.remotes.deleteModal.title}
               </h3>
             </div>
@@ -122,9 +117,7 @@ export const DeleteRemoteModal: React.FC<DeleteRemoteModalProps> = ({
             <div className="p-3 bg-window border border-border-subtle rounded-lg flex items-center gap-3">
               <Cloud size={16} className="text-sky-500 shrink-0" />
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-semibold text-primary truncate">
-                  {remote.name}
-                </span>
+                <span className="text-xs font-semibold text-primary truncate">{remote.name}</span>
                 {remote.fetch_url && (
                   <span className="text-[11px] text-tertiary font-mono truncate">
                     {remote.fetch_url}

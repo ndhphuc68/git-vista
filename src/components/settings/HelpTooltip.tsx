@@ -178,9 +178,7 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
           )}
 
           {/* Description */}
-          <p className="text-[13px] text-secondary leading-relaxed font-normal">
-            {description}
-          </p>
+          <p className="text-[13px] text-secondary leading-relaxed font-normal">{description}</p>
 
           {isPinned && (
             <div className="mt-2.5 pt-2 border-t border-border-subtle/50 flex justify-end">

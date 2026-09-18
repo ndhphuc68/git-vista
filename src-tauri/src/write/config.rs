@@ -87,13 +87,7 @@ mod tests {
             "main",
         )
         .unwrap();
-        write_git_config(
-            Some(repo_path),
-            ConfigScope::Local,
-            "pull.rebase",
-            "true",
-        )
-        .unwrap();
+        write_git_config(Some(repo_path), ConfigScope::Local, "pull.rebase", "true").unwrap();
         write_git_config(
             Some(repo_path),
             ConfigScope::Local,
@@ -108,13 +102,7 @@ mod tests {
             "TESTKEY123",
         )
         .unwrap();
-        write_git_config(
-            Some(repo_path),
-            ConfigScope::Local,
-            "fetch.prune",
-            "true",
-        )
-        .unwrap();
+        write_git_config(Some(repo_path), ConfigScope::Local, "fetch.prune", "true").unwrap();
         write_git_config(
             Some(repo_path),
             ConfigScope::Local,

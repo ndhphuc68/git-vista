@@ -16,6 +16,5 @@ export const useViewStore = create<ViewState>((set) => ({
   setActiveScreen: (screen) => set({ activeScreen: screen }),
   openConflictResolver: (filePath) =>
     set({ activeScreen: "conflict", activeConflictFile: filePath }),
-  closeConflictResolver: () =>
-    set({ activeScreen: "changes", activeConflictFile: null }),
+  closeConflictResolver: () => set({ activeScreen: "changes", activeConflictFile: null }),
 }));

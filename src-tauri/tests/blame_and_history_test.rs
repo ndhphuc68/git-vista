@@ -13,7 +13,11 @@ fn setup_repo() -> (TempDir, String, String, String) {
     config.set_str("user.email", "alice@example.com").unwrap();
 
     let file_path = dir.path().join("hello.txt");
-    fs::write(&file_path, "Line 1 by Alice\nLine 2 by Alice\nLine 3 by Alice\n").unwrap();
+    fs::write(
+        &file_path,
+        "Line 1 by Alice\nLine 2 by Alice\nLine 3 by Alice\n",
+    )
+    .unwrap();
 
     let mut index = repo.index().unwrap();
     index.add_path(Path::new("hello.txt")).unwrap();
@@ -22,19 +26,37 @@ fn setup_repo() -> (TempDir, String, String, String) {
     let tree1 = repo.find_tree(tree_id1).unwrap();
     let sig_alice = git2::Signature::now("Alice", "alice@example.com").unwrap();
     let commit1 = repo
-        .commit(Some("HEAD"), &sig_alice, &sig_alice, "Commit 1 by Alice", &tree1, &[])
+        .commit(
+            Some("HEAD"),
+            &sig_alice,
+            &sig_alice,
+            "Commit 1 by Alice",
+            &tree1,
+            &[],
+        )
         .unwrap();
 
     // Commit 2 by Bob modifying Line 2
     let sig_bob = git2::Signature::now("Bob", "bob@example.com").unwrap();
-    fs::write(&file_path, "Line 1 by Alice\nLine 2 by Bob\nLine 3 by Alice\n").unwrap();
+    fs::write(
+        &file_path,
+        "Line 1 by Alice\nLine 2 by Bob\nLine 3 by Alice\n",
+    )
+    .unwrap();
     index.add_path(Path::new("hello.txt")).unwrap();
     index.write().unwrap();
     let tree_id2 = index.write_tree().unwrap();
     let tree2 = repo.find_tree(tree_id2).unwrap();
     let parent1 = repo.find_commit(commit1).unwrap();
     let commit2 = repo
-        .commit(Some("HEAD"), &sig_bob, &sig_bob, "Commit 2 by Bob", &tree2, &[&parent1])
+        .commit(
+            Some("HEAD"),
+            &sig_bob,
+            &sig_bob,
+            "Commit 2 by Bob",
+            &tree2,
+            &[&parent1],
+        )
         .unwrap();
 
     // Commit 3 touching unrelated file
@@ -46,10 +68,22 @@ fn setup_repo() -> (TempDir, String, String, String) {
     let tree3 = repo.find_tree(tree_id3).unwrap();
     let parent2 = repo.find_commit(commit2).unwrap();
     let commit3 = repo
-        .commit(Some("HEAD"), &sig_alice, &sig_alice, "Commit 3 by Alice", &tree3, &[&parent2])
+        .commit(
+            Some("HEAD"),
+            &sig_alice,
+            &sig_alice,
+            "Commit 3 by Alice",
+            &tree3,
+            &[&parent2],
+        )
         .unwrap();
 
-    (dir, commit1.to_string(), commit2.to_string(), commit3.to_string())
+    (
+        dir,
+        commit1.to_string(),
+        commit2.to_string(),
+        commit3.to_string(),
+    )
 }
 
 #[test]

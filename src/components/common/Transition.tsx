@@ -44,12 +44,7 @@ export const Transition: React.FC<TransitionProps> = ({
   }
 
   return (
-    <div
-      className={clsx(
-        className,
-        show && !isAnimatingOut ? enterClass : exitClass
-      )}
-    >
+    <div className={clsx(className, show && !isAnimatingOut ? enterClass : exitClass)}>
       {children}
     </div>
   );

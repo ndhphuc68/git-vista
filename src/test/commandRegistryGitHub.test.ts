@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { getAppCommands, filterCommands, CommandContext } from "../utils/commandRegistry";
+import { getAppCommands, filterCommands, type CommandContext } from "../utils/commandRegistry";
 
 describe("Command Registry - GitHub Pull Requests", () => {
   it("includes git-create-pr and git-view-prs in command list", () => {
@@ -43,6 +43,8 @@ describe("Command Registry - GitHub Pull Requests", () => {
     expect(prMatches.some((c) => c.id === "git-create-pr")).toBe(true);
 
     const githubMatches = filterCommands(commands, "github");
-    expect(githubMatches.some((c) => c.id === "git-create-pr" || c.id === "git-view-prs")).toBe(true);
+    expect(githubMatches.some((c) => c.id === "git-create-pr" || c.id === "git-view-prs")).toBe(
+      true
+    );
   });
 });

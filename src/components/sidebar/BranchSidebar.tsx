@@ -28,7 +28,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { invokeCommand } from "../../ipc/client";
-import { StashItem, BranchItem, TagItem, RemoteItem } from "../../ipc/bindings";
+import { type StashItem, type BranchItem, type TagItem, type RemoteItem } from "../../ipc/bindings";
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
 import { CreateBranchModal } from "./CreateBranchModal";
@@ -91,7 +91,9 @@ export function buildBranchTree(branches: BranchItem[]): BranchTreeNode[] {
           children: [],
         });
       } else {
-        let folderNode: BranchTreeNode | undefined = currentLevel.find((n) => n.isFolder && n.name === part);
+        let folderNode: BranchTreeNode | undefined = currentLevel.find(
+          (n) => n.isFolder && n.name === part
+        );
         if (!folderNode) {
           const newFolder: BranchTreeNode = {
             isFolder: true,
@@ -132,13 +134,18 @@ export const BranchSidebar: React.FC = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createBranchTarget, setCreateBranchTarget] = useState<string | null>(null);
   const [createTagModalOpen, setCreateTagModalOpen] = useState(false);
-  const [createTagTarget, setCreateTagTarget] = useState<{ commitId: string; summary?: string } | null>(null);
+  const [createTagTarget, setCreateTagTarget] = useState<{
+    commitId: string;
+    summary?: string;
+  } | null>(null);
   const [deleteTagItem, setDeleteTagItem] = useState<TagItem | null>(null);
   const [renameBranchName, setRenameBranchName] = useState<string | null>(null);
   const [deleteBranchName, setDeleteBranchName] = useState<string | null>(null);
   const [mergeModal, setMergeModal] = useState<{ targetBranch: string } | null>(null);
   const [rebaseModal, setRebaseModal] = useState<{ upstreamBranch: string } | null>(null);
-  const [compareModal, setCompareModal] = useState<{ baseRev: string; targetRev: string } | null>(null);
+  const [compareModal, setCompareModal] = useState<{ baseRev: string; targetRev: string } | null>(
+    null
+  );
   const [conflictInfo, setConflictInfo] = useState<{
     targetBranch: string;
     errorMessage: string;
@@ -214,9 +221,9 @@ export const BranchSidebar: React.FC = () => {
 
   const hasUncommittedChanges = Boolean(
     repoStatus &&
-      (repoStatus.staged.length > 0 ||
-        repoStatus.unstaged.length > 0 ||
-        repoStatus.untracked.length > 0)
+    (repoStatus.staged.length > 0 ||
+      repoStatus.unstaged.length > 0 ||
+      repoStatus.untracked.length > 0)
   );
 
   const currentBranchName =
@@ -236,6 +243,19 @@ export const BranchSidebar: React.FC = () => {
     queryFn: () => invokeCommand.getTags(currentRepo!.path),
     enabled: Boolean(currentRepo),
   });
+
+  const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
+  const localBranches = (branchData?.local || []).filter((branch) =>
+    branch.name.toLowerCase().includes(search.toLowerCase())
+  );
+  const remoteBranches = (branchData?.remote || []).filter((branch) =>
+    branch.name.toLowerCase().includes(search.toLowerCase())
+  );
+  const filteredTags = tagItems.filter((tag) =>
+    tag.name.toLowerCase().includes(search.toLowerCase())
+  );
+  const branchTree = useMemo(() => buildBranchTree(localBranches), [localBranches]);
+  const remoteBranchTree = useMemo(() => buildBranchTree(remoteBranches), [remoteBranches]);
 
   if (!currentRepo) return null;
 
@@ -332,10 +352,7 @@ export const BranchSidebar: React.FC = () => {
           type: "success",
           durationMs: 10000,
           undoAction: async () => {
-            await invokeCommand.undoDropStash(
-              currentRepo.path,
-              receipt
-            );
+            await invokeCommand.undoDropStash(currentRepo.path, receipt);
             invalidateStashes();
           },
         });
@@ -345,27 +362,12 @@ export const BranchSidebar: React.FC = () => {
     }
   };
 
-  const localBranches = (branchData?.local || []).filter((b) =>
-    b.name.toLowerCase().includes(search.toLowerCase())
-  );
-  const remoteBranches = (branchData?.remote || []).filter((b) =>
-    b.name.toLowerCase().includes(search.toLowerCase())
-  );
-  const filteredTags = tagItems.filter((t) =>
-    t.name.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
-
   const toggleFolder = (folderPath: string) => {
     setExpandedFolders((prev) => ({
       ...prev,
       [folderPath]: prev[folderPath] === false ? true : false,
     }));
   };
-
-  const branchTree = useMemo(() => buildBranchTree(localBranches), [localBranches]);
-  const remoteBranchTree = useMemo(() => buildBranchTree(remoteBranches), [remoteBranches]);
 
   const renderTreeNode = (node: BranchTreeNode) => {
     if (node.isFolder) {
@@ -436,14 +438,10 @@ export const BranchSidebar: React.FC = () => {
           <span
             className={clsx(
               "w-1.5 h-1.5 rounded-full shrink-0",
-              branch.is_head
-                ? "bg-accent"
-                : "border border-tertiary bg-transparent"
+              branch.is_head ? "bg-accent" : "border border-tertiary bg-transparent"
             )}
           />
-          <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-            {node.name}
-          </span>
+          <span className="overflow-hidden text-ellipsis whitespace-nowrap">{node.name}</span>
           {branch.is_head && (
             <span className="text-[10px] text-accent ml-auto shrink-0 px-1 py-0.2 bg-accent/10 rounded-xs font-semibold">
               HEAD
@@ -560,7 +558,7 @@ export const BranchSidebar: React.FC = () => {
       </div>
     );
   };
- 
+
   const renderRemoteTreeNode = (node: BranchTreeNode, depth: number = 0) => {
     if (node.isFolder) {
       const isExpanded = search.trim() !== "" || expandedFolders[node.fullPath] !== false;
@@ -613,7 +611,9 @@ export const BranchSidebar: React.FC = () => {
                   aria-label={`Menu thao tác remote ${node.name}`}
                   className={clsx(
                     "p-1 bg-transparent border-0 text-secondary hover:text-primary hover:bg-surface-hover rounded-sm cursor-pointer transition-opacity",
-                    isRemoteMenuOpen ? "opacity-100" : "opacity-0 group-hover/remote:opacity-100 focus:opacity-100"
+                    isRemoteMenuOpen
+                      ? "opacity-100"
+                      : "opacity-0 group-hover/remote:opacity-100 focus:opacity-100"
                   )}
                 >
                   <MoreVertical size={13} />
@@ -717,10 +717,11 @@ export const BranchSidebar: React.FC = () => {
           )}
           title={branch.name}
         >
-          <Cloud size={11} className={clsx("shrink-0", isSelected ? "text-accent" : "text-tertiary")} />
-          <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-            {node.name}
-          </span>
+          <Cloud
+            size={11}
+            className={clsx("shrink-0", isSelected ? "text-accent" : "text-tertiary")}
+          />
+          <span className="overflow-hidden text-ellipsis whitespace-nowrap">{node.name}</span>
         </button>
 
         {/* Three dots action menu */}
@@ -791,9 +792,7 @@ export const BranchSidebar: React.FC = () => {
                 className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
               >
                 <GitCompare size={14} className="text-secondary shrink-0" />
-                <span>
-                  {t.sidebar.compareWithCurrent.replace("{branch}", currentBranchName)}
-                </span>
+                <span>{t.sidebar.compareWithCurrent.replace("{branch}", currentBranchName)}</span>
               </button>
             </div>
           )}
@@ -855,7 +854,9 @@ export const BranchSidebar: React.FC = () => {
               >
                 {localOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                 <GitBranch size={13} />
-                <span>{t.sidebar.branches} ({localBranches.length})</span>
+                <span>
+                  {t.sidebar.branches} ({localBranches.length})
+                </span>
               </button>
               <button
                 type="button"
@@ -889,7 +890,9 @@ export const BranchSidebar: React.FC = () => {
               >
                 {remoteOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                 <Cloud size={13} />
-                <span>{t.sidebar.remotes} ({remoteBranches.length})</span>
+                <span>
+                  {t.sidebar.remotes} ({remoteBranches.length})
+                </span>
               </button>
               <div className="flex items-center gap-0.5">
                 <button
@@ -944,7 +947,9 @@ export const BranchSidebar: React.FC = () => {
               >
                 {tagsOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                 <Tag size={13} />
-                <span>{t.sidebar.tags} ({tagItems.length})</span>
+                <span>
+                  {t.sidebar.tags} ({tagItems.length})
+                </span>
               </button>
               <button
                 type="button"
@@ -1006,7 +1011,9 @@ export const BranchSidebar: React.FC = () => {
                             aria-label={`Menu thao tác thẻ ${tag.name}`}
                             className={clsx(
                               "p-1 bg-transparent border-0 text-secondary hover:text-primary hover:bg-surface-hover rounded-sm cursor-pointer transition-opacity",
-                              isMenuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus:opacity-100"
+                              isMenuOpen
+                                ? "opacity-100"
+                                : "opacity-0 group-hover:opacity-100 focus:opacity-100"
                             )}
                           >
                             <MoreVertical size={13} />
@@ -1085,7 +1092,9 @@ export const BranchSidebar: React.FC = () => {
             >
               {stashOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
               <Archive size={13} />
-              <span>{t.sidebar.stashes} ({stashes.length})</span>
+              <span>
+                {t.sidebar.stashes} ({stashes.length})
+              </span>
             </button>
 
             {stashOpen && (

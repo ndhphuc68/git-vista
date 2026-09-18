@@ -7,7 +7,7 @@ import { useTranslation } from "../../i18n";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { useInspectorStore } from "../../store/useInspectorStore";
 import { pairHunkLines } from "../../utils/wordDiff";
-import { DiffHunk, CompareMode, CompareFileItem } from "../../ipc/bindings";
+import { type DiffHunk, type CompareMode, type CompareFileItem } from "../../ipc/bindings";
 import { DiffLineContent } from "../diff/DiffLineContent";
 
 export interface CompareDiffViewerProps {
@@ -47,8 +47,8 @@ const FileDiffHunk: React.FC<FileDiffHunkProps> = ({ hunk, showWordDiff }) => {
                 isAdd
                   ? "bg-diff-add-bg text-diff-add-text"
                   : isDel
-                  ? "bg-diff-remove-bg text-diff-remove-text"
-                  : "bg-transparent text-primary"
+                    ? "bg-diff-remove-bg text-diff-remove-text"
+                    : "bg-transparent text-primary"
               )}
             >
               {/* Line numbers gutter */}
@@ -65,11 +65,7 @@ const FileDiffHunk: React.FC<FileDiffHunkProps> = ({ hunk, showWordDiff }) => {
               <span
                 className={clsx(
                   "w-6 select-none text-center py-0.5 shrink-0 font-bold",
-                  isAdd
-                    ? "text-diff-add-text"
-                    : isDel
-                    ? "text-diff-remove-text"
-                    : "text-tertiary"
+                  isAdd ? "text-diff-add-text" : isDel ? "text-diff-remove-text" : "text-tertiary"
                 )}
               >
                 {isAdd ? "+" : isDel ? "-" : " "}

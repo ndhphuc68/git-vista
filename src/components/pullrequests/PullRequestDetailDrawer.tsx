@@ -23,9 +23,7 @@ interface PullRequestDetailDrawerProps {
   repoPath: string;
 }
 
-export const PullRequestDetailDrawer: React.FC<PullRequestDetailDrawerProps> = ({
-  repoPath,
-}) => {
+export const PullRequestDetailDrawer: React.FC<PullRequestDetailDrawerProps> = ({ repoPath }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { isDrawerOpen, selectedPr, closeDrawer } = usePullRequestStore();
@@ -55,23 +53,12 @@ export const PullRequestDetailDrawer: React.FC<PullRequestDetailDrawerProps> = (
   });
 
   const { data: detail } = useQuery({
-    queryKey: [
-      "github_pr_detail",
-      repoPath,
-      repoInfo?.owner,
-      repoInfo?.repo,
-      selectedPr?.number,
-    ],
+    queryKey: ["github_pr_detail", repoPath, repoInfo?.owner, repoInfo?.repo, selectedPr?.number],
     queryFn: () => {
       if (!repoInfo?.owner || !repoInfo?.repo || !selectedPr?.number) {
         throw new Error("Missing parameters for PR detail");
       }
-      return fetchPullRequestDetail(
-        repoInfo.owner,
-        repoInfo.repo,
-        selectedPr.number,
-        token
-      );
+      return fetchPullRequestDetail(repoInfo.owner, repoInfo.repo, selectedPr.number, token);
     },
     enabled: Boolean(isDrawerOpen && repoInfo?.owner && repoInfo?.repo && selectedPr?.number),
   });
@@ -149,9 +136,7 @@ export const PullRequestDetailDrawer: React.FC<PullRequestDetailDrawerProps> = (
         <div className="flex items-center justify-between px-5 py-3.5 bg-surface-header/50 border-b border-border-subtle gap-3 shrink-0 select-none">
           <div className="flex items-center gap-2 min-w-0">
             <GitPullRequest size={16} className="text-accent shrink-0" />
-            <span className="font-mono text-sm font-bold text-accent shrink-0">
-              #{pr.number}
-            </span>
+            <span className="font-mono text-sm font-bold text-accent shrink-0">#{pr.number}</span>
             {getStatusBadge()}
           </div>
 
@@ -187,13 +172,9 @@ export const PullRequestDetailDrawer: React.FC<PullRequestDetailDrawerProps> = (
         {/* Action Toolbar */}
         <div className="px-5 py-3 border-b border-border-subtle bg-surface flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2 text-xs font-mono text-secondary truncate">
-            <span className="text-primary font-semibold truncate">
-              {pr.head?.ref || "head"}
-            </span>
+            <span className="text-primary font-semibold truncate">{pr.head?.ref || "head"}</span>
             <ArrowRight size={12} className="shrink-0 text-tertiary" />
-            <span className="text-secondary truncate">
-              {pr.base?.ref || "base"}
-            </span>
+            <span className="text-secondary truncate">{pr.base?.ref || "base"}</span>
           </div>
 
           <button
@@ -215,9 +196,7 @@ export const PullRequestDetailDrawer: React.FC<PullRequestDetailDrawerProps> = (
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
           {/* Title & Author */}
           <div>
-            <h2 className="text-base font-bold text-primary mb-2">
-              {pr.title}
-            </h2>
+            <h2 className="text-base font-bold text-primary mb-2">{pr.title}</h2>
             <div className="flex items-center gap-2 text-xs text-secondary">
               {pr.user?.avatar_url ? (
                 <img
@@ -306,9 +285,7 @@ export const PullRequestDetailDrawer: React.FC<PullRequestDetailDrawerProps> = (
             </h4>
             <div className="p-3.5 bg-surface-header/30 border border-border-subtle rounded-xl text-xs text-primary whitespace-pre-wrap font-sans leading-relaxed min-h-[80px]">
               {detail?.body || (
-                <span className="text-tertiary italic">
-                  {t.pullRequests.noDescription}
-                </span>
+                <span className="text-tertiary italic">{t.pullRequests.noDescription}</span>
               )}
             </div>
           </div>
@@ -327,7 +304,10 @@ export const PullRequestDetailDrawer: React.FC<PullRequestDetailDrawerProps> = (
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <FileCode size={13} className="text-secondary shrink-0" />
-                      <span className="font-mono text-[11px] text-primary truncate" title={file.filename}>
+                      <span
+                        className="font-mono text-[11px] text-primary truncate"
+                        title={file.filename}
+                      >
                         {file.filename}
                       </span>
                     </div>

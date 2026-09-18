@@ -232,12 +232,11 @@ pub fn prune_remote<P: AsRef<Path>, F: Fn(u32, String) + Send + Sync + 'static>(
     crate::exec::validate_git_operand(remote, "remote")?;
 
     let args = vec!["remote", "prune", remote];
-    let output = run_git_streaming_command(repo_path, &args, task_id, on_progress).map_err(
-        |e| match e {
+    let output =
+        run_git_streaming_command(repo_path, &args, task_id, on_progress).map_err(|e| match e {
             AppError::CommandFailed { stderr, .. } => map_git_remote_error(&stderr),
             other => other,
-        },
-    )?;
+        })?;
 
     let mut pruned_branches = Vec::new();
     for line in output.stdout.lines().chain(output.stderr.lines()) {

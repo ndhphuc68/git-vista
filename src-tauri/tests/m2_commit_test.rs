@@ -84,13 +84,8 @@ fn test_create_commit_whitespace_only_description() {
     fs::write(repo_path.join("file1.txt"), "updated again\n").unwrap();
     stage_file(repo_path, "file1.txt").expect("stage should succeed");
 
-    let details = create_commit(
-        repo_path,
-        "summary only",
-        Some("   \t  \n  "),
-        false,
-    )
-    .expect("commit should succeed");
+    let details = create_commit(repo_path, "summary only", Some("   \t  \n  "), false)
+        .expect("commit should succeed");
 
     assert_eq!(details.full_message, "summary only");
 }
@@ -143,7 +138,10 @@ fn test_amend_commit_with_backup_ref() {
     .expect("amend commit should succeed");
 
     assert_ne!(details.id, initial_id.to_string());
-    assert_eq!(details.full_message, "Amended commit message\n\nAmended body");
+    assert_eq!(
+        details.full_message,
+        "Amended commit message\n\nAmended body"
+    );
     assert_eq!(details.parent_ids, initial_parents);
 
     // Verify HEAD is updated to amended commit
@@ -170,7 +168,10 @@ fn test_amend_commit_with_backup_ref() {
     }
 
     assert_eq!(backup_refs.len(), 1, "Expected exactly 1 amend backup ref");
-    assert_eq!(backup_refs[0].1, initial_id, "Backup ref must point to original commit");
+    assert_eq!(
+        backup_refs[0].1, initial_id,
+        "Backup ref must point to original commit"
+    );
 
     // Staged status should now be clean
     let status = get_repo_status(repo_path).unwrap();
@@ -183,7 +184,9 @@ fn test_create_commit_unborn_head() {
     let repo = git2::Repository::init(dir.path()).unwrap();
     let mut config = repo.config().unwrap();
     config.set_str("user.name", "Tester").unwrap();
-    config.set_str("user.email", "tester@visualgit.dev").unwrap();
+    config
+        .set_str("user.email", "tester@visualgit.dev")
+        .unwrap();
 
     let file_path = dir.path().join("root.txt");
     fs::write(&file_path, "root content\n").unwrap();
@@ -196,7 +199,10 @@ fn test_create_commit_unborn_head() {
         .expect("commit on unborn head should succeed");
 
     assert_eq!(details.full_message, "Initial root commit");
-    assert!(details.parent_ids.is_empty(), "Initial commit should have no parents");
+    assert!(
+        details.parent_ids.is_empty(),
+        "Initial commit should have no parents"
+    );
 
     let head_commit = repo.head().unwrap().peel_to_commit().unwrap();
     assert_eq!(head_commit.id().to_string(), details.id);
@@ -222,6 +228,9 @@ fn test_create_commit_missing_signature_error() {
         Err(AppError::InvalidOperation(msg)) => {
             assert_eq!(msg, "Git user.name or user.email not configured");
         }
-        other => panic!("Expected InvalidOperation for missing signature, got: {:?}", other),
+        other => panic!(
+            "Expected InvalidOperation for missing signature, got: {:?}",
+            other
+        ),
     }
 }

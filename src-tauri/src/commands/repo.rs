@@ -145,7 +145,9 @@ pub fn get_commit_file_diff(
 
 #[tauri::command]
 #[specta::specta]
-pub fn get_repo_status(repo_path: String) -> Result<crate::read::status::RepoStatusResult, AppError> {
+pub fn get_repo_status(
+    repo_path: String,
+) -> Result<crate::read::status::RepoStatusResult, AppError> {
     crate::read::status::get_repo_status(repo_path)
 }
 
@@ -269,7 +271,13 @@ pub fn stage_lines(
     line_indices: Vec<u32>,
     is_staged: bool,
 ) -> Result<(), AppError> {
-    crate::write::staging::stage_lines(&repo_path, &file_path, hunk_index, &line_indices, is_staged)?;
+    crate::write::staging::stage_lines(
+        &repo_path,
+        &file_path,
+        hunk_index,
+        &line_indices,
+        is_staged,
+    )?;
     emit_repo_changed(&app, repo_path, "stage_lines".to_string());
     Ok(())
 }
@@ -345,14 +353,8 @@ pub fn delete_branch(
     branch_name: String,
     force: Option<bool>,
 ) -> Result<String, AppError> {
-    let backup_ref = crate::write::branch::delete_branch(
-        &repo_path,
-        &branch_name,
-        force.unwrap_or(false),
-    )?;
+    let backup_ref =
+        crate::write::branch::delete_branch(&repo_path, &branch_name, force.unwrap_or(false))?;
     emit_repo_changed(&app, repo_path, "delete_branch".to_string());
     Ok(backup_ref)
 }
-
-
-

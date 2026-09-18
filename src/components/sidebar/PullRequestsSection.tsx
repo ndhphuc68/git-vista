@@ -18,7 +18,7 @@ import { invokeCommand } from "../../ipc/client";
 import { fetchPullRequests } from "../../services/githubService";
 import { usePullRequestStore } from "../../store/usePullRequestStore";
 import { useToastStore } from "../../store/useToastStore";
-import { GitHubPullRequest } from "../../ipc/bindings";
+import { type GitHubPullRequest } from "../../ipc/bindings";
 
 interface PullRequestsSectionProps {
   repoPath: string;
@@ -250,7 +250,9 @@ export const PullRequestsSection: React.FC<PullRequestsSectionProps> = ({ repoPa
                             }}
                             className={clsx(
                               "p-1 bg-transparent border-0 text-secondary hover:text-primary hover:bg-surface-hover rounded-sm cursor-pointer transition-opacity",
-                              isMenuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus:opacity-100"
+                              isMenuOpen
+                                ? "opacity-100"
+                                : "opacity-0 group-hover:opacity-100 focus:opacity-100"
                             )}
                           >
                             <MoreVertical size={13} />

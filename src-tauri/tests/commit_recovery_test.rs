@@ -5,8 +5,14 @@ use visual_git_lib::write::{commit::create_commit, undo::undo_recorded_commit};
 fn repo() -> (tempfile::TempDir, Repository) {
     let dir = tempfile::tempdir().unwrap();
     let repo = Repository::init(dir.path()).unwrap();
-    repo.config().unwrap().set_str("user.name", "Tester").unwrap();
-    repo.config().unwrap().set_str("user.email", "test@example.com").unwrap();
+    repo.config()
+        .unwrap()
+        .set_str("user.name", "Tester")
+        .unwrap();
+    repo.config()
+        .unwrap()
+        .set_str("user.email", "test@example.com")
+        .unwrap();
     fs::write(dir.path().join("file.txt"), b"first\n").unwrap();
     let mut index = repo.index().unwrap();
     index.add_path(Path::new("file.txt")).unwrap();
@@ -21,7 +27,10 @@ fn undo_amend_restores_original_commit_instead_of_its_parent() {
     let original = create_commit(dir.path(), "second", None, false).unwrap();
     let amended = create_commit(dir.path(), "amended", None, true).unwrap();
     undo_recorded_commit(dir.path(), amended.undo_token.as_ref().unwrap()).unwrap();
-    assert_eq!(repo.head().unwrap().target().unwrap().to_string(), original.id);
+    assert_eq!(
+        repo.head().unwrap().target().unwrap().to_string(),
+        original.id
+    );
 }
 
 #[test]
@@ -36,9 +45,16 @@ fn undo_preserves_staged_and_unstaged_content() {
     fs::write(dir.path().join("file.txt"), b"new unsaved work\n").unwrap();
     undo_recorded_commit(dir.path(), second.undo_token.as_ref().unwrap()).unwrap();
     assert_eq!(repo.head().unwrap().target().unwrap().to_string(), first.id);
-    let entry = repo.index().unwrap().get_path(Path::new("file.txt"), 0).unwrap();
+    let entry = repo
+        .index()
+        .unwrap()
+        .get_path(Path::new("file.txt"), 0)
+        .unwrap();
     assert_eq!(repo.find_blob(entry.id).unwrap().content(), b"staged\n");
-    assert_eq!(fs::read(dir.path().join("file.txt")).unwrap(), b"new unsaved work\n");
+    assert_eq!(
+        fs::read(dir.path().join("file.txt")).unwrap(),
+        b"new unsaved work\n"
+    );
 }
 
 #[test]
@@ -51,7 +67,10 @@ fn stale_undo_cannot_rewind_a_later_commit_or_another_branch() {
     repo.branch("other", &commit, false).unwrap();
     repo.set_head("refs/heads/other").unwrap();
     assert!(undo_recorded_commit(dir.path(), second.undo_token.as_ref().unwrap()).is_err());
-    assert_eq!(repo.head().unwrap().target().unwrap().to_string(), second.id);
+    assert_eq!(
+        repo.head().unwrap().target().unwrap().to_string(),
+        second.id
+    );
 }
 
 #[test]
@@ -76,7 +95,10 @@ fn repeated_amends_have_independent_backups_and_restore_in_order() {
     let third = create_commit(dir.path(), "amend two", None, true).unwrap();
     assert_ne!(second.undo_token, third.undo_token);
     undo_recorded_commit(dir.path(), third.undo_token.as_ref().unwrap()).unwrap();
-    assert_eq!(repo.head().unwrap().target().unwrap().to_string(), second.id);
+    assert_eq!(
+        repo.head().unwrap().target().unwrap().to_string(),
+        second.id
+    );
     undo_recorded_commit(dir.path(), second.undo_token.as_ref().unwrap()).unwrap();
     assert_eq!(repo.head().unwrap().target().unwrap().to_string(), first.id);
 }

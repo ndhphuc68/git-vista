@@ -173,8 +173,8 @@ pub fn delete_branch<P: AsRef<Path>>(
         target: branch_commit.id().to_string(),
         nonce,
     };
-    let message = serde_json::to_string(&recovery)
-        .map_err(|error| AppError::Io(error.to_string()))?;
+    let message =
+        serde_json::to_string(&recovery).map_err(|error| AppError::Io(error.to_string()))?;
     let tree = branch_commit.tree()?;
     let signature = recovery_signature(&repo)?;
     let receipt_commit = repo.commit(
@@ -185,8 +185,7 @@ pub fn delete_branch<P: AsRef<Path>>(
         &tree,
         &[&branch_commit],
     )?;
-    let backup_ref_name =
-        crate::write::create_backup_ref(&repo, "delete-branch", receipt_commit)?;
+    let backup_ref_name = crate::write::create_backup_ref(&repo, "delete-branch", receipt_commit)?;
 
     // 4. Remove exactly the ref whose target was captured while the lock was
     // held. A concurrent checkout/retarget cannot slip between receipt and delete.

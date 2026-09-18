@@ -13,14 +13,8 @@ interface FileInspectorDrawerProps {
 
 export const FileInspectorDrawer: React.FC<FileInspectorDrawerProps> = ({ repoPath }) => {
   const { t } = useTranslation();
-  const {
-    isOpen,
-    filePath,
-    commitId,
-    activeTab,
-    closeInspector,
-    setActiveTab,
-  } = useInspectorStore();
+  const { isOpen, filePath, commitId, activeTab, closeInspector, setActiveTab } =
+    useInspectorStore();
 
   const [copiedPath, setCopiedPath] = React.useState(false);
 
@@ -68,7 +62,10 @@ export const FileInspectorDrawer: React.FC<FileInspectorDrawerProps> = ({ repoPa
         <div className="flex items-center justify-between px-4 py-2.5 bg-window border-b border-border-subtle gap-3 select-none shrink-0">
           {/* File Path & Copy */}
           <div className="flex items-center gap-2 min-w-0 max-w-[40%]">
-            <span className="text-secondary font-mono text-xs font-semibold truncate" title={filePath}>
+            <span
+              className="text-secondary font-mono text-xs font-semibold truncate"
+              title={filePath}
+            >
               {filePath}
             </span>
             <button
@@ -132,16 +129,9 @@ export const FileInspectorDrawer: React.FC<FileInspectorDrawerProps> = ({ repoPa
         {/* Body View */}
         <div className="flex-1 min-h-0 overflow-hidden">
           {activeTab === "blame" ? (
-            <BlameView
-              repoPath={repoPath}
-              filePath={filePath}
-              commitId={commitId}
-            />
+            <BlameView repoPath={repoPath} filePath={filePath} commitId={commitId} />
           ) : (
-            <FileHistoryView
-              repoPath={repoPath}
-              filePath={filePath}
-            />
+            <FileHistoryView repoPath={repoPath} filePath={filePath} />
           )}
         </div>
       </div>

@@ -1,0 +1,14 @@
+dist
+coverage
+node_modules
+playwright-report
+src-tauri
+test-results
+.agents
+.claude
+.codegraph
+.superpowers
+pnpm-lock.yaml
+src/ipc/bindings.ts
+**/*.md
+skills-lock.json

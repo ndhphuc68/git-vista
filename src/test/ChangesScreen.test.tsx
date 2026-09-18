@@ -67,10 +67,16 @@ describe("ChangesScreen", () => {
     vi.spyOn(invokeCommand, "getRepoStatus").mockResolvedValue(mockStatus);
     vi.spyOn(invokeCommand, "getWorkingFileDiff").mockResolvedValue(mockDiff);
     vi.spyOn(invokeCommand, "discardFileChanges").mockResolvedValue("discard-receipt" as never);
-    render(<QueryClientProvider client={queryClient}><ChangesScreen /></QueryClientProvider>);
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ChangesScreen />
+      </QueryClientProvider>
+    );
     fireEvent.click(await screen.findByTestId("discard-file-src/unstaged.ts"));
     fireEvent.click(screen.getByTestId("confirm-discard-button"));
-    await waitFor(() => expect(useToastStore.getState().toasts.some(t => t.undoAction)).toBe(true));
+    await waitFor(() =>
+      expect(useToastStore.getState().toasts.some((t) => t.undoAction)).toBe(true)
+    );
   });
 
   it("renders 2-column layout with StagingFileList, CommitBox, and diff viewer", async () => {
@@ -149,12 +155,7 @@ describe("ChangesScreen", () => {
     fireEvent.click(commitBtn);
 
     await waitFor(() => {
-      expect(commitSpy).toHaveBeenCalledWith(
-        "/test/repo",
-        "feat: test commit",
-        undefined,
-        false
-      );
+      expect(commitSpy).toHaveBeenCalledWith("/test/repo", "feat: test commit", undefined, false);
     });
   });
 

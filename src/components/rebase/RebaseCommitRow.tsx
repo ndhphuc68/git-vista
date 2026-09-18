@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  GripVertical,
-  ChevronUp,
-  ChevronDown,
-  Edit3,
-} from "lucide-react";
+import { GripVertical, ChevronUp, ChevronDown, Edit3 } from "lucide-react";
 import clsx from "clsx";
 import type { RebasePlanStep, RebaseCommitItem, RebaseActionKind } from "../../ipc/bindings";
 import { useTranslation } from "../../i18n";
@@ -237,9 +232,7 @@ export const RebaseCommitRow: React.FC<RebaseCommitRowProps> = ({
                 ? t.modals.interactiveRebase.actions.squashDesc
                 : t.modals.interactiveRebase.actions.rewordDesc}
             </span>
-            <span className="font-mono text-[10px] opacity-75">
-              {currentMessage.length} chars
-            </span>
+            <span className="font-mono text-[10px] opacity-75">{currentMessage.length} chars</span>
           </div>
           <textarea
             rows={3}

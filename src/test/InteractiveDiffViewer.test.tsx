@@ -65,7 +65,7 @@ describe("InteractiveDiffViewer", () => {
         screen.getByText((_, el) => {
           const hasText = el?.textContent?.includes("const b = 2;") ?? false;
           const childrenDontHaveText = Array.from(el?.children || []).every(
-            child => !child.textContent?.includes("const b = 2;")
+            (child) => !child.textContent?.includes("const b = 2;")
           );
           return hasText && childrenDontHaveText;
         })
@@ -74,7 +74,7 @@ describe("InteractiveDiffViewer", () => {
         screen.getByText((_, el) => {
           const hasText = el?.textContent?.includes("const b = 20;") ?? false;
           const childrenDontHaveText = Array.from(el?.children || []).every(
-            child => !child.textContent?.includes("const b = 20;")
+            (child) => !child.textContent?.includes("const b = 20;")
           );
           return hasText && childrenDontHaveText;
         })

@@ -8,11 +8,7 @@ import { CompareHeader } from "./CompareHeader";
 import { CompareCommitList } from "./CompareCommitList";
 import { CompareFileList } from "./CompareFileList";
 import { CompareDiffViewer } from "./CompareDiffViewer";
-import type {
-  CompareMode,
-  CompareCommitItem,
-  CompareFileItem,
-} from "../../ipc/bindings";
+import type { CompareMode, CompareCommitItem, CompareFileItem } from "../../ipc/bindings";
 
 const EMPTY_COMMITS: CompareCommitItem[] = [];
 const EMPTY_FILES: CompareFileItem[] = [];

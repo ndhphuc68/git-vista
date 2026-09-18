@@ -41,8 +41,7 @@ export const AddEditRemoteModal: React.FC<AddEditRemoteModalProps> = ({
         setName(initialRemote.name);
         setFetchUrl(initialRemote.fetch_url || "");
         const hasCustomPush =
-          Boolean(initialRemote.push_url) &&
-          initialRemote.push_url !== initialRemote.fetch_url;
+          Boolean(initialRemote.push_url) && initialRemote.push_url !== initialRemote.fetch_url;
         setUseSeparatePush(hasCustomPush);
         setPushUrl(initialRemote.push_url || "");
         setTimeout(() => fetchUrlInputRef.current?.focus(), 50);
@@ -73,7 +72,7 @@ export const AddEditRemoteModal: React.FC<AddEditRemoteModalProps> = ({
   }, [isOpen, onClose]);
 
   const sanitizeRemoteName = (val: string) => {
-    return val.replace(/[\s~^:?*\[\\@{}]/g, "");
+    return val.replace(/[\s~^:?*[\\@{}]/g, "");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,7 +87,7 @@ export const AddEditRemoteModal: React.FC<AddEditRemoteModalProps> = ({
       return;
     }
 
-    if (trimmedName.startsWith("-") || /[\s\0~^:?*\[\\]/.test(trimmedName)) {
+    if (trimmedName.startsWith("-") || /[\s\0~^:?*[\\]/.test(trimmedName)) {
       setError(t.modals.remotes.addModal.errorNameInvalid);
       nameInputRef.current?.focus();
       return;
@@ -112,35 +111,21 @@ export const AddEditRemoteModal: React.FC<AddEditRemoteModalProps> = ({
         }
 
         const effectivePush = useSeparatePush && trimmedPush ? trimmedPush : null;
-        await invokeCommand.setRemoteUrl(
-          repoPath,
-          currentName,
-          trimmedFetch,
-          effectivePush
-        );
+        await invokeCommand.setRemoteUrl(repoPath, currentName, trimmedFetch, effectivePush);
 
         useToastStore
           .getState()
-          .showSuccess(
-            t.modals.remotes.addModal.editSuccess.replace("{name}", currentName)
-          );
+          .showSuccess(t.modals.remotes.addModal.editSuccess.replace("{name}", currentName));
       } else {
         await invokeCommand.addRemote(repoPath, trimmedName, trimmedFetch);
 
         if (useSeparatePush && trimmedPush && trimmedPush !== trimmedFetch) {
-          await invokeCommand.setRemoteUrl(
-            repoPath,
-            trimmedName,
-            trimmedFetch,
-            trimmedPush
-          );
+          await invokeCommand.setRemoteUrl(repoPath, trimmedName, trimmedFetch, trimmedPush);
         }
 
         useToastStore
           .getState()
-          .showSuccess(
-            t.modals.remotes.addModal.addSuccess.replace("{name}", trimmedName)
-          );
+          .showSuccess(t.modals.remotes.addModal.addSuccess.replace("{name}", trimmedName));
       }
 
       onSuccess?.();
@@ -172,13 +157,8 @@ export const AddEditRemoteModal: React.FC<AddEditRemoteModalProps> = ({
                 <Cloud size={18} />
               </div>
               <div>
-                <h3
-                  id="add-edit-remote-title"
-                  className="text-sm font-semibold text-primary m-0"
-                >
-                  {isEdit
-                    ? t.modals.remotes.addModal.editTitle
-                    : t.modals.remotes.addModal.title}
+                <h3 id="add-edit-remote-title" className="text-sm font-semibold text-primary m-0">
+                  {isEdit ? t.modals.remotes.addModal.editTitle : t.modals.remotes.addModal.title}
                 </h3>
               </div>
             </div>
@@ -203,12 +183,8 @@ export const AddEditRemoteModal: React.FC<AddEditRemoteModalProps> = ({
 
             {/* Remote Name */}
             <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="remote-name-input"
-                className="text-xs font-semibold text-primary"
-              >
-                {t.modals.remotes.addModal.nameLabel}{" "}
-                <span className="text-red-500">*</span>
+              <label htmlFor="remote-name-input" className="text-xs font-semibold text-primary">
+                {t.modals.remotes.addModal.nameLabel} <span className="text-red-500">*</span>
               </label>
               <input
                 id="remote-name-input"
@@ -231,8 +207,7 @@ export const AddEditRemoteModal: React.FC<AddEditRemoteModalProps> = ({
                 htmlFor="remote-fetch-url-input"
                 className="text-xs font-semibold text-primary"
               >
-                {t.modals.remotes.addModal.fetchUrlLabel}{" "}
-                <span className="text-red-500">*</span>
+                {t.modals.remotes.addModal.fetchUrlLabel} <span className="text-red-500">*</span>
               </label>
               <input
                 id="remote-fetch-url-input"
@@ -306,8 +281,8 @@ export const AddEditRemoteModal: React.FC<AddEditRemoteModalProps> = ({
                   {loading
                     ? t.modals.remotes.addModal.saving
                     : isEdit
-                    ? t.modals.remotes.addModal.submitEdit
-                    : t.modals.remotes.addModal.submitAdd}
+                      ? t.modals.remotes.addModal.submitEdit
+                      : t.modals.remotes.addModal.submitAdd}
                 </span>
               </button>
             </div>

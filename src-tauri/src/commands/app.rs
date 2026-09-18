@@ -18,7 +18,11 @@ pub struct SystemInfo {
 #[tauri::command]
 #[specta::specta]
 pub fn ping(msg: String) -> String {
-    format!("Pong từ Rust backend: '{}' lúc {:?}", msg, std::time::SystemTime::now())
+    format!(
+        "Pong từ Rust backend: '{}' lúc {:?}",
+        msg,
+        std::time::SystemTime::now()
+    )
 }
 
 #[tauri::command]
@@ -58,4 +62,3 @@ pub fn simulate_repo_change(app: tauri::AppHandle, repo_path: String) -> Result<
 
     Ok(())
 }
-

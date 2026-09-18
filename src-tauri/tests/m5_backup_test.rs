@@ -1,4 +1,4 @@
-﻿use visual_git_lib::write::backup::{create_backup_ref, prune_expired_backups};
+use visual_git_lib::write::backup::{create_backup_ref, prune_expired_backups};
 
 fn create_test_repo() -> (tempfile::TempDir, git2::Repository, git2::Oid) {
     let dir = tempfile::tempdir().unwrap();
@@ -8,7 +8,8 @@ fn create_test_repo() -> (tempfile::TempDir, git2::Repository, git2::Oid) {
     let tree_id = index.write_tree().unwrap();
     let commit_id = {
         let tree = repo.find_tree(tree_id).unwrap();
-        repo.commit(Some("HEAD"), &sig, &sig, "init", &tree, &[]).unwrap()
+        repo.commit(Some("HEAD"), &sig, &sig, "init", &tree, &[])
+            .unwrap()
     };
     (dir, repo, commit_id)
 }
@@ -121,10 +122,8 @@ fn opening_a_repository_prunes_only_expired_backups() {
     let stale = format!("refs/gitui-backup/amend-{}", old_ts);
     repo.reference(&stale, commit_id, false, "old").unwrap();
 
-    visual_git_lib::commands::open_repository_internal(
-        dir.path().to_str().unwrap().to_string(),
-    )
-    .unwrap();
+    visual_git_lib::commands::open_repository_internal(dir.path().to_str().unwrap().to_string())
+        .unwrap();
 
     let repo = git2::Repository::open(dir.path()).unwrap();
     assert!(

@@ -1,41 +1,41 @@
 import {
-  SystemInfo,
-  RepoHeadInfo,
-  RepoChangedPayload,
-  TaskProgressPayload,
-  RepoSummary,
-  RecentRepoEntry,
-  BranchListResult,
-  CommitGraphPage,
-  CommitDetails,
-  FileDiffResult,
-  FileStatus,
-  StatusFileItem,
-  RepoStatusResult,
-  StashItem,
-  RepoStateInfo,
-  MergeResult,
-  RebaseResult,
-  CommitActionResult,
-  ConflictHunk,
-  ConflictFileData,
-  ConfigScope,
-  GitConfigDto,
-  TagItem,
-  FileBlameResult,
-  FileHistoryResult,
-  RemoteItem,
-  PruneResult,
-  RebaseCommitItem,
-  RebaseActionKind,
-  RebasePlanStep,
-  InteractiveRebaseResult,
-  CompareMode,
-  CompareCommitItem,
-  CompareFileItem,
-  CompareSummary,
-  GitHubRepoInfo,
-  CheckoutPrResult,
+  type SystemInfo,
+  type RepoHeadInfo,
+  type RepoChangedPayload,
+  type TaskProgressPayload,
+  type RepoSummary,
+  type RecentRepoEntry,
+  type BranchListResult,
+  type CommitGraphPage,
+  type CommitDetails,
+  type FileDiffResult,
+  type FileStatus,
+  type StatusFileItem,
+  type RepoStatusResult,
+  type StashItem,
+  type RepoStateInfo,
+  type MergeResult,
+  type RebaseResult,
+  type CommitActionResult,
+  type ConflictHunk,
+  type ConflictFileData,
+  type ConfigScope,
+  type GitConfigDto,
+  type TagItem,
+  type FileBlameResult,
+  type FileHistoryResult,
+  type RemoteItem,
+  type PruneResult,
+  type RebaseCommitItem,
+  type RebaseActionKind,
+  type RebasePlanStep,
+  type InteractiveRebaseResult,
+  type CompareMode,
+  type CompareCommitItem,
+  type CompareFileItem,
+  type CompareSummary,
+  type GitHubRepoInfo,
+  type CheckoutPrResult,
 } from "./bindings";
 
 let mockTags: TagItem[] = [
@@ -328,7 +328,10 @@ export function resetMockCompareData() {
 
 // Helper kiểm tra môi trường chạy có phải trong Tauri runtime không
 export const isTauri = (): boolean => {
-  return typeof window !== "undefined" && Boolean((window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__);
+  return (
+    typeof window !== "undefined" &&
+    Boolean((window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__)
+  );
 };
 
 export const invokeCommand = {
@@ -446,8 +449,26 @@ export const invokeCommand = {
       return {
         current_branch: "main",
         is_detached: false,
-        local: [{ name: "main", is_head: true, target_commit_id: "c1", upstream: "origin/main", ahead: 0, behind: 0 }],
-        remote: [{ name: "origin/main", is_head: false, target_commit_id: "c1", upstream: null, ahead: 0, behind: 0 }],
+        local: [
+          {
+            name: "main",
+            is_head: true,
+            target_commit_id: "c1",
+            upstream: "origin/main",
+            ahead: 0,
+            behind: 0,
+          },
+        ],
+        remote: [
+          {
+            name: "origin/main",
+            is_head: false,
+            target_commit_id: "c1",
+            upstream: null,
+            ahead: 0,
+            behind: 0,
+          },
+        ],
         tags: ["v0.1.0"],
       };
     }
@@ -455,7 +476,11 @@ export const invokeCommand = {
     return await invoke<BranchListResult>("get_branches", { repoPath });
   },
 
-  getCommitGraph: async (repoPath: string, offset: number, limit: number): Promise<CommitGraphPage> => {
+  getCommitGraph: async (
+    repoPath: string,
+    offset: number,
+    limit: number
+  ): Promise<CommitGraphPage> => {
     if (!isTauri()) {
       return {
         commits: [
@@ -519,7 +544,12 @@ export const invokeCommand = {
             new_start: 1,
             new_lines: 2,
             lines: [
-              { line_type: "delete", content: "- legacy mock line\n", old_lineno: 1, new_lineno: null },
+              {
+                line_type: "delete",
+                content: "- legacy mock line\n",
+                old_lineno: 1,
+                new_lineno: null,
+              },
               { line_type: "add", content: "+ new live line\n", old_lineno: null, new_lineno: 1 },
             ],
           },
@@ -538,15 +568,11 @@ export const invokeCommand = {
   getRepoStatus: async (repoPath: string): Promise<RepoStatusResult> => {
     if (!isTauri()) {
       return {
-        staged: [
-          { path: "src/staged.ts", status: "Modified", is_staged: true, old_path: null },
-        ],
+        staged: [{ path: "src/staged.ts", status: "Modified", is_staged: true, old_path: null }],
         unstaged: [
           { path: "src/unstaged.ts", status: "Modified", is_staged: false, old_path: null },
         ],
-        untracked: [
-          { path: "src/untracked.ts", status: "New", is_staged: false, old_path: null },
-        ],
+        untracked: [{ path: "src/untracked.ts", status: "New", is_staged: false, old_path: null }],
         conflicted: [],
       };
     }
@@ -796,10 +822,7 @@ export const invokeCommand = {
     return await invoke("create_branch", { repoPath, name, targetCommit, checkout });
   },
 
-  checkoutBranch: async (
-    repoPath: string,
-    branchName: string
-  ): Promise<void> => {
+  checkoutBranch: async (repoPath: string, branchName: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
@@ -807,11 +830,7 @@ export const invokeCommand = {
     return await invoke("checkout_branch", { repoPath, branchName });
   },
 
-  renameBranch: async (
-    repoPath: string,
-    oldName: string,
-    newName: string
-  ): Promise<void> => {
+  renameBranch: async (repoPath: string, oldName: string, newName: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
@@ -819,11 +838,7 @@ export const invokeCommand = {
     return await invoke("rename_branch", { repoPath, oldName, newName });
   },
 
-  deleteBranch: async (
-    repoPath: string,
-    branchName: string,
-    force?: boolean
-  ): Promise<string> => {
+  deleteBranch: async (repoPath: string, branchName: string, force?: boolean): Promise<string> => {
     if (!isTauri()) {
       return `refs/gitui-backup/delete-branch-${branchName}-${Date.now()}`;
     }
@@ -881,11 +896,7 @@ export const invokeCommand = {
     });
   },
 
-  deleteTag: async (
-    repoPath: string,
-    name: string,
-    deleteRemote?: boolean
-  ): Promise<void> => {
+  deleteTag: async (repoPath: string, name: string, deleteRemote?: boolean): Promise<void> => {
     if (!isTauri()) {
       mockTags = mockTags.filter((t) => t.name !== name);
       if (typeof window !== "undefined") {
@@ -928,11 +939,7 @@ export const invokeCommand = {
     return await invoke("checkout_tag", { repoPath, name });
   },
 
-  pushTag: async (
-    repoPath: string,
-    name: string,
-    remoteName?: string
-  ): Promise<void> => {
+  pushTag: async (repoPath: string, name: string, remoteName?: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
@@ -952,11 +959,7 @@ export const invokeCommand = {
     return await invoke<RemoteItem[]>("get_remotes", { repoPath });
   },
 
-  addRemote: async (
-    repoPath: string,
-    name: string,
-    url: string
-  ): Promise<RemoteItem> => {
+  addRemote: async (repoPath: string, name: string, url: string): Promise<RemoteItem> => {
     if (!isTauri()) {
       const newRemote: RemoteItem = {
         name,
@@ -983,11 +986,7 @@ export const invokeCommand = {
     return await invoke<RemoteItem>("add_remote", { repoPath, name, url });
   },
 
-  renameRemote: async (
-    repoPath: string,
-    oldName: string,
-    newName: string
-  ): Promise<void> => {
+  renameRemote: async (repoPath: string, oldName: string, newName: string): Promise<void> => {
     if (!isTauri()) {
       const r = mockRemotes.find((x) => x.name === oldName);
       if (r) r.name = newName;
@@ -1062,11 +1061,7 @@ export const invokeCommand = {
     });
   },
 
-  pruneRemote: async (
-    repoPath: string,
-    remote: string,
-    taskId?: string
-  ): Promise<PruneResult> => {
+  pruneRemote: async (repoPath: string, remote: string, taskId?: string): Promise<PruneResult> => {
     if (!isTauri()) {
       if (typeof window !== "undefined") {
         window.dispatchEvent(
@@ -1153,11 +1148,7 @@ export const invokeCommand = {
     });
   },
 
-  cloneRepo: async (
-    url: string,
-    targetDir: string,
-    taskId?: string
-  ): Promise<string> => {
+  cloneRepo: async (url: string, targetDir: string, taskId?: string): Promise<string> => {
     if (!isTauri()) {
       return "[Browser mock] Clone hoàn tất";
     }
@@ -1225,7 +1216,9 @@ export const invokeCommand = {
 
   popStash: async (repoPath: string, index: number): Promise<void> => {
     if (!isTauri()) {
-      mockStashes = mockStashes.filter((s) => s.index !== index).map((s, idx) => ({ ...s, index: idx }));
+      mockStashes = mockStashes
+        .filter((s) => s.index !== index)
+        .map((s, idx) => ({ ...s, index: idx }));
       return;
     }
     const { invoke } = await import("@tauri-apps/api/core");
@@ -1234,7 +1227,9 @@ export const invokeCommand = {
 
   dropStash: async (repoPath: string, index: number): Promise<string> => {
     if (!isTauri()) {
-      mockStashes = mockStashes.filter((s) => s.index !== index).map((s, idx) => ({ ...s, index: idx }));
+      mockStashes = mockStashes
+        .filter((s) => s.index !== index)
+        .map((s, idx) => ({ ...s, index: idx }));
       return `refs/gitui-backup/stash-drop-undo-${Date.now()}`;
     }
     const { invoke } = await import("@tauri-apps/api/core");
@@ -1271,10 +1266,7 @@ export const invokeCommand = {
     return await invoke<MergeResult>("merge_branch", { repoPath, targetBranch, noFf });
   },
 
-  rebaseBranch: async (
-    repoPath: string,
-    upstreamBranch: string
-  ): Promise<RebaseResult> => {
+  rebaseBranch: async (repoPath: string, upstreamBranch: string): Promise<RebaseResult> => {
     if (!isTauri()) {
       return {
         success: true,
@@ -1286,10 +1278,7 @@ export const invokeCommand = {
     return await invoke<RebaseResult>("rebase_branch", { repoPath, upstreamBranch });
   },
 
-  getRebaseCommits: async (
-    repoPath: string,
-    baseCommitId: string
-  ): Promise<RebaseCommitItem[]> => {
+  getRebaseCommits: async (repoPath: string, baseCommitId: string): Promise<RebaseCommitItem[]> => {
     if (!isTauri()) {
       return [...mockRebaseCommits];
     }
@@ -1379,10 +1368,7 @@ export const invokeCommand = {
     });
   },
 
-  abortInProgress: async (
-    repoPath: string,
-    operation: string
-  ): Promise<void> => {
+  abortInProgress: async (repoPath: string, operation: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
@@ -1390,10 +1376,7 @@ export const invokeCommand = {
     return await invoke("abort_in_progress", { repoPath, operation });
   },
 
-  continueInProgress: async (
-    repoPath: string,
-    operation: string
-  ): Promise<void> => {
+  continueInProgress: async (repoPath: string, operation: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
@@ -1401,10 +1384,7 @@ export const invokeCommand = {
     return await invoke("continue_in_progress", { repoPath, operation });
   },
 
-  getConflictFileData: async (
-    repoPath: string,
-    filePath: string
-  ): Promise<ConflictFileData> => {
+  getConflictFileData: async (repoPath: string, filePath: string): Promise<ConflictFileData> => {
     if (!isTauri()) {
       return {
         file_path: filePath,
@@ -1475,10 +1455,7 @@ export const invokeCommand = {
     return await invoke("undo_delete_branch", { repoPath, branchName, backupRef });
   },
 
-  undoDropStash: async (
-    repoPath: string,
-    receipt: string
-  ): Promise<void> => {
+  undoDropStash: async (repoPath: string, receipt: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
@@ -1542,7 +1519,8 @@ export const invokeCommand = {
           if (key === "commit.gpgsign") mockLocalConfigs[repoPath].gpgSign = value === "true";
           if (key === "user.signingkey") mockLocalConfigs[repoPath].gpgKey = value;
           if (key === "fetch.prune") mockLocalConfigs[repoPath].fetchPrune = value === "true";
-          if (key === "rebase.autoStash") mockLocalConfigs[repoPath].rebaseAutostash = value === "true";
+          if (key === "rebase.autoStash")
+            mockLocalConfigs[repoPath].rebaseAutostash = value === "true";
         }
       }
       return;
@@ -1601,11 +1579,36 @@ export const invokeCommand = {
             new_start: 1,
             new_lines: 6,
             lines: [
-              { line_type: "context", content: " import { useState } from 'react';\n", old_lineno: 1, new_lineno: 1 },
-              { line_type: "delete", content: "- const isAuth = false;\n", old_lineno: 2, new_lineno: null },
-              { line_type: "add", content: "+ const isAuth = true;\n", old_lineno: null, new_lineno: 2 },
-              { line_type: "add", content: "+ export const token = 'jwt-token';\n", old_lineno: null, new_lineno: 3 },
-              { line_type: "context", content: " export default function Auth() {}\n", old_lineno: 3, new_lineno: 4 },
+              {
+                line_type: "context",
+                content: " import { useState } from 'react';\n",
+                old_lineno: 1,
+                new_lineno: 1,
+              },
+              {
+                line_type: "delete",
+                content: "- const isAuth = false;\n",
+                old_lineno: 2,
+                new_lineno: null,
+              },
+              {
+                line_type: "add",
+                content: "+ const isAuth = true;\n",
+                old_lineno: null,
+                new_lineno: 2,
+              },
+              {
+                line_type: "add",
+                content: "+ export const token = 'jwt-token';\n",
+                old_lineno: null,
+                new_lineno: 3,
+              },
+              {
+                line_type: "context",
+                content: " export default function Auth() {}\n",
+                old_lineno: 3,
+                new_lineno: 4,
+              },
             ],
           },
         ],
@@ -1661,10 +1664,7 @@ export const invokeCommand = {
     return await invoke<void>("remove_github_token");
   },
 
-  checkoutPullRequest: async (
-    repoPath: string,
-    prNumber: number
-  ): Promise<CheckoutPrResult> => {
+  checkoutPullRequest: async (repoPath: string, prNumber: number): Promise<CheckoutPrResult> => {
     if (!isTauri()) {
       return {
         branch_name: `pr/${prNumber}`,
@@ -1746,4 +1746,3 @@ export type {
   CompareFileItem,
   CompareSummary,
 };
-

@@ -1,6 +1,14 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import clsx from "clsx";
-import { GitBranch, Tag, Copy, GitPullRequest, RotateCcw, GitMerge, GitCompare } from "lucide-react";
+import {
+  GitBranch,
+  Tag,
+  Copy,
+  GitPullRequest,
+  RotateCcw,
+  GitMerge,
+  GitCompare,
+} from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
@@ -8,7 +16,7 @@ import { useViewStore } from "../../store/useViewStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
 import { useToastStore } from "../../store/useToastStore";
 import { invokeCommand } from "../../ipc/client";
-import { GraphCommitNode } from "../../ipc/bindings";
+import { type GraphCommitNode } from "../../ipc/bindings";
 import { GraphSvgLane } from "./GraphSvgLane";
 import { useTranslation } from "../../i18n";
 import { CreateTagModal } from "../tag";
@@ -118,7 +126,9 @@ export const CommitGraph: React.FC = () => {
   const [createBranchCommit, setCreateBranchCommit] = useState<GraphCommitNode | null>(null);
   const [cherryPickCommit, setCherryPickCommit] = useState<GraphCommitNode | null>(null);
   const [revertCommit, setRevertCommit] = useState<GraphCommitNode | null>(null);
-  const [interactiveRebaseCommit, setInteractiveRebaseCommit] = useState<GraphCommitNode | null>(null);
+  const [interactiveRebaseCommit, setInteractiveRebaseCommit] = useState<GraphCommitNode | null>(
+    null
+  );
   const [compareModalOpen, setCompareModalOpen] = useState(false);
   const [compareBaseRev, setCompareBaseRev] = useState<string | undefined>(undefined);
   const [compareTargetRev, setCompareTargetRev] = useState<string | undefined>(undefined);
@@ -159,12 +169,7 @@ export const CommitGraph: React.FC = () => {
     setContextMenu(null);
   };
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ["commit-graph", currentRepo?.path],
     queryFn: ({ pageParam = 0 }) =>
       invokeCommand.getCommitGraph(currentRepo!.path, pageParam, PAGE_SIZE),
@@ -184,13 +189,12 @@ export const CommitGraph: React.FC = () => {
 
   const hasUncommittedChanges = Boolean(
     repoStatus &&
-      (repoStatus.staged.length > 0 ||
-        repoStatus.unstaged.length > 0 ||
-        repoStatus.untracked.length > 0)
+    (repoStatus.staged.length > 0 ||
+      repoStatus.unstaged.length > 0 ||
+      repoStatus.untracked.length > 0)
   );
 
-  const modifiedCount =
-    (repoStatus?.staged.length || 0) + (repoStatus?.unstaged.length || 0);
+  const modifiedCount = (repoStatus?.staged.length || 0) + (repoStatus?.unstaged.length || 0);
   const untrackedCount = repoStatus?.untracked.length || 0;
 
   const commits = data ? data.pages.flatMap((page) => page.commits) : [];
@@ -341,7 +345,11 @@ export const CommitGraph: React.FC = () => {
                 aria-selected={isSelected}
                 aria-label={`Commit ${commit.short_id}: ${commit.summary}`}
                 onClick={(e) => {
-                  if ((e.ctrlKey || e.metaKey) && selectedCommitId && selectedCommitId !== commit.id) {
+                  if (
+                    (e.ctrlKey || e.metaKey) &&
+                    selectedCommitId &&
+                    selectedCommitId !== commit.id
+                  ) {
                     setCompareBaseRev(selectedCommitId);
                     setCompareTargetRev(commit.id);
                     setCompareModalOpen(true);
@@ -407,9 +415,14 @@ export const CommitGraph: React.FC = () => {
                           {isHeadRef ? (
                             <GitBranch size={10.5} className="shrink-0 text-white" />
                           ) : isTagRef ? (
-                            <Tag size={10.5} className="shrink-0 text-amber-700 dark:text-amber-300" />
+                            <Tag
+                              size={10.5}
+                              className="shrink-0 text-amber-700 dark:text-amber-300"
+                            />
                           ) : (
-                            <span className={clsx("w-1.5 h-1.5 rounded-full shrink-0", style.dot)} />
+                            <span
+                              className={clsx("w-1.5 h-1.5 rounded-full shrink-0", style.dot)}
+                            />
                           )}
                           <span className="truncate min-w-0">{r.name}</span>
                           {isHeadRef && (
@@ -434,7 +447,10 @@ export const CommitGraph: React.FC = () => {
                   })}
                   {remainingCount > 0 && (
                     <div
-                      title={commit.refs.slice(2).map((r) => r.name).join(", ")}
+                      title={commit.refs
+                        .slice(2)
+                        .map((r) => r.name)
+                        .join(", ")}
                       className="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-surface border border-border-strong text-secondary shrink-0 cursor-help"
                     >
                       +{remainingCount}
@@ -579,12 +595,14 @@ export const CommitGraph: React.FC = () => {
             type="button"
             role="menuitem"
             onClick={() => {
-              const base = selectedCommitId && selectedCommitId !== contextMenu.commit.id
-                ? selectedCommitId
-                : contextMenu.commit.id;
-              const target = selectedCommitId && selectedCommitId !== contextMenu.commit.id
-                ? contextMenu.commit.id
-                : "HEAD";
+              const base =
+                selectedCommitId && selectedCommitId !== contextMenu.commit.id
+                  ? selectedCommitId
+                  : contextMenu.commit.id;
+              const target =
+                selectedCommitId && selectedCommitId !== contextMenu.commit.id
+                  ? contextMenu.commit.id
+                  : "HEAD";
               setCompareBaseRev(base);
               setCompareTargetRev(target);
               setCompareModalOpen(true);

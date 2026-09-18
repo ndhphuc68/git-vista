@@ -160,16 +160,14 @@ export function getFileStatusMeta(
     return {
       code: "A",
       label: dict?.added ?? "Thêm mới",
-      badgeClass:
-        "bg-diff-add-bg text-diff-add-text border-diff-add-border font-bold",
+      badgeClass: "bg-diff-add-bg text-diff-add-text border-diff-add-border font-bold",
     };
   }
   if (s.startsWith("D") || s === "DELETED") {
     return {
       code: "D",
       label: dict?.deleted ?? "Đã xoá",
-      badgeClass:
-        "bg-diff-remove-bg text-diff-remove-text border-diff-remove-border font-bold",
+      badgeClass: "bg-diff-remove-bg text-diff-remove-text border-diff-remove-border font-bold",
     };
   }
   if (s.startsWith("R") || s === "RENAMED") {
@@ -190,13 +188,8 @@ export function getFileStatusMeta(
 
 export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose }) => {
   const { t } = useTranslation();
-  const {
-    currentRepo,
-    selectedCommitId,
-    setSelectedCommit,
-    selectedFilePath,
-    setSelectedFile,
-  } = useRepoStore();
+  const { currentRepo, selectedCommitId, setSelectedCommit, selectedFilePath, setSelectedFile } =
+    useRepoStore();
   const { setDetailPanelOpen } = useLayoutStore();
   const { openInspector } = useInspectorStore();
 
@@ -216,8 +209,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
 
   const { data: details, isLoading } = useQuery({
     queryKey: ["commit-details", currentRepo?.path, selectedCommitId],
-    queryFn: () =>
-      invokeCommand.getCommitDetails(currentRepo!.path, selectedCommitId!),
+    queryFn: () => invokeCommand.getCommitDetails(currentRepo!.path, selectedCommitId!),
     enabled: Boolean(currentRepo && selectedCommitId),
   });
 
@@ -269,10 +261,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
       const newWidth = Math.min(Math.max(startWidth + delta, 260), 600);
       setFilesWidth(newWidth);
       try {
-        localStorage.setItem(
-          "git-vista:commit-detail-files-width",
-          String(newWidth)
-        );
+        localStorage.setItem("git-vista:commit-detail-files-width", String(newWidth));
       } catch {
         // ignore
       }
@@ -332,8 +321,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
   }, [details?.files, selectedFilePath]);
 
   const hasPrev = currentFileIndex > 0;
-  const hasNext =
-    currentFileIndex >= 0 && currentFileIndex < (details?.files.length ?? 0) - 1;
+  const hasNext = currentFileIndex >= 0 && currentFileIndex < (details?.files.length ?? 0) - 1;
 
   const handlePrevFile = () => {
     const prevFile = details?.files[currentFileIndex - 1];
@@ -367,7 +355,9 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
     );
   }
 
-  const selectedFileMeta = selectedFile ? getFileStatusMeta(selectedFile.status, t.diff.fileStatus) : null;
+  const selectedFileMeta = selectedFile
+    ? getFileStatusMeta(selectedFile.status, t.diff.fileStatus)
+    : null;
   const selectedPathParts = selectedFile ? splitFilePath(selectedFile.path) : null;
 
   return (
@@ -389,11 +379,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
               title={t.diff.copyShaTooltip}
             >
               <span>{details.id.substring(0, 7)}</span>
-              {copiedSha ? (
-                <Check size={12} className="text-diff-add-text" />
-              ) : (
-                <Copy size={12} />
-              )}
+              {copiedSha ? <Check size={12} className="text-diff-add-text" /> : <Copy size={12} />}
             </button>
             <span className="text-tertiary text-xs">|</span>
             <div className="flex items-center gap-2 text-xs font-mono font-semibold">
@@ -529,10 +515,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
 
             {/* Search input */}
             <div className="relative flex items-center">
-              <Search
-                size={12}
-                className="absolute left-2.5 text-tertiary pointer-events-none"
-              />
+              <Search size={12} className="absolute left-2.5 text-tertiary pointer-events-none" />
               <input
                 type="text"
                 value={fileFilter}
@@ -556,9 +539,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
           {/* Files List */}
           <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
             {filteredFiles.length === 0 ? (
-              <div className="py-6 text-center text-xs text-tertiary">
-                {t.diff.noMatchingFiles}
-              </div>
+              <div className="py-6 text-center text-xs text-tertiary">{t.diff.noMatchingFiles}</div>
             ) : (
               filteredFiles.map((file) => {
                 const isSelected = selectedFilePath === file.path;

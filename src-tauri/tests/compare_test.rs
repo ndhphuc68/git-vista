@@ -3,9 +3,7 @@ mod common;
 use common::fixtures::{commit_index, create_clean_repo};
 use std::fs;
 use std::path::Path;
-use visual_git_lib::read::compare::{
-    get_compare_file_diff, get_compare_summary, CompareMode,
-};
+use visual_git_lib::read::compare::{get_compare_file_diff, get_compare_summary, CompareMode};
 
 #[test]
 fn test_compare_commits_direct_mode() {
@@ -50,8 +48,16 @@ fn test_compare_commits_direct_mode() {
     assert_eq!(summary.commits[1].id, c1_oid.to_string());
 
     assert_eq!(summary.files.len(), 2);
-    let f1 = summary.files.iter().find(|f| f.path == "file1.txt").unwrap();
-    let f2 = summary.files.iter().find(|f| f.path == "file2.txt").unwrap();
+    let f1 = summary
+        .files
+        .iter()
+        .find(|f| f.path == "file1.txt")
+        .unwrap();
+    let f2 = summary
+        .files
+        .iter()
+        .find(|f| f.path == "file2.txt")
+        .unwrap();
     assert_eq!(f1.status, "added"); // Added relative to initial_oid tree
     assert_eq!(f2.status, "added");
     assert!(summary.total_additions > 0);
@@ -130,7 +136,13 @@ fn test_compare_commits_merge_base_mode() {
 fn test_compare_identical_revisions() {
     let (dir, repo) = create_clean_repo().expect("create clean repo");
     let repo_path = dir.path().to_str().unwrap();
-    let head_oid = repo.head().unwrap().peel_to_commit().unwrap().id().to_string();
+    let head_oid = repo
+        .head()
+        .unwrap()
+        .peel_to_commit()
+        .unwrap()
+        .id()
+        .to_string();
 
     let summary = get_compare_summary(repo_path, &head_oid, &head_oid, CompareMode::Direct)
         .expect("compare identical");

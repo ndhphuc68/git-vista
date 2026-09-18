@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
 
 permissions:
@@ -61,7 +61,7 @@ jobs:
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: './src-tauri -> target'
+          workspaces: "./src-tauri -> target"
 
       - name: Install frontend dependencies
         run: pnpm install
@@ -75,7 +75,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: 'Visual Git Client ${{ github.ref_name }}'
-          releaseBody: 'See the RELEASE_NOTES for details.'
+          releaseName: "Visual Git Client ${{ github.ref_name }}"
+          releaseBody: "See the RELEASE_NOTES for details."
           releaseDraft: true
           prerelease: false

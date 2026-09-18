@@ -38,9 +38,7 @@ export const CompareHeader: React.FC<CompareHeaderProps> = ({
   const isIdentical =
     summary &&
     (summary.resolved_base_oid === summary.resolved_target_oid ||
-      (summary.ahead_count === 0 &&
-        summary.behind_count === 0 &&
-        summary.files.length === 0));
+      (summary.ahead_count === 0 && summary.behind_count === 0 && summary.files.length === 0));
 
   return (
     <div className="flex flex-col border-b border-border-subtle bg-surface px-5 py-4 gap-3 shrink-0 select-none">
@@ -188,9 +186,7 @@ export const CompareHeader: React.FC<CompareHeaderProps> = ({
             </div>
           </div>
         ) : (
-          <div className="text-tertiary">
-            Nhập 2 điểm mốc commit/nhánh để xem khác biệt.
-          </div>
+          <div className="text-tertiary">Nhập 2 điểm mốc commit/nhánh để xem khác biệt.</div>
         )}
       </div>
     </div>

@@ -58,10 +58,7 @@ export const CompareCommitList: React.FC<CompareCommitListProps> = ({
             <span className="font-mono text-[11px] font-semibold text-accent bg-accent/10 px-1.5 py-0.5 rounded shrink-0">
               {commit.short_id}
             </span>
-            <span
-              className="text-primary font-medium truncate flex-1"
-              title={commit.summary}
-            >
+            <span className="text-primary font-medium truncate flex-1" title={commit.summary}>
               {commit.summary}
             </span>
           </div>

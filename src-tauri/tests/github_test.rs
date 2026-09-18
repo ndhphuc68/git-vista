@@ -2,7 +2,9 @@ mod common;
 
 use common::fixtures::TestRepoFixture;
 use visual_git_lib::read::github::{get_github_repo_info, parse_github_remote_url};
-use visual_git_lib::write::github_config::{get_github_token, remove_github_token, save_github_token};
+use visual_git_lib::write::github_config::{
+    get_github_token, remove_github_token, save_github_token,
+};
 use visual_git_lib::write::remote::add_remote;
 
 #[test]
@@ -40,10 +42,7 @@ fn test_parse_github_urls() {
         parse_github_remote_url("https://bitbucket.org/atlassian/repo.git"),
         None
     );
-    assert_eq!(
-        parse_github_remote_url("/local/path/to/repo"),
-        None
-    );
+    assert_eq!(parse_github_remote_url("/local/path/to/repo"), None);
 }
 
 #[test]

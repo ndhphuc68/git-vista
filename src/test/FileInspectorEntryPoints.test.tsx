@@ -9,9 +9,7 @@ function renderWithClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-  );
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
 }
 
 describe("File Inspector Entry Points", () => {
@@ -26,11 +24,7 @@ describe("File Inspector Entry Points", () => {
 
   it("triggers Git Blame from FileDiffViewer toolbar", async () => {
     renderWithClient(
-      <FileDiffViewer
-        repoPath="/mock/repo"
-        commitId="c1a2b3c"
-        filePath="src/test.ts"
-      />
+      <FileDiffViewer repoPath="/mock/repo" commitId="c1a2b3c" filePath="src/test.ts" />
     );
 
     // Wait for toolbar to appear
@@ -50,11 +44,7 @@ describe("File Inspector Entry Points", () => {
 
   it("triggers File History from FileDiffViewer toolbar", async () => {
     renderWithClient(
-      <FileDiffViewer
-        repoPath="/mock/repo"
-        commitId="c1a2b3c"
-        filePath="src/test.ts"
-      />
+      <FileDiffViewer repoPath="/mock/repo" commitId="c1a2b3c" filePath="src/test.ts" />
     );
 
     await waitFor(() => {

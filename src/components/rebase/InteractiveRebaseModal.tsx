@@ -1,13 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import {
-  X,
-  RotateCcw,
-  Play,
-  Loader2,
-  GitBranch,
-  AlertTriangle,
-  Info,
-} from "lucide-react";
+import { X, RotateCcw, Play, Loader2, GitBranch, AlertTriangle, Info } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
@@ -55,10 +47,7 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   // Fetch commits between base and HEAD
-  const {
-    data: fetchedCommits = EMPTY_COMMITS,
-    isLoading,
-  } = useQuery({
+  const { data: fetchedCommits = EMPTY_COMMITS, isLoading } = useQuery({
     queryKey: ["rebase-commits", repoPath, baseCommitId],
     queryFn: () => invokeCommand.getRebaseCommits(repoPath, baseCommitId),
     enabled: isOpen && Boolean(repoPath) && Boolean(baseCommitId),
@@ -145,7 +134,7 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
       action,
       new_message:
         action === "Reword" || action === "Squash"
-          ? current.new_message ?? commitMap.get(current.commit_id)?.message ?? ""
+          ? (current.new_message ?? commitMap.get(current.commit_id)?.message ?? "")
           : null,
     };
     setSteps(sanitizeFirstAction(next));
@@ -210,7 +199,10 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
 
     // Validate messages
     for (const s of steps) {
-      if ((s.action === "Reword" || s.action === "Squash") && (!s.new_message || s.new_message.trim() === "")) {
+      if (
+        (s.action === "Reword" || s.action === "Squash") &&
+        (!s.new_message || s.new_message.trim() === "")
+      ) {
         setError(t.modals.interactiveRebase.validation.emptyMessage);
         return;
       }
@@ -234,13 +226,9 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
             async () => {
               try {
                 await invokeCommand.undoCommit(repoPath, undoToken);
-                useToastStore
-                  .getState()
-                  .showSuccess(t.modals.interactiveRebase.undoSuccessToast);
+                useToastStore.getState().showSuccess(t.modals.interactiveRebase.undoSuccessToast);
               } catch (err: any) {
-                useToastStore
-                  .getState()
-                  .showError(err?.message || "Failed to undo rebase");
+                useToastStore.getState().showError(err?.message || "Failed to undo rebase");
               }
             },
             t.toast.undo
@@ -258,7 +246,9 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
         setActiveScreen("changes");
         onClose();
       } else {
-        setError(result.output || t.modals.interactiveRebase.errorToast.replace("{msg}", result.status));
+        setError(
+          result.output || t.modals.interactiveRebase.errorToast.replace("{msg}", result.status)
+        );
       }
     } catch (err: any) {
       setError(err?.message || t.modals.interactiveRebase.errorToast.replace("{msg}", String(err)));
@@ -318,9 +308,7 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
           {error && (
             <div className="mx-6 mt-3 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-start gap-2 animate-fade-in shrink-0">
               <AlertTriangle size={14} className="shrink-0 mt-0.5" />
-              <div className="flex-1 whitespace-pre-wrap font-mono text-[11px]">
-                {error}
-              </div>
+              <div className="flex-1 whitespace-pre-wrap font-mono text-[11px]">{error}</div>
             </div>
           )}
 
@@ -342,9 +330,7 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
                 {isLoading ? (
                   <div className="flex flex-col items-center justify-center h-48 gap-2 text-secondary">
                     <Loader2 size={20} className="animate-spin text-accent" />
-                    <span className="text-xs">
-                      {t.modals.interactiveRebase.loadingCommits}
-                    </span>
+                    <span className="text-xs">{t.modals.interactiveRebase.loadingCommits}</span>
                   </div>
                 ) : steps.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-48 text-secondary text-xs">

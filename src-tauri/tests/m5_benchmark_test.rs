@@ -14,7 +14,9 @@ fn create_500_commit_repo() -> (tempfile::TempDir, String) {
         std::fs::write(&file_path, format!("iteration content {}\n", i)).unwrap();
 
         let mut index = repo.index().unwrap();
-        index.add_path(std::path::Path::new(&format!("file_{}.txt", i % 10))).unwrap();
+        index
+            .add_path(std::path::Path::new(&format!("file_{}.txt", i % 10)))
+            .unwrap();
         let tree_id = index.write_tree().unwrap();
         index.write().unwrap();
         let tree = repo.find_tree(tree_id).unwrap();
@@ -27,14 +29,7 @@ fn create_500_commit_repo() -> (tempfile::TempDir, String) {
         let parent_refs: Vec<&git2::Commit> = parents.iter().collect();
 
         let new_id = repo
-            .commit(
-                Some("HEAD"),
-                &sig,
-                &sig,
-                &commit_msg,
-                &tree,
-                &parent_refs,
-            )
+            .commit(Some("HEAD"), &sig, &sig, &commit_msg, &tree, &parent_refs)
             .unwrap();
         parent_id = Some(new_id);
     }

@@ -13,13 +13,7 @@ describe("CommitBox", () => {
   });
 
   it("renders summary input, description textarea, character counter, and commit button", () => {
-    render(
-      <CommitBox
-        repoPath="/test/repo"
-        stagedCount={2}
-        onCommit={mockOnCommit}
-      />
-    );
+    render(<CommitBox repoPath="/test/repo" stagedCount={2} onCommit={mockOnCommit} />);
 
     expect(screen.getByTestId("commit-summary-input")).toBeInTheDocument();
     expect(screen.getByTestId("commit-description-input")).toBeInTheDocument();
@@ -30,24 +24,14 @@ describe("CommitBox", () => {
 
   it("disables commit button when summary is empty or stagedCount is 0", () => {
     const { rerender } = render(
-      <CommitBox
-        repoPath="/test/repo"
-        stagedCount={0}
-        onCommit={mockOnCommit}
-      />
+      <CommitBox repoPath="/test/repo" stagedCount={0} onCommit={mockOnCommit} />
     );
 
     const commitBtn = screen.getByTestId("commit-button");
     expect(commitBtn).toBeDisabled();
 
     // With staged count > 0 but empty summary
-    rerender(
-      <CommitBox
-        repoPath="/test/repo"
-        stagedCount={3}
-        onCommit={mockOnCommit}
-      />
-    );
+    rerender(<CommitBox repoPath="/test/repo" stagedCount={3} onCommit={mockOnCommit} />);
     expect(commitBtn).toBeDisabled();
 
     // Type summary -> enabled
@@ -58,22 +42,14 @@ describe("CommitBox", () => {
   });
 
   it("displays 72-character counter and shows warning when exceeded", () => {
-    render(
-      <CommitBox
-        repoPath="/test/repo"
-        stagedCount={1}
-        onCommit={mockOnCommit}
-      />
-    );
+    render(<CommitBox repoPath="/test/repo" stagedCount={1} onCommit={mockOnCommit} />);
 
     const summaryInput = screen.getByTestId("commit-summary-input");
     fireEvent.change(summaryInput, {
       target: { value: "Short summary" },
     });
     expect(screen.getByText("13/72")).toBeInTheDocument();
-    expect(
-      screen.queryByText(/Vượt quá 72 ký tự khuyến nghị/i)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/Vượt quá 72 ký tự khuyến nghị/i)).not.toBeInTheDocument();
 
     // 75 chars
     const longSummary = "a".repeat(75);
@@ -81,19 +57,11 @@ describe("CommitBox", () => {
       target: { value: longSummary },
     });
     expect(screen.getByText("75/72")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Vượt quá 72 ký tự khuyến nghị/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Vượt quá 72 ký tự khuyến nghị/i)).toBeInTheDocument();
   });
 
   it("submits commit on button click and clears form", async () => {
-    render(
-      <CommitBox
-        repoPath="/test/repo"
-        stagedCount={1}
-        onCommit={mockOnCommit}
-      />
-    );
+    render(<CommitBox repoPath="/test/repo" stagedCount={1} onCommit={mockOnCommit} />);
 
     const summaryInput = screen.getByTestId("commit-summary-input") as HTMLInputElement;
     const descInput = screen.getByTestId("commit-description-input") as HTMLTextAreaElement;
@@ -139,13 +107,7 @@ describe("CommitBox", () => {
   });
 
   it("triggers commit on Cmd+Enter / Ctrl+Enter", async () => {
-    render(
-      <CommitBox
-        repoPath="/test/repo"
-        stagedCount={1}
-        onCommit={mockOnCommit}
-      />
-    );
+    render(<CommitBox repoPath="/test/repo" stagedCount={1} onCommit={mockOnCommit} />);
 
     const summaryInput = screen.getByTestId("commit-summary-input");
     fireEvent.change(summaryInput, { target: { value: "feat: shortcut commit" } });
@@ -153,11 +115,7 @@ describe("CommitBox", () => {
     fireEvent.keyDown(summaryInput, { key: "Enter", ctrlKey: true });
 
     await waitFor(() => {
-      expect(mockOnCommit).toHaveBeenCalledWith(
-        "feat: shortcut commit",
-        undefined,
-        false
-      );
+      expect(mockOnCommit).toHaveBeenCalledWith("feat: shortcut commit", undefined, false);
     });
   });
 });

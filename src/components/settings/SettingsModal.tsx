@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Settings, X, User, Palette, Sliders, Globe, FolderGit2, FileCode, Terminal, GitPullRequest } from "lucide-react";
+import {
+  Settings,
+  X,
+  User,
+  Palette,
+  Sliders,
+  Globe,
+  FolderGit2,
+  FileCode,
+  Terminal,
+  GitPullRequest,
+} from "lucide-react";
 import { useTranslation } from "../../i18n";
-import { useSettingsStore, SettingsTab } from "../../store/useSettingsStore";
+import { useSettingsStore, type SettingsTab } from "../../store/useSettingsStore";
 import { useTabStore } from "../../store/useTabStore";
 import { Transition } from "../common/Transition";
 import { GitProfileTab } from "./tabs/GitProfileTab";
@@ -21,17 +32,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
   const { tabs } = useTabStore();
 
   const openRepoTabs = tabs.filter((t) => t.type === "repo" && t.repo);
-  const activeRepo = currentRepoPath
-    ? openRepoTabs.find((t) => t.id === currentRepoPath)
-    : null;
+  const activeRepo = currentRepoPath ? openRepoTabs.find((t) => t.id === currentRepoPath) : null;
 
   const [scope, setScope] = useState<"global" | "repo">(() => {
     return currentRepoPath ? "repo" : "global";
   });
 
-  const [selectedRepoPath, setSelectedRepoPath] = useState<string>(
-    currentRepoPath || ""
-  );
+  const [selectedRepoPath, setSelectedRepoPath] = useState<string>(currentRepoPath || "");
 
   useEffect(() => {
     if (!isSettingsOpen) return;
@@ -73,7 +80,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
   };
 
   const effectiveScope = currentRepoPath ? scope : "global";
-  const effectiveRepoPath = effectiveScope === "repo" ? (selectedRepoPath || currentRepoPath) : null;
+  const effectiveRepoPath = effectiveScope === "repo" ? selectedRepoPath || currentRepoPath : null;
 
   return (
     <Transition
@@ -101,15 +108,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
                 <Settings size={20} />
               </div>
               <div>
-                <h2
-                  id="settings-modal-title"
-                  className="text-base font-semibold text-primary m-0"
-                >
+                <h2 id="settings-modal-title" className="text-base font-semibold text-primary m-0">
                   {t.settings.title}
                 </h2>
-                <p className="text-xs text-secondary m-0 mt-0.5">
-                  {t.settings.description}
-                </p>
+                <p className="text-xs text-secondary m-0 mt-0.5">{t.settings.description}</p>
               </div>
             </div>
 
@@ -169,7 +171,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
 
                   {openRepoTabs.length <= 1 && (
                     <span className="ml-1 font-mono text-[11px] opacity-85">
-                      ({activeRepo?.alias || activeRepo?.repo?.name || getRepoDisplayName(currentRepoPath)})
+                      (
+                      {activeRepo?.alias ||
+                        activeRepo?.repo?.name ||
+                        getRepoDisplayName(currentRepoPath)}
+                      )
                     </span>
                   )}
                 </button>
@@ -218,7 +224,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
 
             {/* Main Tab Content */}
             <div className="flex-1 min-h-0 overflow-y-auto p-8">
-              <div key={`${activeTab}-${effectiveScope}-${effectiveRepoPath}`} className="animate-fade-in max-w-3xl">
+              <div
+                key={`${activeTab}-${effectiveScope}-${effectiveRepoPath}`}
+                className="animate-fade-in max-w-3xl"
+              >
                 {activeTab === "profile" && (
                   <GitProfileTab
                     scope={effectiveScope}
@@ -245,4 +254,3 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
     </Transition>
   );
 };
-

@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { GitMerge, GitPullRequest, Clock, Check, FolderGit2, Globe, ShieldAlert, Scissors, Archive } from "lucide-react";
+import {
+  GitMerge,
+  GitPullRequest,
+  Clock,
+  Check,
+  FolderGit2,
+  Globe,
+  ShieldAlert,
+  Scissors,
+  Archive,
+} from "lucide-react";
 import { useTranslation } from "../../../i18n";
 import { invokeCommand } from "../../../ipc/client";
 import { useToastStore } from "../../../store/useToastStore";
@@ -175,7 +185,9 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
             <div>
               <div className="text-xs font-semibold text-primary">
                 {t.settings.profile.repoSettingsBanner}{" "}
-                <span className="font-mono text-accent">{currentRepoPath.split(/[/\\]/).filter(Boolean).pop() || currentRepoPath}</span>
+                <span className="font-mono text-accent">
+                  {currentRepoPath.split(/[/\\]/).filter(Boolean).pop() || currentRepoPath}
+                </span>
               </div>
               <p className="text-[11px] text-secondary mt-0.5">
                 {t.settings.profile.repoSettingsDesc}
@@ -236,7 +248,9 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
                   : "border-border-subtle bg-surface-header/30 hover:bg-surface-hover text-secondary"
               }`}
             >
-              <Globe className={`w-5 h-5 mt-0.5 ${localPullRebase === null ? "text-accent" : "text-secondary"}`} />
+              <Globe
+                className={`w-5 h-5 mt-0.5 ${localPullRebase === null ? "text-accent" : "text-secondary"}`}
+              />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-primary">
@@ -267,15 +281,21 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
                   : "border-border-subtle bg-surface-header/30 hover:bg-surface-hover text-secondary"
               }`}
             >
-              <GitMerge className={`w-5 h-5 mt-0.5 ${localPullRebase === false ? "text-accent" : "text-secondary"}`} />
+              <GitMerge
+                className={`w-5 h-5 mt-0.5 ${localPullRebase === false ? "text-accent" : "text-secondary"}`}
+              />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-primary">{t.settings.behavior.pullMerge}</span>
+                  <span className="text-xs font-semibold text-primary">
+                    {t.settings.behavior.pullMerge}
+                  </span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 font-semibold">
                     {t.settings.profile.overrideRepoOption}
                   </span>
                 </div>
-                <div className="text-[11px] text-secondary mt-0.5">{t.settings.behavior.pullMergeDesc}</div>
+                <div className="text-[11px] text-secondary mt-0.5">
+                  {t.settings.behavior.pullMergeDesc}
+                </div>
               </div>
               {localPullRebase === false && <Check size={16} className="text-accent mt-0.5" />}
             </button>
@@ -291,15 +311,21 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
                   : "border-border-subtle bg-surface-header/30 hover:bg-surface-hover text-secondary"
               }`}
             >
-              <GitPullRequest className={`w-5 h-5 mt-0.5 ${localPullRebase === true ? "text-accent" : "text-secondary"}`} />
+              <GitPullRequest
+                className={`w-5 h-5 mt-0.5 ${localPullRebase === true ? "text-accent" : "text-secondary"}`}
+              />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-primary">{t.settings.behavior.pullRebase}</span>
+                  <span className="text-xs font-semibold text-primary">
+                    {t.settings.behavior.pullRebase}
+                  </span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 font-semibold">
                     {t.settings.profile.overrideRepoOption}
                   </span>
                 </div>
-                <div className="text-[11px] text-secondary mt-0.5">{t.settings.behavior.pullRebaseDesc}</div>
+                <div className="text-[11px] text-secondary mt-0.5">
+                  {t.settings.behavior.pullRebaseDesc}
+                </div>
               </div>
               {localPullRebase === true && <Check size={16} className="text-accent mt-0.5" />}
             </button>
@@ -317,10 +343,16 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
                   : "border-border-subtle bg-surface-header/30 hover:bg-surface-hover text-secondary"
               }`}
             >
-              <GitMerge className={`w-5 h-5 mt-0.5 ${!globalPullRebase ? "text-accent" : "text-secondary"}`} />
+              <GitMerge
+                className={`w-5 h-5 mt-0.5 ${!globalPullRebase ? "text-accent" : "text-secondary"}`}
+              />
               <div className="flex-1">
-                <div className="text-xs font-semibold text-primary">{t.settings.behavior.pullMerge}</div>
-                <div className="text-[11px] text-secondary mt-0.5">{t.settings.behavior.pullMergeDesc}</div>
+                <div className="text-xs font-semibold text-primary">
+                  {t.settings.behavior.pullMerge}
+                </div>
+                <div className="text-[11px] text-secondary mt-0.5">
+                  {t.settings.behavior.pullMergeDesc}
+                </div>
               </div>
               {!globalPullRebase && <Check size={16} className="text-accent mt-0.5" />}
             </button>
@@ -335,10 +367,16 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
                   : "border-border-subtle bg-surface-header/30 hover:bg-surface-hover text-secondary"
               }`}
             >
-              <GitPullRequest className={`w-5 h-5 mt-0.5 ${globalPullRebase ? "text-accent" : "text-secondary"}`} />
+              <GitPullRequest
+                className={`w-5 h-5 mt-0.5 ${globalPullRebase ? "text-accent" : "text-secondary"}`}
+              />
               <div className="flex-1">
-                <div className="text-xs font-semibold text-primary">{t.settings.behavior.pullRebase}</div>
-                <div className="text-[11px] text-secondary mt-0.5">{t.settings.behavior.pullRebaseDesc}</div>
+                <div className="text-xs font-semibold text-primary">
+                  {t.settings.behavior.pullRebase}
+                </div>
+                <div className="text-[11px] text-secondary mt-0.5">
+                  {t.settings.behavior.pullRebaseDesc}
+                </div>
               </div>
               {globalPullRebase && <Check size={16} className="text-accent mt-0.5" />}
             </button>
@@ -532,9 +570,7 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
             tag={t.settings.help.tagRecommended}
           />
         </div>
-        <p className="text-[11px] text-secondary">
-          {t.settings.behavior.autoFetchDesc}
-        </p>
+        <p className="text-[11px] text-secondary">{t.settings.behavior.autoFetchDesc}</p>
         <div className="grid grid-cols-3 gap-3 pt-1">
           {[
             { value: 0, label: t.settings.behavior.autoFetchOff },

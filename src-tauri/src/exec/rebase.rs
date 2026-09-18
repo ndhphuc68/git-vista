@@ -138,7 +138,8 @@ pub fn execute_interactive_rebase<P: AsRef<Path>>(
                 todo_lines.push(format!("pick {}", short_sha));
                 if let Some(msg) = &step.new_message {
                     let msg_file = temp_dir.path().join(format!("msg_{}.txt", idx));
-                    fs::write(&msg_file, msg.as_bytes()).map_err(|e| AppError::Io(e.to_string()))?;
+                    fs::write(&msg_file, msg.as_bytes())
+                        .map_err(|e| AppError::Io(e.to_string()))?;
                     let msg_file_posix = msg_file.to_string_lossy().replace('\\', "/");
                     todo_lines.push(format!("exec git commit --amend -F '{}'", msg_file_posix));
                 }
@@ -150,7 +151,8 @@ pub fn execute_interactive_rebase<P: AsRef<Path>>(
                 todo_lines.push(format!("fixup {}", short_sha));
                 if let Some(msg) = &step.new_message {
                     let msg_file = temp_dir.path().join(format!("msg_{}.txt", idx));
-                    fs::write(&msg_file, msg.as_bytes()).map_err(|e| AppError::Io(e.to_string()))?;
+                    fs::write(&msg_file, msg.as_bytes())
+                        .map_err(|e| AppError::Io(e.to_string()))?;
                     let msg_file_posix = msg_file.to_string_lossy().replace('\\', "/");
                     todo_lines.push(format!("exec git commit --amend -F '{}'", msg_file_posix));
                 }
@@ -164,8 +166,7 @@ pub fn execute_interactive_rebase<P: AsRef<Path>>(
     let todo_content = todo_lines.join("\n");
 
     let todo_file_path = temp_dir.path().join("git-rebase-todo-custom");
-    fs::write(&todo_file_path, todo_content.as_bytes())
-        .map_err(|e| AppError::Io(e.to_string()))?;
+    fs::write(&todo_file_path, todo_content.as_bytes()).map_err(|e| AppError::Io(e.to_string()))?;
 
     let todo_path_posix = todo_file_path.to_string_lossy().replace('\\', "/");
 

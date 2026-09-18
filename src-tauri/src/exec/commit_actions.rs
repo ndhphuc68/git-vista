@@ -56,8 +56,16 @@ fn create_undo_token(
     }
     let receipt = repo.commit(None, &sig, &sig, &message, &tree, &parents)?;
     static NEXT: AtomicU64 = AtomicU64::new(0);
-    let unique = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_nanos();
-    let action = format!("commit-undo-{}-{}-{}", std::process::id(), unique, NEXT.fetch_add(1, Ordering::Relaxed));
+    let unique = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_nanos();
+    let action = format!(
+        "commit-undo-{}-{}-{}",
+        std::process::id(),
+        unique,
+        NEXT.fetch_add(1, Ordering::Relaxed)
+    );
     create_backup_ref(repo, &action, receipt)
 }
 

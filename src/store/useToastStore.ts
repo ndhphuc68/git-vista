@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { flushSync } from "react-dom";
-import { FriendlyError } from "../utils/errorMapping";
+import { type FriendlyError } from "../utils/errorMapping";
 
 export interface ToastItem {
   id: string;
@@ -84,8 +84,8 @@ export const useToastStore = create<ToastState>((set, get) => ({
       "friendlyError" in errorOrOptions && errorOrOptions.friendlyError
         ? errorOrOptions.friendlyError
         : "actionHint" in errorOrOptions
-        ? (errorOrOptions as FriendlyError)
-        : undefined;
+          ? (errorOrOptions as FriendlyError)
+          : undefined;
 
     const title = "title" in errorOrOptions ? errorOrOptions.title : undefined;
     const message = "message" in errorOrOptions ? errorOrOptions.message : undefined;

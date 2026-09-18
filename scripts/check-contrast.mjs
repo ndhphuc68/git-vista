@@ -8,7 +8,7 @@
 
 // Hàm chuyển đổi hex sang RGB
 function hexToRgb(hex) {
-  const cleanHex = hex.replace('#', '').trim();
+  const cleanHex = hex.replace("#", "").trim();
   const num = parseInt(cleanHex, 16);
   return {
     r: (num >> 16) & 255,
@@ -38,39 +38,39 @@ function getContrastRatio(hex1, hex2) {
 // Bảng màu từ spec & tokens.css
 const testSuites = [
   {
-    theme: 'Light Theme',
+    theme: "Light Theme",
     checks: [
-      { name: 'Chữ chính trên Nền cửa sổ', fg: '#1A1918', bg: '#F5F3F1', minRatio: 4.5 },
-      { name: 'Chữ chính trên Bề mặt nổi', fg: '#1A1918', bg: '#FFFFFF', minRatio: 4.5 },
-      { name: 'Chữ phụ trên Bề mặt nổi', fg: '#6B6764', bg: '#FFFFFF', minRatio: 4.5 },
-      { name: 'Accent trên Bề mặt nổi', fg: '#2F6FEB', bg: '#FFFFFF', minRatio: 4.5 },
-      { name: 'Chữ Diff Thêm trên Nền Diff Thêm', fg: '#0E4429', bg: '#DAFBE1', minRatio: 4.5 },
-      { name: 'Chữ Diff Xoá trên Nền Diff Xoá', fg: '#82071E', bg: '#FFEBE9', minRatio: 4.5 },
+      { name: "Chữ chính trên Nền cửa sổ", fg: "#1A1918", bg: "#F5F3F1", minRatio: 4.5 },
+      { name: "Chữ chính trên Bề mặt nổi", fg: "#1A1918", bg: "#FFFFFF", minRatio: 4.5 },
+      { name: "Chữ phụ trên Bề mặt nổi", fg: "#6B6764", bg: "#FFFFFF", minRatio: 4.5 },
+      { name: "Accent trên Bề mặt nổi", fg: "#2F6FEB", bg: "#FFFFFF", minRatio: 4.5 },
+      { name: "Chữ Diff Thêm trên Nền Diff Thêm", fg: "#0E4429", bg: "#DAFBE1", minRatio: 4.5 },
+      { name: "Chữ Diff Xoá trên Nền Diff Xoá", fg: "#82071E", bg: "#FFEBE9", minRatio: 4.5 },
     ],
   },
   {
-    theme: 'Dark Theme',
+    theme: "Dark Theme",
     checks: [
-      { name: 'Chữ chính trên Nền cửa sổ', fg: '#EDEBE9', bg: '#1C1B1A', minRatio: 4.5 },
-      { name: 'Chữ chính trên Bề mặt nổi', fg: '#EDEBE9', bg: '#252423', minRatio: 4.5 },
-      { name: 'Chữ phụ trên Bề mặt nổi', fg: '#98938E', bg: '#252423', minRatio: 4.5 },
-      { name: 'Accent trên Bề mặt nổi', fg: '#4D8DFF', bg: '#252423', minRatio: 4.5 },
-      { name: 'Chữ Diff Thêm trên Nền Diff Thêm', fg: '#3FB950', bg: '#12261E', minRatio: 4.5 },
-      { name: 'Chữ Diff Xoá trên Nền Diff Xoá', fg: '#F85149', bg: '#2D1416', minRatio: 4.5 },
+      { name: "Chữ chính trên Nền cửa sổ", fg: "#EDEBE9", bg: "#1C1B1A", minRatio: 4.5 },
+      { name: "Chữ chính trên Bề mặt nổi", fg: "#EDEBE9", bg: "#252423", minRatio: 4.5 },
+      { name: "Chữ phụ trên Bề mặt nổi", fg: "#98938E", bg: "#252423", minRatio: 4.5 },
+      { name: "Accent trên Bề mặt nổi", fg: "#4D8DFF", bg: "#252423", minRatio: 4.5 },
+      { name: "Chữ Diff Thêm trên Nền Diff Thêm", fg: "#3FB950", bg: "#12261E", minRatio: 4.5 },
+      { name: "Chữ Diff Xoá trên Nền Diff Xoá", fg: "#F85149", bg: "#2D1416", minRatio: 4.5 },
     ],
   },
   {
-    theme: 'Colorblind Mode (Light & Dark)',
+    theme: "Colorblind Mode (Light & Dark)",
     checks: [
-      { name: 'Light: Diff Thêm (Xanh dương)', fg: '#0369A1', bg: '#E0F2FE', minRatio: 4.5 },
-      { name: 'Light: Diff Xoá (Cam)', fg: '#B45309', bg: '#FEF3C7', minRatio: 4.5 },
-      { name: 'Dark: Diff Thêm (Xanh dương)', fg: '#38BDF8', bg: '#0C283E', minRatio: 4.5 },
-      { name: 'Dark: Diff Xoá (Cam)', fg: '#FBBF24', bg: '#3E240C', minRatio: 4.5 },
+      { name: "Light: Diff Thêm (Xanh dương)", fg: "#0369A1", bg: "#E0F2FE", minRatio: 4.5 },
+      { name: "Light: Diff Xoá (Cam)", fg: "#B45309", bg: "#FEF3C7", minRatio: 4.5 },
+      { name: "Dark: Diff Thêm (Xanh dương)", fg: "#38BDF8", bg: "#0C283E", minRatio: 4.5 },
+      { name: "Dark: Diff Xoá (Cam)", fg: "#FBBF24", bg: "#3E240C", minRatio: 4.5 },
     ],
   },
 ];
 
-console.log('🔍 Kiểm tra độ tương phản màu sắc (WCAG AA - Min 4.5:1)...\n');
+console.log("🔍 Kiểm tra độ tương phản màu sắc (WCAG AA - Min 4.5:1)...\n");
 let failed = 0;
 
 for (const suite of testSuites) {
@@ -78,7 +78,7 @@ for (const suite of testSuites) {
   for (const check of suite.checks) {
     const ratio = getContrastRatio(check.fg, check.bg);
     const passed = ratio >= check.minRatio;
-    const icon = passed ? '✅' : '❌';
+    const icon = passed ? "✅" : "❌";
     console.log(
       `  ${icon} ${check.name}: ${ratio.toFixed(2)}:1 (Yêu cầu: >= ${check.minRatio}:1) [fg: ${check.fg}, bg: ${check.bg}]`
     );
@@ -86,14 +86,13 @@ for (const suite of testSuites) {
       failed++;
     }
   }
-  console.log('');
+  console.log("");
 }
 
 if (failed > 0) {
   console.error(`❌ Kiểm tra thất bại! Có ${failed} cặp màu không đạt chuẩn WCAG AA 4.5:1.`);
   process.exit(1);
 } else {
-  console.log('✨ Toàn bộ bảng màu đạt chuẩn tương phản WCAG AA 4.5:1!');
+  console.log("✨ Toàn bộ bảng màu đạt chuẩn tương phản WCAG AA 4.5:1!");
   process.exit(0);
 }
-

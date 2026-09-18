@@ -43,17 +43,27 @@ fn test_get_repo_status_staged_changes() {
     // Add a new file and stage it
     fs::write(repo_path.join("staged_new.txt"), "staged new file").unwrap();
     let mut index = repo.index().unwrap();
-    index.add_path(std::path::Path::new("staged_new.txt")).unwrap();
+    index
+        .add_path(std::path::Path::new("staged_new.txt"))
+        .unwrap();
     index.write().unwrap();
 
     let status = get_repo_status(repo_path).expect("status should succeed");
     assert_eq!(status.staged.len(), 2);
-    
-    let file1_staged = status.staged.iter().find(|item| item.path == "file1.txt").unwrap();
+
+    let file1_staged = status
+        .staged
+        .iter()
+        .find(|item| item.path == "file1.txt")
+        .unwrap();
     assert_eq!(file1_staged.status, FileStatus::Modified);
     assert!(file1_staged.is_staged);
 
-    let new_staged = status.staged.iter().find(|item| item.path == "staged_new.txt").unwrap();
+    let new_staged = status
+        .staged
+        .iter()
+        .find(|item| item.path == "staged_new.txt")
+        .unwrap();
     assert_eq!(new_staged.status, FileStatus::New);
     assert!(new_staged.is_staged);
 
@@ -95,7 +105,11 @@ fn test_get_working_file_diff_unstaged_and_staged() {
     let repo = fixture.repo();
 
     // 1. Unstaged diff
-    fs::write(repo_path.join("file1.txt"), "initial content for file1\nnew line 2\nnew line 3\n").unwrap();
+    fs::write(
+        repo_path.join("file1.txt"),
+        "initial content for file1\nnew line 2\nnew line 3\n",
+    )
+    .unwrap();
     let unstaged_diff = get_working_file_diff(repo_path, "file1.txt", false, None)
         .expect("unstaged diff should succeed");
     assert_eq!(unstaged_diff.file_path, "file1.txt");
@@ -219,7 +233,8 @@ fn test_get_repo_status_deleted_and_renamed() {
     // 3. Stage rename: write to file2.txt and remove file1.txt from index with same content
     // Reset back to clean first by checking out
     let head = repo.head().unwrap().peel_to_commit().unwrap();
-    repo.reset(head.as_object(), git2::ResetType::Hard, None).unwrap();
+    repo.reset(head.as_object(), git2::ResetType::Hard, None)
+        .unwrap();
 
     // Move file1.txt to file2.txt in filesystem and index
     fs::rename(repo_path.join("file1.txt"), repo_path.join("file2.txt")).unwrap();

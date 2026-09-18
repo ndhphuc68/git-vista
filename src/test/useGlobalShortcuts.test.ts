@@ -59,9 +59,7 @@ describe("useGlobalShortcuts", () => {
 
     // Press ?
     act(() => {
-      window.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "?", bubbles: true })
-      );
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "?", bubbles: true }));
     });
     expect(onOpenShortcutsHelp).toHaveBeenCalledTimes(1);
 
@@ -91,9 +89,7 @@ describe("useGlobalShortcuts", () => {
     renderHook(() => useGlobalShortcuts({ onEscape }));
 
     act(() => {
-      window.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
-      );
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     });
     expect(onEscape).toHaveBeenCalledTimes(1);
   });
@@ -118,9 +114,7 @@ describe("useGlobalShortcuts", () => {
     document.body.appendChild(input);
 
     act(() => {
-      input.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true })
-      );
+      input.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
     });
     expect(onOpenCommandPalette).not.toHaveBeenCalled();
 
@@ -129,9 +123,7 @@ describe("useGlobalShortcuts", () => {
 
   it("does not trigger callbacks when enabled is false", () => {
     const onOpenCommandPalette = vi.fn();
-    renderHook(() =>
-      useGlobalShortcuts({ onOpenCommandPalette, enabled: false })
-    );
+    renderHook(() => useGlobalShortcuts({ onOpenCommandPalette, enabled: false }));
 
     act(() => {
       window.dispatchEvent(

@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
-import { GitPullRequest, GitBranch, ArrowRight, Upload, X, AlertCircle, Loader2 } from "lucide-react";
+import {
+  GitPullRequest,
+  GitBranch,
+  ArrowRight,
+  Upload,
+  X,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { invokeCommand } from "../../ipc/client";
 import { createPullRequest } from "../../services/githubService";
@@ -107,9 +115,7 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
   }, [isOpen, handleClose]);
 
   // Check if compare branch has unpushed commits
-  const currentCompareBranchItem = branchData?.local.find(
-    (b) => b.name === compareBranch
-  );
+  const currentCompareBranchItem = branchData?.local.find((b) => b.name === compareBranch);
   const hasUnpushedCommits =
     currentCompareBranchItem &&
     (currentCompareBranchItem.ahead > 0 || !currentCompareBranchItem.upstream);
@@ -134,13 +140,7 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
     setError(null);
     try {
       const hasUpstream = Boolean(currentCompareBranchItem?.upstream);
-      await invokeCommand.pushRepo(
-        repoPath,
-        undefined,
-        compareBranch,
-        !hasUpstream,
-        false
-      );
+      await invokeCommand.pushRepo(repoPath, undefined, compareBranch, !hasUpstream, false);
       await refetchBranches();
       useToastStore.getState().showToast({
         message: "Push thành công",
@@ -193,18 +193,14 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
       );
 
       useToastStore.getState().showToast({
-        message: t.pullRequests.createSuccess.replace(
-          "{number}",
-          String(newPr.number)
-        ),
+        message: t.pullRequests.createSuccess.replace("{number}", String(newPr.number)),
         type: "success",
       });
 
       queryClient.invalidateQueries({
         predicate: (query) =>
           query.queryKey.some(
-            (part) =>
-              typeof part === "string" && part.includes("github-pull-requests")
+            (part) => typeof part === "string" && part.includes("github-pull-requests")
           ),
       });
 
@@ -364,12 +360,8 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
 
             {/* Title Input */}
             <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="pr-title-input"
-                className="text-xs font-medium text-primary"
-              >
-                {t.pullRequests.prTitle}{" "}
-                <span className="text-red-500">*</span>
+              <label htmlFor="pr-title-input" className="text-xs font-medium text-primary">
+                {t.pullRequests.prTitle} <span className="text-red-500">*</span>
               </label>
               <input
                 ref={titleInputRef}
@@ -389,10 +381,7 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
 
             {/* Body Textarea */}
             <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="pr-body-input"
-                className="text-xs font-medium text-primary"
-              >
+              <label htmlFor="pr-body-input" className="text-xs font-medium text-primary">
                 {t.pullRequests.prBody}
               </label>
               <textarea

@@ -6,7 +6,7 @@ import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { pairHunkLines } from "../../utils/wordDiff";
-import { DiffHunk } from "../../ipc/bindings";
+import { type DiffHunk } from "../../ipc/bindings";
 import { DiffLineContent } from "../diff/DiffLineContent";
 
 export interface InteractiveDiffViewerProps {
@@ -97,19 +97,15 @@ const InteractiveHunk: React.FC<InteractiveHunkProps> = ({
               isAdd
                 ? "bg-diff-add-bg text-diff-add-text"
                 : isDel
-                ? "bg-diff-remove-bg text-diff-remove-text"
-                : "bg-transparent text-primary"
+                  ? "bg-diff-remove-bg text-diff-remove-text"
+                  : "bg-transparent text-primary"
             )}
           >
             {/* Sticky Line Number Gutter */}
             <div
               className={clsx(
                 "flex items-center sticky left-0 z-2 shrink-0",
-                isAdd
-                  ? "bg-diff-add-bg"
-                  : isDel
-                  ? "bg-diff-remove-bg"
-                  : "bg-surface"
+                isAdd ? "bg-diff-add-bg" : isDel ? "bg-diff-remove-bg" : "bg-surface"
               )}
             >
               {/* Old Line Number */}
@@ -197,9 +193,14 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
   const [showWordDiff, setShowWordDiff] = useState(true);
   const { diffIgnoreWhitespace, setDiffIgnoreWhitespace } = useSettingsStore();
 
-  const { data: diff, isLoading, isError } = useQuery({
+  const {
+    data: diff,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["workingFileDiff", repoPath, filePath, isStaged, diffIgnoreWhitespace],
-    queryFn: () => invokeCommand.getWorkingFileDiff(repoPath, filePath, isStaged, diffIgnoreWhitespace),
+    queryFn: () =>
+      invokeCommand.getWorkingFileDiff(repoPath, filePath, isStaged, diffIgnoreWhitespace),
     enabled: Boolean(repoPath && filePath),
   });
 
@@ -262,7 +263,9 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
         </div>
         <div className="flex items-center gap-1 text-secondary">
           <Layers size={13} />
-          <span>{diff.hunks.length} {diff.hunks.length === 1 ? "hunk" : "hunks"}</span>
+          <span>
+            {diff.hunks.length} {diff.hunks.length === 1 ? "hunk" : "hunks"}
+          </span>
         </div>
         <div className="flex items-center gap-1.5 shrink-0 ml-1">
           <button

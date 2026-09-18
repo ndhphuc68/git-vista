@@ -12,7 +12,11 @@ export interface CommitBoxProps {
   repoPath: string;
   stagedCount: number;
   lastCommitMessage?: string;
-  onCommit?: (summary: string, description?: string, amend?: boolean) => Promise<CommitDetails | void>;
+  onCommit?: (
+    summary: string,
+    description?: string,
+    amend?: boolean
+  ) => Promise<CommitDetails | void>;
   onSuccess?: () => void;
   isLoading?: boolean;
 }
@@ -39,10 +43,7 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
 
   const isOver72 = summary.length > 72;
   const canCommit =
-    summary.trim().length > 0 &&
-    (isAmend || stagedCount > 0) &&
-    !isLoading &&
-    !submitting;
+    summary.trim().length > 0 && (isAmend || stagedCount > 0) && !isLoading && !submitting;
 
   const handleAmendToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
@@ -82,10 +83,12 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
         message: isAmend ? t.commit.amendSuccess : t.commit.commitSuccess,
         type: "success",
         durationMs: 10000,
-        undoAction: result?.undo_token ? async () => {
-          await invokeCommand.undoCommit(repoPath, result.undo_token!);
-          if (onSuccess) onSuccess();
-        } : undefined,
+        undoAction: result?.undo_token
+          ? async () => {
+              await invokeCommand.undoCommit(repoPath, result.undo_token!);
+              if (onSuccess) onSuccess();
+            }
+          : undefined,
       });
 
       setSummary("");
@@ -111,9 +114,7 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <GitCommit size={14} className="text-accent" />
-          <span className="text-xs font-semibold text-secondary">
-            {t.commit.title}
-          </span>
+          <span className="text-xs font-semibold text-secondary">{t.commit.title}</span>
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -138,7 +139,9 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
           placeholder={t.commit.summaryPlaceholder}
           className={clsx(
             "w-full px-2 py-1.5 bg-window rounded-sm text-xs text-primary outline-none box-border transition-colors",
-            isOver72 ? "border border-diff-remove-text focus:border-diff-remove-text" : "border border-border-subtle focus:border-accent"
+            isOver72
+              ? "border border-diff-remove-text focus:border-diff-remove-text"
+              : "border border-border-subtle focus:border-accent"
           )}
         />
 
@@ -169,16 +172,10 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
             onChange={handleAmendToggle}
             className="cursor-pointer"
           />
-          <span>
-            {mode === "simple"
-              ? t.commit.amendSimple
-              : t.commit.amendAdvanced}
-          </span>
+          <span>{mode === "simple" ? t.commit.amendSimple : t.commit.amendAdvanced}</span>
         </label>
 
-        <span className="text-[10px] text-tertiary">
-          {shortcutHint}
-        </span>
+        <span className="text-[10px] text-tertiary">{shortcutHint}</span>
       </div>
 
       <button
@@ -200,9 +197,7 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
           </>
         ) : isAmend ? (
           <span>
-            {mode === "simple"
-              ? t.commit.amendCommitSimple
-              : t.commit.amendCommitAdvanced}
+            {mode === "simple" ? t.commit.amendCommitSimple : t.commit.amendCommitAdvanced}
           </span>
         ) : (
           <span>

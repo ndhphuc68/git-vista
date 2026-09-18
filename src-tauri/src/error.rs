@@ -32,4 +32,3 @@ impl From<std::io::Error> for AppError {
         AppError::Io(err.to_string())
     }
 }
-

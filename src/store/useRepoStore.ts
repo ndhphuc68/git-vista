@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { RepoSummary } from "../ipc/bindings";
+import { type RepoSummary } from "../ipc/bindings";
 
 interface RepoState {
   currentRepo: RepoSummary | null;

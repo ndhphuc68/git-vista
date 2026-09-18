@@ -12,16 +12,13 @@ describe("Undo & Toast Integration", () => {
   });
 
   it("shows toast with undo action after successful commit in CommitBox", async () => {
-    vi.spyOn(invokeCommand, "createCommit").mockResolvedValue({ id: "oid123", undo_token: "receipt-123" } as any);
+    vi.spyOn(invokeCommand, "createCommit").mockResolvedValue({
+      id: "oid123",
+      undo_token: "receipt-123",
+    } as any);
     const undoSpy = vi.spyOn(invokeCommand, "undoCommit").mockResolvedValue(undefined);
 
-    render(
-      <CommitBox
-        repoPath="/test/repo"
-        stagedCount={2}
-        onSuccess={vi.fn()}
-      />
-    );
+    render(<CommitBox repoPath="/test/repo" stagedCount={2} onSuccess={vi.fn()} />);
 
     const summaryInput = screen.getByPlaceholderText(/Tiêu đề commit/i);
     fireEvent.change(summaryInput, { target: { value: "feat: new feature" } });

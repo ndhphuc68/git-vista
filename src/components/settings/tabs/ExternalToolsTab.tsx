@@ -3,8 +3,8 @@ import { Code2, Terminal as TerminalIcon } from "lucide-react";
 import { useTranslation } from "../../../i18n";
 import {
   useSettingsStore,
-  DefaultEditor,
-  DefaultTerminal,
+  type DefaultEditor,
+  type DefaultTerminal,
 } from "../../../store/useSettingsStore";
 import { HelpTooltip } from "../HelpTooltip";
 
@@ -24,7 +24,11 @@ export const ExternalToolsTab: React.FC = () => {
     { value: "cursor", label: t.settings.tools.editorCursor, desc: "AI First Code Editor" },
     { value: "subl", label: t.settings.tools.editorSublime, desc: "Sublime Text" },
     { value: "notepad++", label: t.settings.tools.editorNotepadPlusPlus, desc: "Notepad++" },
-    { value: "custom", label: t.settings.tools.editorCustom, desc: t.settings.tools.editorCustomPlaceholder },
+    {
+      value: "custom",
+      label: t.settings.tools.editorCustom,
+      desc: t.settings.tools.editorCustomPlaceholder,
+    },
   ];
 
   const terminalOptions: { value: DefaultTerminal; label: string; command: string }[] = [
@@ -37,12 +41,8 @@ export const ExternalToolsTab: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-base font-semibold text-primary mb-1">
-          {t.settings.tools.title}
-        </h3>
-        <p className="text-xs text-secondary">
-          {t.settings.tools.subtitle}
-        </p>
+        <h3 className="text-base font-semibold text-primary mb-1">{t.settings.tools.title}</h3>
+        <p className="text-xs text-secondary">{t.settings.tools.subtitle}</p>
       </div>
 
       {/* Editor Section */}
@@ -60,9 +60,7 @@ export const ExternalToolsTab: React.FC = () => {
                 tag={t.settings.help.tagIntegration}
               />
             </div>
-            <span className="text-[11px] text-secondary block">
-              {t.settings.tools.editorDesc}
-            </span>
+            <span className="text-[11px] text-secondary block">{t.settings.tools.editorDesc}</span>
           </div>
         </div>
 

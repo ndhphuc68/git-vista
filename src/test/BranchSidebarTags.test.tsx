@@ -4,7 +4,7 @@ import { BranchSidebar } from "../components/sidebar/BranchSidebar";
 import { useRepoStore } from "../store/useRepoStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { invokeCommand } from "../ipc/client";
-import { TagItem } from "../ipc/bindings";
+import { type TagItem } from "../ipc/bindings";
 
 const mockTags: TagItem[] = [
   {

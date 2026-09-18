@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { CommandPalette } from "../components/palette/CommandPalette";
 import { useCommandPaletteStore } from "../store/useCommandPaletteStore";
-import { CommandContext } from "../utils/commandRegistry";
+import { type CommandContext } from "../utils/commandRegistry";
 
 describe("CommandPalette Component", () => {
   const mockNavigate = vi.fn();

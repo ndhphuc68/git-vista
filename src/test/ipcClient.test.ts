@@ -41,11 +41,15 @@ describe("invokeCommand M2.1 methods in browser environment", () => {
   });
 
   it("stageHunk resolves without error in browser mock", async () => {
-    await expect(invokeCommand.stageHunk("/mock/repo", "file.ts", 0, false)).resolves.toBeUndefined();
+    await expect(
+      invokeCommand.stageHunk("/mock/repo", "file.ts", 0, false)
+    ).resolves.toBeUndefined();
   });
 
   it("stageLines resolves without error in browser mock", async () => {
-    await expect(invokeCommand.stageLines("/mock/repo", "file.ts", 0, [0, 1], false)).resolves.toBeUndefined();
+    await expect(
+      invokeCommand.stageLines("/mock/repo", "file.ts", 0, [0, 1], false)
+    ).resolves.toBeUndefined();
   });
 
   it("createCommit returns commit details with summary and description in browser mock", async () => {
@@ -79,7 +83,10 @@ describe("invokeCommand M3 remote operations in browser environment", () => {
   });
 
   it("cloneRepo returns success message in browser mock", async () => {
-    const result = await invokeCommand.cloneRepo("https://github.com/example/repo.git", "/target/dir");
+    const result = await invokeCommand.cloneRepo(
+      "https://github.com/example/repo.git",
+      "/target/dir"
+    );
     expect(result).toContain("Clone");
   });
 
@@ -150,6 +157,3 @@ describe("invokeCommand Tag operations in browser environment", () => {
     }
   });
 });
-
-
-

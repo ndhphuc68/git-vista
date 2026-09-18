@@ -78,7 +78,10 @@ fn set_cached_diff(key: DiffCacheKey, result: FileDiffResult) {
         order: Vec::new(),
     });
 
-    if cache.map.len() >= MAX_CACHE_ENTRIES && !cache.map.contains_key(&key) && !cache.order.is_empty() {
+    if cache.map.len() >= MAX_CACHE_ENTRIES
+        && !cache.map.contains_key(&key)
+        && !cache.order.is_empty()
+    {
         let oldest = cache.order.remove(0);
         cache.map.remove(&oldest);
     }
@@ -173,7 +176,12 @@ pub fn get_file_diff<P: AsRef<Path>>(
 ) -> Result<FileDiffResult, AppError> {
     let ignore_ws = ignore_whitespace.unwrap_or(false);
     let repo_buf = repo_path.as_ref().to_path_buf();
-    let cache_key = (repo_buf, commit_id_str.to_string(), target_path.to_string(), ignore_ws);
+    let cache_key = (
+        repo_buf,
+        commit_id_str.to_string(),
+        target_path.to_string(),
+        ignore_ws,
+    );
     if let Some(cached) = get_cached_diff(&cache_key) {
         return Ok(cached);
     }

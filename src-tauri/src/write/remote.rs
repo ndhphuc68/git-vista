@@ -42,10 +42,7 @@ pub fn rename_remote<P: AsRef<Path>>(
     Ok(())
 }
 
-pub fn remove_remote<P: AsRef<Path>>(
-    repo_path: P,
-    name: &str,
-) -> Result<(), AppError> {
+pub fn remove_remote<P: AsRef<Path>>(repo_path: P, name: &str) -> Result<(), AppError> {
     validate_git_operand(name, "remote")?;
 
     let repo = Repository::open(repo_path.as_ref())?;
@@ -61,7 +58,9 @@ pub fn set_remote_url<P: AsRef<Path>>(
 ) -> Result<(), AppError> {
     validate_git_operand(name, "remote")?;
     if fetch_url.trim().is_empty() {
-        return Err(AppError::InvalidOperation("Fetch URL không được để trống".into()));
+        return Err(AppError::InvalidOperation(
+            "Fetch URL không được để trống".into(),
+        ));
     }
 
     let repo = Repository::open(repo_path.as_ref())?;

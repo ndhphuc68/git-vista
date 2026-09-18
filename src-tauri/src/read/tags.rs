@@ -35,19 +35,18 @@ pub fn list_repo_tags<P: AsRef<Path>>(repo_path: P) -> Result<Vec<TagItem>, AppE
             Err(_) => continue,
         };
 
-        let commit_summary = commit
-            .summary()
-            .ok()
-            .flatten()
-            .unwrap_or("")
-            .to_string();
+        let commit_summary = commit.summary().ok().flatten().unwrap_or("").to_string();
 
         let (is_annotated, message, tagger_name, tagger_email, timestamp_sec) =
             if let Some(target_oid) = reference.target() {
                 if let Ok(tag) = repo.find_tag(target_oid) {
                     let tagger = tag.tagger();
-                    let tagger_name = tagger.as_ref().and_then(|t| t.name().ok().map(|s| s.to_string()));
-                    let tagger_email = tagger.as_ref().and_then(|t| t.email().ok().map(|s| s.to_string()));
+                    let tagger_name = tagger
+                        .as_ref()
+                        .and_then(|t| t.name().ok().map(|s| s.to_string()));
+                    let tagger_email = tagger
+                        .as_ref()
+                        .and_then(|t| t.email().ok().map(|s| s.to_string()));
                     let timestamp_sec = tagger
                         .as_ref()
                         .map(|t| t.when().seconds() as f64)
@@ -55,10 +54,22 @@ pub fn list_repo_tags<P: AsRef<Path>>(repo_path: P) -> Result<Vec<TagItem>, AppE
                     let message = tag.message().ok().flatten().map(|m| m.to_string());
                     (true, message, tagger_name, tagger_email, timestamp_sec)
                 } else {
-                    (false, None, None, None, Some(commit.time().seconds() as f64))
+                    (
+                        false,
+                        None,
+                        None,
+                        None,
+                        Some(commit.time().seconds() as f64),
+                    )
                 }
             } else {
-                (false, None, None, None, Some(commit.time().seconds() as f64))
+                (
+                    false,
+                    None,
+                    None,
+                    None,
+                    Some(commit.time().seconds() as f64),
+                )
             };
 
         let target_commit_id = commit.id().to_string();

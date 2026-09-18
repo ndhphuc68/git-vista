@@ -23,7 +23,8 @@ fn test_ahead_behind_calculation() {
     // Add remote "origin" to local repo
     {
         let repo = fixture.repo();
-        repo.remote("origin", &remote_url).expect("add remote origin");
+        repo.remote("origin", &remote_url)
+            .expect("add remote origin");
     }
 
     // Push master to origin and set upstream using git CLI
@@ -32,7 +33,11 @@ fn test_ahead_behind_calculation() {
         .args(["push", "-u", "origin", "master"])
         .output()
         .expect("git push -u origin master");
-    assert!(push_res.status.success(), "initial push should succeed: {}", String::from_utf8_lossy(&push_res.stderr));
+    assert!(
+        push_res.status.success(),
+        "initial push should succeed: {}",
+        String::from_utf8_lossy(&push_res.stderr)
+    );
 
     // Initially ahead = 0, behind = 0
     let head_info = get_head_info(local_path).expect("head info");
@@ -42,12 +47,14 @@ fn test_ahead_behind_calculation() {
     // Commit 1 locally
     fs::write(local_path.join("file1.txt"), "local change 1").unwrap();
     visual_git_lib::write::staging::stage_all(local_path).unwrap();
-    visual_git_lib::write::commit::create_commit(local_path, "Local commit 1", None, false).unwrap();
+    visual_git_lib::write::commit::create_commit(local_path, "Local commit 1", None, false)
+        .unwrap();
 
     // Commit 2 locally
     fs::write(local_path.join("file1.txt"), "local change 2").unwrap();
     visual_git_lib::write::staging::stage_all(local_path).unwrap();
-    visual_git_lib::write::commit::create_commit(local_path, "Local commit 2", None, false).unwrap();
+    visual_git_lib::write::commit::create_commit(local_path, "Local commit 2", None, false)
+        .unwrap();
 
     // Verify ahead == 2, behind == 0
     let head_info2 = get_head_info(local_path).expect("head info after commits");
@@ -55,7 +62,11 @@ fn test_ahead_behind_calculation() {
     assert_eq!(head_info2.behind, 0);
 
     let branches = list_repo_branches(local_path).expect("list branches");
-    let master_branch = branches.local.iter().find(|b| b.name == "master").expect("find master");
+    let master_branch = branches
+        .local
+        .iter()
+        .find(|b| b.name == "master")
+        .expect("find master");
     assert_eq!(master_branch.ahead, 2);
     assert_eq!(master_branch.behind, 0);
 }
@@ -86,7 +97,9 @@ fn test_parse_git_progress_line() {
 #[test]
 fn test_remote_operations_lifecycle() {
     use std::sync::{Arc, Mutex};
-    use visual_git_lib::exec::remote::{git_clone, git_fetch, git_pull, git_push, set_repo_pull_rebase};
+    use visual_git_lib::exec::remote::{
+        git_clone, git_fetch, git_pull, git_push, set_repo_pull_rebase,
+    };
 
     // 1. Create bare origin
     let (bare_dir, _) = create_bare_remote();
@@ -106,13 +119,14 @@ fn test_remote_operations_lifecycle() {
         repo_a_path,
         Some("origin"),
         Some("master"),
-        true, // set_upstream
+        true,  // set_upstream
         false, // force
         "task-push-1",
         move |percent, text| {
             p_clone.lock().unwrap().push((percent, text));
         },
-    ).expect("push master to bare");
+    )
+    .expect("push master to bare");
     assert!(!push_out.is_empty());
 
     // 3. Test git_clone: clone bare origin into repo B directory
@@ -127,7 +141,8 @@ fn test_remote_operations_lifecycle() {
         move |percent, text| {
             c_clone.lock().unwrap().push((percent, text));
         },
-    ).expect("git_clone");
+    )
+    .expect("git_clone");
     assert!(repo_b_path.join(".git").exists());
 
     // 4. Test git_fetch in repo B
@@ -141,12 +156,14 @@ fn test_remote_operations_lifecycle() {
         move |percent, text| {
             f_clone.lock().unwrap().push((percent, text));
         },
-    ).expect("git_fetch");
+    )
+    .expect("git_fetch");
 
     // 5. Commit a new file in repo A and push
     fs::write(repo_a_path.join("new_file.txt"), "hello from repo A").unwrap();
     visual_git_lib::write::staging::stage_all(repo_a_path).unwrap();
-    visual_git_lib::write::commit::create_commit(repo_a_path, "Commit from A", None, false).unwrap();
+    visual_git_lib::write::commit::create_commit(repo_a_path, "Commit from A", None, false)
+        .unwrap();
     git_push(
         repo_a_path,
         Some("origin"),
@@ -155,7 +172,8 @@ fn test_remote_operations_lifecycle() {
         false,
         "task-push-2",
         |_, _| {},
-    ).expect("push commit from A");
+    )
+    .expect("push commit from A");
 
     // 6. Test git_pull in repo B
     let pull_progress = Arc::new(Mutex::new(Vec::new()));
@@ -169,22 +187,34 @@ fn test_remote_operations_lifecycle() {
         move |percent, text| {
             pl_clone.lock().unwrap().push((percent, text));
         },
-    ).expect("git_pull");
-    assert!(repo_b_path.join("new_file.txt").exists(), "new_file.txt should be pulled into repo B");
+    )
+    .expect("git_pull");
+    assert!(
+        repo_b_path.join("new_file.txt").exists(),
+        "new_file.txt should be pulled into repo B"
+    );
 
     // 7. Test set_repo_pull_rebase
     set_repo_pull_rebase(&repo_b_path, true).expect("set pull.rebase true");
-    let config = git2::Repository::open(&repo_b_path).unwrap().config().unwrap();
+    let config = git2::Repository::open(&repo_b_path)
+        .unwrap()
+        .config()
+        .unwrap();
     assert!(config.get_bool("pull.rebase").unwrap());
 
     set_repo_pull_rebase(&repo_b_path, false).expect("set pull.rebase false");
-    let config2 = git2::Repository::open(&repo_b_path).unwrap().config().unwrap();
+    let config2 = git2::Repository::open(&repo_b_path)
+        .unwrap()
+        .config()
+        .unwrap();
     assert!(!config2.get_bool("pull.rebase").unwrap());
 }
 
 #[test]
 fn test_cancel_task_process() {
-    use visual_git_lib::exec::{cancel_task, is_task_cancelled, register_task_process, unregister_task_process};
+    use visual_git_lib::exec::{
+        cancel_task, is_task_cancelled, register_task_process, unregister_task_process,
+    };
 
     let task_id = "test-cancel-123";
     register_task_process(task_id, 999999);
@@ -197,5 +227,3 @@ fn test_cancel_task_process() {
     unregister_task_process(task_id);
     assert!(!is_task_cancelled(task_id));
 }
-
-

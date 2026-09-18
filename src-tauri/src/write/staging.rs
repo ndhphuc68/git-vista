@@ -244,19 +244,12 @@ pub fn stage_hunk<P: AsRef<Path>>(
     let repo_path_ref = repo_path.as_ref();
     let file_diff =
         crate::read::status::get_working_file_diff(repo_path_ref, file_path, is_staged, None)?;
-    let hunk = file_diff
-        .hunks
-        .get(hunk_index as usize)
-        .ok_or_else(|| AppError::InvalidOperation(format!("Hunk index {} out of range", hunk_index)))?;
+    let hunk = file_diff.hunks.get(hunk_index as usize).ok_or_else(|| {
+        AppError::InvalidOperation(format!("Hunk index {} out of range", hunk_index))
+    })?;
 
     let all_line_indices: Vec<u32> = (0..hunk.lines.len() as u32).collect();
-    apply_selected_lines(
-        repo_path_ref,
-        file_path,
-        hunk,
-        &all_line_indices,
-        is_staged,
-    )
+    apply_selected_lines(repo_path_ref, file_path, hunk, &all_line_indices, is_staged)
 }
 
 /// Stage specific lines within a hunk of a file.
@@ -270,17 +263,9 @@ pub fn stage_lines<P: AsRef<Path>>(
     let repo_path_ref = repo_path.as_ref();
     let file_diff =
         crate::read::status::get_working_file_diff(repo_path_ref, file_path, is_staged, None)?;
-    let hunk = file_diff
-        .hunks
-        .get(hunk_index as usize)
-        .ok_or_else(|| AppError::InvalidOperation(format!("Hunk index {} out of range", hunk_index)))?;
+    let hunk = file_diff.hunks.get(hunk_index as usize).ok_or_else(|| {
+        AppError::InvalidOperation(format!("Hunk index {} out of range", hunk_index))
+    })?;
 
-    apply_selected_lines(
-        repo_path_ref,
-        file_path,
-        hunk,
-        line_indices,
-        is_staged,
-    )
+    apply_selected_lines(repo_path_ref, file_path, hunk, line_indices, is_staged)
 }
-

@@ -67,17 +67,16 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
             let shorthand = r_res.shorthand().unwrap_or("").to_string();
             if r_res.is_tag() {
                 if let Ok(peeled_commit) = r_res.peel_to_commit() {
-                    ref_map.entry(peeled_commit.id()).or_default().push(RefBadge {
-                        name: shorthand,
-                        ref_type: "tag".to_string(),
-                    });
+                    ref_map
+                        .entry(peeled_commit.id())
+                        .or_default()
+                        .push(RefBadge {
+                            name: shorthand,
+                            ref_type: "tag".to_string(),
+                        });
                 }
             } else if let Some(target) = r_res.target() {
-                let ref_type = if r_res.is_remote() {
-                    "remote"
-                } else {
-                    "local"
-                };
+                let ref_type = if r_res.is_remote() { "remote" } else { "local" };
                 ref_map.entry(target).or_default().push(RefBadge {
                     name: shorthand,
                     ref_type: ref_type.to_string(),
@@ -96,7 +95,11 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
     let total_count = all_oids.len();
 
     let end = (offset + limit).min(total_count);
-    let mut page_commits = Vec::with_capacity(if offset < total_count { end - offset } else { 0 });
+    let mut page_commits = Vec::with_capacity(if offset < total_count {
+        end - offset
+    } else {
+        0
+    });
     let mut active_lanes: Vec<Option<Oid>> = Vec::new();
 
     for (idx, oid) in all_oids.iter().enumerate() {
@@ -108,7 +111,10 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
         let parent_oids: Vec<Oid> = commit.parent_ids().collect();
 
         // 1. Assign column for this commit
-        let col = match active_lanes.iter().position(|slot| slot.as_ref() == Some(oid)) {
+        let col = match active_lanes
+            .iter()
+            .position(|slot| slot.as_ref() == Some(oid))
+        {
             Some(idx) => idx,
             None => match active_lanes.iter().position(|slot| slot.is_none()) {
                 Some(idx) => {
@@ -168,7 +174,10 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
 
             // Extra merge parents
             for extra_parent in parent_oids.iter().skip(1) {
-                let to_col = match active_lanes.iter().position(|s| s.as_ref() == Some(extra_parent)) {
+                let to_col = match active_lanes
+                    .iter()
+                    .position(|s| s.as_ref() == Some(extra_parent))
+                {
                     Some(slot_idx) => slot_idx,
                     None => match active_lanes.iter().position(|s| s.is_none()) {
                         Some(slot_idx) => {
@@ -243,4 +252,3 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
         total_count: total_count as u32,
     })
 }
-

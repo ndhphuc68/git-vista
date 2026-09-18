@@ -30,7 +30,9 @@ pub fn list_repo_branches<P: AsRef<Path>>(repo_path: P) -> Result<BranchListResu
     let current_branch = if is_detached {
         None
     } else {
-        repo.head().ok().and_then(|h| h.shorthand().ok().map(|s| s.to_string()))
+        repo.head()
+            .ok()
+            .and_then(|h| h.shorthand().ok().map(|s| s.to_string()))
     };
 
     let mut local = Vec::new();
@@ -38,18 +40,21 @@ pub fn list_repo_branches<P: AsRef<Path>>(repo_path: P) -> Result<BranchListResu
         for (branch, _) in branches.flatten() {
             if let Ok(Some(name)) = branch.name() {
                 let is_head = branch.is_head();
-                let target = branch.get().target().map(|o| o.to_string()).unwrap_or_default();
-                
+                let target = branch
+                    .get()
+                    .target()
+                    .map(|o| o.to_string())
+                    .unwrap_or_default();
+
                 let mut ahead = 0u32;
                 let mut behind = 0u32;
                 let mut upstream = None;
 
                 if let Ok(upstream_branch) = branch.upstream() {
                     upstream = upstream_branch.name().ok().flatten().map(|s| s.to_string());
-                    if let (Some(local_oid), Some(upstream_oid)) = (
-                        branch.get().target(),
-                        upstream_branch.get().target(),
-                    ) {
+                    if let (Some(local_oid), Some(upstream_oid)) =
+                        (branch.get().target(), upstream_branch.get().target())
+                    {
                         if let Ok((a, b)) = repo.graph_ahead_behind(local_oid, upstream_oid) {
                             ahead = a as u32;
                             behind = b as u32;
@@ -73,7 +78,11 @@ pub fn list_repo_branches<P: AsRef<Path>>(repo_path: P) -> Result<BranchListResu
     if let Ok(branches) = repo.branches(Some(BranchType::Remote)) {
         for (branch, _) in branches.flatten() {
             if let Ok(Some(name)) = branch.name() {
-                let target = branch.get().target().map(|o| o.to_string()).unwrap_or_default();
+                let target = branch
+                    .get()
+                    .target()
+                    .map(|o| o.to_string())
+                    .unwrap_or_default();
                 remote.push(BranchItem {
                     name: name.to_string(),
                     is_head: false,
@@ -101,4 +110,3 @@ pub fn list_repo_branches<P: AsRef<Path>>(repo_path: P) -> Result<BranchListResu
         tags,
     })
 }
-

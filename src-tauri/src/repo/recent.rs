@@ -62,8 +62,7 @@ impl RecentRepoStore {
             list.truncate(20);
         }
 
-        let json = serde_json::to_string_pretty(&list)
-            .map_err(|e| AppError::Io(e.to_string()))?;
+        let json = serde_json::to_string_pretty(&list).map_err(|e| AppError::Io(e.to_string()))?;
         fs::write(&self.storage_file, json).map_err(AppError::from)?;
         Ok(())
     }
@@ -78,8 +77,7 @@ impl RecentRepoStore {
     pub fn remove(&self, path: &str) -> Result<(), AppError> {
         let mut list = self.list();
         list.retain(|item| item.path != path);
-        let json = serde_json::to_string_pretty(&list)
-            .map_err(|e| AppError::Io(e.to_string()))?;
+        let json = serde_json::to_string_pretty(&list).map_err(|e| AppError::Io(e.to_string()))?;
         fs::write(&self.storage_file, json).map_err(AppError::from)?;
         Ok(())
     }
@@ -88,7 +86,9 @@ impl RecentRepoStore {
 fn app_data_dir() -> PathBuf {
     #[cfg(target_os = "windows")]
     {
-        if let Some(local_app_data) = std::env::var_os("LOCALAPPDATA").or_else(|| std::env::var_os("APPDATA")) {
+        if let Some(local_app_data) =
+            std::env::var_os("LOCALAPPDATA").or_else(|| std::env::var_os("APPDATA"))
+        {
             return PathBuf::from(local_app_data).join("visual_git_client");
         }
     }
@@ -117,4 +117,3 @@ fn app_data_dir() -> PathBuf {
 
     std::env::temp_dir().join("visual_git_client_data")
 }
-

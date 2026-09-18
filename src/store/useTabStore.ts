@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { RepoSummary } from "../ipc/bindings";
-import { TabItem, TabSessionData } from "../types/tab";
+import { type RepoSummary } from "../ipc/bindings";
+import { type TabItem, type TabSessionData } from "../types/tab";
 import { invokeCommand } from "../ipc/client";
 import { useRepoStore } from "./useRepoStore";
 import { useViewStore } from "./useViewStore";
