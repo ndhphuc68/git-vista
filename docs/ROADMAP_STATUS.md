@@ -25,10 +25,10 @@
 | | 1.1.2: Quản lý Thẻ toàn diện (Tag Management) | 25% | ✅ Đã hoàn thành | 100% |
 | | 1.1.3: Nhặt & Hoàn tác Commit (Cherry-pick & Revert Commit) | 25% | ✅ Đã hoàn thành | 100% |
 | | | | | |
-| **Phase 1.2** | **Quy trình Git chuyên sâu (Deep Git Workflows)** | **100%** | 🔄 **Đang triển khai** | **35%** |
+| **Phase 1.2** | **Quy trình Git chuyên sâu (Deep Git Workflows)** | **100%** | 🔄 **Đang triển khai** | **70%** |
 | | 1.2.1: Word-level Diff & Bỏ qua khoảng trắng (Ignore Whitespace) | 35% | ✅ Đã hoàn thành | 100% |
-| | 1.2.2: Lịch sử từng file & Git Blame (File History & Blame) | 35% | ⏳ Kế tiếp (Sẵn sàng) | 0% |
-| | 1.2.3: Quản lý Remote & Dọn dẹp nhánh mồ côi (Remote Prune) | 30% | 📋 Chờ thực hiện | 0% |
+| | 1.2.2: Lịch sử từng file & Git Blame (File History & Blame) | 35% | ✅ Đã hoàn thành | 100% |
+| | 1.2.3: Quản lý Remote & Dọn dẹp nhánh mồ côi (Remote Prune) | 30% | ⏳ Kế tiếp (Sẵn sàng) | 0% |
 | | | | | |
 | **Phase 2.0** | **Công cụ sức mạnh nâng cao (Advanced Power Tools)** | **100%** | 📋 **Chờ Phase 1.2** | **0%** |
 | | 2.0.1: Rebase tương tác trực quan (Visual Interactive Rebase) | 40% | 📋 Chờ thực hiện | 0% |
@@ -151,13 +151,21 @@
   - Thanh công cụ (Toolbar): Nút chuyển đổi nhanh Bỏ qua khoảng trắng (`<Space size={13} />`) và Word Diff (`<Type size={13} />`) trên cả `FileDiffViewer.tsx` (Lịch sử) và `InteractiveDiffViewer.tsx` (Staging), đồng bộ trạng thái toàn cục với `useSettingsStore` và React Query keys.
   - Từ điển song ngữ Việt - Anh đầy đủ tại `vi.ts` và `en.ts`.
 
-#### 📋 1.2.2: Lịch Sử Từng File & Git Blame (File History & Blame View) — [KẾ TIẾP]
-- **Mục tiêu:** Xem nguồn gốc xuất xứ của từng dòng code trong file và lịch sử sửa đổi riêng của từng tệp tin.
-- **Kế hoạch triển khai:**
-  - **Backend:** `read/blame.rs` dùng `repo.blame_file` trích xuất thông tin tác giả, commit SHA cho từng dòng; `read/file_history.rs` lọc revwalk theo đường dẫn file.
-  - **Frontend UI:** Màn hình/Drawer Git Blame hiển thị avatar tác giả bên cạnh từng dòng code; bấm vào tác giả để điều hướng tới commit trên đồ thị; Drawer File History xem danh sách commit đã sửa file đó.
+#### ✅ 1.2.2: Lịch Sử Từng File & Git Blame (File History & Blame View) — [HOÀN THÀNH 100%]
+- **Rust Backend:**
+  - `src-tauri/src/read/blame.rs`: Sử dụng `repo.blame_file()` trích xuất thông tin tác giả, OID, tóm tắt commit cho từng dòng code, phân biệt dòng bắt đầu commit hunk (`is_hunk_start`).
+  - `src-tauri/src/read/file_history.rs`: Duyệt commit `revwalk` kết hợp so khớp OID file trong `tree` giữa commit và các parent, phân loại chính xác thay đổi (`added`, `modified`, `deleted`) và hỗ trợ phân trang.
+  - Lệnh IPC Specta: `get_file_blame` và `get_file_history` tại `src-tauri/src/commands/repo.rs` và `src-tauri/src/lib.rs`.
+  - Kiểm thử `tests/blame_and_history_test.rs` kiểm tra chính xác gán nhãn blame đa tác giả và truy vết lịch sử file.
+- **Frontend State & Components:**
+  - `useInspectorStore.ts`: Quản lý trạng thái mở Drawer, tệp đang kiểm tra, commit mục tiêu và tab kích hoạt (`blame` hoặc `history`).
+  - `FileInspectorDrawer.tsx`: Drawer trượt từ mép phải (Slide-over Drawer) phong cách Windows 11/macOS, kèm thanh tab phân đoạn chuyển đổi mượt mà giữa Blame và Lịch sử file, nút sao chép đường dẫn tệp.
+  - `BlameView.tsx`: Trình xem Git Blame dạng gutter với avatar tác giả (thuật toán hash màu sắc), tên tác giả, mã SHA rút gọn, tooltip hiển thị thông điệp commit đầy đủ, thời gian tương đối và điều hướng tới commit trên đồ thị.
+  - `FileHistoryView.tsx`: Giao diện 2 cột gồm danh sách commit lọc theo tệp tin và tích hợp `FileDiffViewer` xem ngay diff của file tại commit được chọn.
+  - Tích hợp điểm mở (Entry Points): Nút bấm trên thanh công cụ `FileDiffViewer.tsx`, nút thao tác nhanh trên danh sách tệp của `CommitDetailPanel.tsx` và `StagingFileList.tsx`.
+  - Từ điển song ngữ Việt - Anh đầy đủ tại `vi.ts` và `en.ts`.
 
-#### 📋 1.2.3: Quản Lý Remote & Dọn Dẹp Nhánh Mồ Côi (Remotes Management & Prune) — [CHỜ THỰC HIỆN]
+#### 📋 1.2.3: Quản Lý Remote & Dọn Dẹp Nhánh Mồ Côi (Remotes Management & Prune) — [KẾ TIẾP]
 - **Mục tiêu:** Quản lý danh sách máy chủ từ xa (Thêm/Sửa/Xoá Remote) và dọn dẹp các nhánh remote đã bị xoá trên máy chủ.
 - **Kế hoạch triển khai:**
   - **Backend:** Thao tác với `git2::Remote` (Add, Rename, Remove, Set URL, Prune).
@@ -184,13 +192,13 @@ Hệ thống mã nguồn GitVista hiện tại đạt trạng thái kiểm thử
 
 | Tầng hệ thống | Công cụ kiểm thử | Số lượng kiểm thử | Trạng thái |
 | :--- | :--- | :---: | :---: |
-| **Backend (Rust)** | `cargo test` | **29 test suites / 84 tests** | ✅ **100% PASS** |
-| **Frontend (React/TS)** | `vitest` | **60 test files / 314 tests** | ✅ **100% PASS** |
+| **Backend (Rust)** | `cargo test` | **30 test suites / 86 tests** | ✅ **100% PASS** |
+| **Frontend (React/TS)** | `vitest` | **63 test files / 322 tests** | ✅ **100% PASS** |
 | **Đóng gói Sản phẩm** | `pnpm build` (TypeScript + Vite) | **0 lỗi / 0 cảnh báo** | ✅ **100% SẠCH** |
 
 ---
 
 ## 🚀 Bước Đi Kế Tiếp
 
-Hoàn thành trọn vẹn Phase 1.2.1 (100%), chuẩn bị tiến hành:
-**Phase 1.2.2: Lịch sử từng file & Git Blame (File History & Blame View)**.
+Hoàn thành trọn vẹn Phase 1.2.2 (100%), chuẩn bị tiến hành:
+**Phase 1.2.3: Quản lý Remote & Dọn dẹp nhánh mồ côi (Remotes Management & Prune)**.
