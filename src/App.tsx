@@ -24,7 +24,8 @@ import { FileInspectorDrawer } from "./components/inspector/FileInspectorDrawer"
 import { ManageRemotesModal } from "./components/remote/ManageRemotesModal";
 import { InteractiveRebaseModal } from "./components/rebase";
 import { CompareModal } from "./components/compare";
-import { PullRequestDetailDrawer } from "./components/pullrequests";
+import { PullRequestDetailDrawer, CreatePullRequestModal } from "./components/pullrequests";
+import { usePullRequestStore } from "./store/usePullRequestStore";
 import { useCommandPaletteStore } from "./store/useCommandPaletteStore";
 import { CommandContext } from "./utils/commandRegistry";
 
@@ -109,6 +110,7 @@ const RepoContent: React.FC<RepoContentProps> = ({
       />
       <FileInspectorDrawer repoPath={currentRepo.path} />
       <PullRequestDetailDrawer repoPath={currentRepo.path} />
+      <CreatePullRequestModal repoPath={currentRepo.path} />
     </>
   );
 };
@@ -215,6 +217,8 @@ export const App: React.FC<AppProps> = ({
       setIsGlobalInteractiveRebaseOpen(false);
       setIsGlobalCompareOpen(false);
       setIsShortcutsHelpOpen(false);
+      usePullRequestStore.getState().closeCreateModal();
+      usePullRequestStore.getState().closeDrawer();
       closeSettings();
       closeCommandPalette();
     },
@@ -238,6 +242,14 @@ export const App: React.FC<AppProps> = ({
         setCompareBaseRev(repoToDisplay.head_branch || "main");
         setCompareTargetRev("HEAD");
         setIsGlobalCompareOpen(true);
+      }
+    },
+    openCreatePullRequest: () => {
+      if (repoToDisplay) usePullRequestStore.getState().openCreateModal();
+    },
+    openPullRequests: () => {
+      if (repoToDisplay) {
+        setActiveScreen("history");
       }
     },
     openShortcutsHelp: () => setIsShortcutsHelpOpen(true),

@@ -28,6 +28,8 @@ export interface CommandContext {
   openManageRemotes?: () => void;
   openInteractiveRebase?: () => void;
   openCompare?: () => void;
+  openCreatePullRequest?: () => void;
+  openPullRequests?: () => void;
 }
 
 export function normalizeText(text: string): string {
@@ -140,6 +142,22 @@ export function getAppCommands(
       category: "git",
       keywords: ["compare", "so sanh", "so sánh", "diff", "branch", "commit", "merge-base", "two-dot", "three-dot"],
       action: () => context.openCompare?.(),
+    },
+    {
+      id: "git-create-pr",
+      title: t.palette.commands.gitCreatePrTitle,
+      description: t.palette.commands.gitCreatePrDesc,
+      category: "git",
+      keywords: ["pr", "pull request", "github", "tao pr", "tạo pr", "create pr", "new pr"],
+      action: () => context.openCreatePullRequest?.(),
+    },
+    {
+      id: "git-view-prs",
+      title: t.palette.commands.gitViewPrsTitle,
+      description: t.palette.commands.gitViewPrsDesc,
+      category: "git",
+      keywords: ["pr", "pull requests", "github", "danh sach pr", "danh sách pr", "view prs"],
+      action: () => context.openPullRequests?.(),
     },
     {
       id: "settings-theme",

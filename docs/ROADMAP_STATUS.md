@@ -30,10 +30,10 @@
 | | 1.2.2: Lịch sử từng file & Git Blame (File History & Blame) | 35% | ✅ Đã hoàn thành | 100% |
 | | 1.2.3: Quản lý Remote & Dọn dẹp nhánh mồ côi (Remote Prune) | 30% | ✅ Đã hoàn thành | 100% |
 | | | | | |
-| **Phase 2.0** | **Công cụ sức mạnh nâng cao (Advanced Power Tools)** | **100%** | 🔄 **Đang triển khai** | **70%** |
+| **Phase 2.0** | **Công cụ sức mạnh nâng cao (Advanced Power Tools)** | **100%** | ✅ **Đã hoàn thành** | **100%** |
 | | 2.0.1: Rebase tương tác trực quan (Visual Interactive Rebase) | 40% | ✅ Đã hoàn thành | 100% |
 | | 2.0.2: So sánh 2 Commit / 2 Nhánh bất kỳ (Compare 2 Commits) | 30% | ✅ Đã hoàn thành | 100% |
-| | 2.0.3: Tích hợp GitHub / GitLab Pull Requests | 30% | ⏳ Kế tiếp (Sẵn sàng) | 0% |
+| | 2.0.3: Tích hợp GitHub Pull Requests (GitHub Integration) | 30% | ✅ Đã hoàn thành | 100% |
 
 ---
 
@@ -232,8 +232,29 @@
   - **BranchSidebar**: Menu ngữ cảnh chuột phải trên cả nhánh local và remote có lựa chọn *"So sánh với nhánh hiện tại ({branch})..."* (`t.sidebar.compareWithCurrent`).
   - **Command Palette (`Ctrl+K`)**: Lệnh `git-compare` (*"Git: So sánh 2 Commit hoặc Nhánh"*) mở trực tiếp hộp thoại so sánh.
 
-#### 📋 2.0.3: Tích Hợp GitHub / GitLab Pull Requests — [CHỜ THỰC HIỆN]
-- Kết nối thông qua Personal Access Token (PAT), xem danh sách Pull Requests, trạng thái review, CI checks và checkout nhánh PR về máy chỉ với một cú click chuột.
+#### ✅ 2.0.3: Tích Hợp GitHub Pull Requests (GitHub PR Integration) — [HOÀN THÀNH 100%]
+- **Rust Backend:**
+  - `src-tauri/src/read/github.rs`: Trích xuất và chuẩn hóa URL remote (HTTPS/SSH) thành GitHub `owner/repo` (`parse_github_remote_url`), tự động phát hiện repo GitHub và nhánh mặc định (`get_github_repo_info`).
+  - `src-tauri/src/write/github_config.rs`: Quản lý Personal Access Token (PAT) an toàn lưu trữ trong cấu hình GitVista (`save_github_token`, `get_github_token`, `remove_github_token`), tích hợp tự động dò tìm fallback qua GitHub CLI (`gh auth token`).
+  - `src-tauri/src/exec/github_checkout.rs`: Kiểm tra dirty working tree an toàn, thực thi native git refspec fetch `git fetch origin pull/<number>/head:pr/<number> --force` và checkout tức thì `git checkout pr/<number>`.
+  - `src-tauri/src/commands/github.rs`: Đăng ký đầy đủ các lệnh Specta IPC `get_github_repo_info`, `get_github_token`, `save_github_token`, `remove_github_token`, `checkout_pull_request`.
+  - Kiểm thử `tests/github_test.rs` (3 tests) và `tests/github_checkout_test.rs` (1 test) đạt 100% pass.
+- **Frontend IPC, GitHub REST Service & i18n:**
+  - `src/services/githubService.ts`: Kiến trúc Hybrid REST API client tận dụng Schannel/OS proxy của Windows thông qua `fetch()`, xử lý phân trang, lỗi 401, 403 (Rate Limit) và 404 (`fetchPullRequests`, `fetchPullRequestDetail`, `createPullRequest`, `testGitHubToken`).
+  - Định nghĩa kiểu dữ liệu `GitHubRepoInfo`, `GitHubPullRequest`, `PullRequestDetail`, `CheckRunItem`, `PullRequestFileItem`, `CreatePullRequestPayload` tại `src/ipc/bindings.ts` và mock client trong `src/ipc/client.ts`.
+  - Bản dịch song ngữ 100% tiếng Việt & tiếng Anh tại `src/i18n/vi.ts` và `src/i18n/en.ts` (`pullRequests.*`, `settings.github.*`, `settings.tabs.github`, `palette.commands.gitCreatePr*`, `palette.commands.gitViewPrs*`).
+  - Kiểm thử `src/test/githubService.test.ts` (5 tests) bao gồm kiểm tra tính tương đương 100% khóa song ngữ.
+- **Giao diện Người dùng (UI Components):**
+  - **Tab GitHub trong Cài đặt (`GitHubSettingsTab.tsx`)**: Tab thứ 6 trong `SettingsModal`, nhập PAT với mắt che mật khẩu, kiểm tra kết nối tài khoản GitHub, hiển thị thông tin profile/avatar, tự động lấy token từ GitHub CLI `gh`, nút ngắt kết nối an toàn (`src/test/GitHubSettingsTab.test.tsx`: 3 tests).
+  - **Khu vực Pull Requests trên Sidebar (`PullRequestsSection.tsx`)**: Tích hợp trực tiếp vào `BranchSidebar.tsx` giữa Tags và Stashes, huy hiệu số lượng PR đang mở, tab lọc nhanh Open / Mine / Closed, context menu chuột phải Checkout PR (`src/test/PullRequestsSidebar.test.tsx`: 2 tests).
+  - **Slide-over Drawer Chi tiết PR (`PullRequestDetailDrawer.tsx`)**: Drawer 520px trượt từ mép phải với Fluent UI design, trạng thái PR (Open, Draft, Merged, Closed), danh sách kiểm tra CI (pass/fail/pending) kèm icon trực quan, mô tả Markdown đầy đủ, danh sách tập tin thay đổi (+/-) kèm điều hướng diff và nút Checkout nhánh PR (`src/test/PullRequestDetailDrawer.test.tsx`: 1 test).
+  - **Hộp thoại Tạo Pull Request Mới (`CreatePullRequestModal.tsx`)**: Lựa chọn nhánh đích (Base) và nhánh nguồn (Compare), kiểm tra phát hiện commit chưa đẩy lên máy chủ GitHub kèm nút Push trước khi tạo PR, soạn thảo tiêu đề và mô tả Markdown, checkbox tạo bản nháp (Draft PR) (`src/test/CreatePullRequestModal.test.tsx`: 5 tests).
+- **Điểm mở & Tích hợp (Entry Points):**
+  - **Sidebar**: Mục Pull Requests với nút tạo PR mới (`+`) và làm mới danh sách.
+  - **Command Palette (`Ctrl+K`)**:
+    * `git-create-pr` (*"Git: Tạo Pull Request mới"*).
+    * `git-view-prs` (*"Git: Xem danh sách Pull Requests"*).
+  - Kiểm thử `src/test/commandRegistryGitHub.test.ts` (2 tests pass).
 
 ---
 
@@ -243,13 +264,14 @@ Hệ thống mã nguồn GitVista hiện tại đạt trạng thái kiểm thử
 
 | Tầng hệ thống | Công cụ kiểm thử | Số lượng kiểm thử | Trạng thái |
 | :--- | :--- | :---: | :---: |
-| **Backend (Rust)** | `cargo test` | **33 test suites / 99 tests** | ✅ **100% PASS** |
-| **Frontend (React/TS)** | `vitest` | **69 test files / 349 tests** | ✅ **100% PASS** |
+| **Backend (Rust)** | `cargo test` | **35 test suites / 103 tests** | ✅ **100% PASS** |
+| **Frontend (React/TS)** | `vitest` | **75 test files / 368 tests** | ✅ **100% PASS** |
+| **Kiểm tra Kiểu (TypeScript)** | `pnpm tsc --noEmit` | **0 lỗi biên dịch** | ✅ **100% SẠCH** |
 | **Đóng gói Sản phẩm** | `pnpm build` (TypeScript + Vite) | **0 lỗi / 0 cảnh báo** | ✅ **100% SẠCH** |
 
 ---
 
 ## 🚀 Bước Đi Kế Tiếp
 
-Hoàn thành trọn vẹn Phase 2.0.2 (Compare 2 Commits/Branches), sẵn sàng chuẩn bị cho:
-**Phase 2.0.3: Tích Hợp GitHub / GitLab Pull Requests**.
+Hoàn thành trọn vẹn Phase 2.0 (Toàn bộ 3/3 tính năng công cụ nâng cao: Visual Interactive Rebase, Compare 2 Commits/Branches, và GitHub Pull Requests).
+Sẵn sàng cho giai đoạn tối ưu hiệu năng tiếp theo hoặc các tích hợp mở rộng khác.
