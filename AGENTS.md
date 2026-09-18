@@ -1,5 +1,12 @@
 # Repository instructions
 
+## Testing
+
+For regular feature, bug-fix, or refactoring work, add or update the relevant
+unit and component tests as appropriate. Do not add or modify Playwright E2E
+tests as part of those coding tasks unless the user explicitly requests it.
+Playwright E2E coverage is planned and implemented separately.
+
 ## Commit messages
 
 Use Gitmoji for new commit messages: `<emoji> <short description>`.
