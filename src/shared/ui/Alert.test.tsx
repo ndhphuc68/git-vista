@@ -14,8 +14,16 @@ describe("Alert", () => {
   });
 
   it("không dùng role=alert cho thông tin thường", () => {
-    render(<Alert variant="info">Chỉ là thông tin</Alert>);
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    const variants: Array<"warning" | "info" | "success"> = [
+      "warning",
+      "info",
+      "success",
+    ];
+    variants.forEach((variant) => {
+      const { unmount } = render(<Alert variant={variant}>Thông tin</Alert>);
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      unmount();
+    });
   });
 
   it("variant khác nhau cho ra class khác nhau", () => {
@@ -40,5 +48,12 @@ describe("Alert", () => {
       </Alert>
     );
     expect(container.querySelector("svg")).not.toBeInTheDocument();
+  });
+
+  it("icon đánh dấu aria-hidden để trình đọc không phát biểu", () => {
+    const { container } = render(<Alert variant="warning">X</Alert>);
+    // SVG icon element must have aria-hidden to prevent screen reader noise
+    const svg = container.querySelector("svg");
+    expect(svg).toHaveAttribute("aria-hidden", "true");
   });
 });
