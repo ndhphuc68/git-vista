@@ -6,6 +6,11 @@ import { useViewStore } from "../store/useViewStore";
 import { useToastStore } from "../store/useToastStore";
 import { invokeCommand } from "../ipc/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { qk } from "../domain/queryKeys";
+
+// Duong dan repo dung xuyen suot file test nay - dung chung mot nguon voi
+// setRepo() ben duoi de expectation va thuc te luon khop nhau.
+const REPO_PATH = "d:/project-v3";
 
 describe("CommitGraph Context Menu", () => {
   let queryClient: QueryClient;
@@ -19,7 +24,7 @@ describe("CommitGraph Context Menu", () => {
       },
     });
     useRepoStore.getState().setRepo({
-      path: "d:/project-v3",
+      path: REPO_PATH,
       name: "project-v3",
       is_bare: false,
       head_branch: "main",
@@ -179,10 +184,10 @@ describe("CommitGraph Context Menu", () => {
     });
 
     // Check queries invalidated
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["commit-graph"] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["repo_status"] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["repo_head"] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["branches"] });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.commitGraph(REPO_PATH) });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.repo.status(REPO_PATH) });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.repo.head(REPO_PATH) });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.branches(REPO_PATH) });
 
     // Check toast with undoAction
     const toasts = useToastStore.getState().toasts;
@@ -193,8 +198,55 @@ describe("CommitGraph Context Menu", () => {
 
     // Trigger undo action
     await toast.undoAction!();
-    expect(undoSpy).toHaveBeenCalledWith("d:/project-v3", "token-undo-cp-123");
-    expect(invalidateSpy).toHaveBeenCalled();
+    expect(undoSpy).toHaveBeenCalledWith(REPO_PATH, "token-undo-cp-123");
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.repo.all(REPO_PATH) });
+  });
+
+  // Test hoi quy: day la bang chung cho ca giai doan nay. No khang dinh rang
+  // sau mot thao tac Git tu context menu cua CommitGraph (checkout/cherry-pick...),
+  // invalidateQueries duoc goi voi key thuc su lam moi du lieu ma ChangesScreen doc.
+  // So khop qua chinh qk (khong dung chuoi cung) de test khong the lech khoi qk
+  // sau nay - dung cach bug nay da xay ra ban dau.
+  it("verifies a Git action from the context menu invalidates the key ChangesScreen reads", async () => {
+    vi.spyOn(invokeCommand, "cherryPickCommit").mockResolvedValue({
+      success: true,
+      status: "Committed",
+      undo_token: "token-undo-cp-789",
+      output: "Cherry-pick completed",
+    });
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <CommitGraph />
+      </QueryClientProvider>
+    );
+
+    const commitRow = await screen.findByText("feat(m1): visual git viewer");
+    fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
+
+    const cherryPickAction = screen.getByText(
+      /Cherry-pick into current branch|Cherry-pick vào nhánh hiện tại/i
+    );
+    fireEvent.click(cherryPickAction);
+
+    const dialog = await screen.findByRole("dialog");
+    const submitBtn = within(dialog).getByRole("button", { name: /^Cherry-pick$/i });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    // ChangesScreen doc qk.repo.status(REPO_PATH). React Query invalidate theo
+    // tien to, nen mot loi goi voi key ngan hon (vd qk.repo.all) cung lam moi
+    // duoc key dai hon - vi vay so khop theo kieu "la tien to cua".
+    const calls = invalidateSpy.mock.calls.map((c) => c[0]?.queryKey);
+    const statusKey = qk.repo.status(REPO_PATH);
+    const matched = calls.some(
+      (k) => Array.isArray(k) && statusKey.slice(0, k.length).every((seg, i) => seg === k[i])
+    );
+    expect(matched).toBe(true);
   });
 
   it("verifies CherryPick onSuccess with Staged status shows info toast and navigates to changes", async () => {
@@ -227,7 +279,7 @@ describe("CommitGraph Context Menu", () => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
 
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["repo_status"] });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.repo.status(REPO_PATH) });
     const toasts = useToastStore.getState().toasts;
     expect(toasts.length).toBeGreaterThan(0);
     expect(toasts[0]?.type).toBe("info");
@@ -264,8 +316,8 @@ describe("CommitGraph Context Menu", () => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
 
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["repo_status"] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["repo_state"] });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.repo.status(REPO_PATH) });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.repo.state(REPO_PATH) });
     const toasts = useToastStore.getState().toasts;
     expect(toasts.length).toBeGreaterThan(0);
     expect(toasts[0]?.type).toBe("error");
@@ -305,10 +357,10 @@ describe("CommitGraph Context Menu", () => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
 
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["commit-graph"] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["repo_status"] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["repo_head"] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["branches"] });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.commitGraph(REPO_PATH) });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.repo.status(REPO_PATH) });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.repo.head(REPO_PATH) });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.branches(REPO_PATH) });
 
     const toasts = useToastStore.getState().toasts;
     expect(toasts.length).toBeGreaterThan(0);
@@ -317,8 +369,8 @@ describe("CommitGraph Context Menu", () => {
     expect(toast.undoAction).toBeDefined();
 
     await toast.undoAction!();
-    expect(undoSpy).toHaveBeenCalledWith("d:/project-v3", "token-undo-rev-456");
-    expect(invalidateSpy).toHaveBeenCalled();
+    expect(undoSpy).toHaveBeenCalledWith(REPO_PATH, "token-undo-rev-456");
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.repo.all(REPO_PATH) });
   });
 
   it("verifies Revert onSuccess with Staged status shows info toast and navigates to changes", async () => {
@@ -351,7 +403,7 @@ describe("CommitGraph Context Menu", () => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
 
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["repo_status"] });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.repo.status(REPO_PATH) });
     const toasts = useToastStore.getState().toasts;
     expect(toasts.length).toBeGreaterThan(0);
     expect(toasts[0]?.type).toBe("info");
@@ -388,8 +440,8 @@ describe("CommitGraph Context Menu", () => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
 
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["repo_status"] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["repo_state"] });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.repo.status(REPO_PATH) });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.repo.state(REPO_PATH) });
     const toasts = useToastStore.getState().toasts;
     expect(toasts.length).toBeGreaterThan(0);
     expect(toasts[0]?.type).toBe("error");

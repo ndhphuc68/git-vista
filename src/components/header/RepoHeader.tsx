@@ -16,6 +16,7 @@ import { useSettingsStore } from "../../store/useSettingsStore";
 import { useTranslation } from "../../i18n";
 import { invokeCommand } from "../../ipc/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { qk } from "../../domain/queryKeys";
 import { RemoteProgressBanner } from "../common/RemoteProgressBanner";
 
 import { useRemoteTask } from "../../hooks/useRemoteTask";
@@ -33,7 +34,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
   const queryClient = useQueryClient();
 
   const { data: repoStatus } = useQuery({
-    queryKey: ["repoStatus", currentRepo?.path],
+    queryKey: qk.repo.status(currentRepo?.path ?? ""),
     queryFn: () => invokeCommand.getRepoStatus(currentRepo!.path),
     enabled: Boolean(currentRepo?.path),
   });

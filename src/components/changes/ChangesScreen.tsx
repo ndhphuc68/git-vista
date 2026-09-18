@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import clsx from "clsx";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, Archive } from "lucide-react";
+import { qk } from "../../domain/queryKeys";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
 import { useViewStore } from "../../store/useViewStore";
@@ -26,7 +27,7 @@ export const ChangesScreen: React.FC = () => {
   const [showCreateStash, setShowCreateStash] = useState(false);
 
   const { data: status } = useQuery({
-    queryKey: ["repoStatus", currentRepo?.path],
+    queryKey: qk.repo.status(currentRepo?.path ?? ""),
     queryFn: () => invokeCommand.getRepoStatus(currentRepo!.path),
     enabled: Boolean(currentRepo?.path),
   });
