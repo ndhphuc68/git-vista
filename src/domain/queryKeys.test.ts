@@ -47,21 +47,43 @@ describe("queryKeys", () => {
     }
   });
 
-  it("workingFileDiff phân biệt theo trạng thái staged và tuỳ chọn khoảng trắng", () => {
-    expect(qk.workingFileDiff(REPO, "a.ts", true, false)).not.toEqual(
-      qk.workingFileDiff(REPO, "a.ts", false, false)
-    );
-    expect(qk.workingFileDiff(REPO, "a.ts", true, false)).not.toEqual(
-      qk.workingFileDiff(REPO, "a.ts", true, true)
-    );
+  it("workingFileDiff phân biệt theo từng tham số", () => {
+    const base = qk.workingFileDiff(REPO, "a.ts", true, false);
+    // Phân biệt theo filePath
+    expect(base).not.toEqual(qk.workingFileDiff(REPO, "b.ts", true, false));
+    // Phân biệt theo isStaged
+    expect(base).not.toEqual(qk.workingFileDiff(REPO, "a.ts", false, false));
+    // Phân biệt theo ignoreWhitespace
+    expect(base).not.toEqual(qk.workingFileDiff(REPO, "a.ts", true, true));
+    // Phân biệt theo repo
+    expect(base).not.toEqual(qk.workingFileDiff("/other/repo", "a.ts", true, false));
   });
 
-  it("compareSummary phân biệt theo từng tham số so sánh", () => {
-    expect(qk.compareSummary(REPO, "main", "dev", "twodot")).not.toEqual(
-      qk.compareSummary(REPO, "main", "dev", "threedot")
-    );
-    expect(qk.compareSummary(REPO, "main", "dev", "twodot")).not.toEqual(
-      qk.compareSummary(REPO, "main", "other", "twodot")
-    );
+  it("conflictFile phân biệt theo từng tham số", () => {
+    const base = qk.conflictFile(REPO, "a.ts");
+    // Phân biệt theo filePath
+    expect(base).not.toEqual(qk.conflictFile(REPO, "b.ts"));
+    // Phân biệt theo repo
+    expect(base).not.toEqual(qk.conflictFile("/other/repo", "a.ts"));
+  });
+
+  it("compareSummary phân biệt theo từng tham số", () => {
+    const base = qk.compareSummary(REPO, "main", "dev", "twodot");
+    // Phân biệt theo baseRev
+    expect(base).not.toEqual(qk.compareSummary(REPO, "master", "dev", "twodot"));
+    // Phân biệt theo targetRev
+    expect(base).not.toEqual(qk.compareSummary(REPO, "main", "other", "twodot"));
+    // Phân biệt theo mode
+    expect(base).not.toEqual(qk.compareSummary(REPO, "main", "dev", "threedot"));
+    // Phân biệt theo repo
+    expect(base).not.toEqual(qk.compareSummary("/other/repo", "main", "dev", "twodot"));
+  });
+
+  it("rebaseCommits phân biệt theo từng tham số", () => {
+    const base = qk.rebaseCommits(REPO, "abc123");
+    // Phân biệt theo baseCommitId
+    expect(base).not.toEqual(qk.rebaseCommits(REPO, "def456"));
+    // Phân biệt theo repo
+    expect(base).not.toEqual(qk.rebaseCommits("/other/repo", "abc123"));
   });
 });
