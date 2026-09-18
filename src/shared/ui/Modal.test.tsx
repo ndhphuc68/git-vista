@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { Modal } from "./Modal";
 import { Button } from "./Button";
+import { Z_INDEX } from "../../domain/constants/zIndex";
 
 function renderModal(props: Partial<React.ComponentProps<typeof Modal>> = {}) {
   const onClose = vi.fn();
@@ -110,5 +111,20 @@ describe("Modal", () => {
     const largePanel = screen.getByTestId("modal-panel").className;
 
     expect(smallPanel).not.toBe(largePanel);
+  });
+
+  it("mặc định dùng z-index tầng modal thường", () => {
+    renderModal();
+    const backdrop = screen.getByTestId("modal-backdrop");
+
+    expect(backdrop.style.zIndex).toBe(String(Z_INDEX.modal));
+  });
+
+  it("với stacked=true, dùng z-index tầng cao hơn tầng modal thường", () => {
+    renderModal({ stacked: true });
+    const backdrop = screen.getByTestId("modal-backdrop");
+
+    expect(backdrop.style.zIndex).toBe(String(Z_INDEX.modalStacked));
+    expect(Z_INDEX.modalStacked).toBeGreaterThan(Z_INDEX.modal);
   });
 });

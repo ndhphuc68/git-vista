@@ -7,6 +7,8 @@ export const Z_INDEX = {
   overlay: 20,
   modal: 30,
   toast: 40,
+  /** Modal mở lồng bên trong một modal khác (modal-trong-modal). */
+  modalStacked: 50,
 } as const;
 
 export type ZIndexLayer = keyof typeof Z_INDEX;

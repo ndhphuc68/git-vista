@@ -2,6 +2,16 @@ import { describe, it, expect, vi } from "vitest";
 import { renderHook, fireEvent } from "@testing-library/react";
 import { useEscapeKey } from "./useEscapeKey";
 
+function renderTwoHooks(enabledFirst: boolean, enabledSecond: boolean) {
+  const first = vi.fn();
+  const second = vi.fn();
+
+  const firstHook = renderHook(() => useEscapeKey(enabledFirst, first));
+  const secondHook = renderHook(() => useEscapeKey(enabledSecond, second));
+
+  return { first, second, firstHook, secondHook };
+}
+
 describe("useEscapeKey", () => {
   it("gọi callback khi bấm Escape lúc đang bật", () => {
     const onEscape = vi.fn();
@@ -69,5 +79,33 @@ describe("useEscapeKey", () => {
     expect(keydownCalls).toHaveLength(1);
 
     addSpy.mockRestore();
+  });
+
+  it("khi hai modal lồng nhau cùng bật, Escape chỉ đóng modal trên cùng (đăng ký sau)", () => {
+    const { first, second } = renderTwoHooks(true, true);
+
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    expect(second).toHaveBeenCalledTimes(1);
+    expect(first).not.toHaveBeenCalled();
+  });
+
+  it("sau khi modal trên cùng unmount, Escape tiếp theo gọi modal còn lại", () => {
+    const { first, second, secondHook } = renderTwoHooks(true, true);
+
+    secondHook.unmount();
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    expect(first).toHaveBeenCalledTimes(1);
+    expect(second).not.toHaveBeenCalled();
+  });
+
+  it("modal đang tắt (enabled=false) không bao giờ được gọi, kể cả khi mount sau cùng", () => {
+    const { first, second } = renderTwoHooks(true, false);
+
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    expect(first).toHaveBeenCalledTimes(1);
+    expect(second).not.toHaveBeenCalled();
   });
 });

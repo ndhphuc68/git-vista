@@ -17,6 +17,13 @@ export interface ModalProps {
   /** Chặn đóng modal khi đang có thao tác dở dang. */
   closeOnBackdrop?: boolean;
   closeOnEscape?: boolean;
+  /**
+   * Đặt true khi modal này được mở ra TỪ BÊN TRONG một modal khác
+   * (modal-trong-modal, ví dụ ManageRemotesModal mở AddEditRemoteModal).
+   * Nâng z-index lên tầng `modalStacked` để backdrop của modal con luôn
+   * nằm trên modal cha, bất kể thứ tự trong DOM. Mặc định false.
+   */
+  stacked?: boolean;
 }
 
 export interface ModalHeaderProps {
@@ -42,6 +49,9 @@ interface ModalComposition {
  * Dùng compound component (Modal.Header/Body/Footer) thay vì boolean props,
  * vì thân của các modal rất khác nhau; nếu dùng props thì sẽ phải thêm cờ
  * mới cho mỗi biến thể.
+ *
+ * Modal-trong-modal: dùng prop `stacked` trên modal con để nó luôn nổi
+ * trên modal cha (xem ModalProps.stacked).
  */
 const ModalRoot: React.FC<ModalProps> & ModalComposition = ({
   isOpen,
@@ -51,6 +61,7 @@ const ModalRoot: React.FC<ModalProps> & ModalComposition = ({
   labelledBy,
   closeOnBackdrop = true,
   closeOnEscape = true,
+  stacked = false,
 }) => {
   useEscapeKey(isOpen && closeOnEscape, onClose);
 
@@ -66,7 +77,7 @@ const ModalRoot: React.FC<ModalProps> & ModalComposition = ({
       <div
         data-testid="modal-backdrop"
         className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-        style={{ zIndex: Z_INDEX.modal }}
+        style={{ zIndex: stacked ? Z_INDEX.modalStacked : Z_INDEX.modal }}
         onClick={closeOnBackdrop ? onClose : undefined}
         role="dialog"
         aria-modal="true"
