@@ -25,14 +25,14 @@
 | | 1.1.2: Quản lý Thẻ toàn diện (Tag Management) | 25% | ✅ Đã hoàn thành | 100% |
 | | 1.1.3: Nhặt & Hoàn tác Commit (Cherry-pick & Revert Commit) | 25% | ✅ Đã hoàn thành | 100% |
 | | | | | |
-| **Phase 1.2** | **Quy trình Git chuyên sâu (Deep Git Workflows)** | **100%** | 🔄 **Đang triển khai** | **70%** |
+| **Phase 1.2** | **Quy trình Git chuyên sâu (Deep Git Workflows)** | **100%** | ✅ **Đã hoàn thành** | **100%** |
 | | 1.2.1: Word-level Diff & Bỏ qua khoảng trắng (Ignore Whitespace) | 35% | ✅ Đã hoàn thành | 100% |
 | | 1.2.2: Lịch sử từng file & Git Blame (File History & Blame) | 35% | ✅ Đã hoàn thành | 100% |
-| | 1.2.3: Quản lý Remote & Dọn dẹp nhánh mồ côi (Remote Prune) | 30% | ⏳ Kế tiếp (Sẵn sàng) | 0% |
+| | 1.2.3: Quản lý Remote & Dọn dẹp nhánh mồ côi (Remote Prune) | 30% | ✅ Đã hoàn thành | 100% |
 | | | | | |
-| **Phase 2.0** | **Công cụ sức mạnh nâng cao (Advanced Power Tools)** | **100%** | 📋 **Chờ Phase 1.2** | **0%** |
-| | 2.0.1: Rebase tương tác trực quan (Visual Interactive Rebase) | 40% | 📋 Chờ thực hiện | 0% |
-| | 2.0.2: So sánh 2 Commit / 2 Nhánh bất kỳ (Compare 2 Commits) | 30% | 📋 Chờ thực hiện | 0% |
+| **Phase 2.0** | **Công cụ sức mạnh nâng cao (Advanced Power Tools)** | **100%** | 🔄 **Đang triển khai** | **40%** |
+| | 2.0.1: Rebase tương tác trực quan (Visual Interactive Rebase) | 40% | ✅ Đã hoàn thành | 100% |
+| | 2.0.2: So sánh 2 Commit / 2 Nhánh bất kỳ (Compare 2 Commits) | 30% | ⏳ Kế tiếp (Sẵn sàng) | 0% |
 | | 2.0.3: Tích hợp GitHub / GitLab Pull Requests | 30% | 📋 Chờ thực hiện | 0% |
 
 ---
@@ -186,10 +186,26 @@
 
 ---
 
-### 4. PHASE 2.0: CÔNG CỤ SỨC MẠNH NÂNG CAO (ADVANCED POWER TOOLS) [TƯƠNG LAI]
+### 4. PHASE 2.0: CÔNG CỤ SỨC MẠNH NÂNG CAO (ADVANCED POWER TOOLS) [ĐANG TRIỂN KHAI]
 
-#### 📋 2.0.1: Rebase Tương Tác Trực Quan (Visual Interactive Rebase) — [CHỜ THỰC HIỆN]
-- Kéo thả sắp xếp lại thứ tự commit, chuyển đổi hành động `Pick`, `Reword`, `Squash`, `Drop` với giao diện trực quan và xem trước (Live Preview) nhánh cây commit trước khi áp dụng.
+#### ✅ 2.0.1: Rebase Tương Tác Trực Quan (Visual Interactive Rebase) — [HOÀN THÀNH 100%]
+- **Rust Backend:**
+  - `src-tauri/src/read/rebase.rs`: Đọc danh sách commit giữa mốc `base_commit_id` và `HEAD` theo thứ tự thời gian tự nhiên (cũ nhất -> mới nhất) thông qua `revwalk` topo-sort ngược. Trả về `RebaseCommitItem` (id, short_id, summary, message, author, timestamp, parent_ids).
+  - `src-tauri/src/exec/rebase.rs`: Cơ chế Hybrid Engine thực thi interactive rebase không chặn giao diện (non-interactive sequence editor via `GIT_SEQUENCE_EDITOR="cp <todo>"`). Hỗ trợ các hành động `Pick`, `Reword` (tự động đính kèm script `exec git commit --amend -F <msg_file>`), `Squash`, `Fixup`, `Drop`.
+  - Tích hợp 3 lớp an toàn: Kiểm tra trạng thái working tree bẩn + tự động lưu tạm (Auto-stash), tạo ref sao lưu an toàn `refs/gitui-backup/commit-undo-*` kèm `undo_token`, và phát hiện xung đột (`Conflict`) tự động điều hướng sang Conflict Resolver.
+  - `src-tauri/src/commands/rebase.rs`: Đăng ký các lệnh Specta IPC `get_rebase_commits` và `execute_interactive_rebase`.
+  - Kiểm thử `tests/interactive_rebase_test.rs`: 5/5 integration test suites kiểm tra toàn diện thứ tự commit, sao lưu hoàn tác, sắp xếp reorder, drop, squash/fixup và reword.
+- **Frontend IPC & i18n:**
+  - Export types `RebaseCommitItem`, `RebaseActionKind`, `RebasePlanStep`, `InteractiveRebaseResult` tại `src/ipc/bindings.ts`.
+  - Triển khai mockable IPC client tại `src/ipc/client.ts` kèm unit tests `src/test/ipcInteractiveRebase.test.ts`.
+  - Bản dịch song ngữ 100% tiếng Việt & tiếng Anh tại `vi.ts` và `en.ts` (`modals.interactiveRebase.*`, `graph.interactiveRebaseHere`, `palette.commands.gitInteractiveRebase*`).
+- **Giao diện Người dùng (UI Components):**
+  - `RebaseCommitRow.tsx`: Hàng commit trực quan với nút Up/Down, tay cầm kéo thả (drag & drop), badge hành động đổi màu sắc động (Pick: xanh lá, Reword: xanh lam, Squash: cam hổ phách, Fixup: tím, Drop: đỏ hoa hồng), validate chặn Squash/Fixup ở commit đầu tiên, inline textarea soạn lại thông điệp commit.
+  - `RebaseLivePreview.tsx`: Cột xem trước thời gian thực hiển thị dòng thời gian commit dự kiến sau khi rebase, thống kê commit kết quả / squashed / dropped, cảnh báo khi drop toàn bộ commit.
+  - `InteractiveRebaseModal.tsx`: Hộp thoại 2 cột chuẩn thiết kế macOS/Windows 11, checkbox tự động stash, toast thành công kèm nút hoàn tác (Undo), điều hướng mượt mà khi xảy ra xung đột. Unit test `InteractiveRebaseModal.test.tsx` chạy siêu tốc (< 1s).
+- **Điểm mở (Entry Points):**
+  - Context menu chuột phải trên `CommitGraph.tsx`: Lựa chọn *"Interactive Rebase từ commit này..."* (`t.graph.interactiveRebaseHere`).
+  - Command Palette (`Ctrl+K`): Lệnh `git-interactive-rebase` mở hộp thoại rebase tương tác từ bất cứ đâu.
 
 #### 📋 2.0.2: So Sánh 2 Commit / 2 Nhánh Bất Kỳ (Compare 2 Commits/Branches) — [CHỜ THỰC HIỆN]
 - Giữ phím `Ctrl`/`Cmd` chọn 2 điểm mốc bất kỳ trên `CommitGraph` để xem danh sách commit chênh lệch và tổng hợp thay đổi của toàn bộ các file giữa 2 mốc.
@@ -205,13 +221,13 @@ Hệ thống mã nguồn GitVista hiện tại đạt trạng thái kiểm thử
 
 | Tầng hệ thống | Công cụ kiểm thử | Số lượng kiểm thử | Trạng thái |
 | :--- | :--- | :---: | :---: |
-| **Backend (Rust)** | `cargo test` | **31 test suites / 90 tests** | ✅ **100% PASS** |
-| **Frontend (React/TS)** | `vitest` | **65 test files / 331 tests** | ✅ **100% PASS** |
+| **Backend (Rust)** | `cargo test` | **32 test suites / 95 tests** | ✅ **100% PASS** |
+| **Frontend (React/TS)** | `vitest` | **67 test files / 339 tests** | ✅ **100% PASS** |
 | **Đóng gói Sản phẩm** | `pnpm build` (TypeScript + Vite) | **0 lỗi / 0 cảnh báo** | ✅ **100% SẠCH** |
 
 ---
 
 ## 🚀 Bước Đi Kế Tiếp
 
-Hoàn thành trọn vẹn Phase 1.2 (100%), chuẩn bị tiến hành:
-**Phase 2.0: Công Cụ Sức Mạnh Nâng Cao (Advanced Power Tools) - 2.0.1: Rebase Tương Tác Trực Quan (Visual Interactive Rebase)**.
+Hoàn thành trọn vẹn Phase 2.0.1 (Visual Interactive Rebase), sẵn sàng chuẩn bị cho:
+**Phase 2.0.2: So Sánh 2 Commit / 2 Nhánh Bất Kỳ (Compare 2 Commits/Branches)**.
