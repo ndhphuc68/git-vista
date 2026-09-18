@@ -137,7 +137,7 @@
 
 ---
 
-### 3. PHASE 1.2: QUY TRÌNH GIT CHUYÊN SÂU (DEEP GIT WORKFLOWS) [ĐANG TRIỂN KHAI - 35%]
+### 3. PHASE 1.2: QUY TRÌNH GIT CHUYÊN SÂU (DEEP GIT WORKFLOWS) [HOÀN THÀNH 100%]
 
 #### ✅ 1.2.1: Word-level Diff & Bỏ Qua Khoảng Trắng (Ignore Whitespace) — [HOÀN THÀNH 100%]
 - **Rust Backend:**
@@ -165,11 +165,24 @@
   - Tích hợp điểm mở (Entry Points): Nút bấm trên thanh công cụ `FileDiffViewer.tsx`, nút thao tác nhanh trên danh sách tệp của `CommitDetailPanel.tsx` và `StagingFileList.tsx`.
   - Từ điển song ngữ Việt - Anh đầy đủ tại `vi.ts` và `en.ts`.
 
-#### 📋 1.2.3: Quản Lý Remote & Dọn Dẹp Nhánh Mồ Côi (Remotes Management & Prune) — [KẾ TIẾP]
-- **Mục tiêu:** Quản lý danh sách máy chủ từ xa (Thêm/Sửa/Xoá Remote) và dọn dẹp các nhánh remote đã bị xoá trên máy chủ.
-- **Kế hoạch triển khai:**
-  - **Backend:** Thao tác với `git2::Remote` (Add, Rename, Remove, Set URL, Prune).
-  - **Frontend UI:** Tab hoặc hộp thoại quản lý Remote; nút "Dọn dẹp nhánh mồ côi" (Prune branches).
+#### ✅ 1.2.3: Quản Lý Remote & Dọn Dẹp Nhánh Mồ Côi (Remotes Management & Prune) — [HOÀN THÀNH 100%]
+- **Rust Backend:**
+  - `src-tauri/src/read/remote.rs`: Đọc danh sách remote (`RemoteItem`: tên, fetch_url, push_url).
+  - `src-tauri/src/write/remote.rs`: Thao tác CRUD remote an toàn (`add_remote`, `rename_remote`, `remove_remote`, `set_remote_url`). Kiểm tra định dạng URL (HTTPS, SSH, Git protocol) và ngăn chặn đặt tên trùng lặp / rỗng.
+  - `src-tauri/src/exec/remote.rs`: Lệnh `prune_remote` thực thi an toàn `git remote prune <name>`, phân tích biểu thức chính quy (regex) để trích xuất chính xác các nhánh tracking đã bị cắt tỉa (`[pruned] origin/xxx`) và trả về `PruneResult`.
+  - `src-tauri/src/commands/remote.rs`: Đăng ký toàn bộ lệnh IPC Specta (`get_remotes`, `add_remote`, `rename_remote`, `remove_remote`, `set_remote_url`, `prune_remote`) và tự động phát sự kiện `repo-changed` đồng bộ UI.
+  - Kiểm thử `tests/remote_management_test.rs`: 4 test suites chuyên sâu kiểm tra toàn diện CRUD, validation, và dọn dẹp các tracking branch lỗi thời.
+- **Frontend IPC & State:**
+  - Định nghĩa kiểu `RemoteItem` và `PruneResult` tại `src/ipc/bindings.ts`.
+  - Triển khai API IPC client tại `src/ipc/client.ts` kèm browser mocks cho môi trường web và bộ test đơn vị hoàn chỉnh (`src/test/ipcRemoteManagement.test.ts`).
+  - Bản dịch song ngữ Việt - Anh 100% tại `src/i18n/vi.ts` và `src/i18n/en.ts`.
+- **Giao diện người dùng (UI Components):**
+  - `ManageRemotesModal.tsx`: Trung tâm quản lý danh sách remote (hiển thị URL Fetch/Push, badge đếm nhánh tracking, nút thêm mới, sửa, xóa, và prune).
+  - `AddEditRemoteModal.tsx`: Hộp thoại thêm mới hoặc chỉnh sửa cấu hình Remote (tên remote, fetch URL, checkbox tách biệt push URL, kiểm tra cú pháp trực tiếp).
+  - `DeleteRemoteModal.tsx`: Hộp thoại cảnh báo nguy cơ khi gỡ bỏ remote và các tracking branch liên quan.
+  - `PruneConfirmModal.tsx`: Hộp thoại xác nhận dọn dẹp nhánh tracking đã bị xoá trên máy chủ từ xa, thông báo kết quả chi tiết các nhánh đã được dọn.
+  - `BranchSidebar.tsx`: Tích hợp các nút mở nhanh "Quản lý Remotes" và "Thêm Remote" tại thanh tiêu đề phần REMOTES; menu ngữ cảnh chuột phải và menu 3 chấm trên từng remote: "Dọn dẹp nhánh mồ côi (Prune)", "Chỉnh sửa Remote...", "Xóa Remote...".
+  - `CommandPalette.tsx` & `App.tsx`: Tích hợp lệnh `git-manage-remotes` (`Ctrl+K` / `Cmd+K`) mở trực tiếp bảng quản lý remote từ bất kỳ đâu.
 
 ---
 
@@ -192,13 +205,13 @@ Hệ thống mã nguồn GitVista hiện tại đạt trạng thái kiểm thử
 
 | Tầng hệ thống | Công cụ kiểm thử | Số lượng kiểm thử | Trạng thái |
 | :--- | :--- | :---: | :---: |
-| **Backend (Rust)** | `cargo test` | **30 test suites / 86 tests** | ✅ **100% PASS** |
-| **Frontend (React/TS)** | `vitest` | **63 test files / 322 tests** | ✅ **100% PASS** |
+| **Backend (Rust)** | `cargo test` | **31 test suites / 90 tests** | ✅ **100% PASS** |
+| **Frontend (React/TS)** | `vitest` | **65 test files / 331 tests** | ✅ **100% PASS** |
 | **Đóng gói Sản phẩm** | `pnpm build` (TypeScript + Vite) | **0 lỗi / 0 cảnh báo** | ✅ **100% SẠCH** |
 
 ---
 
 ## 🚀 Bước Đi Kế Tiếp
 
-Hoàn thành trọn vẹn Phase 1.2.2 (100%), chuẩn bị tiến hành:
-**Phase 1.2.3: Quản lý Remote & Dọn dẹp nhánh mồ côi (Remotes Management & Prune)**.
+Hoàn thành trọn vẹn Phase 1.2 (100%), chuẩn bị tiến hành:
+**Phase 2.0: Công Cụ Sức Mạnh Nâng Cao (Advanced Power Tools) - 2.0.1: Rebase Tương Tác Trực Quan (Visual Interactive Rebase)**.
