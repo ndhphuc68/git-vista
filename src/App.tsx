@@ -23,6 +23,7 @@ import { SettingsModal } from "./components/settings/SettingsModal";
 import { FileInspectorDrawer } from "./components/inspector/FileInspectorDrawer";
 import { ManageRemotesModal } from "./components/remote/ManageRemotesModal";
 import { InteractiveRebaseModal } from "./components/rebase";
+import { CompareModal } from "./components/compare";
 import { useCommandPaletteStore } from "./store/useCommandPaletteStore";
 import { CommandContext } from "./utils/commandRegistry";
 
@@ -121,6 +122,9 @@ export const App: React.FC<AppProps> = ({
   const [isGlobalCreateBranchOpen, setIsGlobalCreateBranchOpen] = useState(false);
   const [isGlobalManageRemotesOpen, setIsGlobalManageRemotesOpen] = useState(false);
   const [isGlobalInteractiveRebaseOpen, setIsGlobalInteractiveRebaseOpen] = useState(false);
+  const [isGlobalCompareOpen, setIsGlobalCompareOpen] = useState(false);
+  const [compareBaseRev, setCompareBaseRev] = useState<string | undefined>(undefined);
+  const [compareTargetRev, setCompareTargetRev] = useState<string | undefined>(undefined);
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const { currentRepo, setRepo, clearRepo } = useRepoStore();
   const { tabs, activeTabId, setActiveTab, openRepoTab, openHomeTab, closeTab, restoreSession } = useTabStore();
@@ -207,6 +211,7 @@ export const App: React.FC<AppProps> = ({
       setIsGlobalCreateBranchOpen(false);
       setIsGlobalManageRemotesOpen(false);
       setIsGlobalInteractiveRebaseOpen(false);
+      setIsGlobalCompareOpen(false);
       setIsShortcutsHelpOpen(false);
       closeSettings();
       closeCommandPalette();
@@ -225,6 +230,13 @@ export const App: React.FC<AppProps> = ({
     },
     openInteractiveRebase: () => {
       if (repoToDisplay) setIsGlobalInteractiveRebaseOpen(true);
+    },
+    openCompare: () => {
+      if (repoToDisplay) {
+        setCompareBaseRev(repoToDisplay.head_branch || "main");
+        setCompareTargetRev("HEAD");
+        setIsGlobalCompareOpen(true);
+      }
     },
     openShortcutsHelp: () => setIsShortcutsHelpOpen(true),
     toggleTheme: handleToggleTheme,
@@ -311,6 +323,15 @@ export const App: React.FC<AppProps> = ({
               setIsGlobalInteractiveRebaseOpen(false);
               queryClient.invalidateQueries();
             }}
+          />
+        )}
+        {repoToDisplay && (
+          <CompareModal
+            isOpen={isGlobalCompareOpen}
+            onClose={() => setIsGlobalCompareOpen(false)}
+            repoPath={repoToDisplay.path}
+            initialBaseRev={compareBaseRev}
+            initialTargetRev={compareTargetRev}
           />
         )}
       </div>

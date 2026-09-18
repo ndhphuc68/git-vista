@@ -61,6 +61,10 @@ describe("Command Palette Store & Registry", () => {
     const rebaseCmd = commands.find((c) => c.id === "git-interactive-rebase");
     expect(rebaseCmd).toBeDefined();
     expect(rebaseCmd?.category).toBe("git");
+
+    const compareCmd = commands.find((c) => c.id === "git-compare");
+    expect(compareCmd).toBeDefined();
+    expect(compareCmd?.category).toBe("git");
   });
 
   it("filters commands by title, keywords, or description", () => {

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import clsx from "clsx";
-import { GitBranch, Tag, Copy, GitPullRequest, RotateCcw, GitMerge } from "lucide-react";
+import { GitBranch, Tag, Copy, GitPullRequest, RotateCcw, GitMerge, GitCompare } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
@@ -16,6 +16,7 @@ import { CreateBranchModal } from "../sidebar/CreateBranchModal";
 import { CherryPickModal } from "../modals/CherryPickModal";
 import { RevertModal } from "../modals/RevertModal";
 import { InteractiveRebaseModal } from "../rebase";
+import { CompareModal } from "../compare";
 
 const PAGE_SIZE = 50;
 const ROW_HEIGHT = 32;
@@ -118,6 +119,9 @@ export const CommitGraph: React.FC = () => {
   const [cherryPickCommit, setCherryPickCommit] = useState<GraphCommitNode | null>(null);
   const [revertCommit, setRevertCommit] = useState<GraphCommitNode | null>(null);
   const [interactiveRebaseCommit, setInteractiveRebaseCommit] = useState<GraphCommitNode | null>(null);
+  const [compareModalOpen, setCompareModalOpen] = useState(false);
+  const [compareBaseRev, setCompareBaseRev] = useState<string | undefined>(undefined);
+  const [compareTargetRev, setCompareTargetRev] = useState<string | undefined>(undefined);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -336,7 +340,15 @@ export const CommitGraph: React.FC = () => {
                 tabIndex={0}
                 aria-selected={isSelected}
                 aria-label={`Commit ${commit.short_id}: ${commit.summary}`}
-                onClick={() => handleSelectCommit(commit.id)}
+                onClick={(e) => {
+                  if ((e.ctrlKey || e.metaKey) && selectedCommitId && selectedCommitId !== commit.id) {
+                    setCompareBaseRev(selectedCommitId);
+                    setCompareTargetRev(commit.id);
+                    setCompareModalOpen(true);
+                  } else {
+                    handleSelectCommit(commit.id);
+                  }
+                }}
                 onContextMenu={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -566,6 +578,27 @@ export const CommitGraph: React.FC = () => {
           <button
             type="button"
             role="menuitem"
+            onClick={() => {
+              const base = selectedCommitId && selectedCommitId !== contextMenu.commit.id
+                ? selectedCommitId
+                : contextMenu.commit.id;
+              const target = selectedCommitId && selectedCommitId !== contextMenu.commit.id
+                ? contextMenu.commit.id
+                : "HEAD";
+              setCompareBaseRev(base);
+              setCompareTargetRev(target);
+              setCompareModalOpen(true);
+              setContextMenu(null);
+            }}
+            className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors"
+          >
+            <GitCompare size={14} className="shrink-0 text-secondary" />
+            <span>{t.graph.compareWith}</span>
+          </button>
+
+          <button
+            type="button"
+            role="menuitem"
             onClick={() => handleCopySha(contextMenu.commit.id)}
             className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors border-t border-border-subtle/50 mt-1 pt-2"
           >
@@ -722,6 +755,16 @@ export const CommitGraph: React.FC = () => {
             queryClient.invalidateQueries({ queryKey: ["repo_head"] });
             queryClient.invalidateQueries({ queryKey: ["branches"] });
           }}
+        />
+      )}
+
+      {compareModalOpen && currentRepo && (
+        <CompareModal
+          isOpen={compareModalOpen}
+          onClose={() => setCompareModalOpen(false)}
+          repoPath={currentRepo.path}
+          initialBaseRev={compareBaseRev}
+          initialTargetRev={compareTargetRev}
         />
       )}
     </div>

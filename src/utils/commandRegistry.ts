@@ -27,6 +27,7 @@ export interface CommandContext {
   commit?: () => void | Promise<void>;
   openManageRemotes?: () => void;
   openInteractiveRebase?: () => void;
+  openCompare?: () => void;
 }
 
 export function normalizeText(text: string): string {
@@ -131,6 +132,14 @@ export function getAppCommands(
       category: "git",
       keywords: ["rebase", "interactive", "tuong tac", "tương tác", "squash", "reword", "drop", "pick", "fixup"],
       action: () => context.openInteractiveRebase?.(),
+    },
+    {
+      id: "git-compare",
+      title: t.palette.commands.gitCompareTitle,
+      description: t.palette.commands.gitCompareDesc,
+      category: "git",
+      keywords: ["compare", "so sanh", "so sánh", "diff", "branch", "commit", "merge-base", "two-dot", "three-dot"],
+      action: () => context.openCompare?.(),
     },
     {
       id: "settings-theme",

@@ -18,6 +18,7 @@ import {
   PlayCircle,
   GitMerge,
   GitCommit,
+  GitCompare,
   Folder,
   Settings2,
   Scissors,
@@ -38,6 +39,7 @@ import { StashDiffView } from "../stash/StashDiffView";
 import { MergeBranchModal } from "../merge/MergeBranchModal";
 import { RebaseBranchModal } from "../merge/RebaseBranchModal";
 import { CreateTagModal, DeleteTagModal } from "../tag";
+import { CompareModal } from "../compare";
 import {
   ManageRemotesModal,
   AddEditRemoteModal,
@@ -135,6 +137,7 @@ export const BranchSidebar: React.FC = () => {
   const [deleteBranchName, setDeleteBranchName] = useState<string | null>(null);
   const [mergeModal, setMergeModal] = useState<{ targetBranch: string } | null>(null);
   const [rebaseModal, setRebaseModal] = useState<{ upstreamBranch: string } | null>(null);
+  const [compareModal, setCompareModal] = useState<{ baseRev: string; targetRev: string } | null>(null);
   const [conflictInfo, setConflictInfo] = useState<{
     targetBranch: string;
     errorMessage: string;
@@ -485,6 +488,23 @@ export const BranchSidebar: React.FC = () => {
                     <GitCommit size={14} className="text-secondary shrink-0" />
                     <span>{t.sidebar.rebaseOntoThis}</span>
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuBranch(null);
+                      setCompareModal({
+                        baseRev: currentBranchName,
+                        targetRev: branch.name,
+                      });
+                    }}
+                    className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
+                  >
+                    <GitCompare size={14} className="text-secondary shrink-0" />
+                    <span>
+                      {t.sidebar.compareWithCurrent.replace("{branch}", currentBranchName)}
+                    </span>
+                  </button>
                 </>
               )}
 
@@ -735,6 +755,23 @@ export const BranchSidebar: React.FC = () => {
               >
                 <GitCommit size={14} className="text-secondary shrink-0" />
                 <span>{t.sidebar.rebaseOntoThis}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuBranch(null);
+                  setCompareModal({
+                    baseRev: currentBranchName,
+                    targetRev: branch.name,
+                  });
+                }}
+                className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
+              >
+                <GitCompare size={14} className="text-secondary shrink-0" />
+                <span>
+                  {t.sidebar.compareWithCurrent.replace("{branch}", currentBranchName)}
+                </span>
               </button>
             </div>
           )}
@@ -1193,6 +1230,18 @@ export const BranchSidebar: React.FC = () => {
             invalidateRepo();
             return res;
           }}
+        />
+      )}
+
+      {compareModal && currentRepo && (
+        <CompareModal
+          isOpen={Boolean(compareModal)}
+          onClose={() => setCompareModal(null)}
+          repoPath={currentRepo.path}
+          initialBaseRev={compareModal.baseRev}
+          initialTargetRev={compareModal.targetRev}
+          branches={branchData?.local}
+          tags={tagItems}
         />
       )}
 
