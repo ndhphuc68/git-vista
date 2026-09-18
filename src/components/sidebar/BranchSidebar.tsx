@@ -143,13 +143,29 @@ export const BranchSidebar: React.FC = () => {
     errorMessage: string;
   } | null>(null);
 
-  // Context / Action menu state
-  const [menuBranch, setMenuBranch] = useState<string | null>(null);
-  const [tagMenuOpenName, setTagMenuOpenName] = useState<string | null>(null);
-  const [remoteMenuName, setRemoteMenuName] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const tagMenuRef = useRef<HTMLDivElement>(null);
-  const remoteMenuRef = useRef<HTMLDivElement>(null);
+  // Context / Action menu state (strictly 1 active menu at any time)
+  type ActiveSidebarMenu =
+    | { type: "branch"; name: string }
+    | { type: "remote"; name: string }
+    | { type: "tag"; name: string }
+    | null;
+
+  const [activeMenu, setActiveMenu] = useState<ActiveSidebarMenu>(null);
+  const activeMenuRef = useRef<HTMLDivElement>(null);
+
+  const menuBranch = activeMenu?.type === "branch" ? activeMenu.name : null;
+  const remoteMenuName = activeMenu?.type === "remote" ? activeMenu.name : null;
+  const tagMenuOpenName = activeMenu?.type === "tag" ? activeMenu.name : null;
+
+  const setMenuBranch = (name: string | null) => {
+    setActiveMenu(name ? { type: "branch", name } : null);
+  };
+  const setRemoteMenuName = (name: string | null) => {
+    setActiveMenu(name ? { type: "remote", name } : null);
+  };
+  const setTagMenuOpenName = (name: string | null) => {
+    setActiveMenu(name ? { type: "tag", name } : null);
+  };
 
   // Remotes modal states
   const [manageRemotesOpen, setManageRemotesOpen] = useState(false);
@@ -160,18 +176,21 @@ export const BranchSidebar: React.FC = () => {
 
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuBranch(null);
+      if (activeMenuRef.current && !activeMenuRef.current.contains(e.target as Node)) {
+        setActiveMenu(null);
       }
-      if (tagMenuRef.current && !tagMenuRef.current.contains(e.target as Node)) {
-        setTagMenuOpenName(null);
-      }
-      if (remoteMenuRef.current && !remoteMenuRef.current.contains(e.target as Node)) {
-        setRemoteMenuName(null);
+    };
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setActiveMenu(null);
       }
     };
     window.addEventListener("mousedown", handleGlobalClick);
-    return () => window.removeEventListener("mousedown", handleGlobalClick);
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => {
+      window.removeEventListener("mousedown", handleGlobalClick);
+      window.removeEventListener("keydown", handleGlobalKeyDown);
+    };
   }, []);
 
   const { data: branchData } = useQuery({
@@ -390,6 +409,7 @@ export const BranchSidebar: React.FC = () => {
         className="group relative flex items-center justify-between rounded-sm"
         onContextMenu={(e) => {
           e.preventDefault();
+          e.stopPropagation();
           setMenuBranch(branch.name);
         }}
       >
@@ -450,7 +470,7 @@ export const BranchSidebar: React.FC = () => {
           {/* Dropdown Action Menu */}
           {isMenuOpen && (
             <div
-              ref={menuRef}
+              ref={activeMenuRef}
               className="absolute right-0 top-full mt-1 min-w-56 w-max bg-surface border border-border-subtle rounded-lg shadow-2xl py-1.5 z-50 text-xs flex flex-col animate-fade-in"
               onClick={(e) => e.stopPropagation()}
             >
@@ -600,7 +620,7 @@ export const BranchSidebar: React.FC = () => {
 
                 {isRemoteMenuOpen && (
                   <div
-                    ref={remoteMenuRef}
+                    ref={activeMenuRef}
                     className="absolute right-0 top-full mt-1 min-w-56 w-max bg-surface border border-border-subtle rounded-lg shadow-2xl py-1.5 z-50 text-xs flex flex-col animate-fade-in"
                     onClick={(e) => e.stopPropagation()}
                   >
@@ -679,6 +699,7 @@ export const BranchSidebar: React.FC = () => {
         className="group relative flex items-center justify-between rounded-sm"
         onContextMenu={(e) => {
           e.preventDefault();
+          e.stopPropagation();
           setMenuBranch(branch.name);
         }}
       >
@@ -720,7 +741,7 @@ export const BranchSidebar: React.FC = () => {
 
           {isMenuOpen && (
             <div
-              ref={menuRef}
+              ref={activeMenuRef}
               className="absolute right-0 top-full mt-1 min-w-56 w-max bg-surface border border-border-subtle rounded-lg shadow-2xl py-1.5 z-50 text-xs flex flex-col animate-fade-in"
               onClick={(e) => e.stopPropagation()}
             >
@@ -958,6 +979,7 @@ export const BranchSidebar: React.FC = () => {
                         className="group relative flex items-center justify-between rounded-sm"
                         onContextMenu={(e) => {
                           e.preventDefault();
+                          e.stopPropagation();
                           setTagMenuOpenName(tag.name);
                         }}
                       >
@@ -992,7 +1014,7 @@ export const BranchSidebar: React.FC = () => {
                           {/* Dropdown Action Menu */}
                           {isMenuOpen && (
                             <div
-                              ref={tagMenuRef}
+                              ref={activeMenuRef}
                               className="absolute right-0 top-full mt-1 min-w-56 w-max bg-surface border border-border-subtle rounded-lg shadow-2xl py-1.5 z-50 text-xs flex flex-col animate-fade-in"
                               onClick={(e) => e.stopPropagation()}
                             >

@@ -79,5 +79,46 @@ describe("BranchSidebar", () => {
     fireEvent.click(renameBtn);
     expect(screen.getByRole("heading", { name: "Đổi tên nhánh" })).toBeInTheDocument();
   });
+
+  it("ensures only 1 context menu is shown at any time", async () => {
+    useRepoStore.getState().setRepo({
+      path: "d:/project-v3",
+      name: "project-v3",
+      is_bare: false,
+      head_branch: "main",
+      head_commit_id: "c1",
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <BranchSidebar />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("origin")).toBeInTheDocument();
+    });
+
+    // 1. Open remote context menu on origin
+    const originNode = screen.getByText("origin");
+    fireEvent.contextMenu(originNode);
+
+    // Remote menu item should be visible
+    expect(screen.getByText(/Dọn dẹp nhánh mồ côi/i)).toBeInTheDocument();
+
+    // 2. Right-click on a branch item (e.g. main)
+    const branchBtn = screen.getAllByText("main")[0]!;
+    fireEvent.contextMenu(branchBtn);
+
+    // Branch menu item should now be visible
+    expect(screen.getByText(/Đổi tên/i)).toBeInTheDocument();
+
+    // Remote menu item MUST have closed and NOT be in the document!
+    expect(screen.queryByText(/Dọn dẹp nhánh mồ côi/i)).not.toBeInTheDocument();
+
+    // 3. Press Escape key to close the menu
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByText(/Đổi tên/i)).not.toBeInTheDocument();
+  });
 });
 
