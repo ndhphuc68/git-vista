@@ -241,6 +241,42 @@ export interface TagItem {
   timestamp_sec?: number | null;
 }
 
+export interface BlameLine {
+  line_no: number;
+  content: string;
+  commit_id: string;
+  short_id: string;
+  summary: string;
+  author_name: string;
+  author_email: string;
+  timestamp_sec: number;
+  is_hunk_start: boolean;
+}
+
+export interface FileBlameResult {
+  file_path: string;
+  commit_id: string | null;
+  lines: BlameLine[];
+  total_lines: number;
+}
+
+export interface FileHistoryItem {
+  commit_id: string;
+  short_id: string;
+  summary: string;
+  author_name: string;
+  author_email: string;
+  timestamp_sec: number;
+  change_type: string; // "added" | "modified" | "deleted"
+}
+
+export interface FileHistoryResult {
+  file_path: string;
+  commits: FileHistoryItem[];
+  has_more: boolean;
+  total_count: number;
+}
+
 export interface Commands {
   get_commit_file_diff: (
     repoPath: string,
@@ -254,4 +290,15 @@ export interface Commands {
     isStaged: boolean,
     ignoreWhitespace?: boolean | null
   ) => Promise<FileDiffResult>;
+  get_file_blame: (
+    repoPath: string,
+    filePath: string,
+    commitId?: string | null
+  ) => Promise<FileBlameResult>;
+  get_file_history: (
+    repoPath: string,
+    filePath: string,
+    offset?: number | null,
+    limit?: number | null
+  ) => Promise<FileHistoryResult>;
 }

@@ -770,6 +770,29 @@ export const en: Translations = {
   shellExt: {
     resizeTooltip: "Drag to resize sidebar (Double click to reset)",
   },
+  inspector: {
+    title: "File Inspector",
+    blameTab: "Git Blame",
+    historyTab: "File History",
+    copyPath: "Copy path",
+    copyPathSuccess: "File path copied to clipboard",
+    copyShaSuccess: "Commit SHA copied to clipboard",
+    closeTooltip: "Close (Esc)",
+    loadingBlame: "Loading Blame data...",
+    loadingHistory: "Loading file commit history...",
+    noBlameData: "No blame data available for this file.",
+    noHistoryData: "No commit history found for this file.",
+    searchHistoryPlaceholder: "Filter commits by message or author...",
+    noMatchingCommits: "No commits match the filter.",
+    totalLines: "{count} lines",
+    totalCommits: "{count} commits",
+    changeTypeAdded: "Added",
+    changeTypeModified: "Modified",
+    changeTypeDeleted: "Deleted",
+    jumpToCommit: "View commit on graph",
+    viewBlame: "View Git Blame",
+    viewHistory: "View File History",
+  },
 };
 
 

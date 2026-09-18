@@ -20,8 +20,11 @@ import {
   ConflictHunk,
   ConflictFileData,
   ConfigScope,
-  GitConfigDto,
   TagItem,
+  BlameLine,
+  FileBlameResult,
+  FileHistoryItem,
+  FileHistoryResult,
 } from "./bindings";
 
 let mockTags: TagItem[] = [
@@ -379,6 +382,114 @@ export const invokeCommand = {
       filePath,
       isStaged,
       ignoreWhitespace: ignoreWhitespace ?? false,
+    });
+  },
+
+  getFileBlame: async (
+    repoPath: string,
+    filePath: string,
+    commitId?: string | null
+  ): Promise<FileBlameResult> => {
+    if (!isTauri()) {
+      return {
+        file_path: filePath,
+        commit_id: commitId ?? null,
+        total_lines: 4,
+        lines: [
+          {
+            line_no: 1,
+            content: "import React from 'react';",
+            commit_id: "c1a2b3c4d5e6f7890123456789abcdef01234567",
+            short_id: "c1a2b3c",
+            summary: "✨ initial commit with react components",
+            author_name: "GitVista Team",
+            author_email: "team@gitvista.dev",
+            timestamp_sec: Math.floor(Date.now() / 1000) - 86400 * 5,
+            is_hunk_start: true,
+          },
+          {
+            line_no: 2,
+            content: "import { invokeCommand } from '../ipc/client';",
+            commit_id: "c1a2b3c4d5e6f7890123456789abcdef01234567",
+            short_id: "c1a2b3c",
+            summary: "✨ initial commit with react components",
+            author_name: "GitVista Team",
+            author_email: "team@gitvista.dev",
+            timestamp_sec: Math.floor(Date.now() / 1000) - 86400 * 5,
+            is_hunk_start: false,
+          },
+          {
+            line_no: 3,
+            content: "",
+            commit_id: "d4e5f6a1b2c37890123456789abcdef012345678",
+            short_id: "d4e5f6a",
+            summary: "♻️ refactor exports and formatting",
+            author_name: "PhucNDH",
+            author_email: "phuc@example.com",
+            timestamp_sec: Math.floor(Date.now() / 1000) - 86400 * 2,
+            is_hunk_start: true,
+          },
+          {
+            line_no: 4,
+            content: "export const isReady = true;",
+            commit_id: "d4e5f6a1b2c37890123456789abcdef012345678",
+            short_id: "d4e5f6a",
+            summary: "♻️ refactor exports and formatting",
+            author_name: "PhucNDH",
+            author_email: "phuc@example.com",
+            timestamp_sec: Math.floor(Date.now() / 1000) - 86400 * 2,
+            is_hunk_start: false,
+          },
+        ],
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<FileBlameResult>("get_file_blame", {
+      repoPath,
+      filePath,
+      commitId: commitId ?? null,
+    });
+  },
+
+  getFileHistory: async (
+    repoPath: string,
+    filePath: string,
+    offset?: number | null,
+    limit?: number | null
+  ): Promise<FileHistoryResult> => {
+    if (!isTauri()) {
+      return {
+        file_path: filePath,
+        total_count: 2,
+        has_more: false,
+        commits: [
+          {
+            commit_id: "d4e5f6a1b2c37890123456789abcdef012345678",
+            short_id: "d4e5f6a",
+            summary: "♻️ refactor exports and formatting",
+            author_name: "PhucNDH",
+            author_email: "phuc@example.com",
+            timestamp_sec: Math.floor(Date.now() / 1000) - 86400 * 2,
+            change_type: "modified",
+          },
+          {
+            commit_id: "c1a2b3c4d5e6f7890123456789abcdef01234567",
+            short_id: "c1a2b3c",
+            summary: "✨ initial commit with react components",
+            author_name: "GitVista Team",
+            author_email: "team@gitvista.dev",
+            timestamp_sec: Math.floor(Date.now() / 1000) - 86400 * 5,
+            change_type: "added",
+          },
+        ],
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<FileHistoryResult>("get_file_history", {
+      repoPath,
+      filePath,
+      offset: offset ?? null,
+      limit: limit ?? null,
     });
   },
 

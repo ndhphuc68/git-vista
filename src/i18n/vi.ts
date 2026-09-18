@@ -768,6 +768,29 @@ export const vi = {
   shellExt: {
     resizeTooltip: "Kéo để thay đổi chiều rộng sidebar (Nhấp đúp để đặt lại mặc định)",
   },
+  inspector: {
+    title: "Kiểm tra tệp tin",
+    blameTab: "Git Blame",
+    historyTab: "Lịch sử tệp",
+    copyPath: "Sao chép đường dẫn",
+    copyPathSuccess: "Đã sao chép đường dẫn tệp vào clipboard",
+    copyShaSuccess: "Đã sao chép mã commit vào clipboard",
+    closeTooltip: "Đóng (Esc)",
+    loadingBlame: "Đang tải dữ liệu Blame...",
+    loadingHistory: "Đang tải lịch sử commit của tệp...",
+    noBlameData: "Không có dữ liệu blame cho tệp này.",
+    noHistoryData: "Không tìm thấy lịch sử thay đổi nào cho tệp này.",
+    searchHistoryPlaceholder: "Lọc commit theo thông điệp hoặc tác giả...",
+    noMatchingCommits: "Không có commit nào khớp với bộ lọc.",
+    totalLines: "{count} dòng",
+    totalCommits: "{count} commit",
+    changeTypeAdded: "Thêm mới",
+    changeTypeModified: "Đã sửa",
+    changeTypeDeleted: "Đã xoá",
+    jumpToCommit: "Xem commit này trên đồ thị",
+    viewBlame: "Xem Git Blame",
+    viewHistory: "Xem Lịch sử tệp",
+  },
 };
 
 export type Translations = typeof vi;
