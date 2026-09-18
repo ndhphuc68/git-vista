@@ -26,6 +26,10 @@ import {
   FileHistoryResult,
   RemoteItem,
   PruneResult,
+  RebaseCommitItem,
+  RebaseActionKind,
+  RebasePlanStep,
+  InteractiveRebaseResult,
 } from "./bindings";
 
 let mockTags: TagItem[] = [
@@ -98,6 +102,74 @@ export function resetMockRemotes() {
       push_url: "https://github.com/gitvista/git-vista.git",
       branch_count: 5,
       is_default: true,
+    },
+  ];
+}
+
+let mockRebaseCommits: RebaseCommitItem[] = [
+  {
+    id: "a1b2c3d4e5f67890123456789012345678901234",
+    short_id: "a1b2c3d",
+    summary: "feat: add user authentication",
+    message: "feat: add user authentication\n\nImplements JWT login",
+    author_name: "Developer",
+    author_email: "dev@example.com",
+    timestamp: Math.floor(Date.now() / 1000) - 3600,
+    parent_ids: ["0000000000000000000000000000000000000000"],
+  },
+  {
+    id: "b2c3d4e5f6789012345678901234567890123456",
+    short_id: "b2c3d4e",
+    summary: "fix: resolve token expiry bug",
+    message: "fix: resolve token expiry bug",
+    author_name: "Developer",
+    author_email: "dev@example.com",
+    timestamp: Math.floor(Date.now() / 1000) - 1800,
+    parent_ids: ["a1b2c3d4e5f67890123456789012345678901234"],
+  },
+  {
+    id: "c3d4e5f678901234567890123456789012345678",
+    short_id: "c3d4e5f",
+    summary: "docs: update API readme",
+    message: "docs: update API readme",
+    author_name: "Developer",
+    author_email: "dev@example.com",
+    timestamp: Math.floor(Date.now() / 1000) - 600,
+    parent_ids: ["b2c3d4e5f6789012345678901234567890123456"],
+  },
+];
+
+export function resetMockRebaseCommits() {
+  mockRebaseCommits = [
+    {
+      id: "a1b2c3d4e5f67890123456789012345678901234",
+      short_id: "a1b2c3d",
+      summary: "feat: add user authentication",
+      message: "feat: add user authentication\n\nImplements JWT login",
+      author_name: "Developer",
+      author_email: "dev@example.com",
+      timestamp: Math.floor(Date.now() / 1000) - 3600,
+      parent_ids: ["0000000000000000000000000000000000000000"],
+    },
+    {
+      id: "b2c3d4e5f6789012345678901234567890123456",
+      short_id: "b2c3d4e",
+      summary: "fix: resolve token expiry bug",
+      message: "fix: resolve token expiry bug",
+      author_name: "Developer",
+      author_email: "dev@example.com",
+      timestamp: Math.floor(Date.now() / 1000) - 1800,
+      parent_ids: ["a1b2c3d4e5f67890123456789012345678901234"],
+    },
+    {
+      id: "c3d4e5f678901234567890123456789012345678",
+      short_id: "c3d4e5f",
+      summary: "docs: update API readme",
+      message: "docs: update API readme",
+      author_name: "Developer",
+      author_email: "dev@example.com",
+      timestamp: Math.floor(Date.now() / 1000) - 600,
+      parent_ids: ["b2c3d4e5f6789012345678901234567890123456"],
     },
   ];
 }
@@ -1102,6 +1174,55 @@ export const invokeCommand = {
     return await invoke<RebaseResult>("rebase_branch", { repoPath, upstreamBranch });
   },
 
+  getRebaseCommits: async (
+    repoPath: string,
+    baseCommitId: string
+  ): Promise<RebaseCommitItem[]> => {
+    if (!isTauri()) {
+      return [...mockRebaseCommits];
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<RebaseCommitItem[]>("get_rebase_commits", {
+      repoPath,
+      baseCommitId,
+    });
+  },
+
+  executeInteractiveRebase: async (
+    repoPath: string,
+    baseCommitId: string,
+    steps: RebasePlanStep[],
+    autoStash?: boolean
+  ): Promise<InteractiveRebaseResult> => {
+    if (!isTauri()) {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("mock-repo-changed", {
+            detail: {
+              repo_path: repoPath,
+              reason: "execute_interactive_rebase",
+              timestamp_ms: Date.now(),
+            },
+          })
+        );
+      }
+      return {
+        success: true,
+        status: "Success",
+        head_commit_id: "mock-new-head-oid",
+        undo_token: "refs/gitui-backup/commit-undo-mock-123",
+        output: "Successfully rebased and updated refs/heads/main.",
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<InteractiveRebaseResult>("execute_interactive_rebase", {
+      repoPath,
+      baseCommitId,
+      steps,
+      autoStash: autoStash ?? false,
+    });
+  },
+
   cherryPickCommit: async (
     repoPath: string,
     commitId: string,
@@ -1382,5 +1503,9 @@ export type {
   TagItem,
   RemoteItem,
   PruneResult,
+  RebaseCommitItem,
+  RebaseActionKind,
+  RebasePlanStep,
+  InteractiveRebaseResult,
 };
 

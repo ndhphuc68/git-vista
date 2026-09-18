@@ -291,6 +291,33 @@ export interface PruneResult {
   message: string;
 }
 
+export type RebaseActionKind = "Pick" | "Reword" | "Squash" | "Fixup" | "Drop";
+
+export interface RebaseCommitItem {
+  id: string;
+  short_id: string;
+  summary: string;
+  message: string;
+  author_name: string;
+  author_email: string;
+  timestamp: number;
+  parent_ids: string[];
+}
+
+export interface RebasePlanStep {
+  commit_id: string;
+  action: RebaseActionKind;
+  new_message?: string | null;
+}
+
+export interface InteractiveRebaseResult {
+  success: boolean;
+  status: string; // "Success" | "Conflict" | "Error"
+  head_commit_id?: string | null;
+  undo_token?: string | null;
+  output: string;
+}
+
 export interface Commands {
   get_commit_file_diff: (
     repoPath: string,
