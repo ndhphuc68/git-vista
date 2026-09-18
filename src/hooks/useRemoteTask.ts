@@ -4,6 +4,7 @@ import { invokeCommand, listenToTaskProgress } from "../ipc/client";
 import { useTranslation } from "../i18n";
 import type { RemoteTaskState } from "../components/common/RemoteProgressBanner";
 import { mapGitError } from "../utils/errorMapping";
+import { qk } from "../domain/queryKeys";
 
 export type RemoteOperation = "fetch" | "pull" | "push";
 interface TaskOwner {
@@ -89,7 +90,7 @@ export function useRemoteTask(repoPath: string | undefined, hasUpstream: boolean
       else
         await invokeCommand.pushRepo(repoPath, undefined, undefined, !hasUpstream, false, taskId);
       if (active.current !== owner) return;
-      void queryClient.invalidateQueries();
+      void queryClient.invalidateQueries({ queryKey: qk.repo.all(repoPath) });
       setTask((previous) =>
         previous?.taskId === taskId
           ? {
@@ -109,7 +110,7 @@ export function useRemoteTask(repoPath: string | undefined, hasUpstream: boolean
           : previous
       );
       // Pull may leave conflicts even when it fails; refresh the affected views.
-      void queryClient.invalidateQueries();
+      void queryClient.invalidateQueries({ queryKey: qk.repo.all(repoPath) });
     } finally {
       owner.pending = false;
       if (active.current === owner)

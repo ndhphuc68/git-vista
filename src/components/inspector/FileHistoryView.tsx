@@ -10,6 +10,7 @@ import {
   getAuthorInitials,
   formatRelativeTime,
 } from "../diff/CommitDetailPanel";
+import { qk } from "../../domain/queryKeys";
 
 interface FileHistoryViewProps {
   repoPath: string;
@@ -26,7 +27,7 @@ export const FileHistoryView: React.FC<FileHistoryViewProps> = ({ repoPath, file
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["file-history", repoPath, filePath],
+    queryKey: qk.fileHistory(repoPath, filePath),
     queryFn: () => invokeCommand.getFileHistory(repoPath, filePath, 0, 100),
   });
 

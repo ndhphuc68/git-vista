@@ -22,8 +22,9 @@ export const qk = {
   commitDetails: (repo: string, commitId: string) =>
     ["repo", repo, "commitDetails", commitId] as const,
 
-  fileDiff: (repo: string, commitId: string, filePath: string) =>
-    ["repo", repo, "fileDiff", commitId, filePath] as const,
+  /** Diff của file trong một commit. Phân biệt theo tuỳ chọn bỏ qua khoảng trắng — thiếu tham số này thì hai chế độ hiển thị dùng chung một ô cache. */
+  fileDiff: (repo: string, commitId: string, filePath: string, ignoreWhitespace: boolean) =>
+    ["repo", repo, "fileDiff", commitId, filePath, ignoreWhitespace] as const,
 
   fileHistory: (repo: string, filePath: string) =>
     ["repo", repo, "fileHistory", filePath] as const,
@@ -42,6 +43,17 @@ export const qk = {
   /** Kết quả so sánh hai nhánh/commit. */
   compareSummary: (repo: string, baseRev: string, targetRev: string, mode: string) =>
     ["repo", repo, "compareSummary", baseRev, targetRev, mode] as const,
+
+  /** Diff của một file khi so sánh hai nhánh/commit. Phân biệt theo filePath, mode và tuỳ chọn bỏ qua khoảng trắng. */
+  compareFileDiff: (
+    repo: string,
+    baseRev: string,
+    targetRev: string,
+    filePath: string,
+    mode: string,
+    ignoreWhitespace: boolean
+  ) =>
+    ["repo", repo, "compareFileDiff", baseRev, targetRev, filePath, mode, ignoreWhitespace] as const,
 
   /** Danh sách commit sẽ được rebase tương tác. */
   rebaseCommits: (repo: string, baseCommitId: string) =>

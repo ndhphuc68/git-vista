@@ -23,6 +23,7 @@ import { useInspectorStore } from "../../store/useInspectorStore";
 import { invokeCommand } from "../../ipc/client";
 import { FileDiffViewer } from "./FileDiffViewer";
 import { useTranslation, formatRelativeTime as i18nFormatRelativeTime } from "../../i18n";
+import { qk } from "../../domain/queryKeys";
 
 interface CommitDetailPanelProps {
   onClose?: () => void;
@@ -208,7 +209,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
   });
 
   const { data: details, isLoading } = useQuery({
-    queryKey: ["commit-details", currentRepo?.path, selectedCommitId],
+    queryKey: qk.commitDetails(currentRepo?.path ?? "", selectedCommitId ?? ""),
     queryFn: () => invokeCommand.getCommitDetails(currentRepo!.path, selectedCommitId!),
     enabled: Boolean(currentRepo && selectedCommitId),
   });

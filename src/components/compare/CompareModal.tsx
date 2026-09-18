@@ -9,6 +9,7 @@ import { CompareCommitList } from "./CompareCommitList";
 import { CompareFileList } from "./CompareFileList";
 import { CompareDiffViewer } from "./CompareDiffViewer";
 import type { CompareMode, CompareCommitItem, CompareFileItem } from "../../ipc/bindings";
+import { qk } from "../../domain/queryKeys";
 
 const EMPTY_COMMITS: CompareCommitItem[] = [];
 const EMPTY_FILES: CompareFileItem[] = [];
@@ -56,7 +57,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
 
   // Query comparison summary
   const { data: summary, isLoading } = useQuery({
-    queryKey: ["compare-summary", repoPath, baseRev, targetRev, mode],
+    queryKey: qk.compareSummary(repoPath, baseRev, targetRev, mode),
     queryFn: () => invokeCommand.compareCommits(repoPath, baseRev, targetRev, mode),
     enabled: isOpen && Boolean(repoPath) && Boolean(baseRev) && Boolean(targetRev),
   });

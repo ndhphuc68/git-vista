@@ -30,8 +30,18 @@ describe("queryKeys", () => {
   });
 
   it("key phụ thuộc tham số phụ phải phân biệt theo tham số đó", () => {
-    expect(qk.fileDiff(REPO, "abc", "a.ts")).not.toEqual(qk.fileDiff(REPO, "abc", "b.ts"));
-    expect(qk.fileDiff(REPO, "abc", "a.ts")).not.toEqual(qk.fileDiff(REPO, "def", "a.ts"));
+    expect(qk.fileDiff(REPO, "abc", "a.ts", false)).not.toEqual(
+      qk.fileDiff(REPO, "abc", "b.ts", false)
+    );
+    expect(qk.fileDiff(REPO, "abc", "a.ts", false)).not.toEqual(
+      qk.fileDiff(REPO, "def", "a.ts", false)
+    );
+  });
+
+  it("fileDiff phân biệt theo tuỳ chọn bỏ qua khoảng trắng — thiếu tham số này thì hai chế độ hiển thị dùng chung một ô cache", () => {
+    expect(qk.fileDiff(REPO, "abc", "a.ts", false)).not.toEqual(
+      qk.fileDiff(REPO, "abc", "a.ts", true)
+    );
   });
 
   it("key mới cũng mang tiền tố repo để invalidate theo phạm vi", () => {
@@ -85,5 +95,23 @@ describe("queryKeys", () => {
     expect(base).not.toEqual(qk.rebaseCommits(REPO, "def456"));
     // Phân biệt theo repo
     expect(base).not.toEqual(qk.rebaseCommits("/other/repo", "abc123"));
+  });
+
+  it("compareFileDiff phân biệt theo từng tham số, gồm cả tuỳ chọn bỏ qua khoảng trắng", () => {
+    const base = qk.compareFileDiff(REPO, "main", "dev", "a.ts", "twodot", false);
+    // Phân biệt theo baseRev
+    expect(base).not.toEqual(qk.compareFileDiff(REPO, "master", "dev", "a.ts", "twodot", false));
+    // Phân biệt theo targetRev
+    expect(base).not.toEqual(qk.compareFileDiff(REPO, "main", "other", "a.ts", "twodot", false));
+    // Phân biệt theo filePath
+    expect(base).not.toEqual(qk.compareFileDiff(REPO, "main", "dev", "b.ts", "twodot", false));
+    // Phân biệt theo mode
+    expect(base).not.toEqual(qk.compareFileDiff(REPO, "main", "dev", "a.ts", "threedot", false));
+    // Phân biệt theo ignoreWhitespace
+    expect(base).not.toEqual(qk.compareFileDiff(REPO, "main", "dev", "a.ts", "twodot", true));
+    // Phân biệt theo repo
+    expect(base).not.toEqual(
+      qk.compareFileDiff("/other/repo", "main", "dev", "a.ts", "twodot", false)
+    );
   });
 });

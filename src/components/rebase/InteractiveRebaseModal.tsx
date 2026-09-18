@@ -15,6 +15,7 @@ import type {
   RebaseActionKind,
   InteractiveRebaseResult,
 } from "../../ipc/bindings";
+import { qk } from "../../domain/queryKeys";
 
 const EMPTY_COMMITS: RebaseCommitItem[] = [];
 
@@ -48,7 +49,7 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
 
   // Fetch commits between base and HEAD
   const { data: fetchedCommits = EMPTY_COMMITS, isLoading } = useQuery({
-    queryKey: ["rebase-commits", repoPath, baseCommitId],
+    queryKey: qk.rebaseCommits(repoPath, baseCommitId),
     queryFn: () => invokeCommand.getRebaseCommits(repoPath, baseCommitId),
     enabled: isOpen && Boolean(repoPath) && Boolean(baseCommitId),
   });

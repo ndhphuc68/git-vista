@@ -9,6 +9,7 @@ import { useInspectorStore } from "../../store/useInspectorStore";
 import { pairHunkLines } from "../../utils/wordDiff";
 import { type DiffHunk } from "../../ipc/bindings";
 import { DiffLineContent } from "./DiffLineContent";
+import { qk } from "../../domain/queryKeys";
 
 interface FileDiffViewerProps {
   repoPath: string;
@@ -93,7 +94,7 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
   const { openInspector } = useInspectorStore();
 
   const { data: diff, isLoading } = useQuery({
-    queryKey: ["file-diff", repoPath, commitId, filePath, diffIgnoreWhitespace],
+    queryKey: qk.fileDiff(repoPath, commitId, filePath, diffIgnoreWhitespace),
     queryFn: () =>
       invokeCommand.getCommitFileDiff(repoPath, commitId, filePath, diffIgnoreWhitespace),
   });
