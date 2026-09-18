@@ -47,7 +47,33 @@ Cùng một dữ liệu nhưng được đặt key khác nhau ở các file khá
 
 Nguyên nhân kỹ thuật: mock data cho browser dev bị nhét chung vào `client.ts`, chiếm phần lớn 1748 dòng của file đó.
 
-### 1.3 Điều quan trọng hơn số dòng lặp: các bản sao đã phân kỳ
+### 1.3 Chất lượng code bên trong: file khổng lồ và state rời rạc
+
+Kiến trúc quyết định *code nằm ở đâu*; phần này quyết định *code đọc ra sao*. Đo bằng oxlint với ngưỡng đề xuất (mục 6.2), **code production có 131 vi phạm**:
+
+| Luật                     | Số vi phạm | Ý nghĩa                          |
+| ------------------------ | ---------- | -------------------------------- |
+| `max-lines-per-function` | 81         | Hàm/component quá dài để đọc một lần |
+| `complexity`             | 29         | Quá nhiều nhánh rẽ trong một hàm |
+| `max-lines` (file)       | 18         | File vượt 300 dòng               |
+| `max-params`             | 3          | Hàm nhận quá nhiều tham số       |
+
+Trường hợp tệ nhất là `BranchSidebar.tsx`:
+
+- **1327 dòng** (giới hạn 300)
+- Component chính có **complexity 64** (giới hạn 15) và **1127 dòng trong một function**
+- **25 `useState`** trong một file
+- **31 inline arrow handler** trong JSX
+
+Ba nhóm vấn đề chất lượng tách bạch:
+
+**(a) State modal biểu diễn bằng cờ rời rạc.** 12 trong số 25 `useState` của `BranchSidebar` chỉ để đóng/mở modal: `isCreateOpen`, `createTagModalOpen`, `deleteTagItem`, `renameBranchName`, `deleteBranchName`, `mergeModal`, `rebaseModal`, `compareModal`, `manageRemotesOpen`, `addRemoteOpen`, `pruneTargetRemote`, `editTargetRemote`... Các modal này **loại trừ lẫn nhau** nhưng lại được biểu diễn độc lập, nên tồn tại những trạng thái vô nghĩa (hai modal cùng mở). Mỗi modal mới lại thêm 1–2 state — đây chính là thứ khiến file phình ra theo thời gian.
+
+**(b) Logic nghiệp vụ trộn lẫn với render.** Cùng một file vừa fetch dữ liệu, vừa lọc, vừa dựng cây thư mục nhánh, vừa render. Không thể test logic tách rời, không thể đọc hiểu từng phần.
+
+**(c) Micro-duplicate rải rác.** `setTimeout(..., 2000)` cho trạng thái "đã copy" lặp 6 lần; `substring(0, 7)` cắt SHA lặp 12 lần; `duration={150}`/`{200}`/`{1800}` là số ma thuật không tên.
+
+### 1.4 Điều quan trọng hơn số dòng lặp: các bản sao đã phân kỳ
 
 `DeleteTagModal` và `PruneConfirmModal` cùng là modal xác nhận nhưng khác nhau ở:
 
@@ -64,11 +90,24 @@ Nguyên nhân kỹ thuật: mock data cho browser dev bị nhét chung vào `cli
 
 ## 2. Mục tiêu
 
+Mục tiêu không chỉ là dọn duplicate, mà là code **clean, dễ đọc, dễ tái sử dụng, dễ phát triển và bảo trì về sau**. Cụ thể hoá thành 8 tiêu chí đo được:
+
+**Về kiến trúc (code nằm ở đâu)**
+
 1. Thêm một tính năng mới = **thêm một thư mục**, không phải sửa rải rác nhiều file.
 2. Ranh giới kiến trúc được **CI ép buộc**, không phụ thuộc kỷ luật con người.
 3. Type giữa Rust và TypeScript **an toàn tại thời điểm compile**.
-4. Loại bỏ duplicate UI bằng primitives dùng chung, chuẩn hoá theo `docs/DESIGN_SYSTEM.md`.
-5. Sửa dứt điểm bug cache ở mục 1.2(a).
+
+**Về chất lượng code (code đọc ra sao)**
+
+4. Mỗi file **dưới 300 dòng**, mỗi hàm/component **dưới 80 dòng**, complexity **dưới 15** — đọc hiểu được trong một lần.
+5. Trạng thái **không biểu diễn được điều vô nghĩa**: modal loại trừ nhau thì dùng một union, không dùng 12 cờ boolean rời rạc.
+6. Logic nghiệp vụ tách khỏi render, nằm trong custom hooks **test được độc lập**.
+7. Không còn số ma thuật; hằng số có tên và đặt trong `domain/constants`.
+
+**Về tính đúng đắn**
+
+8. Sửa dứt điểm bug cache ở mục 1.2(a) và khôi phục an toàn kiểu ở 1.2(b).
 
 ### Ngoài phạm vi
 
@@ -215,7 +254,73 @@ export function useDeleteTag(repoPath: string) {
 
 Component chỉ gọi `useDeleteTag()`. Không biết IPC, không biết query key, không biết cache. Đổi signature phía Rust chỉ phải sửa một file.
 
-### 4.6 `ipc/` — bỏ bindings viết tay
+### 4.6 Ba mẫu cho code dễ đọc, dễ bảo trì
+
+Giải quyết trực tiếp ba nhóm vấn đề ở mục 1.3.
+
+#### (a) Gom state modal: từ 12 cờ rời rạc về một union
+
+Hiện tại, `BranchSidebar` biểu diễn được trạng thái vô nghĩa (hai modal cùng mở). Thay bằng **discriminated union** — làm cho trạng thái sai *không thể biểu diễn được*:
+
+```ts
+type SidebarDialog =
+  | { kind: "none" }
+  | { kind: "createBranch"; fromRef: string | null }
+  | { kind: "renameBranch"; name: string }
+  | { kind: "deleteBranch"; name: string }
+  | { kind: "createTag"; target: { commitId: string; shortId: string } }
+  | { kind: "deleteTag"; tag: TagItem }
+  | { kind: "merge"; targetBranch: string }
+  | { kind: "rebase"; upstreamBranch: string };
+
+const [dialog, setDialog] = useState<SidebarDialog>({ kind: "none" });
+const closeDialog = () => setDialog({ kind: "none" });
+```
+
+Lợi ích cho phát triển tương lai: thêm modal mới = thêm **một nhánh vào union**, TypeScript ép xử lý đầy đủ; không thêm state mới, không làm file phình ra. 12 `useState` → 1.
+
+#### (b) Tách logic khỏi render bằng custom hooks
+
+Logic nghiệp vụ trong `BranchSidebar` được đưa ra các hook độc lập, test được mà không cần render UI:
+
+| Hook                 | Trách nhiệm                          |
+| -------------------- | ------------------------------------ |
+| `useBranchTree()`    | Dựng cây thư mục từ danh sách nhánh phẳng |
+| `useBranchFilter()`  | Lọc theo ô tìm kiếm                  |
+| `useSidebarDialog()` | Quản lý union ở mục (a)              |
+
+Component chỉ còn việc render. Mục tiêu: `BranchSidebar.tsx` từ 1327 dòng xuống **dưới 300 dòng**, chia thành `BranchSidebar` + `BranchTreeSection` + `TagSection` + `StashSection` + `RemoteSection`.
+
+Áp dụng cùng cách cho các file vượt ngưỡng khác: `CommitGraph.tsx` (790), `CommitDetailPanel.tsx` (763), `GitBehaviorTab.tsx` (597), `WelcomeScreen.tsx` (585).
+
+#### (c) Xoá số ma thuật và micro-duplicate
+
+```ts
+// domain/constants/ui.ts
+export const SHORT_SHA_LENGTH = 7;
+export const COPY_FEEDBACK_MS = 2000;
+export const AUTOFOCUS_DELAY_MS = 50;
+export const UNDO_TOAST_MS = 10000;
+
+// domain/constants/motion.ts  — thay duration={150|200|1800} rải rác
+export const MOTION = { fast: 150, normal: 200, slow: 300 } as const;
+
+// shared/utils/git.ts
+export const shortSha = (sha: string) => sha.slice(0, SHORT_SHA_LENGTH);
+
+// shared/hooks/useCopyToClipboard.ts — thay 6 bản sao setTimeout(..., 2000)
+export function useCopyToClipboard() {
+  const [copied, setCopied] = useState(false);
+  const copy = useCallback(async (text: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
+  }, []);
+  return { copied, copy };
+}
+```
+
+### 4.7 `ipc/` — bỏ bindings viết tay
 
 Tách ba trách nhiệm đang bị trộn trong `client.ts` (1748 dòng):
 
@@ -229,7 +334,7 @@ Bước này khôi phục an toàn kiểu compile-time giữa Rust và TypeScrip
 
 Cần gỡ `"src/ipc/bindings.ts"` khỏi `ignorePatterns` trong `.oxlintrc.json` và thay bằng `"src/ipc/bindings.generated.ts"`.
 
-### 4.7 Rust
+### 4.8 Rust
 
 Rust đã tách module sạch (`commands/` → `read`/`write`/`exec`), `AppError` dùng `thiserror` đúng cách, chỉ có 3 chỗ `map_err(|e| e.to_string())` lười. Thay đổi giới hạn ở:
 
@@ -261,14 +366,17 @@ Tăng dần theo từng feature. Mỗi giai đoạn kết thúc bằng `pnpm che
 
 | GĐ    | Nội dung                                                                    | Rủi ro     | Kiểm chứng                |
 | ----- | --------------------------------------------------------------------------- | ---------- | ------------------------- |
-| **0** | Dựng `domain/` + `shared/ui` + `shared/hooks`. Chưa đụng code cũ.            | Không      | Test mới cho primitives   |
+| **0** | Dựng `domain/` + `shared/ui` + `shared/hooks` + `constants`. Bật lint độ phức tạp ở mức `warn`. Chưa đụng code cũ. | Không | Test mới cho primitives |
 | **1** | Chuẩn hoá `queryKeys`, thay ~25 `invalidateQueries()` trống. **Sửa bug 1.2(a)** | Thấp       | 73 test sẵn có            |
 | **2** | Migrate 26 modal sang `Modal`/`Button`/`Alert`, chuẩn hoá theo DESIGN_SYSTEM.md | Thấp       | Test riêng từng modal     |
 | **3** | Bật tauri-specta, tách mock khỏi `client.ts`. **Sửa lỗi 1.2(b)**             | **Cao**    | `pnpm build` + toàn bộ test |
 | **4** | Tách `ipc/client.ts` (1748 dòng) theo domain                                | Trung bình | `ipc*.test.ts`            |
 | **5** | Migrate sang `features/` từng cái: branch → tag → remote → changes → ...     | Thấp mỗi bước | Test của feature đó    |
-| **6** | Rust: `with_repo()`, gom `emit_repo_changed`, dọn `map_err`                 | Thấp       | `cargo test` + `cargo clippy` |
-| **7** | Bật lint ranh giới trong CI — khoá kiến trúc lại                            | Không      | `pnpm lint`               |
+| **5b**| **Xẻ nhỏ file khổng lồ**: gom state modal về union, tách logic ra hooks, tách component con. Làm cùng lúc với GĐ5 cho từng feature. | Trung bình | Test của feature đó |
+| **6** | Rust: `with_repo()`, gom `emit_repo_changed` (9 bản), dọn `map_err`         | Thấp       | `cargo test` + `cargo clippy` |
+| **7** | Nâng lint ranh giới + độ phức tạp từ `warn` lên `error` — khoá lại vĩnh viễn | Không      | `pnpm lint`               |
+
+**Về GĐ5b:** không tách thành giai đoạn riêng mà làm **cùng lúc** với GĐ5 cho từng feature. Lý do: khi đã di chuyển `BranchSidebar` sang `features/branch/`, việc xẻ nhỏ nó ngay lúc đó rẻ hơn nhiều so với di chuyển nguyên khối 1327 dòng rồi quay lại sửa sau. Thứ tự ưu tiên theo mức độ vi phạm: `BranchSidebar` (1327) → `CommitGraph` (790) → `CommitDetailPanel` (763) → `GitBehaviorTab` (597) → `WelcomeScreen` (585).
 
 Giai đoạn 3 mang lại giá trị lớn nhất cho bảo trì dài hạn nhưng cũng rủi ro nhất, nên đứng riêng một PR.
 
@@ -276,9 +384,11 @@ Giai đoạn 5 cho phép cũ và mới sống chung: `components/` và `features
 
 ---
 
-## 6. Ép buộc ranh giới bằng CI
+## 6. Ép buộc bằng CI
 
-Thêm vào `.oxlintrc.json`:
+Đây là phần giữ cho "clean, dễ đọc, dễ bảo trì" **không trôi theo thời gian**. Không có nó, code sẽ mục dần vì lint không chặn được vi phạm và mọi thứ phụ thuộc vào kỷ luật của người review.
+
+### 6.1 Ranh giới kiến trúc
 
 ```jsonc
 "rules": {
@@ -295,7 +405,32 @@ Thêm vào `.oxlintrc.json`:
 
 Kèm override cho phép `features/*/api` được import `ipc/`, và `shared/ui/` bị cấm import `ipc`/`store`/`i18n`.
 
-Không có bước này, kiến trúc sẽ mục dần vì lint không chặn được vi phạm.
+### 6.2 Giới hạn độ phức tạp
+
+Đã **kiểm chứng thực tế**: cả 6 luật dưới đây đều có trong oxlint 1.83 và chạy được trên codebase này.
+
+```jsonc
+"max-lines":              ["error", { "max": 300, "skipBlankLines": true, "skipComments": true }],
+"max-lines-per-function": ["error", { "max": 80,  "skipBlankLines": true, "skipComments": true }],
+"complexity":             ["error", 15],
+"max-depth":              ["error", 4],
+"max-params":             ["error", 5],
+"max-nested-callbacks":   ["error", 3]
+```
+
+**Chiến lược siết dần — bắt buộc.** Bật `error` ngay lập tức sẽ vỡ CI vì hiện có **131 vi phạm** trong code production. Lộ trình:
+
+| Thời điểm | Mức    | Trạng thái mong đợi                          |
+| --------- | ------ | -------------------------------------------- |
+| GĐ 0      | `warn` | 131 vi phạm hiện ra, chưa chặn CI             |
+| GĐ 2–6    | `warn` | Số vi phạm giảm dần khi migrate từng phần     |
+| GĐ 7      | `error`| Về 0, khoá lại vĩnh viễn                      |
+
+File test được miễn `max-lines-per-function` (test dài là bình thường), `bindings.generated.ts` được miễn toàn bộ.
+
+### 6.3 Tài liệu quy ước
+
+Cập nhật `AGENTS.md` / `CLAUDE.md` ghi rõ 5 quy tắc bất biến ở mục 3.3 và các ngưỡng ở 6.2, để cả người và AI cùng tuân theo khi viết code mới.
 
 ---
 
@@ -304,7 +439,8 @@ Không có bước này, kiến trúc sẽ mục dần vì lint không chặn đ
 Dựa vào **73 test file sẵn có** — gần như mọi modal đều đã có test riêng. Đây là lưới an toàn đủ mạnh cho việc di chuyển code.
 
 - **Code chỉ di chuyển** (giai đoạn 2, 4, 5): không viết test mới. Test sẵn có phải xanh không sửa assertion. Nếu phải sửa assertion nghĩa là hành vi đã đổi — cần dừng lại xem xét.
-- **Code mới** (giai đoạn 0): viết test cho `Modal`, `Button`, `useAsyncAction`, `useEscapeKey`, `queryKeys`.
+- **Code mới** (giai đoạn 0): viết test cho `Modal`, `Button`, `useAsyncAction`, `useEscapeKey`, `useCopyToClipboard`, `queryKeys`.
+- **Logic tách ra hooks** (giai đoạn 5b): mỗi hook (`useBranchTree`, `useBranchFilter`, `useSidebarDialog`) có test riêng, chạy không cần render UI. Đây là lợi ích trực tiếp của việc tách logic khỏi render — trước đó không test được.
 - **Giai đoạn 1**: bổ sung test khẳng định invalidate đúng phạm vi.
 - **Giai đoạn 3**: `pnpm build` phải xanh — chính là phép kiểm chứng type an toàn đã khôi phục.
 - **Giai đoạn 6**: `cargo test` + `cargo clippy -- -D warnings`.
@@ -321,17 +457,44 @@ Dựa vào **73 test file sẵn có** — gần như mọi modal đều đã có
 | Di chuyển thư mục làm vỡ import test  | Trung bình | Từng feature một, chạy test ngay sau mỗi lần di chuyển.                        |
 | Refactor kéo dài, bỏ dở giữa chừng    | Trung bình | Mỗi giai đoạn tự đứng vững được. Cũ/mới sống chung an toàn.                    |
 | Mock tách ra làm hỏng browser dev mode| Trung bình | Giữ nguyên hành vi mock, chỉ đổi vị trí file. E2E `app.spec.ts` kiểm chứng.    |
+| Xẻ nhỏ file lớn làm sai hành vi        | Trung bình | Chỉ di chuyển code, không đổi logic. Test sẵn có phải xanh mà **không sửa assertion**. |
+| Gom 12 cờ modal về union làm sót nhánh | Trung bình | TypeScript ép xử lý đủ nhánh union. Test modal sẵn có phủ từng nhánh.          |
+| Lint `error` quá sớm làm vỡ CI         | Trung bình | Bắt buộc bật `warn` ở GĐ0, chỉ nâng `error` ở GĐ7 khi đã về 0 vi phạm.         |
+| Ngưỡng lint gây tách file máy móc      | Thấp       | Ngưỡng là tín hiệu cần xem lại, không phải mục tiêu tự thân. Tách theo trách nhiệm, không tách cho đủ số dòng. |
 
 ---
 
 ## 9. Tiêu chí hoàn thành
 
+**Tái sử dụng — hết duplicate**
+
 - [ ] `shared/ui/` có Modal, Button, Alert, Field — không import `ipc`/`store`/`i18n`
+- [ ] 26 modal dùng `Modal` dùng chung; không còn `fixed inset-0` tự dựng trong feature
+- [ ] Không còn `setTimeout(..., 2000)` copy-clipboard lặp; dùng `useCopyToClipboard`
+- [ ] Không còn `substring(0, 7)` rải rác; dùng `shortSha()`
+- [ ] Không còn số ma thuật cho duration/z-index; dùng `domain/constants`
+
+**Dễ đọc — không còn file khổng lồ**
+
+- [ ] Mọi file production **dưới 300 dòng** (hiện 18 file vi phạm)
+- [ ] Mọi hàm/component **dưới 80 dòng** (hiện 81 vi phạm)
+- [ ] Complexity mọi hàm **dưới 15** (hiện 29 vi phạm, cao nhất là 64)
+- [ ] `BranchSidebar.tsx` 1327 dòng → dưới 300, chia thành các component con
+- [ ] 12 cờ modal rời rạc → 1 discriminated union
+- [ ] Logic nghiệp vụ nằm trong hooks test được độc lập, không lẫn trong render
+
+**Dễ phát triển — kiến trúc rõ ràng**
+
 - [ ] Không còn query key literal ngoài `domain/queryKeys.ts`
 - [ ] Không còn `invalidateQueries()` không tham số
-- [ ] 26 modal dùng `Modal` dùng chung; không còn `fixed inset-0` tự dựng trong feature
-- [ ] `bindings.generated.ts` do tauri-specta sinh; mock nằm ngoài lớp IPC production
-- [ ] `ipc/client.ts` 1748 dòng đã tách theo domain
 - [ ] Component không import `ipc/` trực tiếp (CI ép)
-- [ ] Rust: `with_repo()` thay 58 chỗ lặp; `emit_repo_changed` gom một chỗ
+- [ ] `ipc/client.ts` 1748 dòng đã tách theo domain
+- [ ] `bindings.generated.ts` do tauri-specta sinh; mock nằm ngoài lớp IPC production
+- [ ] Rust: `with_repo()` thay 58 chỗ lặp; `emit_repo_changed` gom từ 9 bản về 1
+
+**Dễ bảo trì — được CI khoá lại**
+
+- [ ] Lint ranh giới kiến trúc ở mức `error`
+- [ ] Lint độ phức tạp ở mức `error`, 0 vi phạm
+- [ ] `AGENTS.md`/`CLAUDE.md` ghi rõ quy ước cho người và AI
 - [ ] `pnpm check` xanh
