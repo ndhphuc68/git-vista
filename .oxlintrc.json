@@ -42,13 +42,27 @@
     "import/no-duplicates": "error",
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+    "react/only-export-components": ["warn", { "allowConstantExport": true }],
+    "max-lines": ["warn", { "max": 300, "skipBlankLines": true, "skipComments": true }],
+    "max-lines-per-function": ["warn", { "max": 80, "skipBlankLines": true, "skipComments": true }],
+    "complexity": ["warn", 15],
+    "max-depth": ["warn", 4],
+    "max-params": ["warn", 5],
+    "max-nested-callbacks": ["warn", 3]
   },
   "overrides": [
     {
       "files": ["src/ipc/bindings.ts"],
       "rules": {
         "typescript/no-explicit-any": "off"
+      }
+    },
+    {
+      "files": ["src/test/**", "**/*.test.ts", "**/*.test.tsx", "e2e/**"],
+      "rules": {
+        "max-lines": "off",
+        "max-lines-per-function": "off",
+        "max-nested-callbacks": "off"
       }
     }
   ]
