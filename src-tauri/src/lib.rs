@@ -78,7 +78,9 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         rename_remote,
         remove_remote,
         set_remote_url,
-        prune_remote
+        prune_remote,
+        get_rebase_commits,
+        execute_interactive_rebase
     ])
 }
 

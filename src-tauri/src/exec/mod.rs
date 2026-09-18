@@ -3,6 +3,7 @@
 
 pub mod commit_actions;
 pub mod merge;
+pub mod rebase;
 pub mod remote;
 
 use crate::error::AppError;
