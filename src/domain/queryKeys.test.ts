@@ -33,4 +33,35 @@ describe("queryKeys", () => {
     expect(qk.fileDiff(REPO, "abc", "a.ts")).not.toEqual(qk.fileDiff(REPO, "abc", "b.ts"));
     expect(qk.fileDiff(REPO, "abc", "a.ts")).not.toEqual(qk.fileDiff(REPO, "def", "a.ts"));
   });
+
+  it("key mới cũng mang tiền tố repo để invalidate theo phạm vi", () => {
+    const prefix = qk.repo.all(REPO);
+    const keys = [
+      qk.workingFileDiff(REPO, "a.ts", true, false),
+      qk.conflictFile(REPO, "a.ts"),
+      qk.compareSummary(REPO, "main", "dev", "twodot"),
+      qk.rebaseCommits(REPO, "abc123"),
+    ];
+    for (const key of keys) {
+      expect(key.slice(0, prefix.length)).toEqual([...prefix]);
+    }
+  });
+
+  it("workingFileDiff phân biệt theo trạng thái staged và tuỳ chọn khoảng trắng", () => {
+    expect(qk.workingFileDiff(REPO, "a.ts", true, false)).not.toEqual(
+      qk.workingFileDiff(REPO, "a.ts", false, false)
+    );
+    expect(qk.workingFileDiff(REPO, "a.ts", true, false)).not.toEqual(
+      qk.workingFileDiff(REPO, "a.ts", true, true)
+    );
+  });
+
+  it("compareSummary phân biệt theo từng tham số so sánh", () => {
+    expect(qk.compareSummary(REPO, "main", "dev", "twodot")).not.toEqual(
+      qk.compareSummary(REPO, "main", "dev", "threedot")
+    );
+    expect(qk.compareSummary(REPO, "main", "dev", "twodot")).not.toEqual(
+      qk.compareSummary(REPO, "main", "other", "twodot")
+    );
+  });
 });

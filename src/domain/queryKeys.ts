@@ -31,6 +31,22 @@ export const qk = {
   fileBlame: (repo: string, filePath: string, commitId: string) =>
     ["repo", repo, "fileBlame", filePath, commitId] as const,
 
+  /** Diff của file trong thư mục làm việc. Phân biệt staged và tuỳ chọn bỏ qua khoảng trắng. */
+  workingFileDiff: (repo: string, filePath: string, isStaged: boolean, ignoreWhitespace: boolean) =>
+    ["repo", repo, "workingFileDiff", filePath, isStaged, ignoreWhitespace] as const,
+
+  /** Nội dung file đang xung đột khi merge/rebase. */
+  conflictFile: (repo: string, filePath: string) =>
+    ["repo", repo, "conflictFile", filePath] as const,
+
+  /** Kết quả so sánh hai nhánh/commit. */
+  compareSummary: (repo: string, baseRev: string, targetRev: string, mode: string) =>
+    ["repo", repo, "compareSummary", baseRev, targetRev, mode] as const,
+
+  /** Danh sách commit sẽ được rebase tương tác. */
+  rebaseCommits: (repo: string, baseCommitId: string) =>
+    ["repo", repo, "rebaseCommits", baseCommitId] as const,
+
   github: {
     repoInfo: (repo: string) => ["repo", repo, "github", "repoInfo"] as const,
     pullRequests: (repo: string, state: string) =>
