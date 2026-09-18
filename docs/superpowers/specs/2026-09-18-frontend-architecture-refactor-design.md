@@ -216,7 +216,9 @@ Chọn compound thay vì boolean props. Lý do: thân của 26 modal rất khác
 </Modal>
 ```
 
-`Modal` tự lo: backdrop, Escape, focus trap, `role="dialog"`, `aria-modal`, `stopPropagation`, z-index. Modal con không viết lại các thứ đó nữa.
+`Modal` tự lo: backdrop, Escape, `role="dialog"`, `aria-modal`, `aria-labelledby`, `stopPropagation`, z-index. Modal con không viết lại các thứ đó nữa.
+
+**Quản lý focus — nợ kỹ thuật đã biết, phải trả trước GĐ2.** Bản `Modal` ở GĐ0 **chưa có** focus trap, chưa tự focus khi mở, và chưa trả focus về nút đã mở nó khi đóng. Hệ quả: người dùng bàn phím có thể Tab ra khỏi modal vào nội dung nền phía sau. 26 modal hiện tại cũng không có những thứ này, nên đây không phải bước lùi — nhưng một khi cả 26 modal cùng kế thừa từ một primitive, sửa một chỗ là sửa cho tất cả. Vì vậy **phải bổ sung focus management vào `Modal` trước khi bắt đầu migrate ở GĐ2**, kèm test cho cả ba hành vi (trap, focus ban đầu, trả focus).
 
 `size` ánh xạ sang token cố định (`sm | md | lg | xl`) lấy từ `docs/DESIGN_SYSTEM.md`, xoá bỏ phân kỳ `max-w-115` vs `max-w-md`.
 
@@ -470,6 +472,7 @@ Dựa vào **73 test file sẵn có** — gần như mọi modal đều đã có
 
 - [ ] `shared/ui/` có Modal, Button, Alert, Field — không import `ipc`/`store`/`i18n`
 - [ ] 26 modal dùng `Modal` dùng chung; không còn `fixed inset-0` tự dựng trong feature
+- [ ] `Modal` có focus management đầy đủ (trap, focus ban đầu, trả focus khi đóng) — **phải xong trước khi migrate GĐ2**
 - [ ] Không còn `setTimeout(..., 2000)` copy-clipboard lặp; dùng `useCopyToClipboard`
 - [ ] Không còn `substring(0, 7)` rải rác; dùng `shortSha()`
 - [ ] Không còn số ma thuật cho duration/z-index; dùng `domain/constants`
