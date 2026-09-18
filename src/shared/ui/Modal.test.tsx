@@ -82,6 +82,22 @@ describe("Modal", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it("không đóng khi bấm Escape lúc closeOnEscape=false", () => {
+    const { onClose } = renderModal({ closeOnEscape: false });
+
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("không đóng khi bấm ra ngoài lúc closeOnBackdrop=false", () => {
+    const { onClose } = renderModal({ closeOnBackdrop: false });
+
+    fireEvent.click(screen.getByTestId("modal-backdrop"));
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it("size khác nhau cho ra class chiều rộng khác nhau", () => {
     const { rerender } = renderModal({ size: "sm" });
     const smallPanel = screen.getByTestId("modal-panel").className;
