@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Minus, FileCode, AlertTriangle, Layers, Space, Type } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
+import { qk } from "../../domain/queryKeys";
 import { useTranslation } from "../../i18n";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { pairHunkLines } from "../../utils/wordDiff";
@@ -198,7 +199,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["workingFileDiff", repoPath, filePath, isStaged, diffIgnoreWhitespace],
+    queryKey: qk.workingFileDiff(repoPath, filePath, isStaged, diffIgnoreWhitespace),
     queryFn: () =>
       invokeCommand.getWorkingFileDiff(repoPath, filePath, isStaged, diffIgnoreWhitespace),
     enabled: Boolean(repoPath && filePath),

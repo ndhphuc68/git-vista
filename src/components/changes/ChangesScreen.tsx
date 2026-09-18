@@ -78,23 +78,24 @@ export const ChangesScreen: React.FC = () => {
   const handleStageFile = async (filePath: string) => {
     await invokeCommand.stageFile(currentRepo.path, filePath);
     setSelectedFile({ path: filePath, is_staged: true });
-    await queryClient.invalidateQueries();
+    // Chỉ làm mới cache của repo hiện tại, không xoá sạch cache của repo khác
+    await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleUnstageFile = async (filePath: string) => {
     await invokeCommand.unstageFile(currentRepo.path, filePath);
     setSelectedFile({ path: filePath, is_staged: false });
-    await queryClient.invalidateQueries();
+    await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleStageAll = async () => {
     await invokeCommand.stageAll(currentRepo.path);
-    await queryClient.invalidateQueries();
+    await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleUnstageAll = async () => {
     await invokeCommand.unstageAll(currentRepo.path);
-    await queryClient.invalidateQueries();
+    await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleDiscardFile = async (filePath: string) => {
@@ -107,10 +108,10 @@ export const ChangesScreen: React.FC = () => {
         durationMs: 10000,
         undoAction: async () => {
           await invokeCommand.restoreDiscard(repoPath, token);
-          await queryClient.invalidateQueries();
+          await queryClient.invalidateQueries({ queryKey: qk.repo.all(repoPath) });
         },
       });
-      await queryClient.invalidateQueries();
+      await queryClient.invalidateQueries({ queryKey: qk.repo.all(repoPath) });
     } catch (err: unknown) {
       useToastStore.getState().showError(mapGitError(err));
     }
@@ -119,13 +120,13 @@ export const ChangesScreen: React.FC = () => {
   const handleStageHunk = async (hunkIndex: number) => {
     if (!selectedFile) return;
     await invokeCommand.stageHunk(currentRepo.path, selectedFile.path, hunkIndex, false);
-    await queryClient.invalidateQueries();
+    await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleUnstageHunk = async (hunkIndex: number) => {
     if (!selectedFile) return;
     await invokeCommand.stageHunk(currentRepo.path, selectedFile.path, hunkIndex, true);
-    await queryClient.invalidateQueries();
+    await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleStageLines = async (hunkIndex: number, lineIndices: number[]) => {
@@ -137,7 +138,7 @@ export const ChangesScreen: React.FC = () => {
       lineIndices,
       false
     );
-    await queryClient.invalidateQueries();
+    await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleUnstageLines = async (hunkIndex: number, lineIndices: number[]) => {
@@ -149,12 +150,12 @@ export const ChangesScreen: React.FC = () => {
       lineIndices,
       true
     );
-    await queryClient.invalidateQueries();
+    await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleCommit = async (summary: string, description?: string, amend?: boolean) => {
     const result = await invokeCommand.createCommit(currentRepo.path, summary, description, amend);
-    await queryClient.invalidateQueries();
+    await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
     return result;
   };
 
@@ -249,7 +250,7 @@ export const ChangesScreen: React.FC = () => {
                 stagedCount={stagedCount}
                 onCommit={handleCommit}
                 onSuccess={() => {
-                  void queryClient.invalidateQueries();
+                  void queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
                 }}
               />
             </div>
@@ -301,7 +302,7 @@ export const ChangesScreen: React.FC = () => {
         repoPath={currentRepo.path}
         onSaveStash={async (message, includeUntracked) => {
           const id = await invokeCommand.saveStash(currentRepo.path, message, includeUntracked);
-          queryClient.invalidateQueries({ queryKey: ["stashes", currentRepo.path] });
+          queryClient.invalidateQueries({ queryKey: qk.stashes(currentRepo.path) });
           setShowCreateStash(false);
           return id;
         }}
