@@ -24,6 +24,7 @@ import { FileInspectorDrawer } from "./components/inspector/FileInspectorDrawer"
 import { ManageRemotesModal } from "./components/remote/ManageRemotesModal";
 import { InteractiveRebaseModal } from "./components/rebase";
 import { CompareModal } from "./components/compare";
+import { PullRequestDetailDrawer } from "./components/pullrequests";
 import { useCommandPaletteStore } from "./store/useCommandPaletteStore";
 import { CommandContext } from "./utils/commandRegistry";
 
@@ -107,6 +108,7 @@ const RepoContent: React.FC<RepoContentProps> = ({
         onSuccess={() => queryClient.invalidateQueries()}
       />
       <FileInspectorDrawer repoPath={currentRepo.path} />
+      <PullRequestDetailDrawer repoPath={currentRepo.path} />
     </>
   );
 };

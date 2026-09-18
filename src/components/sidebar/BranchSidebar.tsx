@@ -33,6 +33,7 @@ import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
 import { CreateBranchModal } from "./CreateBranchModal";
 import { RenameBranchModal } from "./RenameBranchModal";
+import { PullRequestsSection } from "./PullRequestsSection";
 import { DeleteBranchModal } from "./DeleteBranchModal";
 import { CheckoutConflictModal } from "./CheckoutConflictModal";
 import { StashDiffView } from "../stash/StashDiffView";
@@ -1070,6 +1071,9 @@ export const BranchSidebar: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* PULL REQUESTS */}
+          <PullRequestsSection repoPath={currentRepo.path} />
 
           {/* STASHES */}
           <div>
