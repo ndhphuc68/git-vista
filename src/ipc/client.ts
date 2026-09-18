@@ -24,6 +24,8 @@ import {
   TagItem,
   FileBlameResult,
   FileHistoryResult,
+  RemoteItem,
+  PruneResult,
 } from "./bindings";
 
 let mockTags: TagItem[] = [
@@ -74,6 +76,28 @@ export function resetMockTags() {
       tagger_name: null,
       tagger_email: null,
       timestamp_sec: Math.floor(Date.now() / 1000) - 86400 * 15,
+    },
+  ];
+}
+
+let mockRemotes: RemoteItem[] = [
+  {
+    name: "origin",
+    fetch_url: "https://github.com/gitvista/git-vista.git",
+    push_url: "https://github.com/gitvista/git-vista.git",
+    branch_count: 5,
+    is_default: true,
+  },
+];
+
+export function resetMockRemotes() {
+  mockRemotes = [
+    {
+      name: "origin",
+      fetch_url: "https://github.com/gitvista/git-vista.git",
+      push_url: "https://github.com/gitvista/git-vista.git",
+      branch_count: 5,
+      is_default: true,
     },
   ];
 }
@@ -736,6 +760,155 @@ export const invokeCommand = {
     });
   },
 
+  getRemotes: async (repoPath: string): Promise<RemoteItem[]> => {
+    if (!isTauri()) {
+      return [...mockRemotes];
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<RemoteItem[]>("get_remotes", { repoPath });
+  },
+
+  addRemote: async (
+    repoPath: string,
+    name: string,
+    url: string
+  ): Promise<RemoteItem> => {
+    if (!isTauri()) {
+      const newRemote: RemoteItem = {
+        name,
+        fetch_url: url,
+        push_url: url,
+        branch_count: 0,
+        is_default: mockRemotes.length === 0,
+      };
+      mockRemotes.push(newRemote);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("mock-repo-changed", {
+            detail: {
+              repo_path: repoPath,
+              reason: "remotes",
+              timestamp_ms: Date.now(),
+            },
+          })
+        );
+      }
+      return newRemote;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<RemoteItem>("add_remote", { repoPath, name, url });
+  },
+
+  renameRemote: async (
+    repoPath: string,
+    oldName: string,
+    newName: string
+  ): Promise<void> => {
+    if (!isTauri()) {
+      const r = mockRemotes.find((x) => x.name === oldName);
+      if (r) r.name = newName;
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("mock-repo-changed", {
+            detail: {
+              repo_path: repoPath,
+              reason: "remotes",
+              timestamp_ms: Date.now(),
+            },
+          })
+        );
+      }
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("rename_remote", { repoPath, oldName, newName });
+  },
+
+  removeRemote: async (repoPath: string, name: string): Promise<void> => {
+    if (!isTauri()) {
+      mockRemotes = mockRemotes.filter((x) => x.name !== name);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("mock-repo-changed", {
+            detail: {
+              repo_path: repoPath,
+              reason: "remotes",
+              timestamp_ms: Date.now(),
+            },
+          })
+        );
+      }
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("remove_remote", { repoPath, name });
+  },
+
+  setRemoteUrl: async (
+    repoPath: string,
+    name: string,
+    fetchUrl: string,
+    pushUrl?: string | null
+  ): Promise<void> => {
+    if (!isTauri()) {
+      const r = mockRemotes.find((x) => x.name === name);
+      if (r) {
+        r.fetch_url = fetchUrl;
+        r.push_url = pushUrl !== undefined && pushUrl !== null ? pushUrl : fetchUrl;
+      }
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("mock-repo-changed", {
+            detail: {
+              repo_path: repoPath,
+              reason: "remotes",
+              timestamp_ms: Date.now(),
+            },
+          })
+        );
+      }
+      return;
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke("set_remote_url", {
+      repoPath,
+      name,
+      fetchUrl,
+      pushUrl: pushUrl ?? null,
+    });
+  },
+
+  pruneRemote: async (
+    repoPath: string,
+    remote: string,
+    taskId?: string
+  ): Promise<PruneResult> => {
+    if (!isTauri()) {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("mock-repo-changed", {
+            detail: {
+              repo_path: repoPath,
+              reason: "prune",
+              timestamp_ms: Date.now(),
+            },
+          })
+        );
+      }
+      return {
+        remote,
+        pruned_branches: [`${remote}/stale-mock-branch`],
+        message: "Đã dọn dẹp 1 nhánh remote.",
+      };
+    }
+    const { invoke } = await import("@tauri-apps/api/core");
+    return await invoke<PruneResult>("prune_remote", {
+      repoPath,
+      remote,
+      taskId: taskId ?? null,
+    });
+  },
+
   fetchRepo: async (
     repoPath: string,
     remote?: string,
@@ -1207,5 +1380,7 @@ export type {
   ConfigScope,
   GitConfigDto,
   TagItem,
+  RemoteItem,
+  PruneResult,
 };
 

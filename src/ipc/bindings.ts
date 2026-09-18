@@ -277,6 +277,20 @@ export interface FileHistoryResult {
   total_count: number;
 }
 
+export interface RemoteItem {
+  name: string;
+  fetch_url: string | null;
+  push_url: string | null;
+  branch_count: number;
+  is_default: boolean;
+}
+
+export interface PruneResult {
+  remote: string;
+  pruned_branches: string[];
+  message: string;
+}
+
 export interface Commands {
   get_commit_file_diff: (
     repoPath: string,
