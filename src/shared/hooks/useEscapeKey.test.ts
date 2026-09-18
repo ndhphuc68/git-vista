@@ -55,4 +55,20 @@ describe("useEscapeKey", () => {
     expect(first).not.toHaveBeenCalled();
     expect(second).toHaveBeenCalledTimes(1);
   });
+
+  it("không gắn lại listener khi callback đổi, chỉ giữ một listener duy nhất", () => {
+    const addSpy = vi.spyOn(window, "addEventListener");
+
+    const { rerender } = renderHook(({ cb }) => useEscapeKey(true, cb), {
+      initialProps: { cb: vi.fn() },
+    });
+
+    rerender({ cb: vi.fn() });
+    rerender({ cb: vi.fn() });
+
+    const keydownCalls = addSpy.mock.calls.filter(([type]) => type === "keydown");
+    expect(keydownCalls).toHaveLength(1);
+
+    addSpy.mockRestore();
+  });
 });
