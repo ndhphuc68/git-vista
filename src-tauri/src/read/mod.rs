@@ -2,19 +2,23 @@
 //! Quy tắc bất biến: Module này KHÔNG BAO GIỜ ghi hay thay đổi trạng thái repo.
 //! Có thể gọi song song từ nhiều thread mà không cần khoá.
 
+pub mod blame;
 pub mod branches;
 pub mod config;
 pub mod conflict;
 pub mod diff;
+pub mod file_history;
 pub mod graph;
 pub mod state;
 pub mod status;
 pub mod tags;
 
+pub use blame::*;
 pub use branches::*;
 pub use config::*;
 pub use conflict::*;
 pub use diff::*;
+pub use file_history::*;
 pub use graph::*;
 pub use state::*;
 pub use status::*;
