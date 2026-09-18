@@ -20,6 +20,7 @@ import { CommandPalette } from "./components/palette/CommandPalette";
 import { ShortcutsHelpModal } from "./components/shortcuts/ShortcutsHelpModal";
 import { SplashScreen } from "./components/splash/SplashScreen";
 import { SettingsModal } from "./components/settings/SettingsModal";
+import { FileInspectorDrawer } from "./components/inspector/FileInspectorDrawer";
 import { useCommandPaletteStore } from "./store/useCommandPaletteStore";
 import { CommandContext } from "./utils/commandRegistry";
 
@@ -102,6 +103,7 @@ const RepoContent: React.FC<RepoContentProps> = ({
         repoPath={currentRepo.path}
         onSuccess={() => queryClient.invalidateQueries()}
       />
+      <FileInspectorDrawer repoPath={currentRepo.path} />
     </>
   );
 };
