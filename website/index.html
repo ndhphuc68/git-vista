@@ -1,574 +1,847 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="dark scroll-smooth">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GitVista — Fast, Visual, Keyboard-Driven Git Desktop Client</title>
-  <meta name="description" content="A fast, visual, keyboard-driven Git desktop client for Windows, macOS & Linux built with Rust. Crystal-clear commit graph, visual rebase, multi-tab workspace, and 10s undo.">
-  
-  <!-- OpenGraph / Social Meta Tags -->
-  <meta property="og:title" content="GitVista — Visual Git Desktop Client">
-  <meta property="og:description" content="A fast, visual, keyboard-driven Git desktop client for Windows, macOS & Linux with 10s undo and visual rebase studio.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://ndhphuc68.github.io/git-vista-/">
-  <meta property="og:image" content="assets/app-icon.png">
-  <meta name="twitter:card" content="summary_large_image">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitVista — Fast, Visual, Keyboard-Driven Git Desktop Client</title>
+    <meta
+      name="description"
+      content="A fast, visual, keyboard-driven Git desktop client for Windows, macOS & Linux built with Rust. Crystal-clear commit graph, visual rebase, multi-tab workspace, and 10s undo."
+    />
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="assets/app-icon.png">
-  
-  <!-- Tailwind CSS via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              400: '#818cf8',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
+    <!-- OpenGraph / Social Meta Tags -->
+    <meta property="og:title" content="GitVista — Visual Git Desktop Client" />
+    <meta
+      property="og:description"
+      content="A fast, visual, keyboard-driven Git desktop client for Windows, macOS & Linux with 10s undo and visual rebase studio."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ndhphuc68.github.io/git-vista-/" />
+    <meta property="og:image" content="assets/app-icon.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/app-icon.png" />
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#eef2ff",
+                100: "#e0e7ff",
+                400: "#818cf8",
+                500: "#6366f1",
+                600: "#4f46e5",
+                700: "#4338ca",
+              },
+              dark: {
+                950: "#090d16",
+                900: "#0f172a",
+                800: "#1e293b",
+                700: "#334155",
+              },
             },
-            dark: {
-              950: '#090d16',
-              900: '#0f172a',
-              800: '#1e293b',
-              700: '#334155',
-            }
-          }
-        }
-      }
-    }
-  </script>
+          },
+        },
+      };
+    </script>
 
-  <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css">
-</head>
-<body class="bg-[#090d16] text-slate-100 antialiased selection:bg-indigo-500 selection:text-white min-h-screen flex flex-col relative overflow-x-hidden">
-
-  <!-- Background Gradients -->
-  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] pointer-events-none overflow-hidden z-0">
-    <div class="absolute -top-40 left-1/4 w-96 h-96 hero-glow-1 rounded-full blur-3xl opacity-50"></div>
-    <div class="absolute top-20 right-1/4 w-96 h-96 hero-glow-2 rounded-full blur-3xl opacity-40"></div>
-    <div class="absolute inset-0 bg-grid-pattern opacity-60"></div>
-  </div>
-
-  <!-- STICKY HEADER -->
-  <header class="sticky top-0 z-50 backdrop-blur-md bg-[#090d16]/80 border-b border-white/5 transition-all">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <!-- Brand Logo -->
-      <a href="#" class="flex items-center gap-3 group">
-        <img src="assets/app-icon.png" alt="GitVista Logo" class="w-9 h-9 rounded-lg shadow-md group-hover:scale-105 transition-transform">
-        <div class="flex items-center gap-2">
-          <span class="font-bold text-lg tracking-tight text-white group-hover:text-indigo-400 transition-colors">GitVista</span>
-          <span class="text-xs font-mono font-medium px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">v0.1.0</span>
-        </div>
-      </a>
-
-      <!-- Navigation Links -->
-      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-        <a href="#features" class="hover:text-white transition-colors" data-i18n="nav.features">Features</a>
-        <a href="#downloads" class="hover:text-white transition-colors" data-i18n="nav.downloads">Downloads</a>
-        <a href="#shortcuts" class="hover:text-white transition-colors" data-i18n="nav.shortcuts">Shortcuts</a>
-        <a href="https://github.com/ndhphuc68/git-vista-#readme" target="_blank" rel="noreferrer" class="hover:text-white transition-colors" data-i18n="nav.docs">Documentation</a>
-      </nav>
-
-      <!-- Actions & Language Switcher -->
-      <div class="flex items-center gap-3">
-        <!-- Language Switcher Toggle -->
-        <button id="lang-toggle-btn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-white/10 text-xs font-medium text-slate-200 transition-colors" aria-label="Toggle language">
-          <span id="lang-flag" class="text-sm">🇬🇧</span>
-          <span id="lang-label" class="font-semibold">EN</span>
-        </button>
-
-        <!-- GitHub Star Link -->
-        <a href="https://github.com/ndhphuc68/git-vista-" target="_blank" rel="noreferrer" class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-slate-200 transition-colors">
-          <svg class="w-4 h-4 text-slate-300 fill-current" viewBox="0 0 24 24">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-          </svg>
-          <span data-i18n="nav.github">GitHub</span>
-        </a>
-
-        <!-- Quick Download CTA -->
-        <a href="#downloads" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-colors" data-i18n="nav.quick_download">
-          Download
-        </a>
-      </div>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body
+    class="bg-[#090d16] text-slate-100 antialiased selection:bg-indigo-500 selection:text-white min-h-screen flex flex-col relative overflow-x-hidden"
+  >
+    <!-- Background Gradients -->
+    <div
+      class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] pointer-events-none overflow-hidden z-0"
+    >
+      <div
+        class="absolute -top-40 left-1/4 w-96 h-96 hero-glow-1 rounded-full blur-3xl opacity-50"
+      ></div>
+      <div
+        class="absolute top-20 right-1/4 w-96 h-96 hero-glow-2 rounded-full blur-3xl opacity-40"
+      ></div>
+      <div class="absolute inset-0 bg-grid-pattern opacity-60"></div>
     </div>
-  </header>
 
-  <!-- MAIN CONTENT CONTAINER -->
-  <main class="flex-grow z-10">
-    
-    <!-- HERO SECTION -->
-    <section class="pt-16 pb-20 sm:pt-24 sm:pb-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <!-- Announcement Tag -->
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-medium text-indigo-300 mb-8 backdrop-blur-sm animate-pulse-subtle">
-        <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
-        <span data-i18n="hero.badge">v0.1.0 Released • Fast & Native Git Client</span>
-      </div>
-
-      <!-- Headline -->
-      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight sm:leading-none mb-6" data-i18n="hero.title">
-        A Fast, Keyboard-Driven Visual Git Desktop Client
-      </h1>
-
-      <!-- Tagline / Subtitle -->
-      <p class="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto mb-4 font-normal" data-i18n="hero.tagline">
-        Built with Rust and modern Web technologies for clarity, speed, and absolute safety.
-      </p>
-
-      <!-- Description Paragraph -->
-      <p class="text-sm sm:text-base text-slate-400 max-w-3xl mx-auto mb-10 leading-relaxed" data-i18n="hero.desc">
-        GitVista turns complex Git operations into intuitive visual workflows. Featuring a topology-based commit graph, zero-latency multi-repository tabs, visual interactive rebase, and a 10-second instant undo safety net so you never lose code again.
-      </p>
-
-      <!-- Call to Action Buttons -->
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-        <!-- Smart Primary Download Button -->
-        <a id="download-primary-btn" href="https://github.com/ndhphuc68/git-vista-/releases/latest/download/GitVista_0.1.0_x64-setup.exe" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-base shadow-xl shadow-indigo-600/20 hover:shadow-indigo-600/35 transition-all">
-          <!-- OS Icon will be updated dynamically via JS -->
-          <svg id="primary-os-icon" class="w-5 h-5 fill-current" viewBox="0 0 24 24">
-            <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4h-13.051M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-13.051-1.802"/>
-          </svg>
-          <span id="download-primary-text" data-i18n="hero.download_primary">Download for Windows</span>
-        </a>
-
-        <!-- Secondary Download Selector Button -->
-        <a href="#downloads" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-white/10 text-slate-200 font-medium text-base transition-colors" data-i18n="hero.all_platforms">
-          All Platforms & Formats
-        </a>
-
-        <!-- GitHub Repo CTA Button -->
-        <a href="https://github.com/ndhphuc68/git-vista-" target="_blank" rel="noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white font-medium text-base transition-colors" data-i18n="hero.view_github">
-          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-          </svg>
-          View on GitHub
-        </a>
-      </div>
-
-      <p class="text-xs text-slate-400" data-i18n="hero.sub_note">
-        Free & Open Source under MIT License • Supports Windows, macOS & Linux
-      </p>
-
-      <!-- VISUAL APPLICATION MOCKUP -->
-      <div class="mt-14 max-w-5xl mx-auto rounded-2xl border border-white/10 bg-[#0f172a]/95 shadow-2xl overflow-hidden text-left card-glass">
-        <!-- Mockup Window Title Bar -->
-        <div class="h-10 bg-[#090d16]/90 border-b border-white/5 flex items-center justify-between px-4">
-          <!-- Window Controls -->
+    <!-- STICKY HEADER -->
+    <header
+      class="sticky top-0 z-50 backdrop-blur-md bg-[#090d16]/80 border-b border-white/5 transition-all"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <!-- Brand Logo -->
+        <a href="#" class="flex items-center gap-3 group">
+          <img
+            src="assets/app-icon.png"
+            alt="GitVista Logo"
+            class="w-9 h-9 rounded-lg shadow-md group-hover:scale-105 transition-transform"
+          />
           <div class="flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-rose-500/80"></span>
-            <span class="w-3 h-3 rounded-full bg-amber-500/80"></span>
-            <span class="w-3 h-3 rounded-full bg-emerald-500/80"></span>
+            <span
+              class="font-bold text-lg tracking-tight text-white group-hover:text-indigo-400 transition-colors"
+              >GitVista</span
+            >
+            <span
+              class="text-xs font-mono font-medium px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
+              >v0.1.0</span
+            >
           </div>
-
-          <!-- Tabs Mockup -->
-          <div class="flex items-center gap-1 text-xs">
-            <div class="flex items-center gap-2 px-3 py-1 rounded-t-md bg-[#0f172a] border-t border-x border-white/10 font-medium text-slate-200">
-              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-              <span data-i18n="mockup.tab1">git-vista (main)</span>
-            </div>
-            <div class="flex items-center gap-2 px-3 py-1 rounded-t-md text-slate-400 hover:text-slate-200 transition-colors">
-              <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
-              <span data-i18n="mockup.tab2">api-backend (feat/auth)</span>
-            </div>
-          </div>
-
-          <div class="text-[11px] font-mono text-slate-400 hidden sm:block" data-i18n="mockup.title">
-            GitVista — visual-git-client
-          </div>
-        </div>
-
-        <!-- Mockup Main Workspace -->
-        <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-          <!-- Sidebar Mockup -->
-          <div class="md:col-span-1 border-r border-white/5 pr-4 hidden md:block space-y-4">
-            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Branches</div>
-            <div class="space-y-1 text-xs">
-              <div class="flex items-center justify-between px-2.5 py-1.5 rounded-md bg-indigo-600/20 text-indigo-300 font-medium">
-                <span>● main</span>
-                <span class="text-[10px] bg-indigo-500/20 px-1 rounded">HEAD</span>
-              </div>
-              <div class="flex items-center justify-between px-2.5 py-1.5 rounded-md text-slate-400 hover:bg-white/5">
-                <span>○ feat/visual-rebase</span>
-              </div>
-              <div class="flex items-center justify-between px-2.5 py-1.5 rounded-md text-slate-400 hover:bg-white/5">
-                <span>○ fix/undo-countdown</span>
-              </div>
-            </div>
-
-            <div class="pt-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">Safety Refs</div>
-            <div class="text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded p-2 flex items-center gap-1.5">
-              <span>🛡️</span>
-              <span>refs/gitui-backup/auto</span>
-            </div>
-          </div>
-
-          <!-- Commit Graph Mockup -->
-          <div class="md:col-span-3 space-y-2">
-            <!-- Simulated Commit Row 1 -->
-            <div class="p-3 rounded-lg bg-white/5 border border-white/5 flex items-center justify-between hover:border-indigo-500/30 transition-colors">
-              <div class="flex items-center gap-3">
-                <span class="w-3 h-3 rounded-full bg-indigo-500 shadow-sm shadow-indigo-500/50"></span>
-                <div>
-                  <div class="text-xs sm:text-sm font-semibold text-slate-100 flex items-center gap-2">
-                    <span>✨ implement visual interactive rebase studio</span>
-                    <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.2 rounded font-mono">v0.1.0</span>
-                  </div>
-                  <div class="text-[11px] text-slate-400">ndhphuc68 • 2 hours ago</div>
-                </div>
-              </div>
-              <div class="text-[11px] font-mono text-slate-400">e8a94b1</div>
-            </div>
-
-            <!-- Simulated Commit Row 2 -->
-            <div class="p-3 rounded-lg bg-white/5 border border-white/5 flex items-center justify-between hover:border-indigo-500/30 transition-colors">
-              <div class="flex items-center gap-3">
-                <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
-                <div>
-                  <div class="text-xs sm:text-sm font-semibold text-slate-100">
-                    <span>🛡️ add 10-second instant undo notification toast</span>
-                  </div>
-                  <div class="text-[11px] text-slate-400">ndhphuc68 • 5 hours ago</div>
-                </div>
-              </div>
-              <div class="text-[11px] font-mono text-slate-400">4c72d1f</div>
-            </div>
-
-            <!-- Simulated Commit Row 3 -->
-            <div class="p-3 rounded-lg bg-white/5 border border-white/5 flex items-center justify-between hover:border-indigo-500/30 transition-colors">
-              <div class="flex items-center gap-3">
-                <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
-                <div>
-                  <div class="text-xs sm:text-sm font-semibold text-slate-100">
-                    <span>🔀 integrate 3-way visual conflict resolver</span>
-                  </div>
-                  <div class="text-[11px] text-slate-400">ndhphuc68 • 1 day ago</div>
-                </div>
-              </div>
-              <div class="text-[11px] font-mono text-slate-400">2b910a3</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Mockup Bottom Status Bar -->
-        <div class="h-8 bg-[#090d16]/90 border-t border-white/5 px-4 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-          <div class="flex items-center gap-3">
-            <span class="text-emerald-400 flex items-center gap-1">● <span data-i18n="mockup.status">Clean • 0 uncommitted changes</span></span>
-          </div>
-          <div class="flex items-center gap-4">
-            <span data-i18n="mockup.branch">Branch: main</span>
-            <span class="hidden sm:inline">UTF-8</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- FEATURES SECTION -->
-    <section id="features" class="py-20 border-t border-white/5 bg-slate-950/40">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Section Title -->
-        <div class="text-center max-w-3xl mx-auto mb-16">
-          <div class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-semibold mb-3" data-i18n="features.badge">
-            Why GitVista?
-          </div>
-          <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4" data-i18n="features.title">
-            Designed for Clarity, Speed, and Peace of Mind
-          </h2>
-          <p class="text-slate-400 text-base" data-i18n="features.subtitle">
-            Powerful desktop tools crafted to streamline everyday development without intimidating Git intricacies.
-          </p>
-        </div>
-
-        <!-- Features 6-Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Feature 1: Commit Graph -->
-          <div class="p-6 rounded-2xl card-glass">
-            <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-2xl mb-5">
-              🌳
-            </div>
-            <h3 class="text-xl font-bold text-white mb-2" data-i18n="features.graph.title">Interactive Commit Graph</h3>
-            <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.graph.desc">
-              Crystal-clear topology-based branch visualization. Virtualized rendering effortlessly handles tens of thousands of commits with 0ms lag.
-            </p>
-          </div>
-
-          <!-- Feature 2: Visual Rebase Studio -->
-          <div class="p-6 rounded-2xl card-glass">
-            <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-2xl mb-5">
-              🔀
-            </div>
-            <h3 class="text-xl font-bold text-white mb-2" data-i18n="features.rebase.title">Visual Interactive Rebase</h3>
-            <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.rebase.desc">
-              Drag-and-drop commit reordering with full Pick, Reword, Squash, Fixup, and Drop support. Includes live timeline preview and auto-stash.
-            </p>
-          </div>
-
-          <!-- Feature 3: 10s Instant Undo -->
-          <div class="p-6 rounded-2xl card-glass">
-            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl mb-5">
-              🛡️
-            </div>
-            <h3 class="text-xl font-bold text-white mb-2" data-i18n="features.undo.title">10s Instant Undo & Safety Refs</h3>
-            <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.undo.desc">
-              Never fear losing work. Risky actions automatically create safety backup refs, and an interactive 10-second countdown toast lets you reverse mistakes in one click.
-            </p>
-          </div>
-
-          <!-- Feature 4: Multi-Tab & Multi-Repo -->
-          <div class="p-6 rounded-2xl card-glass">
-            <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl mb-5">
-              📑
-            </div>
-            <h3 class="text-xl font-bold text-white mb-2" data-i18n="features.multitab.title">Multi-Tab & Multi-Repo Workspace</h3>
-            <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.multitab.desc">
-              Open and inspect multiple repositories side-by-side in a single window with partitioned cache and instant zero-latency tab switching.
-            </p>
-          </div>
-
-          <!-- Feature 5: Word-Level Diff -->
-          <div class="p-6 rounded-2xl card-glass">
-            <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-2xl mb-5">
-              🔍
-            </div>
-            <h3 class="text-xl font-bold text-white mb-2" data-i18n="features.diff.title">Word-Level Diff & File Inspector</h3>
-            <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.diff.desc">
-              Character and word-level difference highlighting with whitespace ignore toggle, alongside a slide-over drawer featuring line-by-line Git Blame and file history.
-            </p>
-          </div>
-
-          <!-- Feature 6: Conflict Resolver & PR Hub -->
-          <div class="p-6 rounded-2xl card-glass">
-            <div class="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-2xl mb-5">
-              ⚔️
-            </div>
-            <h3 class="text-xl font-bold text-white mb-2" data-i18n="features.conflict.title">3-Way Conflict Resolver & PR Hub</h3>
-            <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.conflict.desc">
-              Resolve merge conflicts visually with Ours vs Theirs vs Result hunks. Connect directly with GitHub to browse, inspect, and checkout Pull Requests.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- DOWNLOADS SECTION -->
-    <section id="downloads" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center max-w-3xl mx-auto mb-16">
-        <div class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-semibold mb-3" data-i18n="downloads.badge">
-          Get Started
-        </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4" data-i18n="downloads.title">
-          Download GitVista for Your Platform
-        </h2>
-        <p class="text-slate-400 text-base" data-i18n="downloads.subtitle">
-          Choose the installer package tailored for your operating system. Free and open source.
-        </p>
-      </div>
-
-      <!-- 3 Columns for Platforms -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- Windows Card -->
-        <div class="p-7 rounded-2xl card-glass flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="flex items-center gap-3">
-                <svg class="w-7 h-7 text-indigo-400 fill-current" viewBox="0 0 24 24">
-                  <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4h-13.051M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-13.051-1.802"/>
-                </svg>
-                <h3 class="text-2xl font-bold text-white" data-i18n="downloads.windows.title">Windows</h3>
-              </div>
-              <span class="text-xs font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">x64</span>
-            </div>
-            <p class="text-xs text-slate-400 mb-6" data-i18n="downloads.windows.desc">Windows 10 / 11 (64-bit)</p>
-          </div>
-
-          <div class="space-y-2.5">
-            <a href="https://github.com/ndhphuc68/git-vista-/releases/latest/download/GitVista_0.1.0_x64-setup.exe" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-colors">
-              <span data-i18n="downloads.windows.btn_setup">Installer (.exe)</span>
-            </a>
-            <a href="https://github.com/ndhphuc68/git-vista-/releases/latest/download/GitVista_0.1.0_x64_en-US.msi" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-white/5 transition-colors">
-              <span data-i18n="downloads.windows.btn_msi">Windows Package (.msi)</span>
-            </a>
-            <a href="https://github.com/ndhphuc68/git-vista-/releases/latest/download/visual-git-client.exe" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 text-xs font-medium transition-colors">
-              <span data-i18n="downloads.windows.btn_portable">Portable (.exe)</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- macOS Card -->
-        <div class="p-7 rounded-2xl card-glass flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="flex items-center gap-3">
-                <svg class="w-7 h-7 text-indigo-400 fill-current" viewBox="0 0 24 24">
-                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.63-.77 1.06-1.85.94-2.93-.91.04-2.02.61-2.67 1.38-.58.67-1.09 1.77-.95 2.82 1.02.08 2.05-.5 2.68-1.27z"/>
-                </svg>
-                <h3 class="text-2xl font-bold text-white" data-i18n="downloads.mac.title">macOS</h3>
-              </div>
-              <span class="text-xs font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">Universal</span>
-            </div>
-            <p class="text-xs text-slate-400 mb-2" data-i18n="downloads.mac.desc">macOS 10.13+ (Apple Silicon & Intel)</p>
-            <p class="text-[11px] text-slate-400 mb-6" data-i18n="downloads.mac.universal_note">Universal binary for M-Series and Intel chips</p>
-          </div>
-
-          <div class="space-y-2.5">
-            <a href="https://github.com/ndhphuc68/git-vista-/releases/latest/download/GitVista_0.1.0_universal.dmg" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-colors">
-              <span data-i18n="downloads.mac.btn_dmg">Disk Image (.dmg)</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- Linux Card -->
-        <div class="p-7 rounded-2xl card-glass flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="flex items-center gap-3">
-                <svg class="w-7 h-7 text-indigo-400 fill-current" viewBox="0 0 24 24">
-                  <path d="M12.003 2c-3.15 0-5.71 2.56-5.71 5.71 0 1.25.4 2.41 1.08 3.35C5.073 12.18 3.5 14.54 3.5 17.29c0 2.6 2.09 4.71 4.69 4.71h7.62c2.6 0 4.69-2.11 4.69-4.71 0-2.75-1.57-5.11-3.87-6.23.68-.94 1.08-2.1 1.08-3.35 0-3.15-2.56-5.71-5.71-5.71z"/>
-                </svg>
-                <h3 class="text-2xl font-bold text-white" data-i18n="downloads.linux.title">Linux</h3>
-              </div>
-              <span class="text-xs font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">amd64</span>
-            </div>
-            <p class="text-xs text-slate-400 mb-6" data-i18n="downloads.linux.desc">Ubuntu, Debian, Fedora, Arch Linux</p>
-          </div>
-
-          <div class="space-y-2.5">
-            <a href="https://github.com/ndhphuc68/git-vista-/releases/latest/download/gitvista_0.1.0_amd64.deb" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-colors">
-              <span data-i18n="downloads.linux.btn_deb">Debian Package (.deb)</span>
-            </a>
-            <a href="https://github.com/ndhphuc68/git-vista-/releases/latest/download/GitVista_0.1.0_amd64.AppImage" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-white/5 transition-colors">
-              <span data-i18n="downloads.linux.btn_appimage">Universal AppImage</span>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-12 text-center text-xs text-slate-400">
-        <span data-i18n="downloads.release_note">Looking for previous versions or checksums? Check out</span>
-        <a href="https://github.com/ndhphuc68/git-vista-/releases" target="_blank" rel="noreferrer" class="text-indigo-400 hover:underline font-medium ml-1" data-i18n="downloads.releases_link">
-          GitHub Releases
         </a>
-      </div>
-    </section>
 
-    <!-- KEYBOARD SHORTCUTS SECTION -->
-    <section id="shortcuts" class="py-20 border-t border-white/5 bg-slate-950/40">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-3xl mx-auto mb-16">
-          <div class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-semibold mb-3" data-i18n="shortcuts.badge">
-            Efficiency First
+        <!-- Navigation Links -->
+        <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+          <a href="#features" class="hover:text-white transition-colors" data-i18n="nav.features"
+            >Features</a
+          >
+          <a href="#downloads" class="hover:text-white transition-colors" data-i18n="nav.downloads"
+            >Downloads</a
+          >
+          <a href="#shortcuts" class="hover:text-white transition-colors" data-i18n="nav.shortcuts"
+            >Shortcuts</a
+          >
+          <a
+            href="https://github.com/ndhphuc68/git-vista-#readme"
+            target="_blank"
+            rel="noreferrer"
+            class="hover:text-white transition-colors"
+            data-i18n="nav.docs"
+            >Documentation</a
+          >
+        </nav>
+
+        <!-- Actions & Language Switcher -->
+        <div class="flex items-center gap-3">
+          <!-- Language Switcher Toggle -->
+          <button
+            id="lang-toggle-btn"
+            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-white/10 text-xs font-medium text-slate-200 transition-colors"
+            aria-label="Toggle language"
+          >
+            <span id="lang-flag" class="text-sm">🇬🇧</span>
+            <span id="lang-label" class="font-semibold">EN</span>
+          </button>
+
+          <!-- GitHub Star Link -->
+          <a
+            href="https://github.com/ndhphuc68/git-vista-"
+            target="_blank"
+            rel="noreferrer"
+            class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-slate-200 transition-colors"
+          >
+            <svg class="w-4 h-4 text-slate-300 fill-current" viewBox="0 0 24 24">
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+              />
+            </svg>
+            <span data-i18n="nav.github">GitHub</span>
+          </a>
+
+          <!-- Quick Download CTA -->
+          <a
+            href="#downloads"
+            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-colors"
+            data-i18n="nav.quick_download"
+          >
+            Download
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow z-10">
+      <!-- HERO SECTION -->
+      <section
+        class="pt-16 pb-20 sm:pt-24 sm:pb-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
+      >
+        <!-- Announcement Tag -->
+        <div
+          class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-medium text-indigo-300 mb-8 backdrop-blur-sm animate-pulse-subtle"
+        >
+          <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+          <span data-i18n="hero.badge">v0.1.0 Released • Fast & Native Git Client</span>
+        </div>
+
+        <!-- Headline -->
+        <h1
+          class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight sm:leading-none mb-6"
+          data-i18n="hero.title"
+        >
+          A Fast, Keyboard-Driven Visual Git Desktop Client
+        </h1>
+
+        <!-- Tagline / Subtitle -->
+        <p
+          class="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto mb-4 font-normal"
+          data-i18n="hero.tagline"
+        >
+          Built with Rust and modern Web technologies for clarity, speed, and absolute safety.
+        </p>
+
+        <!-- Description Paragraph -->
+        <p
+          class="text-sm sm:text-base text-slate-400 max-w-3xl mx-auto mb-10 leading-relaxed"
+          data-i18n="hero.desc"
+        >
+          GitVista turns complex Git operations into intuitive visual workflows. Featuring a
+          topology-based commit graph, zero-latency multi-repository tabs, visual interactive
+          rebase, and a 10-second instant undo safety net so you never lose code again.
+        </p>
+
+        <!-- Call to Action Buttons -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+          <!-- Smart Primary Download Button -->
+          <a
+            id="download-primary-btn"
+            href="https://github.com/ndhphuc68/git-vista-/releases/latest/download/GitVista_0.1.0_x64-setup.exe"
+            class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-base shadow-xl shadow-indigo-600/20 hover:shadow-indigo-600/35 transition-all"
+          >
+            <!-- OS Icon will be updated dynamically via JS -->
+            <svg id="primary-os-icon" class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path
+                d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4h-13.051M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-13.051-1.802"
+              />
+            </svg>
+            <span id="download-primary-text" data-i18n="hero.download_primary"
+              >Download for Windows</span
+            >
+          </a>
+
+          <!-- Secondary Download Selector Button -->
+          <a
+            href="#downloads"
+            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-white/10 text-slate-200 font-medium text-base transition-colors"
+            data-i18n="hero.all_platforms"
+          >
+            All Platforms & Formats
+          </a>
+
+          <!-- GitHub Repo CTA Button -->
+          <a
+            href="https://github.com/ndhphuc68/git-vista-"
+            target="_blank"
+            rel="noreferrer"
+            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white font-medium text-base transition-colors"
+            data-i18n="hero.view_github"
+          >
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+              />
+            </svg>
+            View on GitHub
+          </a>
+        </div>
+
+        <p class="text-xs text-slate-400" data-i18n="hero.sub_note">
+          Free & Open Source under MIT License • Supports Windows, macOS & Linux
+        </p>
+
+        <!-- VISUAL APPLICATION MOCKUP -->
+        <div
+          class="mt-14 max-w-5xl mx-auto rounded-2xl border border-white/10 bg-[#0f172a]/95 shadow-2xl overflow-hidden text-left card-glass"
+        >
+          <!-- Mockup Window Title Bar -->
+          <div
+            class="h-10 bg-[#090d16]/90 border-b border-white/5 flex items-center justify-between px-4"
+          >
+            <!-- Window Controls -->
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-rose-500/80"></span>
+              <span class="w-3 h-3 rounded-full bg-amber-500/80"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-500/80"></span>
+            </div>
+
+            <!-- Tabs Mockup -->
+            <div class="flex items-center gap-1 text-xs">
+              <div
+                class="flex items-center gap-2 px-3 py-1 rounded-t-md bg-[#0f172a] border-t border-x border-white/10 font-medium text-slate-200"
+              >
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span data-i18n="mockup.tab1">git-vista (main)</span>
+              </div>
+              <div
+                class="flex items-center gap-2 px-3 py-1 rounded-t-md text-slate-400 hover:text-slate-200 transition-colors"
+              >
+                <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+                <span data-i18n="mockup.tab2">api-backend (feat/auth)</span>
+              </div>
+            </div>
+
+            <div
+              class="text-[11px] font-mono text-slate-400 hidden sm:block"
+              data-i18n="mockup.title"
+            >
+              GitVista — visual-git-client
+            </div>
           </div>
-          <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4" data-i18n="shortcuts.title">
-            Keyboard-Driven Navigation
+
+          <!-- Mockup Main Workspace -->
+          <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Sidebar Mockup -->
+            <div class="md:col-span-1 border-r border-white/5 pr-4 hidden md:block space-y-4">
+              <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Branches
+              </div>
+              <div class="space-y-1 text-xs">
+                <div
+                  class="flex items-center justify-between px-2.5 py-1.5 rounded-md bg-indigo-600/20 text-indigo-300 font-medium"
+                >
+                  <span>● main</span>
+                  <span class="text-[10px] bg-indigo-500/20 px-1 rounded">HEAD</span>
+                </div>
+                <div
+                  class="flex items-center justify-between px-2.5 py-1.5 rounded-md text-slate-400 hover:bg-white/5"
+                >
+                  <span>○ feat/visual-rebase</span>
+                </div>
+                <div
+                  class="flex items-center justify-between px-2.5 py-1.5 rounded-md text-slate-400 hover:bg-white/5"
+                >
+                  <span>○ fix/undo-countdown</span>
+                </div>
+              </div>
+
+              <div class="pt-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Safety Refs
+              </div>
+              <div
+                class="text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded p-2 flex items-center gap-1.5"
+              >
+                <span>🛡️</span>
+                <span>refs/gitui-backup/auto</span>
+              </div>
+            </div>
+
+            <!-- Commit Graph Mockup -->
+            <div class="md:col-span-3 space-y-2">
+              <!-- Simulated Commit Row 1 -->
+              <div
+                class="p-3 rounded-lg bg-white/5 border border-white/5 flex items-center justify-between hover:border-indigo-500/30 transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <span
+                    class="w-3 h-3 rounded-full bg-indigo-500 shadow-sm shadow-indigo-500/50"
+                  ></span>
+                  <div>
+                    <div
+                      class="text-xs sm:text-sm font-semibold text-slate-100 flex items-center gap-2"
+                    >
+                      <span>✨ implement visual interactive rebase studio</span>
+                      <span
+                        class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.2 rounded font-mono"
+                        >v0.1.0</span
+                      >
+                    </div>
+                    <div class="text-[11px] text-slate-400">ndhphuc68 • 2 hours ago</div>
+                  </div>
+                </div>
+                <div class="text-[11px] font-mono text-slate-400">e8a94b1</div>
+              </div>
+
+              <!-- Simulated Commit Row 2 -->
+              <div
+                class="p-3 rounded-lg bg-white/5 border border-white/5 flex items-center justify-between hover:border-indigo-500/30 transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
+                  <div>
+                    <div class="text-xs sm:text-sm font-semibold text-slate-100">
+                      <span>🛡️ add 10-second instant undo notification toast</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400">ndhphuc68 • 5 hours ago</div>
+                  </div>
+                </div>
+                <div class="text-[11px] font-mono text-slate-400">4c72d1f</div>
+              </div>
+
+              <!-- Simulated Commit Row 3 -->
+              <div
+                class="p-3 rounded-lg bg-white/5 border border-white/5 flex items-center justify-between hover:border-indigo-500/30 transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+                  <div>
+                    <div class="text-xs sm:text-sm font-semibold text-slate-100">
+                      <span>🔀 integrate 3-way visual conflict resolver</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400">ndhphuc68 • 1 day ago</div>
+                  </div>
+                </div>
+                <div class="text-[11px] font-mono text-slate-400">2b910a3</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mockup Bottom Status Bar -->
+          <div
+            class="h-8 bg-[#090d16]/90 border-t border-white/5 px-4 flex items-center justify-between text-[11px] text-slate-400 font-mono"
+          >
+            <div class="flex items-center gap-3">
+              <span class="text-emerald-400 flex items-center gap-1"
+                >● <span data-i18n="mockup.status">Clean • 0 uncommitted changes</span></span
+              >
+            </div>
+            <div class="flex items-center gap-4">
+              <span data-i18n="mockup.branch">Branch: main</span>
+              <span class="hidden sm:inline">UTF-8</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FEATURES SECTION -->
+      <section id="features" class="py-20 border-t border-white/5 bg-slate-950/40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <!-- Section Title -->
+          <div class="text-center max-w-3xl mx-auto mb-16">
+            <div
+              class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-semibold mb-3"
+              data-i18n="features.badge"
+            >
+              Why GitVista?
+            </div>
+            <h2
+              class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4"
+              data-i18n="features.title"
+            >
+              Designed for Clarity, Speed, and Peace of Mind
+            </h2>
+            <p class="text-slate-400 text-base" data-i18n="features.subtitle">
+              Powerful desktop tools crafted to streamline everyday development without intimidating
+              Git intricacies.
+            </p>
+          </div>
+
+          <!-- Features 6-Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Feature 1: Commit Graph -->
+            <div class="p-6 rounded-2xl card-glass">
+              <div
+                class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-2xl mb-5"
+              >
+                🌳
+              </div>
+              <h3 class="text-xl font-bold text-white mb-2" data-i18n="features.graph.title">
+                Interactive Commit Graph
+              </h3>
+              <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.graph.desc">
+                Crystal-clear topology-based branch visualization. Virtualized rendering
+                effortlessly handles tens of thousands of commits with 0ms lag.
+              </p>
+            </div>
+
+            <!-- Feature 2: Visual Rebase Studio -->
+            <div class="p-6 rounded-2xl card-glass">
+              <div
+                class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-2xl mb-5"
+              >
+                🔀
+              </div>
+              <h3 class="text-xl font-bold text-white mb-2" data-i18n="features.rebase.title">
+                Visual Interactive Rebase
+              </h3>
+              <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.rebase.desc">
+                Drag-and-drop commit reordering with full Pick, Reword, Squash, Fixup, and Drop
+                support. Includes live timeline preview and auto-stash.
+              </p>
+            </div>
+
+            <!-- Feature 3: 10s Instant Undo -->
+            <div class="p-6 rounded-2xl card-glass">
+              <div
+                class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl mb-5"
+              >
+                🛡️
+              </div>
+              <h3 class="text-xl font-bold text-white mb-2" data-i18n="features.undo.title">
+                10s Instant Undo & Safety Refs
+              </h3>
+              <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.undo.desc">
+                Never fear losing work. Risky actions automatically create safety backup refs, and
+                an interactive 10-second countdown toast lets you reverse mistakes in one click.
+              </p>
+            </div>
+
+            <!-- Feature 4: Multi-Tab & Multi-Repo -->
+            <div class="p-6 rounded-2xl card-glass">
+              <div
+                class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl mb-5"
+              >
+                📑
+              </div>
+              <h3 class="text-xl font-bold text-white mb-2" data-i18n="features.multitab.title">
+                Multi-Tab & Multi-Repo Workspace
+              </h3>
+              <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.multitab.desc">
+                Open and inspect multiple repositories side-by-side in a single window with
+                partitioned cache and instant zero-latency tab switching.
+              </p>
+            </div>
+
+            <!-- Feature 5: Word-Level Diff -->
+            <div class="p-6 rounded-2xl card-glass">
+              <div
+                class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-2xl mb-5"
+              >
+                🔍
+              </div>
+              <h3 class="text-xl font-bold text-white mb-2" data-i18n="features.diff.title">
+                Word-Level Diff & File Inspector
+              </h3>
+              <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.diff.desc">
+                Character and word-level difference highlighting with whitespace ignore toggle,
+                alongside a slide-over drawer featuring line-by-line Git Blame and file history.
+              </p>
+            </div>
+
+            <!-- Feature 6: Conflict Resolver & PR Hub -->
+            <div class="p-6 rounded-2xl card-glass">
+              <div
+                class="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-2xl mb-5"
+              >
+                ⚔️
+              </div>
+              <h3 class="text-xl font-bold text-white mb-2" data-i18n="features.conflict.title">
+                3-Way Conflict Resolver & PR Hub
+              </h3>
+              <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.conflict.desc">
+                Resolve merge conflicts visually with Ours vs Theirs vs Result hunks. Connect
+                directly with GitHub to browse, inspect, and checkout Pull Requests.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DOWNLOADS SECTION -->
+      <section id="downloads" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <div
+            class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-semibold mb-3"
+            data-i18n="downloads.badge"
+          >
+            Get Started
+          </div>
+          <h2
+            class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4"
+            data-i18n="downloads.title"
+          >
+            Download GitVista for Your Platform
           </h2>
-          <p class="text-slate-400 text-base" data-i18n="shortcuts.subtitle">
-            Designed from the ground up so you rarely have to take your hands off the keyboard.
+          <p class="text-slate-400 text-base" data-i18n="downloads.subtitle">
+            Choose the installer package tailored for your operating system. Free and open source.
           </p>
         </div>
 
-        <!-- Shortcuts Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
-          <!-- Shortcut 1 -->
-          <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
-            <div class="mb-2">
-              <kbd class="kbd-key" data-i18n="shortcuts.k1.key">Ctrl + K</kbd>
+        <!-- 3 Columns for Platforms -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Windows Card -->
+          <div class="p-7 rounded-2xl card-glass flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                  <svg class="w-7 h-7 text-indigo-400 fill-current" viewBox="0 0 24 24">
+                    <path
+                      d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4h-13.051M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-13.051-1.802"
+                    />
+                  </svg>
+                  <h3 class="text-2xl font-bold text-white" data-i18n="downloads.windows.title">
+                    Windows
+                  </h3>
+                </div>
+                <span
+                  class="text-xs font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5"
+                  >x64</span
+                >
+              </div>
+              <p class="text-xs text-slate-400 mb-6" data-i18n="downloads.windows.desc">
+                Windows 10 / 11 (64-bit)
+              </p>
             </div>
-            <p class="text-xs text-slate-300" data-i18n="shortcuts.k1.desc">Open Command Palette (search commands & branches)</p>
+
+            <div class="space-y-2.5">
+              <a
+                href="https://github.com/ndhphuc68/git-vista-/releases/latest/download/GitVista_0.1.0_x64-setup.exe"
+                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-colors"
+              >
+                <span data-i18n="downloads.windows.btn_setup">Installer (.exe)</span>
+              </a>
+              <a
+                href="https://github.com/ndhphuc68/git-vista-/releases/latest/download/GitVista_0.1.0_x64_en-US.msi"
+                class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-white/5 transition-colors"
+              >
+                <span data-i18n="downloads.windows.btn_msi">Windows Package (.msi)</span>
+              </a>
+              <a
+                href="https://github.com/ndhphuc68/git-vista-/releases/latest/download/visual-git-client.exe"
+                class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-slate-200 text-xs font-medium transition-colors"
+              >
+                <span data-i18n="downloads.windows.btn_portable">Portable (.exe)</span>
+              </a>
+            </div>
           </div>
 
-          <!-- Shortcut 2 -->
-          <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
-            <div class="mb-2">
-              <kbd class="kbd-key" data-i18n="shortcuts.k2.key">Ctrl + T</kbd>
+          <!-- macOS Card -->
+          <div class="p-7 rounded-2xl card-glass flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                  <svg class="w-7 h-7 text-indigo-400 fill-current" viewBox="0 0 24 24">
+                    <path
+                      d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.63-.77 1.06-1.85.94-2.93-.91.04-2.02.61-2.67 1.38-.58.67-1.09 1.77-.95 2.82 1.02.08 2.05-.5 2.68-1.27z"
+                    />
+                  </svg>
+                  <h3 class="text-2xl font-bold text-white" data-i18n="downloads.mac.title">
+                    macOS
+                  </h3>
+                </div>
+                <span
+                  class="text-xs font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5"
+                  >Universal</span
+                >
+              </div>
+              <p class="text-xs text-slate-400 mb-2" data-i18n="downloads.mac.desc">
+                macOS 10.13+ (Apple Silicon & Intel)
+              </p>
+              <p class="text-[11px] text-slate-400 mb-6" data-i18n="downloads.mac.universal_note">
+                Universal binary for M-Series and Intel chips
+              </p>
             </div>
-            <p class="text-xs text-slate-300" data-i18n="shortcuts.k2.desc">Open a new repository tab</p>
+
+            <div class="space-y-2.5">
+              <a
+                href="https://github.com/ndhphuc68/git-vista-/releases/latest/download/GitVista_0.1.0_universal.dmg"
+                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-colors"
+              >
+                <span data-i18n="downloads.mac.btn_dmg">Disk Image (.dmg)</span>
+              </a>
+            </div>
           </div>
 
-          <!-- Shortcut 3 -->
-          <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
-            <div class="mb-2">
-              <kbd class="kbd-key" data-i18n="shortcuts.k3.key">Ctrl + W</kbd>
+          <!-- Linux Card -->
+          <div class="p-7 rounded-2xl card-glass flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                  <svg class="w-7 h-7 text-indigo-400 fill-current" viewBox="0 0 24 24">
+                    <path
+                      d="M12.003 2c-3.15 0-5.71 2.56-5.71 5.71 0 1.25.4 2.41 1.08 3.35C5.073 12.18 3.5 14.54 3.5 17.29c0 2.6 2.09 4.71 4.69 4.71h7.62c2.6 0 4.69-2.11 4.69-4.71 0-2.75-1.57-5.11-3.87-6.23.68-.94 1.08-2.1 1.08-3.35 0-3.15-2.56-5.71-5.71-5.71z"
+                    />
+                  </svg>
+                  <h3 class="text-2xl font-bold text-white" data-i18n="downloads.linux.title">
+                    Linux
+                  </h3>
+                </div>
+                <span
+                  class="text-xs font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5"
+                  >amd64</span
+                >
+              </div>
+              <p class="text-xs text-slate-400 mb-6" data-i18n="downloads.linux.desc">
+                Ubuntu, Debian, Fedora, Arch Linux
+              </p>
             </div>
-            <p class="text-xs text-slate-300" data-i18n="shortcuts.k3.desc">Close the active repository tab</p>
-          </div>
 
-          <!-- Shortcut 4 -->
-          <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
-            <div class="mb-2">
-              <kbd class="kbd-key" data-i18n="shortcuts.k4.key">Ctrl + Tab</kbd>
+            <div class="space-y-2.5">
+              <a
+                href="https://github.com/ndhphuc68/git-vista-/releases/latest/download/gitvista_0.1.0_amd64.deb"
+                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-colors"
+              >
+                <span data-i18n="downloads.linux.btn_deb">Debian Package (.deb)</span>
+              </a>
+              <a
+                href="https://github.com/ndhphuc68/git-vista-/releases/latest/download/GitVista_0.1.0_amd64.AppImage"
+                class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-white/5 transition-colors"
+              >
+                <span data-i18n="downloads.linux.btn_appimage">Universal AppImage</span>
+              </a>
             </div>
-            <p class="text-xs text-slate-300" data-i18n="shortcuts.k4.desc">Switch to next / previous repository tab</p>
-          </div>
-
-          <!-- Shortcut 5 -->
-          <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
-            <div class="mb-2">
-              <kbd class="kbd-key" data-i18n="shortcuts.k5.key">Ctrl + 1..9</kbd>
-            </div>
-            <p class="text-xs text-slate-300" data-i18n="shortcuts.k5.desc">Jump directly to tab index 1 through 9</p>
-          </div>
-
-          <!-- Shortcut 6 -->
-          <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
-            <div class="mb-2">
-              <kbd class="kbd-key" data-i18n="shortcuts.k6.key">Ctrl + B</kbd>
-            </div>
-            <p class="text-xs text-slate-300" data-i18n="shortcuts.k6.desc">Toggle branch sidebar visibility</p>
-          </div>
-
-          <!-- Shortcut 7 -->
-          <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
-            <div class="mb-2">
-              <kbd class="kbd-key" data-i18n="shortcuts.k7.key">Ctrl + /</kbd>
-            </div>
-            <p class="text-xs text-slate-300" data-i18n="shortcuts.k7.desc">Quickly focus search and filter input</p>
-          </div>
-
-          <!-- Shortcut 8 -->
-          <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
-            <div class="mb-2">
-              <kbd class="kbd-key" data-i18n="shortcuts.k8.key">Escape</kbd>
-            </div>
-            <p class="text-xs text-slate-300" data-i18n="shortcuts.k8.desc">Close active dialog, modal, or clear selection</p>
           </div>
         </div>
-      </div>
-    </section>
 
-  </main>
+        <div class="mt-12 text-center text-xs text-slate-400">
+          <span data-i18n="downloads.release_note"
+            >Looking for previous versions or checksums? Check out</span
+          >
+          <a
+            href="https://github.com/ndhphuc68/git-vista-/releases"
+            target="_blank"
+            rel="noreferrer"
+            class="text-indigo-400 hover:underline font-medium ml-1"
+            data-i18n="downloads.releases_link"
+          >
+            GitHub Releases
+          </a>
+        </div>
+      </section>
 
-  <!-- FOOTER -->
-  <footer class="border-t border-white/5 bg-[#090d16] py-12 z-10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-400">
-      <div class="flex items-center gap-3">
-        <img src="assets/app-icon.png" alt="GitVista Logo" class="w-6 h-6 rounded-md">
-        <div>
-          <div class="text-slate-200 font-semibold">GitVista</div>
-          <div data-i18n="footer.built_with">Built with Rust, Tauri 2, and React.</div>
+      <!-- KEYBOARD SHORTCUTS SECTION -->
+      <section id="shortcuts" class="py-20 border-t border-white/5 bg-slate-950/40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center max-w-3xl mx-auto mb-16">
+            <div
+              class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-semibold mb-3"
+              data-i18n="shortcuts.badge"
+            >
+              Efficiency First
+            </div>
+            <h2
+              class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4"
+              data-i18n="shortcuts.title"
+            >
+              Keyboard-Driven Navigation
+            </h2>
+            <p class="text-slate-400 text-base" data-i18n="shortcuts.subtitle">
+              Designed from the ground up so you rarely have to take your hands off the keyboard.
+            </p>
+          </div>
+
+          <!-- Shortcuts Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+            <!-- Shortcut 1 -->
+            <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
+              <div class="mb-2">
+                <kbd class="kbd-key" data-i18n="shortcuts.k1.key">Ctrl + K</kbd>
+              </div>
+              <p class="text-xs text-slate-300" data-i18n="shortcuts.k1.desc">
+                Open Command Palette (search commands & branches)
+              </p>
+            </div>
+
+            <!-- Shortcut 2 -->
+            <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
+              <div class="mb-2">
+                <kbd class="kbd-key" data-i18n="shortcuts.k2.key">Ctrl + T</kbd>
+              </div>
+              <p class="text-xs text-slate-300" data-i18n="shortcuts.k2.desc">
+                Open a new repository tab
+              </p>
+            </div>
+
+            <!-- Shortcut 3 -->
+            <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
+              <div class="mb-2">
+                <kbd class="kbd-key" data-i18n="shortcuts.k3.key">Ctrl + W</kbd>
+              </div>
+              <p class="text-xs text-slate-300" data-i18n="shortcuts.k3.desc">
+                Close the active repository tab
+              </p>
+            </div>
+
+            <!-- Shortcut 4 -->
+            <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
+              <div class="mb-2">
+                <kbd class="kbd-key" data-i18n="shortcuts.k4.key">Ctrl + Tab</kbd>
+              </div>
+              <p class="text-xs text-slate-300" data-i18n="shortcuts.k4.desc">
+                Switch to next / previous repository tab
+              </p>
+            </div>
+
+            <!-- Shortcut 5 -->
+            <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
+              <div class="mb-2">
+                <kbd class="kbd-key" data-i18n="shortcuts.k5.key">Ctrl + 1..9</kbd>
+              </div>
+              <p class="text-xs text-slate-300" data-i18n="shortcuts.k5.desc">
+                Jump directly to tab index 1 through 9
+              </p>
+            </div>
+
+            <!-- Shortcut 6 -->
+            <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
+              <div class="mb-2">
+                <kbd class="kbd-key" data-i18n="shortcuts.k6.key">Ctrl + B</kbd>
+              </div>
+              <p class="text-xs text-slate-300" data-i18n="shortcuts.k6.desc">
+                Toggle branch sidebar visibility
+              </p>
+            </div>
+
+            <!-- Shortcut 7 -->
+            <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
+              <div class="mb-2">
+                <kbd class="kbd-key" data-i18n="shortcuts.k7.key">Ctrl + /</kbd>
+              </div>
+              <p class="text-xs text-slate-300" data-i18n="shortcuts.k7.desc">
+                Quickly focus search and filter input
+              </p>
+            </div>
+
+            <!-- Shortcut 8 -->
+            <div class="p-4 rounded-xl card-glass flex flex-col justify-between">
+              <div class="mb-2">
+                <kbd class="kbd-key" data-i18n="shortcuts.k8.key">Escape</kbd>
+              </div>
+              <p class="text-xs text-slate-300" data-i18n="shortcuts.k8.desc">
+                Close active dialog, modal, or clear selection
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-white/5 bg-[#090d16] py-12 z-10">
+      <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-400"
+      >
+        <div class="flex items-center gap-3">
+          <img src="assets/app-icon.png" alt="GitVista Logo" class="w-6 h-6 rounded-md" />
+          <div>
+            <div class="text-slate-200 font-semibold">GitVista</div>
+            <div data-i18n="footer.built_with">Built with Rust, Tauri 2, and React.</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-6">
+          <a
+            href="https://github.com/ndhphuc68/git-vista-/issues"
+            target="_blank"
+            rel="noreferrer"
+            class="hover:text-slate-200 transition-colors"
+            data-i18n="footer.issues"
+            >Report an Issue</a
+          >
+          <a
+            href="https://github.com/ndhphuc68/git-vista-#readme"
+            target="_blank"
+            rel="noreferrer"
+            class="hover:text-slate-200 transition-colors"
+            data-i18n="footer.docs"
+            >Documentation</a
+          >
+          <a
+            href="https://github.com/ndhphuc68/git-vista-"
+            target="_blank"
+            rel="noreferrer"
+            class="hover:text-slate-200 transition-colors"
+            data-i18n="footer.github"
+            >GitHub Repository</a
+          >
+        </div>
+
+        <div class="text-center md:text-right">
+          <div data-i18n="footer.license">Released under the MIT License.</div>
+          <div data-i18n="footer.copyright">© 2026 GitVista Team. All rights reserved.</div>
         </div>
       </div>
+    </footer>
 
-      <div class="flex items-center gap-6">
-        <a href="https://github.com/ndhphuc68/git-vista-/issues" target="_blank" rel="noreferrer" class="hover:text-slate-200 transition-colors" data-i18n="footer.issues">Report an Issue</a>
-        <a href="https://github.com/ndhphuc68/git-vista-#readme" target="_blank" rel="noreferrer" class="hover:text-slate-200 transition-colors" data-i18n="footer.docs">Documentation</a>
-        <a href="https://github.com/ndhphuc68/git-vista-" target="_blank" rel="noreferrer" class="hover:text-slate-200 transition-colors" data-i18n="footer.github">GitHub Repository</a>
-      </div>
-
-      <div class="text-center md:text-right">
-        <div data-i18n="footer.license">Released under the MIT License.</div>
-        <div data-i18n="footer.copyright">© 2026 GitVista Team. All rights reserved.</div>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Client-side Scripts -->
-  <script src="i18n.js"></script>
-  <script src="app.js"></script>
-</body>
+    <!-- Client-side Scripts -->
+    <script src="i18n.js"></script>
+    <script src="app.js"></script>
+  </body>
 </html>

@@ -1,15 +1,15 @@
-import { describe, it, expect } from 'vitest';
-import * as fs from 'fs';
-import * as path from 'path';
+import { describe, it, expect } from "vitest";
+import * as fs from "fs";
+import * as path from "path";
 
-describe('Website i18n dictionary', () => {
-  it('should exist and have identical non-empty keys for en and vi', () => {
-    const i18nPath = path.resolve(__dirname, '../../website/i18n.js');
+describe("Website i18n dictionary", () => {
+  it("should exist and have identical non-empty keys for en and vi", () => {
+    const i18nPath = path.resolve(__dirname, "../../website/i18n.js");
     expect(fs.existsSync(i18nPath)).toBe(true);
 
-    const fileContent = fs.readFileSync(i18nPath, 'utf-8');
+    const fileContent = fs.readFileSync(i18nPath, "utf-8");
     const sandbox: { I18N_DATA?: { en: Record<string, string>; vi: Record<string, string> } } = {};
-    const fn = new Function('window', fileContent);
+    const fn = new Function("window", fileContent);
     fn(sandbox);
 
     expect(sandbox.I18N_DATA).toBeDefined();
