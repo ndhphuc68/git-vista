@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
-import { Space, Type } from "lucide-react";
+import { Space, Type, FileText, History } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
 import { useSettingsStore } from "../../store/useSettingsStore";
+import { useInspectorStore } from "../../store/useInspectorStore";
 import { pairHunkLines } from "../../utils/wordDiff";
 import { DiffHunk } from "../../ipc/bindings";
 import { DiffLineContent } from "./DiffLineContent";
@@ -89,6 +90,7 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
   const { t } = useTranslation();
   const [showWordDiff, setShowWordDiff] = useState(true);
   const { diffIgnoreWhitespace, setDiffIgnoreWhitespace } = useSettingsStore();
+  const { openInspector } = useInspectorStore();
 
   const { data: diff, isLoading } = useQuery({
     queryKey: ["file-diff", repoPath, commitId, filePath, diffIgnoreWhitespace],
@@ -104,14 +106,16 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
     );
   }
 
+  const activeFilePath = diff?.file_path || filePath;
+
   const renderToolbar = () => (
     <div className="flex items-center justify-between px-3 py-2 bg-window border-b border-border-subtle gap-2">
       <div className="flex items-center gap-2 min-w-0 flex-1">
         <span
           className="font-mono text-xs font-semibold text-primary overflow-hidden text-ellipsis whitespace-nowrap"
-          title={diff?.file_path || filePath}
+          title={activeFilePath}
         >
-          {diff?.file_path || filePath}
+          {activeFilePath}
         </span>
         {diff && (
           <div className="flex items-center gap-1 font-mono text-xs shrink-0">
@@ -148,6 +152,28 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
           )}
         >
           <Type size={13} />
+        </button>
+
+        <div className="w-[1px] h-3.5 bg-border-subtle mx-0.5" />
+
+        <button
+          type="button"
+          title={t.inspector.viewBlame}
+          aria-label={t.inspector.viewBlame}
+          onClick={() => openInspector(activeFilePath, "blame", commitId)}
+          className="p-1.5 rounded text-xs flex items-center justify-center transition-colors cursor-pointer bg-surface text-secondary border border-border-subtle hover:bg-surface-hover hover:text-primary"
+        >
+          <FileText size={13} />
+        </button>
+
+        <button
+          type="button"
+          title={t.inspector.viewHistory}
+          aria-label={t.inspector.viewHistory}
+          onClick={() => openInspector(activeFilePath, "history")}
+          className="p-1.5 rounded text-xs flex items-center justify-center transition-colors cursor-pointer bg-surface text-secondary border border-border-subtle hover:bg-surface-hover hover:text-primary"
+        >
+          <History size={13} />
         </button>
       </div>
     </div>

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import clsx from "clsx";
-import { Plus, Minus, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Plus, Minus, Trash2, CheckCircle2, AlertCircle, FileText, History } from "lucide-react";
 import { RepoStatusResult, StatusFileItem, FileStatus } from "../../ipc/bindings";
 import { DiscardConfirmModal } from "./DiscardConfirmModal";
 import { useTranslation } from "../../i18n";
+import { useInspectorStore } from "../../store/useInspectorStore";
 
 export interface SelectedWorkingFile {
   path: string;
@@ -89,6 +90,7 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
 }) => {
   const { t } = useTranslation();
   const [discardTarget, setDiscardTarget] = useState<string | null>(null);
+  const { openInspector } = useInspectorStore();
 
   const stagedFiles = staged ?? status?.staged ?? [];
   const unstagedFiles = unstaged ?? status?.unstaged ?? [];
@@ -173,6 +175,28 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
                   </div>
 
                   <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openInspector(file.path, "blame");
+                      }}
+                      className="flex items-center justify-center w-[22px] h-[22px] bg-transparent border border-border-subtle rounded-sm text-secondary cursor-pointer hover:bg-surface-hover hover:text-accent transition-colors duration-fast ease-macos"
+                      title={t.inspector.viewBlame}
+                    >
+                      <FileText size={12} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openInspector(file.path, "history");
+                      }}
+                      className="flex items-center justify-center w-[22px] h-[22px] bg-transparent border border-border-subtle rounded-sm text-secondary cursor-pointer hover:bg-surface-hover hover:text-accent transition-colors duration-fast ease-macos"
+                      title={t.inspector.viewHistory}
+                    >
+                      <History size={12} />
+                    </button>
                     <button
                       type="button"
                       data-testid={`unstage-file-${file.path}`}
@@ -308,6 +332,33 @@ export const StagingFileList: React.FC<StagingFileListProps> = ({
                   </div>
 
                   <div className="flex items-center gap-1">
+                    {!file.isUntracked && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openInspector(file.path, "blame");
+                          }}
+                          className="flex items-center justify-center w-[22px] h-[22px] bg-transparent border border-border-subtle rounded-sm text-secondary cursor-pointer hover:bg-surface-hover hover:text-accent transition-colors duration-fast ease-macos"
+                          title={t.inspector.viewBlame}
+                        >
+                          <FileText size={12} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openInspector(file.path, "history");
+                          }}
+                          className="flex items-center justify-center w-[22px] h-[22px] bg-transparent border border-border-subtle rounded-sm text-secondary cursor-pointer hover:bg-surface-hover hover:text-accent transition-colors duration-fast ease-macos"
+                          title={t.inspector.viewHistory}
+                        >
+                          <History size={12} />
+                        </button>
+                      </>
+                    )}
+
                     <button
                       type="button"
                       data-testid={`stage-file-${file.path}`}

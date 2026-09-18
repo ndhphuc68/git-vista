@@ -13,10 +13,13 @@ import {
   Clock,
   Mail,
   UserCheck,
+  FileText,
+  History,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
+import { useInspectorStore } from "../../store/useInspectorStore";
 import { invokeCommand } from "../../ipc/client";
 import { FileDiffViewer } from "./FileDiffViewer";
 import { useTranslation, formatRelativeTime as i18nFormatRelativeTime } from "../../i18n";
@@ -195,6 +198,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
     setSelectedFile,
   } = useRepoStore();
   const { setDetailPanelOpen } = useLayoutStore();
+  const { openInspector } = useInspectorStore();
 
   const [copiedSha, setCopiedSha] = useState(false);
   const [copiedFilePath, setCopiedFilePath] = useState(false);
@@ -604,8 +608,33 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
                       </div>
                     </div>
 
-                    {/* Additions / Deletions Stats */}
-                    <div className="flex items-center gap-1 font-mono text-[10px] shrink-0">
+                    {/* Additions / Deletions Stats & Quick Inspector Buttons */}
+                    <div className="flex items-center gap-1.5 font-mono text-[10px] shrink-0">
+                      <div className="items-center gap-0.5 hidden group-hover:flex">
+                        <span
+                          role="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openInspector(file.path, "blame", selectedCommitId);
+                          }}
+                          className="p-1 rounded hover:bg-surface-hover text-tertiary hover:text-accent transition-colors cursor-pointer"
+                          title={t.inspector.viewBlame}
+                        >
+                          <FileText size={11} />
+                        </span>
+                        <span
+                          role="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openInspector(file.path, "history");
+                          }}
+                          className="p-1 rounded hover:bg-surface-hover text-tertiary hover:text-accent transition-colors cursor-pointer"
+                          title={t.inspector.viewHistory}
+                        >
+                          <History size={11} />
+                        </span>
+                      </div>
+
                       <span className="text-diff-add-text font-semibold">
                         {`+${file.additions}`}
                       </span>
@@ -675,6 +704,24 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
                     ) : (
                       <Copy size={13} />
                     )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openInspector(selectedFile.path, "blame", selectedCommitId)}
+                    className="p-1 rounded hover:bg-surface-hover text-tertiary hover:text-primary transition-colors cursor-pointer shrink-0"
+                    title={t.inspector.viewBlame}
+                  >
+                    <FileText size={13} />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openInspector(selectedFile.path, "history")}
+                    className="p-1 rounded hover:bg-surface-hover text-tertiary hover:text-primary transition-colors cursor-pointer shrink-0"
+                    title={t.inspector.viewHistory}
+                  >
+                    <History size={13} />
                   </button>
 
                   <div className="flex items-center gap-1 font-mono text-xs shrink-0 ml-1">
