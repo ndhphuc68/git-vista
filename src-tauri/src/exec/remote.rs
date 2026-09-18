@@ -221,3 +221,42 @@ pub fn set_repo_pull_rebase<P: AsRef<Path>>(repo_path: P, rebase: bool) -> Resul
     config.set_bool("pull.rebase", rebase)?;
     Ok(())
 }
+
+/// Thực thi `git remote prune <remote>` và bóc tách các nhánh đã bị xoá
+pub fn prune_remote<P: AsRef<Path>, F: Fn(u32, String) + Send + Sync + 'static>(
+    repo_path: P,
+    remote: &str,
+    task_id: &str,
+    on_progress: F,
+) -> Result<crate::read::remote::PruneResult, AppError> {
+    crate::exec::validate_git_operand(remote, "remote")?;
+
+    let args = vec!["remote", "prune", remote];
+    let output = run_git_streaming_command(repo_path, &args, task_id, on_progress).map_err(
+        |e| match e {
+            AppError::CommandFailed { stderr, .. } => map_git_remote_error(&stderr),
+            other => other,
+        },
+    )?;
+
+    let mut pruned_branches = Vec::new();
+    for line in output.stdout.lines().chain(output.stderr.lines()) {
+        let trimmed = line.trim();
+        // git remote prune outputs: " * [pruned] origin/branch-name"
+        if let Some(rest) = trimmed.strip_prefix("* [pruned]") {
+            pruned_branches.push(rest.trim().to_string());
+        }
+    }
+
+    let message = if pruned_branches.is_empty() {
+        "Không có nhánh mồ côi nào cần dọn dẹp.".to_string()
+    } else {
+        format!("Đã dọn dẹp {} nhánh remote.", pruned_branches.len())
+    };
+
+    Ok(crate::read::remote::PruneResult {
+        remote: remote.to_string(),
+        pruned_branches,
+        message,
+    })
+}

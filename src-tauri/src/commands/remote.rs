@@ -164,3 +164,88 @@ pub fn cancel_remote_task(task_id: String) -> Result<(), AppError> {
 pub fn set_repo_pull_rebase(repo_path: String, rebase: bool) -> Result<(), AppError> {
     crate::exec::remote::set_repo_pull_rebase(&repo_path, rebase)
 }
+
+#[tauri::command]
+#[specta::specta]
+pub fn get_remotes(repo_path: String) -> Result<Vec<crate::read::remote::RemoteItem>, AppError> {
+    crate::read::remote::get_remotes(repo_path)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn add_remote(
+    app: tauri::AppHandle,
+    repo_path: String,
+    name: String,
+    url: String,
+) -> Result<crate::read::remote::RemoteItem, AppError> {
+    let item = crate::write::remote::add_remote(&repo_path, &name, &url)?;
+    emit_repo_changed(&app, &repo_path, "remotes");
+    Ok(item)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn rename_remote(
+    app: tauri::AppHandle,
+    repo_path: String,
+    old_name: String,
+    new_name: String,
+) -> Result<(), AppError> {
+    crate::write::remote::rename_remote(&repo_path, &old_name, &new_name)?;
+    emit_repo_changed(&app, &repo_path, "remotes");
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn remove_remote(
+    app: tauri::AppHandle,
+    repo_path: String,
+    name: String,
+) -> Result<(), AppError> {
+    crate::write::remote::remove_remote(&repo_path, &name)?;
+    emit_repo_changed(&app, &repo_path, "remotes");
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn set_remote_url(
+    app: tauri::AppHandle,
+    repo_path: String,
+    name: String,
+    fetch_url: String,
+    push_url: Option<String>,
+) -> Result<(), AppError> {
+    crate::write::remote::set_remote_url(&repo_path, &name, &fetch_url, push_url)?;
+    emit_repo_changed(&app, &repo_path, "remotes");
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn prune_remote(
+    app: tauri::AppHandle,
+    repo_path: String,
+    remote: String,
+    task_id: Option<String>,
+) -> Result<crate::read::remote::PruneResult, AppError> {
+    let tid = task_id.unwrap_or_else(gen_task_id);
+    let app_clone = app.clone();
+    let tid_clone = tid.clone();
+
+    emit_task_progress(&app, &tid, 0, "Đang dọn dẹp các nhánh mồ côi (Prune)...");
+    let res = crate::exec::remote::prune_remote(
+        &repo_path,
+        &remote,
+        &tid,
+        move |progress_percent, status_text| {
+            emit_task_progress(&app_clone, &tid_clone, progress_percent, &status_text);
+        },
+    )?;
+
+    emit_task_progress(&app, &tid, 100, "Dọn dẹp hoàn tất");
+    emit_repo_changed(&app, &repo_path, "prune");
+    Ok(res)
+}

@@ -72,7 +72,13 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
         cherry_pick_commit,
         revert_commit,
         get_file_blame,
-        get_file_history
+        get_file_history,
+        get_remotes,
+        add_remote,
+        rename_remote,
+        remove_remote,
+        set_remote_url,
+        prune_remote
     ])
 }
 
