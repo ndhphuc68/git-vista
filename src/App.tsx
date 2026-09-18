@@ -22,6 +22,7 @@ import { SplashScreen } from "./components/splash/SplashScreen";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import { FileInspectorDrawer } from "./components/inspector/FileInspectorDrawer";
 import { ManageRemotesModal } from "./components/remote/ManageRemotesModal";
+import { InteractiveRebaseModal } from "./components/rebase";
 import { useCommandPaletteStore } from "./store/useCommandPaletteStore";
 import { CommandContext } from "./utils/commandRegistry";
 
@@ -119,6 +120,7 @@ export const App: React.FC<AppProps> = ({
   const [splashFinished, setSplashFinished] = useState(skipSplash);
   const [isGlobalCreateBranchOpen, setIsGlobalCreateBranchOpen] = useState(false);
   const [isGlobalManageRemotesOpen, setIsGlobalManageRemotesOpen] = useState(false);
+  const [isGlobalInteractiveRebaseOpen, setIsGlobalInteractiveRebaseOpen] = useState(false);
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const { currentRepo, setRepo, clearRepo } = useRepoStore();
   const { tabs, activeTabId, setActiveTab, openRepoTab, openHomeTab, closeTab, restoreSession } = useTabStore();
@@ -204,6 +206,7 @@ export const App: React.FC<AppProps> = ({
     onEscape: () => {
       setIsGlobalCreateBranchOpen(false);
       setIsGlobalManageRemotesOpen(false);
+      setIsGlobalInteractiveRebaseOpen(false);
       setIsShortcutsHelpOpen(false);
       closeSettings();
       closeCommandPalette();
@@ -219,6 +222,9 @@ export const App: React.FC<AppProps> = ({
     },
     openManageRemotes: () => {
       if (repoToDisplay) setIsGlobalManageRemotesOpen(true);
+    },
+    openInteractiveRebase: () => {
+      if (repoToDisplay) setIsGlobalInteractiveRebaseOpen(true);
     },
     openShortcutsHelp: () => setIsShortcutsHelpOpen(true),
     toggleTheme: handleToggleTheme,
@@ -293,6 +299,18 @@ export const App: React.FC<AppProps> = ({
             isOpen={isGlobalManageRemotesOpen}
             onClose={() => setIsGlobalManageRemotesOpen(false)}
             repoPath={repoToDisplay.path}
+          />
+        )}
+        {repoToDisplay && (
+          <InteractiveRebaseModal
+            isOpen={isGlobalInteractiveRebaseOpen}
+            onClose={() => setIsGlobalInteractiveRebaseOpen(false)}
+            repoPath={repoToDisplay.path}
+            baseCommitId={useRepoStore.getState().selectedCommitId || "HEAD~5"}
+            onRebaseSuccess={() => {
+              setIsGlobalInteractiveRebaseOpen(false);
+              queryClient.invalidateQueries();
+            }}
           />
         )}
       </div>

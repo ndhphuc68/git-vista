@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import clsx from "clsx";
-import { GitBranch, Tag, Copy, GitPullRequest, RotateCcw } from "lucide-react";
+import { GitBranch, Tag, Copy, GitPullRequest, RotateCcw, GitMerge } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
@@ -15,6 +15,7 @@ import { CreateTagModal } from "../tag";
 import { CreateBranchModal } from "../sidebar/CreateBranchModal";
 import { CherryPickModal } from "../modals/CherryPickModal";
 import { RevertModal } from "../modals/RevertModal";
+import { InteractiveRebaseModal } from "../rebase";
 
 const PAGE_SIZE = 50;
 const ROW_HEIGHT = 32;
@@ -116,6 +117,7 @@ export const CommitGraph: React.FC = () => {
   const [createBranchCommit, setCreateBranchCommit] = useState<GraphCommitNode | null>(null);
   const [cherryPickCommit, setCherryPickCommit] = useState<GraphCommitNode | null>(null);
   const [revertCommit, setRevertCommit] = useState<GraphCommitNode | null>(null);
+  const [interactiveRebaseCommit, setInteractiveRebaseCommit] = useState<GraphCommitNode | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -551,6 +553,19 @@ export const CommitGraph: React.FC = () => {
           <button
             type="button"
             role="menuitem"
+            onClick={() => {
+              setInteractiveRebaseCommit(contextMenu.commit);
+              setContextMenu(null);
+            }}
+            className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors"
+          >
+            <GitMerge size={14} className="shrink-0 text-secondary" />
+            <span>{t.graph.interactiveRebaseHere}</span>
+          </button>
+
+          <button
+            type="button"
+            role="menuitem"
             onClick={() => handleCopySha(contextMenu.commit.id)}
             className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors border-t border-border-subtle/50 mt-1 pt-2"
           >
@@ -689,6 +704,23 @@ export const CommitGraph: React.FC = () => {
               });
               setActiveScreen("changes");
             }
+          }}
+        />
+      )}
+
+      {interactiveRebaseCommit && currentRepo && (
+        <InteractiveRebaseModal
+          isOpen={Boolean(interactiveRebaseCommit)}
+          onClose={() => setInteractiveRebaseCommit(null)}
+          repoPath={currentRepo.path}
+          baseCommitId={interactiveRebaseCommit.id}
+          baseCommitSummary={interactiveRebaseCommit.summary}
+          onRebaseSuccess={() => {
+            setInteractiveRebaseCommit(null);
+            queryClient.invalidateQueries({ queryKey: ["commit-graph"] });
+            queryClient.invalidateQueries({ queryKey: ["repo_status"] });
+            queryClient.invalidateQueries({ queryKey: ["repo_head"] });
+            queryClient.invalidateQueries({ queryKey: ["branches"] });
           }}
         />
       )}

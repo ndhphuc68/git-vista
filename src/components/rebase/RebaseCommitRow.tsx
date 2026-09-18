@@ -4,11 +4,6 @@ import {
   ChevronUp,
   ChevronDown,
   Edit3,
-  GitCommit,
-  Scissors,
-  CheckCircle2,
-  Trash2,
-  Layers,
 } from "lucide-react";
 import clsx from "clsx";
 import type { RebasePlanStep, RebaseCommitItem, RebaseActionKind } from "../../ipc/bindings";
@@ -51,7 +46,6 @@ export const RebaseCommitRow: React.FC<RebaseCommitRowProps> = ({
   const isDropped = step.action === "Drop";
   const isReword = step.action === "Reword";
   const isSquash = step.action === "Squash";
-  const isFixup = step.action === "Fixup";
   const hasInlineEditor = isReword || isSquash;
 
   const currentMessage = step.new_message ?? commit.message ?? commit.summary;

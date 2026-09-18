@@ -1,12 +1,10 @@
 import React, { useMemo } from "react";
 import {
   GitCommit,
-  CheckCircle2,
   Trash2,
   Layers,
   Edit3,
   GitBranch,
-  ArrowDown,
 } from "lucide-react";
 import clsx from "clsx";
 import type { RebasePlanStep, RebaseCommitItem } from "../../ipc/bindings";

@@ -26,6 +26,7 @@ export interface CommandContext {
   stageAll?: () => void | Promise<void>;
   commit?: () => void | Promise<void>;
   openManageRemotes?: () => void;
+  openInteractiveRebase?: () => void;
 }
 
 export function normalizeText(text: string): string {
@@ -122,6 +123,14 @@ export function getAppCommands(
       category: "git",
       keywords: ["remote", "may chu", "máy chủ", "origin", "upstream", "url", "prune", "don dep"],
       action: () => context.openManageRemotes?.(),
+    },
+    {
+      id: "git-interactive-rebase",
+      title: t.palette.commands.gitInteractiveRebaseTitle,
+      description: t.palette.commands.gitInteractiveRebaseDesc,
+      category: "git",
+      keywords: ["rebase", "interactive", "tuong tac", "tương tác", "squash", "reword", "drop", "pick", "fixup"],
+      action: () => context.openInteractiveRebase?.(),
     },
     {
       id: "settings-theme",

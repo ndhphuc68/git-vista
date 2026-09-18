@@ -8,7 +8,6 @@ import {
   AlertTriangle,
   Info,
 } from "lucide-react";
-import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
 import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
@@ -59,7 +58,6 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
   const {
     data: fetchedCommits = EMPTY_COMMITS,
     isLoading,
-    isError,
   } = useQuery({
     queryKey: ["rebase-commits", repoPath, baseCommitId],
     queryFn: () => invokeCommand.getRebaseCommits(repoPath, baseCommitId),
@@ -179,7 +177,7 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleDragOver = (index: number) => (e: React.DragEvent) => {
+  const handleDragOver = (_index: number) => (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   };
@@ -233,21 +231,19 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
           const undoToken = result.undo_token;
           useToastStore.getState().showSuccess(
             t.modals.interactiveRebase.successToast,
-            {
-              label: t.toast.undo,
-              onClick: async () => {
-                try {
-                  await invokeCommand.undoCommit(repoPath, undoToken);
-                  useToastStore
-                    .getState()
-                    .showSuccess(t.modals.interactiveRebase.undoSuccessToast);
-                } catch (err: any) {
-                  useToastStore
-                    .getState()
-                    .showError(err?.message || "Failed to undo rebase");
-                }
-              },
-            }
+            async () => {
+              try {
+                await invokeCommand.undoCommit(repoPath, undoToken);
+                useToastStore
+                  .getState()
+                  .showSuccess(t.modals.interactiveRebase.undoSuccessToast);
+              } catch (err: any) {
+                useToastStore
+                  .getState()
+                  .showError(err?.message || "Failed to undo rebase");
+              }
+            },
+            t.toast.undo
           );
         } else {
           useToastStore.getState().showSuccess(t.modals.interactiveRebase.successToast);
@@ -258,7 +254,7 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
       } else if (result.status === "Conflict") {
         useToastStore
           .getState()
-          .showToast({ type: "warning", message: t.modals.interactiveRebase.conflictToast });
+          .showToast({ type: "error", message: t.modals.interactiveRebase.conflictToast });
         setActiveScreen("changes");
         onClose();
       } else {
