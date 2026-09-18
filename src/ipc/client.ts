@@ -20,10 +20,9 @@ import {
   ConflictHunk,
   ConflictFileData,
   ConfigScope,
+  GitConfigDto,
   TagItem,
-  BlameLine,
   FileBlameResult,
-  FileHistoryItem,
   FileHistoryResult,
 } from "./bindings";
 

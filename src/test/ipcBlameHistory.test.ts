@@ -9,7 +9,7 @@ describe("IPC Client - Git Blame & File History", () => {
     expect(result.total_lines).toBeGreaterThan(0);
     expect(result.lines.length).toBe(result.total_lines);
 
-    const firstLine = result.lines[0];
+    const firstLine = result.lines[0]!;
     expect(firstLine).toBeDefined();
     expect(firstLine.line_no).toBe(1);
     expect(firstLine.commit_id).toBeDefined();
@@ -25,7 +25,7 @@ describe("IPC Client - Git Blame & File History", () => {
     expect(result.total_count).toBeGreaterThan(0);
     expect(result.commits.length).toBeGreaterThan(0);
 
-    const firstCommit = result.commits[0];
+    const firstCommit = result.commits[0]!;
     expect(firstCommit).toBeDefined();
     expect(firstCommit.commit_id).toBeDefined();
     expect(firstCommit.short_id).toBeDefined();

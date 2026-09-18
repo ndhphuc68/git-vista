@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
-import { Search, X, Calendar, User } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
 import { FileDiffViewer } from "../diff/FileDiffViewer";

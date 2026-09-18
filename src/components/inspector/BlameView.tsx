@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
-import { GitCommit, Copy, Check, ExternalLink } from "lucide-react";
+import { Copy, Check, ExternalLink } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
 import { useRepoStore } from "../../store/useRepoStore";
