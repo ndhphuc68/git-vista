@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Archive } from "lucide-react";
-import { useTranslation } from "../../i18n";
-import { Modal, Button } from "../../shared/ui";
+import { useTranslation } from "../../../i18n";
+import { Modal, Button } from "../../../shared/ui";
 
 const TITLE_ID = "create-stash-title";
 
-interface CreateStashModalProps {
+export interface CreateStashModalProps {
   isOpen: boolean;
   onClose: () => void;
   repoPath: string;

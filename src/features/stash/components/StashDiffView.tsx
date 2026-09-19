@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Play, PlayCircle, Trash2 } from "lucide-react";
-import { type StashItem, type CommitDetails } from "../../ipc/bindings.generated";
-import { invokeCommand } from "../../ipc/client";
-import { useTranslation } from "../../i18n";
+import { type StashItem, type CommitDetails } from "../../../ipc/bindings.generated";
+import { invokeCommand } from "../../../ipc/client";
+import { useTranslation } from "../../../i18n";
 
-interface StashDiffViewProps {
+export interface StashDiffViewProps {
   stashItem: StashItem;
   repoPath: string;
   onApply: (index: number) => void;
@@ -28,6 +28,9 @@ export const StashDiffView: React.FC<StashDiffViewProps> = ({
     setCommitDetails(null);
     setError(null);
 
+    // Reads commit details to render the stash diff. This is a commit-domain
+    // command, not a stash one, so it stays on invokeCommand directly until a
+    // commit feature exists with its own hook (see IPC_IMPORT_EXCEPTIONS).
     invokeCommand
       .getCommitDetails(repoPath, stashItem.commit_id)
       .then((details) => {

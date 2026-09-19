@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import { CreateStashModal } from "../components/stash/CreateStashModal";
+import { CreateStashModal } from "../features/stash";
 
 /**
  * Characterization tests: these pin the behaviour the modal had BEFORE being
@@ -18,7 +18,9 @@ describe("CreateStashModal", () => {
   const submit = () => screen.getByRole("button", { name: /Lưu Stash/i });
 
   it("does not render when closed", () => {
-    render(<CreateStashModal {...defaults} isOpen={false} onClose={vi.fn()} onSaveStash={vi.fn()} />);
+    render(
+      <CreateStashModal {...defaults} isOpen={false} onClose={vi.fn()} onSaveStash={vi.fn()} />
+    );
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });

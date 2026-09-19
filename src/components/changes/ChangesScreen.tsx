@@ -13,7 +13,8 @@ import { mapGitError } from "../../utils/errorMapping";
 import { StagingFileList, type SelectedWorkingFile } from "./StagingFileList";
 import { CommitBox } from "./CommitBox";
 import { InteractiveDiffViewer } from "./InteractiveDiffViewer";
-import { CreateStashModal } from "../stash/CreateStashModal";
+import { CreateStashModal } from "../../features/stash";
+import { useSaveStash } from "../../features/stash/api";
 import { useTranslation } from "../../i18n";
 
 export const ChangesScreen: React.FC = () => {
@@ -25,6 +26,7 @@ export const ChangesScreen: React.FC = () => {
   const queryClient = useQueryClient();
   const [selectedFile, setSelectedFile] = useState<SelectedWorkingFile | null>(null);
   const [showCreateStash, setShowCreateStash] = useState(false);
+  const saveStash = useSaveStash(currentRepo?.path ?? "");
 
   const { data: status } = useQuery({
     queryKey: qk.repo.status(currentRepo?.path ?? ""),
@@ -301,8 +303,8 @@ export const ChangesScreen: React.FC = () => {
         onClose={() => setShowCreateStash(false)}
         repoPath={currentRepo.path}
         onSaveStash={async (message, includeUntracked) => {
-          const id = await invokeCommand.saveStash(currentRepo.path, message, includeUntracked);
-          queryClient.invalidateQueries({ queryKey: qk.stashes(currentRepo.path) });
+          // useSaveStash invalidates qk.repo.all, which covers qk.stashes.
+          const id = await saveStash.mutateAsync({ message, includeUntracked });
           setShowCreateStash(false);
           return id;
         }}

@@ -39,16 +39,19 @@ const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {
     "still queries remotes, stashes, tags and runs merge/rebase; removed as features/remote, features/stash and the remaining tag commands land in slice 2",
   "features/branch/model/useStashCommands.ts":
     "stash commands lifted out of the sidebar verbatim; moves to features/stash in slice 2",
+  "features/stash/components/StashDiffView.tsx":
+    "reads commit details to render the stash diff; removed once the commit domain has a hook",
 };
 
 /**
  * Cross-feature imports allowed while a feature is mid-migration, as
- * "<importing file>" -> "<imported feature>". Same rule as above: temporary,
- * named one by one, and shrinking. A pair listed here must still be a real
- * import — the staleness check below fails once it is gone.
+ * "<importing file>" -> ["<imported feature>", ...]. Same rule as above:
+ * temporary, named one by one, and shrinking. Every feature named for a file
+ * must still be a real import — the staleness check below fails once one of
+ * them is gone.
  */
-const CROSS_FEATURE_EXCEPTIONS: Record<string, string> = {
-  "features/branch/components/BranchSidebar.tsx": "tag",
+const CROSS_FEATURE_EXCEPTIONS: Record<string, string[]> = {
+  "features/branch/components/BranchSidebar.tsx": ["tag", "stash"],
 };
 
 /**
@@ -137,7 +140,7 @@ describe("architecture boundaries", () => {
         const source = readFileSync(file, "utf8");
         for (const other of names) {
           if (other === name) continue;
-          if (CROSS_FEATURE_EXCEPTIONS[rel] === other) continue;
+          if (CROSS_FEATURE_EXCEPTIONS[rel]?.includes(other)) continue;
           // Matches both "../<other>" relative hops and "features/<other>" paths.
           const pattern = new RegExp(
             `from\\s+["'][^"']*(?:\\.\\./${other}|features/${other})(?:/|["'])`
@@ -183,19 +186,21 @@ describe("architecture boundaries", () => {
   });
 
   it("every cross-feature exception still names a real import", () => {
-    // Stricter than the ipc list: the file must exist AND still import the
-    // feature it was excused for. Once the import is gone the entry has to
-    // go too, otherwise it silently re-permits a violation later.
-    for (const [rel, other] of Object.entries(CROSS_FEATURE_EXCEPTIONS)) {
+    // Stricter than the ipc list: the file must exist AND still import every
+    // feature it was excused for. Once one of those imports is gone, that
+    // entry has to go too, otherwise it silently re-permits a violation later.
+    for (const [rel, others] of Object.entries(CROSS_FEATURE_EXCEPTIONS)) {
       const full = join(SRC, rel);
       expect(() => statSync(full), `stale exception: ${rel}`).not.toThrow();
       const source = readFileSync(full, "utf8");
-      const pattern = new RegExp(
-        `from\\s+["'][^"']*(?:\\.\\./${other}|features/${other})(?:/|["'])`
-      );
-      expect(pattern.test(source), `${rel} no longer imports "${other}" — drop the entry`).toBe(
-        true
-      );
+      for (const other of others) {
+        const pattern = new RegExp(
+          `from\\s+["'][^"']*(?:\\.\\./${other}|features/${other})(?:/|["'])`
+        );
+        expect(pattern.test(source), `${rel} no longer imports "${other}" — drop the entry`).toBe(
+          true
+        );
+      }
     }
   });
 

@@ -28,7 +28,7 @@ import { RemoteTreeNode } from "./RemoteTreeNode";
 import { TagSection } from "./TagSection";
 import { StashSection } from "./StashSection";
 import { PullRequestsSection } from "../../../components/sidebar/PullRequestsSection";
-import { StashDiffView } from "../../../components/stash/StashDiffView";
+import { StashDiffView } from "../../../features/stash";
 import { MergeBranchModal } from "../../../components/merge/MergeBranchModal";
 import { RebaseBranchModal } from "../../../components/merge/RebaseBranchModal";
 import { CreateTagModal, DeleteTagModal } from "../../../features/tag";
