@@ -323,7 +323,8 @@ export const BranchSidebar: React.FC = () => {
     try {
       await invokeCommand.applyStash(currentRepo.path, index);
       invalidateStashes();
-      // Da fix loi: dung camelCase lech cap voi ["repo_status", ...], gio dung chung qk.repo.status
+      // Fixed bug: this used a camelCase key mismatched with ["repo_status", ...];
+      // now both use the shared qk.repo.status.
       queryClient.invalidateQueries({ queryKey: qk.repo.status(currentRepo.path) });
     } catch (err: unknown) {
       alert(`Khong the ap dung stash: ${err instanceof Error ? err.message : String(err)}`);
@@ -334,7 +335,8 @@ export const BranchSidebar: React.FC = () => {
     try {
       await invokeCommand.popStash(currentRepo.path, index);
       invalidateStashes();
-      // Da fix loi: dung camelCase lech cap voi ["repo_status", ...], gio dung chung qk.repo.status
+      // Fixed bug: this used a camelCase key mismatched with ["repo_status", ...];
+      // now both use the shared qk.repo.status.
       queryClient.invalidateQueries({ queryKey: qk.repo.status(currentRepo.path) });
       setSelectedStash(null);
     } catch (err: unknown) {

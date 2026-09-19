@@ -64,13 +64,13 @@ const RepoContent: React.FC<RepoContentProps> = ({
 
   const handleAbort = async (operation: string) => {
     await invokeCommand.abortInProgress(currentRepo.path, operation);
-    // Thao tác Git trên repo hiện tại: chỉ làm mới cache của repo này
+    // Git operation on the current repo: only refresh this repo's cache
     queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleContinue = async (operation: string) => {
     await invokeCommand.continueInProgress(currentRepo.path, operation);
-    // Thao tác Git trên repo hiện tại: chỉ làm mới cache của repo này
+    // Git operation on the current repo: only refresh this repo's cache
     queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
@@ -99,7 +99,7 @@ const RepoContent: React.FC<RepoContentProps> = ({
                 true
               );
               closeConflictResolver();
-              // Thao tác Git trên repo hiện tại: chỉ làm mới cache của repo này
+              // Git operation on the current repo: only refresh this repo's cache
               queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
             }}
           />
@@ -112,7 +112,7 @@ const RepoContent: React.FC<RepoContentProps> = ({
         onClose={() => setIsGlobalCreateBranchOpen(false)}
         repoPath={currentRepo.path}
         onSuccess={() =>
-          // Tạo nhánh mới trên repo hiện tại: chỉ làm mới cache của repo này
+          // Created a new branch on the current repo: only refresh this repo's cache
           queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) })
         }
       />
@@ -156,7 +156,7 @@ export const App: React.FC<AppProps> = ({
     setMode(mode === "simple" ? "advanced" : "simple");
   };
 
-  // Đồng bộ tab đang active sang repoStore để tương thích ngược với mọi component con
+  // Sync the active tab into repoStore for backward compatibility with all child components
   useEffect(() => {
     const activeTab = tabs.find((t) => t.id === activeTabId);
     if (activeTab && activeTab.type === "repo" && activeTab.repo) {
@@ -166,7 +166,7 @@ export const App: React.FC<AppProps> = ({
     }
   }, [activeTabId, tabs, setRepo, clearRepo]);
 
-  // Khôi phục phiên làm việc trước đó khi khởi động app
+  // Restore the previous session on app startup
   useEffect(() => {
     restoreSession();
   }, [restoreSession]);
@@ -277,7 +277,7 @@ export const App: React.FC<AppProps> = ({
 
     listenToRepoChanged((payload) => {
       console.log("🔔 [Event] repo-changed payload:", payload);
-      // Invalidate có chọn lọc: chỉ làm mới query của riêng repo bị thay đổi
+      // Selective invalidation: only refresh queries belonging to the repo that changed
       if (payload?.repo_path) {
         queryClient.invalidateQueries({
           predicate: (query) => {
@@ -287,8 +287,9 @@ export const App: React.FC<AppProps> = ({
           },
         });
       } else {
-        // Sự kiện repo-changed không kèm repo_path (không rõ repo nào bị ảnh hưởng):
-        // cố ý xoá sạch toàn bộ cache thay vì đoán sai phạm vi và để lại dữ liệu cũ.
+        // A repo-changed event without repo_path means we don't know which repo was
+        // affected: deliberately wipe the whole cache rather than guess the scope
+        // wrong and leave stale data behind.
         queryClient.invalidateQueries();
       }
     }).then((unlisten) => {
@@ -347,7 +348,7 @@ export const App: React.FC<AppProps> = ({
             baseCommitId={useRepoStore.getState().selectedCommitId || "HEAD~5"}
             onRebaseSuccess={() => {
               setIsGlobalInteractiveRebaseOpen(false);
-              // Rebase tương tác trên repo hiện tại: chỉ làm mới cache của repo này
+              // Interactive rebase on the current repo: only refresh this repo's cache
               queryClient.invalidateQueries({ queryKey: qk.repo.all(repoToDisplay.path) });
             }}
           />

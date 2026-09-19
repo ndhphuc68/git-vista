@@ -8,8 +8,8 @@ import { invokeCommand } from "../ipc/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { qk } from "../domain/queryKeys";
 
-// Duong dan repo dung xuyen suot file test nay - dung chung mot nguon voi
-// setRepo() ben duoi de expectation va thuc te luon khop nhau.
+// The repo path used throughout this test file - shares a single source with
+// setRepo() below so expectations and reality always match.
 const REPO_PATH = "d:/project-v3";
 
 describe("CommitGraph Context Menu", () => {
@@ -202,11 +202,11 @@ describe("CommitGraph Context Menu", () => {
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.repo.all(REPO_PATH) });
   });
 
-  // Test hoi quy: day la bang chung cho ca giai doan nay. No khang dinh rang
-  // sau mot thao tac Git tu context menu cua CommitGraph (checkout/cherry-pick...),
-  // invalidateQueries duoc goi voi key thuc su lam moi du lieu ma ChangesScreen doc.
-  // So khop qua chinh qk (khong dung chuoi cung) de test khong the lech khoi qk
-  // sau nay - dung cach bug nay da xay ra ban dau.
+  // Regression test: this is the proof for this whole phase. It asserts that
+  // after a Git action from the CommitGraph context menu (checkout/cherry-pick/...),
+  // invalidateQueries is called with a key that actually refreshes the data
+  // ChangesScreen reads. Matching through qk itself (not a hardcoded string) means
+  // the test can't drift from qk later - this is exactly how the original bug happened.
   it("verifies a Git action from the context menu invalidates the key ChangesScreen reads", async () => {
     vi.spyOn(invokeCommand, "cherryPickCommit").mockResolvedValue({
       success: true,
@@ -238,9 +238,9 @@ describe("CommitGraph Context Menu", () => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
 
-    // ChangesScreen doc qk.repo.status(REPO_PATH). React Query invalidate theo
-    // tien to, nen mot loi goi voi key ngan hon (vd qk.repo.all) cung lam moi
-    // duoc key dai hon - vi vay so khop theo kieu "la tien to cua".
+    // ChangesScreen reads qk.repo.status(REPO_PATH). React Query invalidates by
+    // prefix, so a call with a shorter key (e.g. qk.repo.all) also refreshes the
+    // longer key - hence matching in a "is a prefix of" style here.
     const calls = invalidateSpy.mock.calls.map((c) => c[0]?.queryKey);
     const statusKey = qk.repo.status(REPO_PATH);
     const matched = calls.some(

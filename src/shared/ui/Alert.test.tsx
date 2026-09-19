@@ -4,8 +4,8 @@ import { Alert } from "./Alert";
 
 describe("Alert", () => {
   it("renders its content", () => {
-    render(<Alert variant="error">Không xoá được nhánh</Alert>);
-    expect(screen.getByText("Không xoá được nhánh")).toBeInTheDocument();
+    render(<Alert variant="error">Could not delete branch</Alert>);
+    expect(screen.getByText("Could not delete branch")).toBeInTheDocument();
   });
 
   it("uses role=alert for errors so screen readers announce immediately", () => {

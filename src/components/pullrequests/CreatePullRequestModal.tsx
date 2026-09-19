@@ -198,10 +198,10 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
         type: "success",
       });
 
-      // Trước đây dùng predicate tìm chuỗi "github-pull-requests" — chuỗi đó
-      // không tồn tại trong bất kỳ key nào, nên lời gọi này khớp rỗng và danh
-      // sách PR không bao giờ được làm mới sau khi tạo. Dùng tiền tố qk để
-      // làm mới mọi bộ lọc trạng thái, vì ở đây không biết người dùng đang lọc gì.
+      // This used to use a predicate searching for the string "github-pull-requests" —
+      // that string existed in no key, so the call matched nothing and the PR list
+      // never refreshed after creating a PR. Using the qk prefix instead refreshes
+      // every status filter, since we don't know which one the user is currently viewing.
       queryClient.invalidateQueries({ queryKey: qk.github.pullRequestsAll(repoPath) });
 
       handleClose();

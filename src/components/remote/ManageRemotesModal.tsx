@@ -104,8 +104,9 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
     refetch();
     queryClient.invalidateQueries({ queryKey: qk.remotes(repoPath) });
     queryClient.invalidateQueries({ queryKey: qk.branches(repoPath) });
-    // Sửa remote URL có thể đổi owner/repo GitHub tương ứng, nên phải làm mới
-    // luôn cache repoInfo — trước đây bug này khiến repoInfo bị stale sau khi đổi remote.
+    // Editing a remote's URL can change its corresponding GitHub owner/repo, so
+    // repoInfo's cache must be refreshed too — this used to be a bug where
+    // repoInfo went stale after changing the remote.
     queryClient.invalidateQueries({ queryKey: qk.github.repoInfo(repoPath) });
   };
 

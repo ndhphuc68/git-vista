@@ -8,12 +8,12 @@ function renderModal(props: Partial<React.ComponentProps<typeof Modal>> = {}) {
   const onClose = vi.fn();
   const utils = render(
     <Modal isOpen onClose={onClose} labelledBy="test-title" {...props}>
-      <Modal.Header title="Tiêu đề thử" onClose={onClose} titleId="test-title" />
+      <Modal.Header title="Test title" onClose={onClose} titleId="test-title" />
       <Modal.Body>
-        <p>Nội dung thân modal</p>
+        <p>Modal body content</p>
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={onClose}>Huỷ</Button>
+        <Button onClick={onClose}>Cancel</Button>
       </Modal.Footer>
     </Modal>
   );
@@ -23,13 +23,13 @@ function renderModal(props: Partial<React.ComponentProps<typeof Modal>> = {}) {
 describe("Modal", () => {
   it("renders its content when open", () => {
     renderModal();
-    expect(screen.getByText("Nội dung thân modal")).toBeInTheDocument();
-    expect(screen.getByText("Tiêu đề thử")).toBeInTheDocument();
+    expect(screen.getByText("Modal body content")).toBeInTheDocument();
+    expect(screen.getByText("Test title")).toBeInTheDocument();
   });
 
   it("renders nothing when closed", () => {
     renderModal({ isOpen: false });
-    expect(screen.queryByText("Nội dung thân modal")).not.toBeInTheDocument();
+    expect(screen.queryByText("Modal body content")).not.toBeInTheDocument();
   });
 
   it("has role=dialog and aria-modal for accessibility", () => {
@@ -62,7 +62,7 @@ describe("Modal", () => {
   it("does NOT close when clicking inside the content area", () => {
     const { onClose } = renderModal();
 
-    fireEvent.click(screen.getByText("Nội dung thân modal"));
+    fireEvent.click(screen.getByText("Modal body content"));
 
     expect(onClose).not.toHaveBeenCalled();
   });

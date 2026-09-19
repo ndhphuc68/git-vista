@@ -3,11 +3,11 @@ import { toErrorMessage } from "./toError";
 
 describe("toErrorMessage", () => {
   it("takes the message from an Error", () => {
-    expect(toErrorMessage(new Error("hỏng rồi"))).toBe("hỏng rồi");
+    expect(toErrorMessage(new Error("something broke"))).toBe("something broke");
   });
 
   it("converts a string into itself", () => {
-    expect(toErrorMessage("lỗi dạng chuỗi")).toBe("lỗi dạng chuỗi");
+    expect(toErrorMessage("a string error")).toBe("a string error");
   });
 
   it("converts an unknown value into a string instead of throwing further", () => {

@@ -97,7 +97,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
         data-testid="repo-header"
         className="flex items-center justify-between px-3 bg-surface border-b border-border-subtle h-[40px] min-h-[40px] max-h-[40px] shrink-0 gap-3 select-none z-20"
       >
-        {/* Khối Trái: Sidebar toggle & Screen Switcher Tabs */}
+        {/* Left cluster: Sidebar toggle & Screen Switcher Tabs */}
         <div className="flex items-center gap-2.5 min-w-0 shrink">
           <button
             type="button"
@@ -114,7 +114,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
             <PanelLeft size={14} />
           </button>
 
-          {/* Segmented Screen Switcher (Lịch sử & Thay đổi) */}
+          {/* Segmented Screen Switcher (History & Changes) */}
           <div
             role="tablist"
             aria-label="Màn hình làm việc"
@@ -166,7 +166,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
           </div>
         </div>
 
-        {/* Khối Thao tác Git Kiểu GitKraken (Connected Segmented Cluster) */}
+        {/* GitKraken-style Git action cluster (Connected Segmented Cluster) */}
         <div className="flex items-center gap-2 shrink-0">
           <div className="inline-flex items-center bg-surface border border-border-subtle rounded-md p-0.5 shadow-2xs divide-x divide-border-subtle">
             {/* Fetch */}
@@ -237,13 +237,13 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
             </button>
           </div>
 
-          {/* Khối Công Cụ Phải: Refresh & Settings */}
+          {/* Right-side toolbar: Refresh & Settings */}
           <div className="flex items-center gap-1 pl-1 border-l border-border-subtle relative">
             {/* Refresh button */}
             <button
               onClick={() =>
-                // Nhãn nút là "Tải lại dữ liệu repo" (số ít): chỉ làm mới cache
-                // của repo hiện tại, không đụng đến các repo khác đang mở ở tab khác.
+                // The button's label is "Refresh repository" (singular): only refresh
+                // the current repo's cache, don't touch other repos open in other tabs.
                 queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo?.path ?? "") })
               }
               className="flex items-center justify-center w-7 h-7 bg-surface border border-border-subtle rounded-md text-secondary cursor-pointer hover:bg-surface-hover hover:text-primary transition-colors shadow-2xs"

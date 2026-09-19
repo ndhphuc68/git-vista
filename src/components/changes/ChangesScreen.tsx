@@ -78,7 +78,7 @@ export const ChangesScreen: React.FC = () => {
   const handleStageFile = async (filePath: string) => {
     await invokeCommand.stageFile(currentRepo.path, filePath);
     setSelectedFile({ path: filePath, is_staged: true });
-    // Chỉ làm mới cache của repo hiện tại, không xoá sạch cache của repo khác
+    // Only refresh the current repo's cache, don't wipe other repos' caches
     await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 

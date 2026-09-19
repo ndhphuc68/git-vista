@@ -4,13 +4,13 @@ import { Button } from "./Button";
 
 describe("Button", () => {
   it("renders its children", () => {
-    render(<Button>Lưu lại</Button>);
-    expect(screen.getByRole("button", { name: "Lưu lại" })).toBeInTheDocument();
+    render(<Button>Save</Button>);
+    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
   });
 
   it("calls onClick when clicked", () => {
     const onClick = vi.fn();
-    render(<Button onClick={onClick}>Bấm</Button>);
+    render(<Button onClick={onClick}>Click me</Button>);
 
     fireEvent.click(screen.getByRole("button"));
 
@@ -43,7 +43,7 @@ describe("Button", () => {
   });
 
   it("is disabled when passed disabled", () => {
-    render(<Button disabled>Không bấm được</Button>);
+    render(<Button disabled>Cannot click</Button>);
     expect(screen.getByRole("button")).toBeDisabled();
   });
 

@@ -53,8 +53,8 @@ export const PullRequestDetailDrawer: React.FC<PullRequestDetailDrawerProps> = (
     queryFn: () => invokeCommand.getGitHubToken(),
   });
 
-  // selectedPr?.number có thể undefined trước khi PR được chọn; enabled bên dưới
-  // đảm bảo query chỉ chạy khi có số PR hợp lệ, nên dùng ?? 0 làm giá trị giữ chỗ.
+  // selectedPr?.number can be undefined before a PR is selected; `enabled` below
+  // ensures the query only runs once there's a valid PR number, so ?? 0 is just a placeholder.
   const { data: detail } = useQuery({
     queryKey: qk.github.pullRequestDetail(repoPath, selectedPr?.number ?? 0),
     queryFn: () => {

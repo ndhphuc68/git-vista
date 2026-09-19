@@ -24,8 +24,8 @@ describe("Website i18n dictionary", () => {
     expect(enKeys).toEqual(viKeys);
 
     for (const key of enKeys) {
-      // Truy cập theo chỉ mục trả về `string | undefined`, nên khẳng định
-      // tồn tại trước rồi mới kiểm tra nội dung — giữ nguyên ý nghĩa test.
+      // Index access returns `string | undefined`, so assert existence first
+      // before checking content — this keeps the test's original intent intact.
       const enValue = en[key];
       const viValue = vi[key];
       expect(enValue).toBeDefined();
