@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, AlertTriangle, ShieldCheck } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
-import { useToastStore } from "../../store/useToastStore";
-import { mapGitError } from "../../utils/errorMapping";
-import { useTranslation } from "../../i18n";
-import { Modal, Button, Alert } from "../../shared/ui";
+// The undo toast calls undoDeleteBranch, which belongs to the undo domain and
+// has no feature hook yet. Until one exists this single call stays on
+// invokeCommand directly; the delete itself goes through useDeleteBranch.
+import { invokeCommand } from "../../../ipc/client";
+import { useDeleteBranch } from "../api";
+import { useToastStore } from "../../../store/useToastStore";
+import { mapGitError } from "../../../utils/errorMapping";
+import { useTranslation } from "../../../i18n";
+import { Modal, Button, Alert } from "../../../shared/ui";
 
 const TITLE_ID = "delete-branch-title";
 
@@ -24,24 +28,23 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
   onSuccess,
 }) => {
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
+  const deleteBranch = useDeleteBranch(repoPath);
   const [error, setError] = useState<string | null>(null);
   const [isUnmerged, setIsUnmerged] = useState(false);
+  const loading = deleteBranch.isPending;
 
   useEffect(() => {
     if (isOpen) {
-      setLoading(false);
       setError(null);
       setIsUnmerged(false);
     }
   }, [isOpen, branchName]);
 
   const handleDelete = async (force: boolean) => {
-    setLoading(true);
     setError(null);
 
     try {
-      const backupRef = await invokeCommand.deleteBranch(repoPath, branchName, force);
+      const backupRef = await deleteBranch.mutateAsync({ name: branchName, force });
       useToastStore.getState().showToast({
         message: t.modals.deleteBranch.successToast.replace("{name}", branchName),
         type: "success",
@@ -60,8 +63,6 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
         setError(msg || t.modals.deleteBranch.errorGeneric);
         useToastStore.getState().showError(mapGitError(err));
       }
-    } finally {
-      setLoading(false);
     }
   };
 

@@ -13,7 +13,7 @@ import { useTabStore } from "./store/useTabStore";
 import { useViewStore } from "./store/useViewStore";
 import { useSettingsStore } from "./store/useSettingsStore";
 import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
-import { CreateBranchModal } from "./components/sidebar/CreateBranchModal";
+import { CreateBranchModal } from "./features/branch";
 import { ConflictResolverScreen } from "./components/conflict/ConflictResolverScreen";
 import { ToastContainer } from "./components/toast/ToastContainer";
 import { CommandPalette } from "./components/palette/CommandPalette";

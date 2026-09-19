@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { CreateBranchModal } from "../components/sidebar/CreateBranchModal";
+import { CreateBranchModal } from "../features/branch";
 import { invokeCommand } from "../ipc/client";
 
 vi.mock("../ipc/client", () => ({
@@ -9,13 +10,20 @@ vi.mock("../ipc/client", () => ({
   },
 }));
 
+function renderWithClient(ui: React.ReactElement) {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+}
+
 describe("CreateBranchModal", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("does not render when isOpen is false", () => {
-    render(<CreateBranchModal isOpen={false} onClose={vi.fn()} repoPath="/test/repo" />);
+    renderWithClient(<CreateBranchModal isOpen={false} onClose={vi.fn()} repoPath="/test/repo" />);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
@@ -23,7 +31,7 @@ describe("CreateBranchModal", () => {
     const onClose = vi.fn();
     (invokeCommand.createBranch as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
 
-    render(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
+    renderWithClient(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
 
     const input = screen.getByLabelText("Tên nhánh mới");
     expect(input).toBeInTheDocument();
@@ -52,7 +60,7 @@ describe("CreateBranchModal", () => {
     const onClose = vi.fn();
     (invokeCommand.createBranch as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
 
-    render(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
+    renderWithClient(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
 
     const input = screen.getByLabelText("Tên nhánh mới");
     fireEvent.change(input, { target: { value: "quick-fix" } });
@@ -83,7 +91,7 @@ describe("CreateBranchModal", () => {
   describe("closing", () => {
     it("closes on Escape", () => {
       const onClose = vi.fn();
-      render(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
+      renderWithClient(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
 
       fireEvent.keyDown(window, { key: "Escape" });
 
@@ -92,7 +100,9 @@ describe("CreateBranchModal", () => {
 
     it("does not react to Escape while closed", () => {
       const onClose = vi.fn();
-      render(<CreateBranchModal isOpen={false} onClose={onClose} repoPath="/test/repo" />);
+      renderWithClient(
+        <CreateBranchModal isOpen={false} onClose={onClose} repoPath="/test/repo" />
+      );
 
       fireEvent.keyDown(window, { key: "Escape" });
 
@@ -101,7 +111,7 @@ describe("CreateBranchModal", () => {
 
     it("closes on the header close button", () => {
       const onClose = vi.fn();
-      render(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
+      renderWithClient(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
 
       fireEvent.click(screen.getByLabelText("Đóng"));
 
@@ -110,7 +120,7 @@ describe("CreateBranchModal", () => {
 
     it("closes on cancel without creating anything", () => {
       const onClose = vi.fn();
-      render(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
+      renderWithClient(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
 
       fireEvent.click(screen.getByRole("button", { name: /^Huỷ/i }));
 
@@ -120,7 +130,7 @@ describe("CreateBranchModal", () => {
   });
 
   it("is labelled by its title for screen readers", () => {
-    render(<CreateBranchModal isOpen={true} onClose={vi.fn()} repoPath="/test/repo" />);
+    renderWithClient(<CreateBranchModal isOpen={true} onClose={vi.fn()} repoPath="/test/repo" />);
     const dialog = screen.getByRole("dialog");
 
     expect(dialog).toHaveAttribute("aria-modal", "true");
@@ -130,7 +140,7 @@ describe("CreateBranchModal", () => {
   });
 
   it("shows the source commit when creating from one", () => {
-    render(
+    renderWithClient(
       <CreateBranchModal
         isOpen={true}
         onClose={vi.fn()}
@@ -148,7 +158,7 @@ describe("CreateBranchModal", () => {
       new Error("branch already exists")
     );
 
-    render(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
+    renderWithClient(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
     fireEvent.change(screen.getByLabelText("Tên nhánh mới"), { target: { value: "dup" } });
     fireEvent.click(screen.getByRole("button", { name: /tạo nhánh/i }));
 

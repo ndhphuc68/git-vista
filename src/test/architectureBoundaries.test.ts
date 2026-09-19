@@ -30,7 +30,12 @@ function collectSourceFiles(dir: string): string[] {
  * condition. Every entry is temporary — shrink this list, never grow it.
  * Task 9 adds CheckoutConflictModal here when it moves into the feature.
  */
-const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {};
+const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {
+  "features/branch/components/CheckoutConflictModal.tsx":
+    "calls saveStash; removed once features/stash exists",
+  "features/branch/components/DeleteBranchModal.tsx":
+    "undo toast calls undoDeleteBranch; removed once the undo domain has a hook",
+};
 
 /**
  * True when the source pulls a VALUE out of ipc/ at runtime — the thing the
@@ -67,7 +72,10 @@ function importsIpcAtRuntime(source: string): boolean {
 
     // Everything between `import` and `from` — default and namespace
     // specifiers included, not just the brace group.
-    const clause = statement.replace(/^import\s+/, "").replace(/\s+from[\s\S]*$/, "").trim();
+    const clause = statement
+      .replace(/^import\s+/, "")
+      .replace(/\s+from[\s\S]*$/, "")
+      .trim();
     const braces = clause.match(/\{([\s\S]*)\}/);
 
     // No brace group means a bare default or namespace import: always a value.
@@ -110,7 +118,9 @@ describe("architecture boundaries", () => {
         for (const other of names) {
           if (other === name) continue;
           // Matches both "../<other>" relative hops and "features/<other>" paths.
-          const pattern = new RegExp(`from\\s+["'][^"']*(?:\\.\\./${other}|features/${other})(?:/|["'])`);
+          const pattern = new RegExp(
+            `from\\s+["'][^"']*(?:\\.\\./${other}|features/${other})(?:/|["'])`
+          );
           if (pattern.test(source)) {
             violations.push(`${relative(SRC, file)} imports feature "${other}"`);
           }
@@ -179,10 +189,7 @@ describe("importsIpcAtRuntime", () => {
     ["default alongside type-only bindings", `import client, { type Tag } from ${IPC};`],
     ["side-effect import", `import ${IPC};`],
     ["re-export of a live binding", `export { invokeCommand } from ${IPC};`],
-    [
-      "multi-line value import",
-      `import {\n  invokeCommand,\n  other,\n} from ${IPC};`,
-    ],
+    ["multi-line value import", `import {\n  invokeCommand,\n  other,\n} from ${IPC};`],
   ])("flags %s", (_label, source) => {
     expect(importsIpcAtRuntime(source)).toBe(true);
   });

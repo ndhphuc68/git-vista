@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Edit3 } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
-import { useTranslation } from "../../i18n";
-import { Modal, Button, Alert } from "../../shared/ui";
+import { useRenameBranch } from "../api";
+import { useTranslation } from "../../../i18n";
+import { Modal, Button, Alert } from "../../../shared/ui";
 
 const TITLE_ID = "rename-branch-title";
 
@@ -23,8 +23,9 @@ export const RenameBranchModal: React.FC<RenameBranchModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const [newName, setNewName] = useState("");
-  const [loading, setLoading] = useState(false);
+  const renameBranch = useRenameBranch(repoPath);
   const [error, setError] = useState<string | null>(null);
+  const loading = renameBranch.isPending;
   const inputRef = useRef<HTMLInputElement>(null);
   // One-shot latch: the prefilled name is selected once per opening. Without
   // it the effect below re-selects on every keystroke, so the next character
@@ -35,7 +36,6 @@ export const RenameBranchModal: React.FC<RenameBranchModalProps> = ({
     if (isOpen) {
       setNewName(currentName);
       setError(null);
-      setLoading(false);
       hasSelectedRef.current = false;
     }
   }, [isOpen, currentName]);
@@ -76,18 +76,15 @@ export const RenameBranchModal: React.FC<RenameBranchModalProps> = ({
       return;
     }
 
-    setLoading(true);
     setError(null);
 
     try {
-      await invokeCommand.renameBranch(repoPath, currentName, trimmed);
+      await renameBranch.mutateAsync({ oldName: currentName, newName: trimmed });
       if (onSuccess) onSuccess();
       onClose();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       setError(msg || t.common.error);
-    } finally {
-      setLoading(false);
     }
   };
 

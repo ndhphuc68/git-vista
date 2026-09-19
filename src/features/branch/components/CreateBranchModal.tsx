@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { GitBranch } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
-import { useTranslation } from "../../i18n";
-import { Modal, Button, Alert } from "../../shared/ui";
+import { useCreateBranch } from "../api";
+import { useTranslation } from "../../../i18n";
+import { Modal, Button, Alert } from "../../../shared/ui";
 
 const TITLE_ID = "create-branch-title";
 
@@ -22,17 +22,17 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
   onSuccess,
 }) => {
   const { t } = useTranslation();
+  const createBranch = useCreateBranch(repoPath);
   const [branchName, setBranchName] = useState("");
   const [checkout, setCheckout] = useState(true);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const loading = createBranch.isPending;
 
   useEffect(() => {
     if (isOpen) {
       setBranchName("");
       setCheckout(true);
       setError(null);
-      setLoading(false);
     }
   }, [isOpen]);
 
@@ -55,18 +55,19 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
       return;
     }
 
-    setLoading(true);
     setError(null);
 
     try {
-      await invokeCommand.createBranch(repoPath, trimmed, targetCommit ?? undefined, checkout);
+      await createBranch.mutateAsync({
+        name: trimmed,
+        targetCommit: targetCommit ?? undefined,
+        checkout,
+      });
       if (onSuccess) onSuccess();
       onClose();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       setError(msg || t.common.error);
-    } finally {
-      setLoading(false);
     }
   };
 

@@ -21,7 +21,7 @@ import { type GraphCommitNode } from "../../ipc/bindings.generated";
 import { GraphSvgLane } from "./GraphSvgLane";
 import { useTranslation } from "../../i18n";
 import { CreateTagModal } from "../../features/tag";
-import { CreateBranchModal } from "../sidebar/CreateBranchModal";
+import { CreateBranchModal } from "../../features/branch";
 import { CherryPickModal } from "../modals/CherryPickModal";
 import { RevertModal } from "../modals/RevertModal";
 import { InteractiveRebaseModal } from "../rebase";

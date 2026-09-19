@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { DeleteBranchModal } from "../components/sidebar/DeleteBranchModal";
+import { DeleteBranchModal } from "../features/branch";
 import { invokeCommand } from "../ipc/client";
 
 vi.mock("../ipc/client", () => ({
@@ -9,13 +10,20 @@ vi.mock("../ipc/client", () => ({
   },
 }));
 
+function renderWithClient(ui: React.ReactElement) {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+}
+
 describe("DeleteBranchModal", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("does not render when isOpen is false", () => {
-    render(
+    renderWithClient(
       <DeleteBranchModal
         isOpen={false}
         onClose={vi.fn()}
@@ -32,7 +40,7 @@ describe("DeleteBranchModal", () => {
       "refs/gitui-backup/delete-branch-test-123"
     );
 
-    render(
+    renderWithClient(
       <DeleteBranchModal
         isOpen={true}
         onClose={onClose}
@@ -63,7 +71,7 @@ describe("DeleteBranchModal", () => {
       .mockRejectedValueOnce(new Error("UNMERGED_BRANCH: commit not merged"))
       .mockResolvedValueOnce("refs/gitui-backup/delete-branch-test-123");
 
-    render(
+    renderWithClient(
       <DeleteBranchModal
         isOpen={true}
         onClose={onClose}
@@ -93,7 +101,7 @@ describe("DeleteBranchModal", () => {
       expect(onClose).toHaveBeenCalled();
     });
   });
-// Pinned before migrating onto the shared Modal: nothing covered the shell
+  // Pinned before migrating onto the shared Modal: nothing covered the shell
   // (Escape, the close button, cancel), which is exactly what the migration
   // replaces (convention #5).
   describe("closing", () => {
@@ -105,7 +113,7 @@ describe("DeleteBranchModal", () => {
 
     it("closes on Escape", () => {
       const onClose = vi.fn();
-      render(<DeleteBranchModal {...props} onClose={onClose} />);
+      renderWithClient(<DeleteBranchModal {...props} onClose={onClose} />);
 
       fireEvent.keyDown(window, { key: "Escape" });
 
@@ -114,7 +122,7 @@ describe("DeleteBranchModal", () => {
 
     it("does not react to Escape while closed", () => {
       const onClose = vi.fn();
-      render(<DeleteBranchModal {...props} isOpen={false} onClose={onClose} />);
+      renderWithClient(<DeleteBranchModal {...props} isOpen={false} onClose={onClose} />);
 
       fireEvent.keyDown(window, { key: "Escape" });
 
@@ -123,7 +131,7 @@ describe("DeleteBranchModal", () => {
 
     it("closes on the header close button and on cancel, without deleting", () => {
       const onClose = vi.fn();
-      render(<DeleteBranchModal {...props} onClose={onClose} />);
+      renderWithClient(<DeleteBranchModal {...props} onClose={onClose} />);
 
       fireEvent.click(screen.getByLabelText("Đóng"));
       expect(onClose).toHaveBeenCalledTimes(1);
@@ -134,7 +142,7 @@ describe("DeleteBranchModal", () => {
     });
 
     it("is labelled by its title for screen readers", () => {
-      render(<DeleteBranchModal {...props} onClose={vi.fn()} />);
+      renderWithClient(<DeleteBranchModal {...props} onClose={vi.fn()} />);
       const dialog = screen.getByRole("dialog");
 
       expect(dialog).toHaveAttribute("aria-modal", "true");

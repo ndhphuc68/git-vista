@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { RenameBranchModal } from "../components/sidebar/RenameBranchModal";
+import { RenameBranchModal } from "../features/branch";
 import { invokeCommand } from "../ipc/client";
 
 vi.mock("../ipc/client", () => ({
@@ -9,13 +10,20 @@ vi.mock("../ipc/client", () => ({
   },
 }));
 
+function renderWithClient(ui: React.ReactElement) {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+}
+
 describe("RenameBranchModal", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("does not render when isOpen is false", () => {
-    render(
+    renderWithClient(
       <RenameBranchModal
         isOpen={false}
         onClose={vi.fn()}
@@ -27,7 +35,7 @@ describe("RenameBranchModal", () => {
   });
 
   it("renders with currentName and disables submit until name is changed", () => {
-    render(
+    renderWithClient(
       <RenameBranchModal
         isOpen={true}
         onClose={vi.fn()}
@@ -47,7 +55,7 @@ describe("RenameBranchModal", () => {
     const onClose = vi.fn();
     (invokeCommand.renameBranch as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
 
-    render(
+    renderWithClient(
       <RenameBranchModal
         isOpen={true}
         onClose={onClose}
@@ -79,7 +87,7 @@ describe("RenameBranchModal", () => {
   // data-autofocus only focuses, so the selection has to be kept explicitly
   // or renaming silently becomes "append to the old name".
   it("focuses the name field and preselects it so typing replaces the old name", async () => {
-    render(
+    renderWithClient(
       <RenameBranchModal
         isOpen={true}
         onClose={vi.fn()}
@@ -100,7 +108,7 @@ describe("RenameBranchModal", () => {
   // what had just been typed and the next character wiped it. The preselect
   // must happen once per opening, not once per keystroke.
   it("stops preselecting once the user starts typing", async () => {
-    render(
+    renderWithClient(
       <RenameBranchModal
         isOpen={true}
         onClose={vi.fn()}
@@ -123,7 +131,7 @@ describe("RenameBranchModal", () => {
   describe("closing", () => {
     it("closes on Escape", () => {
       const onClose = vi.fn();
-      render(
+      renderWithClient(
         <RenameBranchModal
           isOpen={true}
           onClose={onClose}
@@ -139,7 +147,7 @@ describe("RenameBranchModal", () => {
 
     it("does not react to Escape while closed", () => {
       const onClose = vi.fn();
-      render(
+      renderWithClient(
         <RenameBranchModal
           isOpen={false}
           onClose={onClose}
@@ -155,7 +163,7 @@ describe("RenameBranchModal", () => {
 
     it("closes on the header close button and on cancel", () => {
       const onClose = vi.fn();
-      render(
+      renderWithClient(
         <RenameBranchModal
           isOpen={true}
           onClose={onClose}
@@ -179,7 +187,7 @@ describe("RenameBranchModal", () => {
       new Error("name already taken")
     );
 
-    render(
+    renderWithClient(
       <RenameBranchModal
         isOpen={true}
         onClose={onClose}

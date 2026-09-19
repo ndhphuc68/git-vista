@@ -32,11 +32,13 @@ import { type StashItem, type TagItem, type RemoteItem } from "../../ipc/binding
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
 import { qk } from "../../domain/queryKeys";
-import { CreateBranchModal } from "./CreateBranchModal";
-import { RenameBranchModal } from "./RenameBranchModal";
+import {
+  CreateBranchModal,
+  RenameBranchModal,
+  DeleteBranchModal,
+  CheckoutConflictModal,
+} from "../../features/branch";
 import { PullRequestsSection } from "./PullRequestsSection";
-import { DeleteBranchModal } from "./DeleteBranchModal";
-import { CheckoutConflictModal } from "./CheckoutConflictModal";
 import { StashDiffView } from "../stash/StashDiffView";
 import { MergeBranchModal } from "../merge/MergeBranchModal";
 import { RebaseBranchModal } from "../merge/RebaseBranchModal";
