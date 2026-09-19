@@ -24,8 +24,14 @@ describe("Website i18n dictionary", () => {
     expect(enKeys).toEqual(viKeys);
 
     for (const key of enKeys) {
-      expect(en[key].trim().length).toBeGreaterThan(0);
-      expect(vi[key].trim().length).toBeGreaterThan(0);
+      // Truy cập theo chỉ mục trả về `string | undefined`, nên khẳng định
+      // tồn tại trước rồi mới kiểm tra nội dung — giữ nguyên ý nghĩa test.
+      const enValue = en[key];
+      const viValue = vi[key];
+      expect(enValue).toBeDefined();
+      expect(viValue).toBeDefined();
+      expect(enValue?.trim().length).toBeGreaterThan(0);
+      expect(viValue?.trim().length).toBeGreaterThan(0);
     }
   });
 });
