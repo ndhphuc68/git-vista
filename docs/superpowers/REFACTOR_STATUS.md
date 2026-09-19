@@ -3,9 +3,9 @@
 > **Đọc file này trước khi làm tiếp.** Đây là điểm vào duy nhất cho công việc tái cấu trúc — nó cho biết đã làm gì, đang ở đâu, và làm gì tiếp theo.
 
 **Cập nhật**: 2026-09-19
-**Nhánh làm việc**: `refactor/phase0-foundation` (chứa GĐ0–GĐ3, chưa merge vào `main`)
-**Tiến độ**: 4 / 8 giai đoạn xong
-**Việc tiếp theo**: Giai đoạn 4 — tách `ipc/client.ts` theo domain
+**Nhánh làm việc**: `refactor/phase0-foundation` (chứa GĐ0–GĐ4, chưa merge vào `main`)
+**Tiến độ**: 5 / 8 giai đoạn xong
+**Việc tiếp theo**: Giai đoạn 5 — migrate sang `features/` từng cái
 
 > **Còn một việc chưa xác minh của GĐ3:** chạy app Tauri thật để kiểm chứng đầu-cuối (Task 5 trong kế hoạch GĐ3). `pnpm build` xanh chứng minh kiểu khớp, **không** chứng minh dây IPC chạy đúng. Phiên làm GĐ3 không chạy được GUI nên bước này còn nợ. Xem mục 9.
 
@@ -21,7 +21,7 @@ pnpm install
 # Xác nhận mọi thứ xanh trước khi làm gì
 pnpm lint                     # phải exit 0
 pnpm build                    # phải exit 0
-pnpm test                     # phải 93 file / 570 test xanh
+pnpm test                     # phải 94 file / 572 test xanh
 pnpm check-query-keys         # "No query key literals found..."
 pnpm check-comment-language   # "All comments are in English."
 pnpm check-bindings           # "...is in sync with the Rust commands."
@@ -40,6 +40,7 @@ Nếu một trong các lệnh trên đỏ, **dừng lại và tìm nguyên nhân
 | `docs/superpowers/plans/2026-09-18-refactor-phase0-foundation.md` | Kế hoạch GĐ0 (đã xong) |
 | `docs/superpowers/plans/2026-09-18-refactor-phase1-querykeys.md` | Kế hoạch GĐ1 (đã xong) |
 | `docs/superpowers/plans/2026-09-19-refactor-phase3-tauri-specta.md` | Kế hoạch GĐ3 (đã xong, trừ Task 5) |
+| `docs/superpowers/plans/2026-09-19-refactor-phase4-split-ipc-client.md` | Kế hoạch GĐ4 (đã xong) |
 | `docs/DESIGN_SYSTEM.md` | Design token — nguồn chuẩn cho màu, bo góc, khoảng cách |
 
 ---
@@ -194,13 +195,35 @@ Xoá được ~1.400 dòng: 22 overlay tự dựng, 22 Escape handler, ~44 nút 
 
 **Sửa thêm trước khi bắt đầu** (`591c23e`): `test_github_token_storage_lifecycle` đọc/ghi token GitHub **thật** của người dùng. Vì `get_github_token()` có fallback `gh auth token`, máy dev đã đăng nhập `gh` thì assertion `None` nhận token thật **và in nó ra log test**. CI không thấy vì runner không có `gh`. Đã trỏ `GITVISTA_TOKEN_PATH` vào tempdir và ẩn `PATH` trong lúc chạy.
 
+### Giai đoạn 4 — Tách `ipc/client.ts` theo domain ✅
+
+`client.ts` 1347 → **124 dòng**, thành facade thuần tuý. 77 command chuyển sang 16 file domain khớp với `src-tauri/src/commands/`.
+
+**Bản đồ domain suy ra từ Rust, không đoán:** đọc `#[specta::specta]` phía Rust rồi đối chiếu tên lệnh trong `bindings.generated.ts` → **77/77 khớp**, trải trên 13 module.
+
+Chỉ `repo` vượt 300 dòng (28 method, ~389 dòng). Xẻ **theo chỗ `commands/repo.rs` thật sự uỷ quyền tới**, không cắt cho đủ số dòng:
+
+| File | Method | Uỷ quyền tới |
+| --- | --- | --- |
+| `repo.ts` | 7 | `crate::repo::` (vòng đời) |
+| `history.ts` | 8 | `crate::read::` |
+| `staging.ts` | 8 | `crate::write::staging` |
+| `branch.ts` | 5 | `crate::write::branch` |
+
+**Mọi file IPC viết tay giờ dưới 300 dòng** (lớn nhất: `history.ts` 278).
+
+**Đây là move thuần tuý** — `git diff` cho thấy **0 thay đổi** trong `src/components/`, `src/hooks/`, `src/store/`, `src/services/`, `App.tsx`. 291 call site và 38 test file mock không đụng tới, vì `invokeCommand` gom lại y hệt cũ.
+
+**Một lỗi mà `pnpm build` không bắt được — phải có test riêng:** nếu quên một dòng `...xxxCommands` trong facade, **build vẫn xanh**. Call site vẫn typecheck vì kiểu của facade là kiểu suy ra, chỉ đơn giản là mất method đó — lỗi chỉ lộ lúc chạy. Đã thêm `ipcFacade.test.ts` ghim đúng **77 key** + một đại diện mỗi domain. Thí nghiệm phá: bỏ một spread → cả hai assertion đỏ.
+
 ### Số liệu hiện tại
 
 | Chỉ số | Khi bắt đầu | Bây giờ |
 | --- | --- | --- |
-| Test | 73 file / ~370 | **93 file / 570** |
+| Test | 73 file / ~370 | **94 file / 572** |
 | `src/ipc/bindings.ts` viết tay | 486 dòng | **0** (do máy sinh) |
-| `src/ipc/client.ts` | 1748 dòng | **1347** |
+| `src/ipc/client.ts` | 1748 dòng | **124** (facade) |
+| File IPC viết tay quá 300 dòng | 1 | **0** |
 | Query key literal | 75 | **0** |
 | `invalidateQueries()` trống | 23 | **1** (cố ý, có comment) |
 | Cặp key lệch | 3 | **0** |
@@ -212,12 +235,11 @@ Xoá được ~1.400 dòng: 22 overlay tự dựng, 22 Escape handler, ~44 nút 
 
 ---
 
-## 4. Còn lại: 4 giai đoạn
+## 4. Còn lại: 3 giai đoạn
 
 | GĐ | Nội dung | Rủi ro | Ghi chú |
 | --- | --- | --- | --- |
-| **4** | ← **Việc tiếp theo.** Tách `ipc/client.ts` (1347 dòng) theo domain | Trung bình | Mock đã tách sẵn ở GĐ3 |
-| **5** | Migrate sang `features/` từng cái: branch → tag → remote → changes | Thấp mỗi bước | |
+| **5** | ← **Việc tiếp theo.** Migrate sang `features/` từng cái: branch → tag → remote → changes | Thấp mỗi bước | Tầng `ipc/<domain>.ts` đã sẵn ở GĐ4 để `features/*/api` gọi vào |
 | **5b** | Xẻ nhỏ file khổng lồ, gom state modal về union | Trung bình | Làm cùng lúc với GĐ5 cho từng feature |
 | **6** | Rust: `with_repo()` thay 58 chỗ lặp, gom `emit_repo_changed` (9 bản, 2 chữ ký) | Thấp | |
 | **7** | Nâng lint từ `warn` lên `error` | Không | Khoá kiến trúc lại vĩnh viễn |
@@ -308,6 +330,8 @@ Những nguyên tắc này rút ra từ GĐ0–1 và đã nhiều lần chứng 
 **11. Bindings sinh ra nghiêm ngặt hơn viết tay — mỗi lỗi kiểu là một drift thật.** Khi `pnpm build` đỏ sau khi đổi sang kiểu sinh ra, đừng ép kiểu cho qua. GĐ3 có 4 lỗi kiểu, **cả 4 đều là chỗ code TS đang nói sai về dữ liệu Rust gửi về** — trong đó một cái là bug người dùng nhìn thấy được.
 
 **12. `pnpm build` xanh không chứng minh IPC chạy đúng.** Nó chứng minh kiểu khớp. Toàn bộ 570 test chạy mock, không test nào gọi Rust thật. Bug `ignoreWhitespace`/`ignoreWs` của GĐ3 tồn tại được lâu đúng vì thế: tên tham số sai chỉ lộ khi payload thật đi qua Tauri. Việc gì đổi tầng IPC thì phải chạy app thật mới coi là xong.
+
+**13. Facade gom bằng spread thì phải có test đếm.** GĐ4 gom 16 object thành `invokeCommand` bằng `...`. Quên một dòng spread → **build vẫn xanh** (kiểu facade là kiểu suy ra, mất method thì call site vẫn hợp lệ theo kiểu mới), lỗi chỉ lộ lúc chạy. Mọi chỗ gom kiểu này cần một test ghim số lượng.
 
 ---
 
