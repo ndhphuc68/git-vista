@@ -321,6 +321,13 @@ function collectSourceFiles(dir: string): string[] {
   return out;
 }
 
+/**
+ * Files allowed to import ipc/ outside api/, each with its reason and exit
+ * condition. Every entry is temporary — shrink this list, never grow it.
+ * Task 9 adds CheckoutConflictModal here when it moves into the feature.
+ */
+const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {};
+
 /** Names of the feature directories that currently exist. */
 function featureNames(): string[] {
   try {
@@ -361,6 +368,7 @@ describe("architecture boundaries", () => {
       for (const file of files) {
         const rel = relative(SRC, file).replace(/\\/g, "/");
         if (rel.includes(`features/${name}/api/`)) continue;
+        if (rel.replace(/^features\//, "features/") in IPC_IMPORT_EXCEPTIONS) continue;
         const source = readFileSync(file, "utf8");
         if (/from\s+["'][^"']*\/ipc\//.test(source)) {
           violations.push(`${rel} imports ipc/ outside of api/`);
@@ -369,6 +377,14 @@ describe("architecture boundaries", () => {
     }
 
     expect(violations).toEqual([]);
+  });
+
+  it("every ipc-import exception still exists", () => {
+    // An exception left behind after its file moved or was cleaned up would
+    // silently widen the rule. Each entry must name a real file.
+    for (const rel of Object.keys(IPC_IMPORT_EXCEPTIONS)) {
+      expect(() => statSync(join(SRC, rel)), `stale exception: ${rel}`).not.toThrow();
+    }
   });
 
   it("shared/ui does not import ipc, store, or i18n", () => {
@@ -394,7 +410,7 @@ Chú ý assertion cuối: `expect(files.length).toBeGreaterThan(0)`. Không có 
 - [ ] **Step 2: Chạy test, xác nhận xanh**
 
 Run: `pnpm vitest run src/test/architectureBoundaries.test.ts`
-Expected: 3 test PASS. Hai test đầu xanh tầm thường vì `src/features/` còn rỗng — đó là đúng, chúng sẽ có việc từ Task 3.
+Expected: 4 test PASS. Ba test đầu xanh tầm thường vì `src/features/` còn rỗng — đó là đúng, chúng sẽ có việc từ Task 3. Test thứ tư xanh vì danh sách ngoại lệ còn rỗng.
 
 - [ ] **Step 3: Thí nghiệm phá — chứng minh test bắt được vi phạm**
 
@@ -1175,6 +1191,7 @@ Tạo `src/test/sidebarDialog.test.ts`:
 ```ts
 import { describe, it, expect } from "vitest";
 import { NO_DIALOG, isDialog, type SidebarDialog } from "../features/branch/model/sidebarDialog";
+import { type TagItem } from "../ipc/bindings.generated";
 
 describe("SidebarDialog", () => {
   it("starts closed", () => {
@@ -1212,14 +1229,24 @@ describe("SidebarDialog", () => {
     );
   });
 
-  it("only one dialog can be open at a time", () => {
-    // The union makes a two-dialogs-open state unrepresentable: a value has
-    // exactly one kind. This test documents the invariant the type enforces.
-    const dialog: SidebarDialog = { kind: "createTag", commitId: "abc123" };
-    const kinds = Object.keys(dialog).filter((k) => k === "kind");
-    expect(kinds).toHaveLength(1);
+  it("replacing the dialog closes the previous one", () => {
+    // The sidebar held one useState per dialog, so two could be open at once.
+    // With a single union-typed slot, opening one necessarily closes the
+    // other — this is the invariant that replaces the old flag juggling.
+    let dialog: SidebarDialog = { kind: "createTag", commitId: "abc123" };
     expect(isDialog(dialog, "createTag")).toBe(true);
-    expect(isDialog(dialog, "deleteTag")).toBe(false);
+
+    dialog = { kind: "deleteTag", tag: { name: "v1" } as TagItem };
+
+    expect(isDialog(dialog, "createTag")).toBe(false);
+    expect(isDialog(dialog, "deleteTag")).toBe(true);
+  });
+
+  it("returns to the closed state", () => {
+    let dialog: SidebarDialog = { kind: "merge", targetBranch: "develop" };
+    dialog = NO_DIALOG;
+    expect(isDialog(dialog, "merge")).toBe(false);
+    expect(dialog.kind).toBe("none");
   });
 });
 ```
@@ -1277,13 +1304,13 @@ export function isDialog<K extends SidebarDialog["kind"]>(
 - [ ] **Step 4: Chạy test, xác nhận xanh**
 
 Run: `pnpm vitest run src/test/sidebarDialog.test.ts`
-Expected: 5 test PASS.
+Expected: 6 test PASS.
 
 - [ ] **Step 5: Thí nghiệm phá**
 
 Đổi thân `isDialog` thành `return true;`.
-Run lại. Expected: "isDialog rejects a different variant" và "only one dialog can be open" **FAIL**.
-Hoàn nguyên.
+Run lại. Expected: **FAIL** ở "isDialog rejects a different variant", "replacing the dialog closes the previous one", và "returns to the closed state".
+Hoàn nguyên, xác nhận xanh lại.
 
 - [ ] **Step 6: Xác minh và commit**
 
@@ -1705,11 +1732,39 @@ Ba file còn lại dùng hook tương ứng, các bước y hệt:
 | --- | --- | --- |
 | `RenameBranchModal` | `useRenameBranch` | `{ oldName, newName: trimmedName }` |
 | `DeleteBranchModal` | `useDeleteBranch` | `{ name: branchName, force }` |
-| `CheckoutConflictModal` | — | không gọi IPC, xem ghi chú dưới |
+| `CheckoutConflictModal` | `useCheckoutBranch` + `invokeCommand.saveStash` | xem ghi chú dưới |
 
 **Giữ nguyên** toast, `mapGitError`, `setError`, `onSuccess`, `onClose` ở cả bốn file.
 
-`CheckoutConflictModal` có thể không gọi IPC nào (nó chỉ hiển thị xung đột) — nếu vậy chỉ di chuyển và sửa import, không thêm hook.
+**`CheckoutConflictModal` là ngoại lệ — đọc kỹ.** Nó gọi **hai** lệnh theo thứ tự: `invokeCommand.saveStash(...)` rồi `invokeCommand.checkoutBranch(repoPath, targetBranch)`. `saveStash` thuộc domain **stash**, mà kế hoạch này **không** dựng `features/stash`.
+
+Xử lý:
+
+- `checkoutBranch` → đổi sang `useCheckoutBranch` như các modal khác.
+- `saveStash` → **giữ nguyên `invokeCommand.saveStash`** trong file, kèm comment giải thích. Đây là vi phạm quy tắc 4 có chủ đích và có thời hạn, gỡ khi `features/stash` ra đời ở lát sau.
+
+```ts
+// Stash has no feature hook yet — features/stash arrives in the next slice.
+// Until then this call stays on invokeCommand directly.
+import { invokeCommand } from "../../../ipc/client";
+```
+
+Thứ tự hai lệnh **phải giữ nguyên**: stash trước, checkout sau. Đảo lại là mất thay đổi chưa commit của người dùng.
+
+Vì file này giữ một import `ipc/`, test `architectureBoundaries.test.ts` ở Task 2 sẽ **đỏ** ("only features/*/api may import ipc/"). Thêm ngoại lệ có tên vào test đó, đừng nới lỏng luật:
+
+```ts
+/**
+ * Files allowed to import ipc/ outside api/, with the reason and the exit
+ * condition. Every entry here is temporary — shrink this list, never grow it.
+ */
+const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {
+  "features/branch/components/CheckoutConflictModal.tsx":
+    "calls saveStash; removed once features/stash exists",
+};
+```
+
+...và trong vòng lặp, bỏ qua file có trong danh sách đó. Báo cho tôi biết nếu cần thêm bất kỳ ngoại lệ nào **ngoài** cái này — đó là dấu hiệu phạm vi đã trượt.
 
 Chạy test của từng modal ngay sau khi sửa xong file đó, trước khi sang file kế:
 
