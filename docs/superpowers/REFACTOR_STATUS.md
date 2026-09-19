@@ -4,8 +4,8 @@
 
 **Cập nhật**: 2026-09-19
 **Nhánh làm việc**: `refactor/phase0-foundation` (chứa cả GĐ0 và GĐ1, chưa merge vào `main`)
-**Tiến độ**: 2 / 8 giai đoạn xong, cộng điều kiện tiên quyết của GĐ2 (focus management — mục 5)
-**Việc tiếp theo**: Giai đoạn 2 — migrate 26 modal sang `Modal`/`Button`/`Alert`
+**Tiến độ**: 3 / 8 giai đoạn xong
+**Việc tiếp theo**: Giai đoạn 3 — bật `tauri-specta`, bỏ `bindings.ts` viết tay
 
 ---
 
@@ -19,7 +19,7 @@ pnpm install
 # Xác nhận mọi thứ xanh trước khi làm gì
 pnpm lint                     # phải exit 0
 pnpm build                    # phải exit 0
-pnpm test                     # phải 88 file / 467 test xanh
+pnpm test                     # phải 93 file / 569 test xanh
 pnpm check-query-keys         # "No query key literals found..."
 pnpm check-comment-language   # "All comments are in English."
 ```
@@ -122,25 +122,64 @@ Cả ba cặp key lệch đã biến mất: `repo_status`/`repoStatus`, `commit-
 
 **Chống tái phát:** `scripts/check-query-keys.mjs`, nối vào `pnpm check`. (Kế hoạch ban đầu định dùng luật oxlint `no-restricted-syntax` — hoá ra oxlint 1.83 **không có** luật đó, chỉ có các biến thể hẹp. Đã thay bằng script theo tiền lệ `check-contrast.mjs` sẵn có.)
 
+### Giai đoạn 2 — Migrate 22 modal ✅
+
+Toàn bộ **22 modal hộp thoại** đã dùng chung `Modal`/`Button`/`Alert`. Làm theo 5 nhóm, mỗi nhóm một commit và chạy đủ bộ kiểm chứng:
+
+| Nhóm | Modal | Commit |
+| --- | --- | --- |
+| mẫu | DiscardConfirm | `0411953` |
+| remote | AddEditRemote, DeleteRemote, PruneConfirm, ManageRemotes | `09962db` |
+| branch | CreateBranch, RenameBranch, DeleteBranch, CheckoutConflict | `c43730b` |
+| tag/stash | CreateTag, DeleteTag, CreateStash | `337b09e` |
+| merge/rebase | MergeBranch, RebaseBranch, InteractiveRebase | `e3a1895` |
+| còn lại | CreatePullRequest, Clone, Settings, CherryPick, Revert, Compare, ShortcutsHelp | `5612948` |
+
+Xoá được ~1.400 dòng: 22 overlay tự dựng, 22 Escape handler, ~44 nút bespoke, 6 hack `setTimeout(...)` focus.
+
+**Quy trình:** modal nào thiếu test thì viết **trước**, xác nhận xanh trên code gốc, rồi mới migrate — test không đổi, vẫn xanh. Đó là bằng chứng thay thế cơ học (quy ước 5). Test: 444 → **569**.
+
+**Hai thứ phải thêm vào primitive** thay vì lách ở từng chỗ gọi:
+
+- **Tier `size="full"`** — Settings (85vw) và Compare (`max-w-6xl`) tính theo viewport chứ không theo nội dung; mọi tier cũ đều bóp chúng hẹp lại. `full` đặt `max-w-none` và bỏ `w-full`.
+- **Prop `label`** — `CompareModal` đặt tên bằng `aria-label` vì tiêu đề nằm trong `CompareHeader` không có id để trỏ tới.
+
+**Lỗi thật do test bắt được:**
+
+| Modal | Vấn đề |
+| --- | --- |
+| `RenameBranch` | `focus()` **+ `select()`** qua `setTimeout`. Bản thay thế đầu của tôi sai 2 lần: select lúc value còn rỗng (không ăn), rồi select lại mỗi lần gõ (xoá chữ vừa gõ). Cả hai giờ đều có test. |
+| `InteractiveRebase` | Escape chặn khi đang submit nhưng **backdrop thì không** — click ra ngoài huỷ được rebase đang chạy. Đã vá, ghim 2 test. |
+| `ManageRemotes` | Test cũ ghim literal `z-[9999]` — chính magic number GĐ0 xoá. Thay bằng assertion suy từ `Z_INDEX`, mạnh hơn. |
+
+**Thay đổi hành vi cố ý (không phải thay thế cơ học), đều có test ghim:**
+
+- `CreateStash` trước không autofocus; dưới `Modal` focus sẽ rơi vào nút X nên trỏ vào ô mô tả.
+- `CompareModal` bỏ `if (!isOpen) return null` để có animation đóng như các modal khác.
+
+**Chưa migrate — 4 file có overlay nhưng không phải modal hộp thoại:** `FileInspectorDrawer`, `PullRequestDetailDrawer` (drawer trượt phải), `CommandPalette` (neo đỉnh), `SplashScreen` (không có backdrop/panel). Ép vào `Modal` sẽ phải thêm prop cho từng biến thể layout — đúng thứ compound component sinh ra để tránh. Hai drawer giống nhau gần hết, nếu cần thì tách primitive `Drawer` riêng.
+
 ### Số liệu hiện tại
 
 | Chỉ số | Khi bắt đầu | Bây giờ |
 | --- | --- | --- |
-| Test | 73 file / ~370 | **88 file / 467** |
+| Test | 73 file / ~370 | **93 file / 569** |
 | Query key literal | 75 | **0** |
 | `invalidateQueries()` trống | 23 | **1** (cố ý, có comment) |
 | Cặp key lệch | 3 | **0** |
+| Modal tự dựng overlay | 26 | **4** (drawer/palette/splash, cố ý) |
+| Escape handler lặp | ~30 | **1** (`useEscapeKey`) |
+| Nút Cancel/Submit bespoke | 13 + ~20 | **0** (dùng `Button`) |
 | `pnpm lint` | exit 1 | **exit 0** |
 | `pnpm build` | exit 0 | exit 0 |
 
 ---
 
-## 4. Còn lại: 6 giai đoạn
+## 4. Còn lại: 5 giai đoạn
 
 | GĐ | Nội dung | Rủi ro | Ghi chú |
 | --- | --- | --- | --- |
-| **2** | Migrate 26 modal sang `Modal`/`Button`/`Alert` | Thấp | ← **Việc tiếp theo.** Điều kiện tiên quyết (focus management) đã xong, xem mục 5 |
-| **3** | Bật `tauri-specta`, bỏ `bindings.ts` viết tay, tách mock khỏi `client.ts` | **Cao** | Giá trị lớn nhất cho bảo trì dài hạn. PR riêng. |
+| **3** | ← **Việc tiếp theo.** Bật `tauri-specta`, bỏ `bindings.ts` viết tay, tách mock khỏi `client.ts` | **Cao** | Giá trị lớn nhất cho bảo trì dài hạn. PR riêng. |
 | **4** | Tách `ipc/client.ts` (1748 dòng) theo domain | Trung bình | |
 | **5** | Migrate sang `features/` từng cái: branch → tag → remote → changes | Thấp mỗi bước | |
 | **5b** | Xẻ nhỏ file khổng lồ, gom state modal về union | Trung bình | Làm cùng lúc với GĐ5 cho từng feature |
@@ -149,11 +188,11 @@ Cả ba cặp key lệch đã biến mất: `repo_status`/`repoStatus`, `commit-
 
 ---
 
-## 5. Việc PHẢI làm trước Giai đoạn 2 ✅ ĐÃ XONG
+## 5. Điều kiện tiên quyết của Giai đoạn 2 ✅ ĐÃ XONG
 
 **`Modal` đã có focus management** (commit `4bae4be`). Trước đó không có focus trap, không tự focus khi mở, không trả focus về nút đã mở nó — người dùng bàn phím có thể Tab ra khỏi modal vào nội dung nền.
 
-Lý do phải làm **trước** GĐ2: một khi cả 26 modal cùng kế thừa từ primitive này, sửa một chỗ là sửa cho tất cả. Làm sau nghĩa là 26 modal ship khuyết điểm trước rồi mới vá.
+Lý do phải làm **trước** GĐ2: một khi cả 22 modal cùng kế thừa từ primitive này, sửa một chỗ là sửa cho tất cả. Làm sau nghĩa là 22 modal ship khuyết điểm trước rồi mới vá. (Khảo sát đầu GĐ2 cho thấy trong 26 file có overlay thì 4 cái không phải modal hộp thoại — xem GĐ2 ở mục 3.)
 
 Thêm `src/shared/hooks/useFocusTrap.ts` — `useFocusTrap(containerRef, enabled)` — phủ cả ba hành vi:
 
@@ -163,7 +202,7 @@ Thêm `src/shared/hooks/useFocusTrap.ts` — `useFocusTrap(containerRef, enabled
 | Trap | Tab / Shift+Tab cuộn vòng trong container, không ra được nền |
 | Trả focus | Khi đóng hoặc unmount, focus về đúng phần tử đã mở modal |
 
-`Modal.tsx` gắn hook vào `modal-panel` qua ref. Để focus vào ô input thay vì nút đầu tiên, đánh dấu `data-autofocus` — **hữu ích cho GĐ2**, phần lớn 26 modal có form nên sẽ cần.
+`Modal.tsx` gắn hook vào `modal-panel` qua ref. Để focus vào ô input thay vì nút đầu tiên, đánh dấu `data-autofocus` — GĐ2 đã dùng nó để thay 6 hack `setTimeout` focus.
 
 **Hai lỗi thật do test bắt được (thí nghiệm phá, quy ước 3):**
 
@@ -210,6 +249,18 @@ Những nguyên tắc này rút ra từ GĐ0–1 và đã nhiều lần chứng 
 **7. Trailer commit:** `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>` — cố định cho nhánh này, không đổi theo model.
 
 **8. Khi migrate modal có form, cân nhắc `data-autofocus`.** Mặc định focus rơi vào phần tử focus được đầu tiên trong panel — thường là nút X ở header, không phải ô nhập. Modal nào có ô nhập chính thì đánh dấu `data-autofocus` lên ô đó.
+
+**8b. Test cũ phủ business logic không có nghĩa là an toàn để migrate.** GĐ2 gặp nhiều file có 3–8 test nhưng **không test nào** chạm tới Escape / nút đóng / cancel — đúng phần mà migration thay thế. Luôn đếm số assertion chạm vào phần shell trước khi bắt đầu, không chỉ đếm số test.
+
+**8c. Ba thứ dễ mất im lặng khi đổi sang `Modal`:**
+
+| Thứ | Vì sao mất |
+| --- | --- |
+| `select()` sau `focus()` | `data-autofocus` chỉ focus. Phải select lại sau khi value đã vào, **một lần mỗi lần mở** (latch), nếu không sẽ select lại mỗi keystroke. |
+| Chiều cao cố định (`h-[85vh]`) | Panel của `Modal` chỉ có `max-h`. Body chia scroll bằng `flex-1`/`h-full` cần chiều cao xác định → phải đặt trên wrapper con. **jsdom không có layout engine nên không test nào bắt được.** |
+| Guard bất đối xứng | Ví dụ Escape chặn khi đang submit nhưng backdrop thì không. Kiểm tra cả ba đường đóng (Escape / backdrop / nút) xem có cùng guard không. |
+
+**8d. Thiếu gì ở primitive thì thêm vào primitive.** GĐ2 phải thêm `size="full"` và prop `label`. Lách ở từng chỗ gọi thì chỗ thứ hai gặp lại đúng vấn đề đó. Ngược lại, header có subtitle / nút phụ thì **giữ header tự dựng bên trong `Modal`** — đừng nhồi prop vào `Modal.Header`, đó là lối boolean-prop mà compound component sinh ra để tránh.
 
 **9. Viết tiếng Anh.** Comment, mô tả test, chuỗi fixture trong test, và commit message. Ngoại lệ duy nhất: chuỗi người dùng đọc được trong app (`src/i18n/*`, `aria-label`, `title`) — giữ tiếng Việt. `pnpm check-comment-language` ép buộc, xem `AGENTS.md` → Language.
 
