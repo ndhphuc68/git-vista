@@ -16,13 +16,16 @@ git checkout refactor/phase0-foundation
 pnpm install
 
 # Xác nhận mọi thứ xanh trước khi làm gì
-pnpm lint          # phải exit 0
-pnpm build         # phải exit 0
-pnpm test          # phải 87 file / 444 test xanh
-pnpm check-query-keys   # phải báo "Không có query key literal..."
+pnpm lint                     # phải exit 0
+pnpm build                    # phải exit 0
+pnpm test                     # phải 87 file / 444 test xanh
+pnpm check-query-keys         # "No query key literals found..."
+pnpm check-comment-language   # "All comments are in English."
 ```
 
-Nếu một trong bốn lệnh trên đỏ, **dừng lại và tìm nguyên nhân** trước khi viết code mới — chúng là mốc chuẩn của nhánh này.
+Nếu một trong năm lệnh trên đỏ, **dừng lại và tìm nguyên nhân** trước khi viết code mới — chúng là mốc chuẩn của nhánh này.
+
+> **Ngôn ngữ:** code, comment, mô tả test và commit message đều viết **tiếng Anh**. Chỉ chuỗi người dùng đọc được (i18n, `aria-label`, `title`) giữ tiếng Việt. Xem `AGENTS.md` → Language. `pnpm check-comment-language` ép buộc điều này.
 
 ### Tài liệu liên quan
 
@@ -184,6 +187,10 @@ Những nguyên tắc này rút ra từ GĐ0–1 và đã nhiều lần chứng 
 **6. Khi bỏ tham số khỏi key, phải chứng minh an toàn.** Bỏ một tham số là cách kinh điển tạo va chạm cache. GĐ1 có 2 trường hợp phải truy tới tận source Rust mới kết luận được.
 
 **7. Trailer commit:** `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>` — cố định cho nhánh này, không đổi theo model.
+
+**8. Viết tiếng Anh.** Comment, mô tả test, chuỗi fixture trong test, và commit message. Ngoại lệ duy nhất: chuỗi người dùng đọc được trong app (`src/i18n/*`, `aria-label`, `title`) — giữ tiếng Việt. `pnpm check-comment-language` ép buộc, xem `AGENTS.md` → Language.
+
+> Quy ước này thêm vào sau khi GĐ0–1 lỡ viết comment tiếng Việt. Đáng chú ý: khi bật guard lần đầu, nó phát hiện **13 comment tiếng Việt có sẵn từ trước refactor** — codebase không đồng nhất như tưởng. Đã dịch nốt.
 
 ---
 
