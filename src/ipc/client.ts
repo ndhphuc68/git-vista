@@ -38,294 +38,15 @@ import {
   type GitHubRepoInfo,
   type CheckoutPrResult,
 } from "./bindings.generated";
+import { mockState } from "./mocks";
 
-let mockTags: TagItem[] = [
-  {
-    name: "v1.0.0",
-    target_commit_id: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
-    short_commit_id: "c1a2b3c",
-    commit_summary: "Initial release",
-    is_annotated: true,
-    message: "First official release",
-    tagger_name: "GitVista User",
-    tagger_email: "user@gitvista.dev",
-    timestamp_sec: Math.floor(Date.now() / 1000) - 86400 * 5,
-  },
-  {
-    name: "v0.9.0",
-    target_commit_id: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
-    short_commit_id: "a1b2c3d",
-    commit_summary: "Beta testing release",
-    is_annotated: false,
-    message: null,
-    tagger_name: null,
-    tagger_email: null,
-    timestamp_sec: Math.floor(Date.now() / 1000) - 86400 * 15,
-  },
-];
-
-export function resetMockTags() {
-  mockTags = [
-    {
-      name: "v1.0.0",
-      target_commit_id: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
-      short_commit_id: "c1a2b3c",
-      commit_summary: "Initial release",
-      is_annotated: true,
-      message: "First official release",
-      tagger_name: "GitVista User",
-      tagger_email: "user@gitvista.dev",
-      timestamp_sec: Math.floor(Date.now() / 1000) - 86400 * 5,
-    },
-    {
-      name: "v0.9.0",
-      target_commit_id: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
-      short_commit_id: "a1b2c3d",
-      commit_summary: "Beta testing release",
-      is_annotated: false,
-      message: null,
-      tagger_name: null,
-      tagger_email: null,
-      timestamp_sec: Math.floor(Date.now() / 1000) - 86400 * 15,
-    },
-  ];
-}
-
-let mockRemotes: RemoteItem[] = [
-  {
-    name: "origin",
-    fetch_url: "https://github.com/gitvista/git-vista.git",
-    push_url: "https://github.com/gitvista/git-vista.git",
-    branch_count: 5,
-    is_default: true,
-  },
-];
-
-export function resetMockRemotes() {
-  mockRemotes = [
-    {
-      name: "origin",
-      fetch_url: "https://github.com/gitvista/git-vista.git",
-      push_url: "https://github.com/gitvista/git-vista.git",
-      branch_count: 5,
-      is_default: true,
-    },
-  ];
-}
-
-let mockRebaseCommits: RebaseCommitItem[] = [
-  {
-    id: "a1b2c3d4e5f67890123456789012345678901234",
-    short_id: "a1b2c3d",
-    summary: "feat: add user authentication",
-    message: "feat: add user authentication\n\nImplements JWT login",
-    author_name: "Developer",
-    author_email: "dev@example.com",
-    timestamp: Math.floor(Date.now() / 1000) - 3600,
-    parent_ids: ["0000000000000000000000000000000000000000"],
-  },
-  {
-    id: "b2c3d4e5f6789012345678901234567890123456",
-    short_id: "b2c3d4e",
-    summary: "fix: resolve token expiry bug",
-    message: "fix: resolve token expiry bug",
-    author_name: "Developer",
-    author_email: "dev@example.com",
-    timestamp: Math.floor(Date.now() / 1000) - 1800,
-    parent_ids: ["a1b2c3d4e5f67890123456789012345678901234"],
-  },
-  {
-    id: "c3d4e5f678901234567890123456789012345678",
-    short_id: "c3d4e5f",
-    summary: "docs: update API readme",
-    message: "docs: update API readme",
-    author_name: "Developer",
-    author_email: "dev@example.com",
-    timestamp: Math.floor(Date.now() / 1000) - 600,
-    parent_ids: ["b2c3d4e5f6789012345678901234567890123456"],
-  },
-];
-
-export function resetMockRebaseCommits() {
-  mockRebaseCommits = [
-    {
-      id: "a1b2c3d4e5f67890123456789012345678901234",
-      short_id: "a1b2c3d",
-      summary: "feat: add user authentication",
-      message: "feat: add user authentication\n\nImplements JWT login",
-      author_name: "Developer",
-      author_email: "dev@example.com",
-      timestamp: Math.floor(Date.now() / 1000) - 3600,
-      parent_ids: ["0000000000000000000000000000000000000000"],
-    },
-    {
-      id: "b2c3d4e5f6789012345678901234567890123456",
-      short_id: "b2c3d4e",
-      summary: "fix: resolve token expiry bug",
-      message: "fix: resolve token expiry bug",
-      author_name: "Developer",
-      author_email: "dev@example.com",
-      timestamp: Math.floor(Date.now() / 1000) - 1800,
-      parent_ids: ["a1b2c3d4e5f67890123456789012345678901234"],
-    },
-    {
-      id: "c3d4e5f678901234567890123456789012345678",
-      short_id: "c3d4e5f",
-      summary: "docs: update API readme",
-      message: "docs: update API readme",
-      author_name: "Developer",
-      author_email: "dev@example.com",
-      timestamp: Math.floor(Date.now() / 1000) - 600,
-      parent_ids: ["b2c3d4e5f6789012345678901234567890123456"],
-    },
-  ];
-}
-
-let mockStashes: StashItem[] = [
-  {
-    index: 0,
-    message: "WIP on main: initial work",
-    commit_id: "stash1234567890",
-    created_at: Math.floor(Date.now() / 1000) - 3600,
-  },
-];
-
-let mockGlobalConfig: GitConfigDto = {
-  userName: "GitVista User",
-  userNameSource: "global",
-  userEmail: "user@gitvista.dev",
-  userEmailSource: "global",
-  defaultBranch: "main",
-  pullRebase: false,
-  gpgSign: false,
-  gpgKey: "",
-  fetchPrune: false,
-  rebaseAutostash: false,
-};
-
-let mockLocalConfigs: Record<string, Partial<GitConfigDto>> = {};
-
-export function resetMockGitConfig() {
-  mockGlobalConfig = {
-    userName: "GitVista User",
-    userNameSource: "global",
-    userEmail: "user@gitvista.dev",
-    userEmailSource: "global",
-    defaultBranch: "main",
-    pullRebase: false,
-    gpgSign: false,
-    gpgKey: "",
-    fetchPrune: false,
-    rebaseAutostash: false,
-  };
-  mockLocalConfigs = {};
-}
-
-let mockCompareSummary: CompareSummary = {
-  base_rev: "main",
-  target_rev: "feature/auth",
-  resolved_base_oid: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
-  resolved_target_oid: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
-  effective_base_oid: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
-  merge_base_oid: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
-  mode: "MergeBase",
-  ahead_count: 2,
-  behind_count: 0,
-  commits: [
-    {
-      id: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
-      short_id: "a1b2c3d",
-      summary: "feat: implement user authentication flow",
-      author_name: "GitVista User",
-      author_email: "user@gitvista.dev",
-      timestamp: Math.floor(Date.now() / 1000) - 3600,
-      parent_ids: ["b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1"],
-    },
-    {
-      id: "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1",
-      short_id: "b2c3d4e",
-      summary: "chore: setup oauth config",
-      author_name: "GitVista User",
-      author_email: "user@gitvista.dev",
-      timestamp: Math.floor(Date.now() / 1000) - 7200,
-      parent_ids: ["c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0"],
-    },
-  ],
-  files: [
-    {
-      path: "src/auth.ts",
-      old_path: null,
-      status: "Modified",
-      additions: 45,
-      deletions: 12,
-      is_binary: false,
-    },
-    {
-      path: "src/config.ts",
-      old_path: null,
-      status: "Added",
-      additions: 20,
-      deletions: 0,
-      is_binary: false,
-    },
-  ],
-  total_additions: 65,
-  total_deletions: 12,
-};
-
-export function resetMockCompareData() {
-  mockCompareSummary = {
-    base_rev: "main",
-    target_rev: "feature/auth",
-    resolved_base_oid: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
-    resolved_target_oid: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
-    effective_base_oid: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
-    merge_base_oid: "c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
-    mode: "MergeBase",
-    ahead_count: 2,
-    behind_count: 0,
-    commits: [
-      {
-        id: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
-        short_id: "a1b2c3d",
-        summary: "feat: implement user authentication flow",
-        author_name: "GitVista User",
-        author_email: "user@gitvista.dev",
-        timestamp: Math.floor(Date.now() / 1000) - 3600,
-        parent_ids: ["b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1"],
-      },
-      {
-        id: "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1",
-        short_id: "b2c3d4e",
-        summary: "chore: setup oauth config",
-        author_name: "GitVista User",
-        author_email: "user@gitvista.dev",
-        timestamp: Math.floor(Date.now() / 1000) - 7200,
-        parent_ids: ["c1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0"],
-      },
-    ],
-    files: [
-      {
-        path: "src/auth.ts",
-        old_path: null,
-        status: "Modified",
-        additions: 45,
-        deletions: 12,
-        is_binary: false,
-      },
-      {
-        path: "src/config.ts",
-        old_path: null,
-        status: "Added",
-        additions: 20,
-        deletions: 0,
-        is_binary: false,
-      },
-    ],
-    total_additions: 65,
-    total_deletions: 12,
-  };
-}
+export {
+  resetMockTags,
+  resetMockRemotes,
+  resetMockRebaseCommits,
+  resetMockGitConfig,
+  resetMockCompareData,
+} from "./mocks";
 
 // Checks whether we are running inside the Tauri runtime
 export const isTauri = (): boolean => {
@@ -823,7 +544,7 @@ export const invokeCommand = {
 
   getTags: async (repoPath: string): Promise<TagItem[]> => {
     if (!isTauri()) {
-      return [...mockTags];
+      return [...mockState.tags];
     }
     return unwrap(await commands.getTags(repoPath));
   },
@@ -847,7 +568,7 @@ export const invokeCommand = {
         tagger_email: isAnnotated ? "user@gitvista.dev" : null,
         timestamp_sec: Math.floor(Date.now() / 1000),
       };
-      mockTags = [newTag, ...mockTags.filter((t) => t.name !== name)];
+      mockState.tags = [newTag, ...mockState.tags.filter((t) => t.name !== name)];
       if (typeof window !== "undefined") {
         window.dispatchEvent(
           new CustomEvent("mock-repo-changed", {
@@ -866,7 +587,7 @@ export const invokeCommand = {
 
   deleteTag: async (repoPath: string, name: string, deleteRemote?: boolean): Promise<void> => {
     if (!isTauri()) {
-      mockTags = mockTags.filter((t) => t.name !== name);
+      mockState.tags = mockState.tags.filter((t) => t.name !== name);
       if (typeof window !== "undefined") {
         window.dispatchEvent(
           new CustomEvent("mock-repo-changed", {
@@ -910,7 +631,7 @@ export const invokeCommand = {
 
   getRemotes: async (repoPath: string): Promise<RemoteItem[]> => {
     if (!isTauri()) {
-      return [...mockRemotes];
+      return [...mockState.remotes];
     }
     return unwrap(await commands.getRemotes(repoPath));
   },
@@ -922,9 +643,9 @@ export const invokeCommand = {
         fetch_url: url,
         push_url: url,
         branch_count: 0,
-        is_default: mockRemotes.length === 0,
+        is_default: mockState.remotes.length === 0,
       };
-      mockRemotes.push(newRemote);
+      mockState.remotes.push(newRemote);
       if (typeof window !== "undefined") {
         window.dispatchEvent(
           new CustomEvent("mock-repo-changed", {
@@ -943,7 +664,7 @@ export const invokeCommand = {
 
   renameRemote: async (repoPath: string, oldName: string, newName: string): Promise<void> => {
     if (!isTauri()) {
-      const r = mockRemotes.find((x) => x.name === oldName);
+      const r = mockState.remotes.find((x) => x.name === oldName);
       if (r) r.name = newName;
       if (typeof window !== "undefined") {
         window.dispatchEvent(
@@ -963,7 +684,7 @@ export const invokeCommand = {
 
   removeRemote: async (repoPath: string, name: string): Promise<void> => {
     if (!isTauri()) {
-      mockRemotes = mockRemotes.filter((x) => x.name !== name);
+      mockState.remotes = mockState.remotes.filter((x) => x.name !== name);
       if (typeof window !== "undefined") {
         window.dispatchEvent(
           new CustomEvent("mock-repo-changed", {
@@ -987,7 +708,7 @@ export const invokeCommand = {
     pushUrl?: string | null
   ): Promise<void> => {
     if (!isTauri()) {
-      const r = mockRemotes.find((x) => x.name === name);
+      const r = mockState.remotes.find((x) => x.name === name);
       if (r) {
         r.fetch_url = fetchUrl;
         r.push_url = pushUrl !== undefined && pushUrl !== null ? pushUrl : fetchUrl;
@@ -1104,8 +825,8 @@ export const invokeCommand = {
 
   setRepoPullRebase: async (repoPath: string, rebase: boolean): Promise<void> => {
     if (!isTauri()) {
-      if (!mockLocalConfigs[repoPath]) mockLocalConfigs[repoPath] = {};
-      mockLocalConfigs[repoPath].pullRebase = rebase;
+      if (!mockState.localConfigs[repoPath]) mockState.localConfigs[repoPath] = {};
+      mockState.localConfigs[repoPath].pullRebase = rebase;
       return;
     }
     await commands.setRepoPullRebase(repoPath, rebase);
@@ -1113,7 +834,7 @@ export const invokeCommand = {
 
   getStashes: async (repoPath: string): Promise<StashItem[]> => {
     if (!isTauri()) {
-      return [...mockStashes];
+      return [...mockState.stashes];
     }
     return unwrap(await commands.getStashes(repoPath));
   },
@@ -1131,7 +852,10 @@ export const invokeCommand = {
         commit_id: commitId,
         created_at: Math.floor(Date.now() / 1000),
       };
-      mockStashes = [newStash, ...mockStashes.map((s, idx) => ({ ...s, index: idx + 1 }))];
+      mockState.stashes = [
+        newStash,
+        ...mockState.stashes.map((s, idx) => ({ ...s, index: idx + 1 })),
+      ];
       return commitId;
     }
     return unwrap(await commands.saveStash(repoPath, message ?? null, includeUntracked ?? null));
@@ -1146,7 +870,7 @@ export const invokeCommand = {
 
   popStash: async (repoPath: string, index: number): Promise<void> => {
     if (!isTauri()) {
-      mockStashes = mockStashes
+      mockState.stashes = mockState.stashes
         .filter((s) => s.index !== index)
         .map((s, idx) => ({ ...s, index: idx }));
       return;
@@ -1156,7 +880,7 @@ export const invokeCommand = {
 
   dropStash: async (repoPath: string, index: number): Promise<string> => {
     if (!isTauri()) {
-      mockStashes = mockStashes
+      mockState.stashes = mockState.stashes
         .filter((s) => s.index !== index)
         .map((s, idx) => ({ ...s, index: idx }));
       return `refs/gitui-backup/stash-drop-undo-${Date.now()}`;
@@ -1205,7 +929,7 @@ export const invokeCommand = {
 
   getRebaseCommits: async (repoPath: string, baseCommitId: string): Promise<RebaseCommitItem[]> => {
     if (!isTauri()) {
-      return [...mockRebaseCommits];
+      return [...mockState.rebaseCommits];
     }
     return unwrap(await commands.getRebaseCommits(repoPath, baseCommitId));
   },
@@ -1360,22 +1084,22 @@ export const invokeCommand = {
 
   getGitConfig: async (repoPath?: string | null): Promise<GitConfigDto> => {
     if (!isTauri()) {
-      if (repoPath && mockLocalConfigs[repoPath]) {
-        const local = mockLocalConfigs[repoPath];
+      if (repoPath && mockState.localConfigs[repoPath]) {
+        const local = mockState.localConfigs[repoPath];
         return {
-          userName: local.userName ?? mockGlobalConfig.userName,
+          userName: local.userName ?? mockState.globalConfig.userName,
           userNameSource: local.userName ? "local" : "global",
-          userEmail: local.userEmail ?? mockGlobalConfig.userEmail,
+          userEmail: local.userEmail ?? mockState.globalConfig.userEmail,
           userEmailSource: local.userEmail ? "local" : "global",
-          defaultBranch: local.defaultBranch ?? mockGlobalConfig.defaultBranch,
-          pullRebase: local.pullRebase ?? mockGlobalConfig.pullRebase,
-          gpgSign: local.gpgSign ?? mockGlobalConfig.gpgSign,
-          gpgKey: local.gpgKey ?? mockGlobalConfig.gpgKey,
-          fetchPrune: local.fetchPrune ?? mockGlobalConfig.fetchPrune,
-          rebaseAutostash: local.rebaseAutostash ?? mockGlobalConfig.rebaseAutostash,
+          defaultBranch: local.defaultBranch ?? mockState.globalConfig.defaultBranch,
+          pullRebase: local.pullRebase ?? mockState.globalConfig.pullRebase,
+          gpgSign: local.gpgSign ?? mockState.globalConfig.gpgSign,
+          gpgKey: local.gpgKey ?? mockState.globalConfig.gpgKey,
+          fetchPrune: local.fetchPrune ?? mockState.globalConfig.fetchPrune,
+          rebaseAutostash: local.rebaseAutostash ?? mockState.globalConfig.rebaseAutostash,
         };
       }
-      return { ...mockGlobalConfig };
+      return { ...mockState.globalConfig };
     }
     return unwrap(await commands.getGitConfig(repoPath ?? null));
   },
@@ -1388,33 +1112,33 @@ export const invokeCommand = {
   ): Promise<void> => {
     if (!isTauri()) {
       if (scope === "global") {
-        if (key === "user.name") mockGlobalConfig.userName = value;
-        if (key === "user.email") mockGlobalConfig.userEmail = value;
-        if (key === "init.defaultBranch") mockGlobalConfig.defaultBranch = value;
-        if (key === "pull.rebase") mockGlobalConfig.pullRebase = value === "true";
-        if (key === "commit.gpgsign") mockGlobalConfig.gpgSign = value === "true";
-        if (key === "user.signingkey") mockGlobalConfig.gpgKey = value;
-        if (key === "fetch.prune") mockGlobalConfig.fetchPrune = value === "true";
-        if (key === "rebase.autoStash") mockGlobalConfig.rebaseAutostash = value === "true";
+        if (key === "user.name") mockState.globalConfig.userName = value;
+        if (key === "user.email") mockState.globalConfig.userEmail = value;
+        if (key === "init.defaultBranch") mockState.globalConfig.defaultBranch = value;
+        if (key === "pull.rebase") mockState.globalConfig.pullRebase = value === "true";
+        if (key === "commit.gpgsign") mockState.globalConfig.gpgSign = value === "true";
+        if (key === "user.signingkey") mockState.globalConfig.gpgKey = value;
+        if (key === "fetch.prune") mockState.globalConfig.fetchPrune = value === "true";
+        if (key === "rebase.autoStash") mockState.globalConfig.rebaseAutostash = value === "true";
       } else if (scope === "local" && repoPath) {
-        if (!mockLocalConfigs[repoPath]) mockLocalConfigs[repoPath] = {};
+        if (!mockState.localConfigs[repoPath]) mockState.localConfigs[repoPath] = {};
         if (value.trim() === "") {
-          if (key === "user.name") delete mockLocalConfigs[repoPath].userName;
-          if (key === "user.email") delete mockLocalConfigs[repoPath].userEmail;
-          if (key === "pull.rebase") delete mockLocalConfigs[repoPath].pullRebase;
-          if (key === "commit.gpgsign") delete mockLocalConfigs[repoPath].gpgSign;
-          if (key === "user.signingkey") delete mockLocalConfigs[repoPath].gpgKey;
-          if (key === "fetch.prune") delete mockLocalConfigs[repoPath].fetchPrune;
-          if (key === "rebase.autoStash") delete mockLocalConfigs[repoPath].rebaseAutostash;
+          if (key === "user.name") delete mockState.localConfigs[repoPath].userName;
+          if (key === "user.email") delete mockState.localConfigs[repoPath].userEmail;
+          if (key === "pull.rebase") delete mockState.localConfigs[repoPath].pullRebase;
+          if (key === "commit.gpgsign") delete mockState.localConfigs[repoPath].gpgSign;
+          if (key === "user.signingkey") delete mockState.localConfigs[repoPath].gpgKey;
+          if (key === "fetch.prune") delete mockState.localConfigs[repoPath].fetchPrune;
+          if (key === "rebase.autoStash") delete mockState.localConfigs[repoPath].rebaseAutostash;
         } else {
-          if (key === "user.name") mockLocalConfigs[repoPath].userName = value;
-          if (key === "user.email") mockLocalConfigs[repoPath].userEmail = value;
-          if (key === "pull.rebase") mockLocalConfigs[repoPath].pullRebase = value === "true";
-          if (key === "commit.gpgsign") mockLocalConfigs[repoPath].gpgSign = value === "true";
-          if (key === "user.signingkey") mockLocalConfigs[repoPath].gpgKey = value;
-          if (key === "fetch.prune") mockLocalConfigs[repoPath].fetchPrune = value === "true";
+          if (key === "user.name") mockState.localConfigs[repoPath].userName = value;
+          if (key === "user.email") mockState.localConfigs[repoPath].userEmail = value;
+          if (key === "pull.rebase") mockState.localConfigs[repoPath].pullRebase = value === "true";
+          if (key === "commit.gpgsign") mockState.localConfigs[repoPath].gpgSign = value === "true";
+          if (key === "user.signingkey") mockState.localConfigs[repoPath].gpgKey = value;
+          if (key === "fetch.prune") mockState.localConfigs[repoPath].fetchPrune = value === "true";
           if (key === "rebase.autoStash")
-            mockLocalConfigs[repoPath].rebaseAutostash = value === "true";
+            mockState.localConfigs[repoPath].rebaseAutostash = value === "true";
         }
       }
       return;
@@ -1430,7 +1154,7 @@ export const invokeCommand = {
   ): Promise<CompareSummary> => {
     if (!isTauri()) {
       return {
-        ...mockCompareSummary,
+        ...mockState.compareSummary,
         base_rev: baseRev,
         target_rev: targetRev,
         mode,
