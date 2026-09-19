@@ -71,7 +71,8 @@
       "rules": {
         "max-lines": "off",
         "max-lines-per-function": "off",
-        "max-nested-callbacks": "off"
+        "max-nested-callbacks": "off",
+        "no-restricted-imports": "off"
       }
     },
     {

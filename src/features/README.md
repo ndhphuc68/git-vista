@@ -20,7 +20,7 @@ features/<name>/
 
 Quy tắc 3 và 4 được `no-restricted-imports` trong `.oxlintrc.json` ép buộc.
 Quy tắc 5 được `scripts/check-query-keys.mjs` ép buộc.
-Quy tắc 1 và 2 được `src/test/architectureBoundaries.test.ts` ép buộc.
+Quy tắc 1 và 2 sẽ được `src/test/architectureBoundaries.test.ts` ép buộc (Task 2).
 
 ## Thêm một feature mới
 
