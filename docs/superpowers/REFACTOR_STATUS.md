@@ -4,7 +4,8 @@
 
 **Cập nhật**: 2026-09-19
 **Nhánh làm việc**: `refactor/phase0-foundation` (chứa cả GĐ0 và GĐ1, chưa merge vào `main`)
-**Tiến độ**: 2 / 8 giai đoạn xong
+**Tiến độ**: 2 / 8 giai đoạn xong, cộng điều kiện tiên quyết của GĐ2 (focus management — mục 5)
+**Việc tiếp theo**: Giai đoạn 2 — migrate 26 modal sang `Modal`/`Button`/`Alert`
 
 ---
 
@@ -18,7 +19,7 @@ pnpm install
 # Xác nhận mọi thứ xanh trước khi làm gì
 pnpm lint                     # phải exit 0
 pnpm build                    # phải exit 0
-pnpm test                     # phải 87 file / 444 test xanh
+pnpm test                     # phải 88 file / 467 test xanh
 pnpm check-query-keys         # "No query key literals found..."
 pnpm check-comment-language   # "All comments are in English."
 ```
@@ -90,6 +91,10 @@ Kèm theo: bật 6 luật lint độ phức tạp ở mức `warn` (`max-lines` 
 - `Modal` không biểu diễn được modal lồng nhau. `ManageRemotesModal` render 3 modal con bên trong; hiện chạy được *chỉ nhờ* `z-[9999]` vs `z-[10000]`. `Modal` mới hardcode một z-index → hai modal hoà nhau, thắng thua phụ thuộc thứ tự DOM. Đã thêm `Z_INDEX.modalStacked` và prop `stacked`.
 - Một lần Escape đóng **cả hai** modal lồng nhau, vì mỗi instance gắn listener riêng vào `window`. Đã sửa bằng registry cấp module: chỉ instance trên cùng phản hồi.
 
+### Điều kiện tiên quyết GĐ2 — Focus management cho `Modal` ✅
+
+Xem **mục 5** để biết chi tiết. Tóm tắt: thêm `useFocusTrap`, gắn vào `Modal`, +23 test.
+
 ### Giai đoạn 1 — Query keys và bug cache ✅
 
 Chuyển toàn bộ 75 key literal sang `qk`, sửa dứt điểm bug cache.
@@ -121,7 +126,7 @@ Cả ba cặp key lệch đã biến mất: `repo_status`/`repoStatus`, `commit-
 
 | Chỉ số | Khi bắt đầu | Bây giờ |
 | --- | --- | --- |
-| Test | 73 file / ~370 | **87 file / 444** |
+| Test | 73 file / ~370 | **88 file / 467** |
 | Query key literal | 75 | **0** |
 | `invalidateQueries()` trống | 23 | **1** (cố ý, có comment) |
 | Cặp key lệch | 3 | **0** |
@@ -134,7 +139,7 @@ Cả ba cặp key lệch đã biến mất: `repo_status`/`repoStatus`, `commit-
 
 | GĐ | Nội dung | Rủi ro | Ghi chú |
 | --- | --- | --- | --- |
-| **2** | Migrate 26 modal sang `Modal`/`Button`/`Alert` | Thấp | **Phải làm focus management trước** (mục 5) |
+| **2** | Migrate 26 modal sang `Modal`/`Button`/`Alert` | Thấp | ← **Việc tiếp theo.** Điều kiện tiên quyết (focus management) đã xong, xem mục 5 |
 | **3** | Bật `tauri-specta`, bỏ `bindings.ts` viết tay, tách mock khỏi `client.ts` | **Cao** | Giá trị lớn nhất cho bảo trì dài hạn. PR riêng. |
 | **4** | Tách `ipc/client.ts` (1748 dòng) theo domain | Trung bình | |
 | **5** | Migrate sang `features/` từng cái: branch → tag → remote → changes | Thấp mỗi bước | |
@@ -144,15 +149,30 @@ Cả ba cặp key lệch đã biến mất: `repo_status`/`repoStatus`, `commit-
 
 ---
 
-## 5. Việc PHẢI làm trước Giai đoạn 2
+## 5. Việc PHẢI làm trước Giai đoạn 2 ✅ ĐÃ XONG
 
-**`Modal` chưa có focus management.** Không có focus trap, không tự focus khi mở, không trả focus về nút đã mở nó khi đóng. Người dùng bàn phím có thể Tab ra khỏi modal vào nội dung nền.
+**`Modal` đã có focus management** (commit `4bae4be`). Trước đó không có focus trap, không tự focus khi mở, không trả focus về nút đã mở nó — người dùng bàn phím có thể Tab ra khỏi modal vào nội dung nền.
 
-26 modal hiện tại cũng không có, nên đây không phải bước lùi. Nhưng **một khi cả 26 cùng kế thừa từ một primitive, sửa một chỗ là sửa cho tất cả** — bỏ lỡ thời điểm này là bỏ lỡ cơ hội rẻ nhất.
+Lý do phải làm **trước** GĐ2: một khi cả 26 modal cùng kế thừa từ primitive này, sửa một chỗ là sửa cho tất cả. Làm sau nghĩa là 26 modal ship khuyết điểm trước rồi mới vá.
 
-Cần bổ sung vào `src/shared/ui/Modal.tsx`, kèm test cho cả ba hành vi (trap, focus ban đầu, trả focus).
+Thêm `src/shared/hooks/useFocusTrap.ts` — `useFocusTrap(containerRef, enabled)` — phủ cả ba hành vi:
 
-*(Ghi chú: spec từng viết `Modal` "tự lo focus trap" — đó là sai sót của spec, code không hề có. Đã sửa spec nói đúng sự thật.)*
+| Hành vi | Chi tiết |
+| --- | --- |
+| Focus ban đầu | Vào phần tử `data-autofocus` nếu có, không thì phần tử focus được đầu tiên, không nữa thì chính container |
+| Trap | Tab / Shift+Tab cuộn vòng trong container, không ra được nền |
+| Trả focus | Khi đóng hoặc unmount, focus về đúng phần tử đã mở modal |
+
+`Modal.tsx` gắn hook vào `modal-panel` qua ref. Để focus vào ô input thay vì nút đầu tiên, đánh dấu `data-autofocus` — **hữu ích cho GĐ2**, phần lớn 26 modal có form nên sẽ cần.
+
+**Hai lỗi thật do test bắt được (thí nghiệm phá, quy ước 3):**
+
+1. **Chọn trap đang hoạt động theo thứ tự đăng ký là sai.** React mount con trước cha, nên modal cha lồng nhau lại đăng ký **cuối** và bị nhầm là trong cùng. Đã đổi sang xét theo quan hệ chứa nhau trong DOM, đăng ký sau thắng khi hoà — để modal stacked render kiểu anh em (đúng như `ManageRemotesModal` đang làm) vẫn chạy đúng.
+2. **Trả focus không được cướp lại** khi ứng dụng đã chủ ý chuyển focus đi nơi khác trong lúc đó.
+
+**Ghi chú về chất lượng test:** 5 mutation đều bị giết. Mutation "chọn trap theo thứ tự đăng ký" **ban đầu sống sót** — vì trong test lồng nhau, React mount trap trong trước nên nó tình cờ là phần tử đầu tiên. Phải thêm test cho trường hợp **anh em** (stacked modal) mới giết được. Đây là ví dụ rõ: test xanh không đồng nghĩa test đủ mạnh.
+
+*(Ghi chú cũ: spec từng viết `Modal` "tự lo focus trap" trong khi code không hề có. Spec đã sửa, và giờ điều đó thành sự thật.)*
 
 ---
 
@@ -165,6 +185,7 @@ Cần bổ sung vào `src/shared/ui/Modal.tsx`, kèm test cho cả ba hành vi (
 | `qk.github.repoInfo` không được invalidate khi đổi remote URL | Minor | Đã giảm nhẹ ở GĐ1 (`refreshData()` giờ có invalidate), nhưng chưa phủ hết đường. |
 | `bindings.ts:270` comment thiếu `"renamed"` so với Rust trả về | Minor | Bằng chứng cho luận điểm bindings viết tay bị lệch. GĐ3 xoá bỏ hẳn. |
 | 175 warning lint độ phức tạp | Theo kế hoạch | Giảm dần qua GĐ5b, nâng lên `error` ở GĐ7. |
+| `useFocusTrap` coi phần tử là "nhìn thấy được" nếu không có `hidden`/`aria-hidden` | Minor | jsdom trả rect bằng 0 cho mọi thứ nên không dùng kích thước để xét được. Phần tử ẩn bằng CSS (`display:none`) vẫn lọt vào danh sách focus được. Chưa gặp trong thực tế vì modal ẩn nội dung bằng cách không render. |
 
 ---
 
@@ -188,7 +209,9 @@ Những nguyên tắc này rút ra từ GĐ0–1 và đã nhiều lần chứng 
 
 **7. Trailer commit:** `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>` — cố định cho nhánh này, không đổi theo model.
 
-**8. Viết tiếng Anh.** Comment, mô tả test, chuỗi fixture trong test, và commit message. Ngoại lệ duy nhất: chuỗi người dùng đọc được trong app (`src/i18n/*`, `aria-label`, `title`) — giữ tiếng Việt. `pnpm check-comment-language` ép buộc, xem `AGENTS.md` → Language.
+**8. Khi migrate modal có form, cân nhắc `data-autofocus`.** Mặc định focus rơi vào phần tử focus được đầu tiên trong panel — thường là nút X ở header, không phải ô nhập. Modal nào có ô nhập chính thì đánh dấu `data-autofocus` lên ô đó.
+
+**9. Viết tiếng Anh.** Comment, mô tả test, chuỗi fixture trong test, và commit message. Ngoại lệ duy nhất: chuỗi người dùng đọc được trong app (`src/i18n/*`, `aria-label`, `title`) — giữ tiếng Việt. `pnpm check-comment-language` ép buộc, xem `AGENTS.md` → Language.
 
 > Quy ước này thêm vào sau khi GĐ0–1 lỡ viết comment tiếng Việt. Đáng chú ý: khi bật guard lần đầu, nó phát hiện **13 comment tiếng Việt có sẵn từ trước refactor** — codebase không đồng nhất như tưởng. Đã dịch nốt.
 
