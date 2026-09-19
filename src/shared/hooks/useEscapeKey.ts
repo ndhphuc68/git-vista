@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Registry toàn cục các instance đang bật, theo thứ tự đăng ký.
- * Instance đăng ký SAU CÙNG (trên cùng của chồng modal) được coi là
- * "topmost" — chỉ nó mới được gọi khi Escape được bấm, các instance
- * còn lại (modal cha bên dưới) bị bỏ qua để một lần bấm Escape không
- * đóng cả chồng modal.
+ * Global registry of currently-enabled instances, in registration order.
+ * The LAST-registered instance (the top of the modal stack) is treated as
+ * "topmost" — only it is invoked when Escape is pressed. The rest (parent
+ * modals underneath) are skipped, so a single Escape press doesn't close
+ * the entire modal stack.
  */
 const registry: Array<() => void> = [];
 
@@ -32,18 +32,21 @@ function teardownWindowListenerIfIdle(): void {
 }
 
 /**
- * Gọi `onEscape` khi người dùng bấm Escape, chỉ khi `enabled` là true.
+ * Calls `onEscape` when the user presses Escape, but only while `enabled`
+ * is true.
  *
- * Callback được giữ trong ref nên đổi callback không làm gắn lại listener —
- * người gọi không cần bọc `useCallback`.
+ * The callback is kept in a ref, so changing the callback identity doesn't
+ * re-attach the listener — callers don't need to wrap it in `useCallback`.
  *
- * Khi có nhiều modal lồng nhau cùng bật, chỉ modal đăng ký SAU CÙNG
- * (modal trên cùng) nhận Escape — tránh một lần bấm đóng luôn modal cha.
+ * When multiple nested modals are enabled at once, only the LAST-registered
+ * one (the topmost modal) receives Escape — this prevents a single press
+ * from also closing the parent modal.
  */
 export function useEscapeKey(enabled: boolean, onEscape: () => void): void {
   const callbackRef = useRef(onEscape);
-  // Wrapper ổn định theo instance, dùng để định danh trong registry mà
-  // không phụ thuộc identity của onEscape (có thể đổi mỗi lần render).
+  // A per-instance stable wrapper, used to identify this instance in the
+  // registry without depending on onEscape's identity (which can change on
+  // every render).
   const dispatchRef = useRef(() => callbackRef.current());
 
   useEffect(() => {

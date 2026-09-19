@@ -24,10 +24,11 @@ const VARIANT: Record<ButtonVariant, string> = {
 };
 
 /**
- * Nút bấm dùng chung. Không biết gì về nghiệp vụ Git — nhận mọi thứ qua props.
+ * Shared button component. Knows nothing about Git-specific business logic —
+ * everything comes in through props.
  *
- * `loading` tự vô hiệu hoá nút và hiện spinner, nên nơi gọi không phải tự
- * quản lý hai thứ đó riêng.
+ * `loading` automatically disables the button and shows a spinner, so
+ * callers don't have to manage those two things separately.
  */
 export const Button: React.FC<ButtonProps> = ({
   variant = "primary",

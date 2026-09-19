@@ -12,16 +12,17 @@ export interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
   size?: ModalSize;
-  /** id của phần tử tiêu đề, gắn vào aria-labelledby. */
+  /** id of the title element, wired to aria-labelledby. */
   labelledBy?: string;
-  /** Chặn đóng modal khi đang có thao tác dở dang. */
+  /** Prevent closing the modal while an operation is in progress. */
   closeOnBackdrop?: boolean;
   closeOnEscape?: boolean;
   /**
-   * Đặt true khi modal này được mở ra TỪ BÊN TRONG một modal khác
-   * (modal-trong-modal, ví dụ ManageRemotesModal mở AddEditRemoteModal).
-   * Nâng z-index lên tầng `modalStacked` để backdrop của modal con luôn
-   * nằm trên modal cha, bất kể thứ tự trong DOM. Mặc định false.
+   * Set to true when this modal is opened FROM WITHIN another modal
+   * (modal-in-modal, e.g. ManageRemotesModal opening AddEditRemoteModal).
+   * Raises the z-index to the `modalStacked` layer so the child modal's
+   * backdrop always sits above the parent modal, regardless of DOM order.
+   * Defaults to false.
    */
   stacked?: boolean;
 }
@@ -41,17 +42,18 @@ interface ModalComposition {
 }
 
 /**
- * Khung modal dùng chung cho toàn ứng dụng.
+ * Shared modal shell for the whole app.
  *
- * Tự lo backdrop, phím Escape, role/aria, chặn sự kiện click lan ra ngoài
- * và z-index — modal con chỉ việc mô tả nội dung.
+ * Handles the backdrop, the Escape key, role/aria attributes, stopping
+ * click events from bubbling outside, and z-index — individual modals only
+ * need to describe their content.
  *
- * Dùng compound component (Modal.Header/Body/Footer) thay vì boolean props,
- * vì thân của các modal rất khác nhau; nếu dùng props thì sẽ phải thêm cờ
- * mới cho mỗi biến thể.
+ * Uses a compound component (Modal.Header/Body/Footer) instead of boolean
+ * props, because modal bodies vary widely; with boolean props we'd need to
+ * keep adding new flags for each variant.
  *
- * Modal-trong-modal: dùng prop `stacked` trên modal con để nó luôn nổi
- * trên modal cha (xem ModalProps.stacked).
+ * Modal-in-modal: use the `stacked` prop on the child modal so it always
+ * floats above the parent modal (see ModalProps.stacked).
  */
 const ModalRoot: React.FC<ModalProps> & ModalComposition = ({
   isOpen,

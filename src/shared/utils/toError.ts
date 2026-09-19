@@ -1,8 +1,9 @@
 /**
- * Chuyển giá trị lỗi bất kỳ thành chuỗi hiển thị được.
+ * Converts an arbitrary error value into a displayable string.
  *
- * Tauri có thể ném ra Error, chuỗi, hoặc object có trường message tuỳ
- * cách lỗi phát sinh, nên phải xử lý cả ba dạng.
+ * Tauri can throw an Error, a string, or an object with a message field
+ * depending on how the error originated, so all three shapes must be
+ * handled.
  */
 export function toErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;

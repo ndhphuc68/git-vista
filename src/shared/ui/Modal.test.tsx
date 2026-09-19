@@ -21,29 +21,29 @@ function renderModal(props: Partial<React.ComponentProps<typeof Modal>> = {}) {
 }
 
 describe("Modal", () => {
-  it("hiển thị nội dung khi mở", () => {
+  it("renders its content when open", () => {
     renderModal();
     expect(screen.getByText("Nội dung thân modal")).toBeInTheDocument();
     expect(screen.getByText("Tiêu đề thử")).toBeInTheDocument();
   });
 
-  it("không hiển thị gì khi đóng", () => {
+  it("renders nothing when closed", () => {
     renderModal({ isOpen: false });
     expect(screen.queryByText("Nội dung thân modal")).not.toBeInTheDocument();
   });
 
-  it("có role=dialog và aria-modal cho trợ năng", () => {
+  it("has role=dialog and aria-modal for accessibility", () => {
     renderModal();
     const dialog = screen.getByRole("dialog");
     expect(dialog).toHaveAttribute("aria-modal", "true");
   });
 
-  it("liên kết tiêu đề qua aria-labelledby", () => {
+  it("links the title via aria-labelledby", () => {
     renderModal();
     expect(screen.getByRole("dialog")).toHaveAttribute("aria-labelledby", "test-title");
   });
 
-  it("gọi onClose khi bấm Escape", () => {
+  it("calls onClose when Escape is pressed", () => {
     const { onClose } = renderModal();
 
     fireEvent.keyDown(window, { key: "Escape" });
@@ -51,7 +51,7 @@ describe("Modal", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("gọi onClose khi bấm ra ngoài vùng nội dung", () => {
+  it("calls onClose when clicking outside the content area", () => {
     const { onClose } = renderModal();
 
     fireEvent.click(screen.getByTestId("modal-backdrop"));
@@ -59,7 +59,7 @@ describe("Modal", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("KHÔNG đóng khi bấm bên trong vùng nội dung", () => {
+  it("does NOT close when clicking inside the content area", () => {
     const { onClose } = renderModal();
 
     fireEvent.click(screen.getByText("Nội dung thân modal"));
@@ -67,7 +67,7 @@ describe("Modal", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it("gọi onClose khi bấm nút X trên header", () => {
+  it("calls onClose when clicking the X button in the header", () => {
     const { onClose } = renderModal();
 
     fireEvent.click(screen.getByLabelText("Đóng"));
@@ -75,7 +75,7 @@ describe("Modal", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("không bắt Escape khi modal đang đóng", () => {
+  it("does not react to Escape while the modal is closed", () => {
     const { onClose } = renderModal({ isOpen: false });
 
     fireEvent.keyDown(window, { key: "Escape" });
@@ -83,7 +83,7 @@ describe("Modal", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it("không đóng khi bấm Escape lúc closeOnEscape=false", () => {
+  it("does not close on Escape when closeOnEscape=false", () => {
     const { onClose } = renderModal({ closeOnEscape: false });
 
     fireEvent.keyDown(window, { key: "Escape" });
@@ -91,7 +91,7 @@ describe("Modal", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it("không đóng khi bấm ra ngoài lúc closeOnBackdrop=false", () => {
+  it("does not close on outside click when closeOnBackdrop=false", () => {
     const { onClose } = renderModal({ closeOnBackdrop: false });
 
     fireEvent.click(screen.getByTestId("modal-backdrop"));
@@ -99,7 +99,7 @@ describe("Modal", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it("size khác nhau cho ra class chiều rộng khác nhau", () => {
+  it("different sizes produce different width classes", () => {
     const { rerender } = renderModal({ size: "sm" });
     const smallPanel = screen.getByTestId("modal-panel").className;
 
@@ -113,14 +113,14 @@ describe("Modal", () => {
     expect(smallPanel).not.toBe(largePanel);
   });
 
-  it("mặc định dùng z-index tầng modal thường", () => {
+  it("defaults to the regular modal z-index layer", () => {
     renderModal();
     const backdrop = screen.getByTestId("modal-backdrop");
 
     expect(backdrop.style.zIndex).toBe(String(Z_INDEX.modal));
   });
 
-  it("với stacked=true, dùng z-index tầng cao hơn tầng modal thường", () => {
+  it("with stacked=true, uses a z-index layer higher than the regular modal", () => {
     renderModal({ stacked: true });
     const backdrop = screen.getByTestId("modal-backdrop");
 

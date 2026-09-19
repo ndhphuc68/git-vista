@@ -15,12 +15,12 @@ describe("useCopyToClipboard", () => {
     vi.useRealTimers();
   });
 
-  it("ban đầu chưa ở trạng thái đã sao chép", () => {
+  it("starts out not in the copied state", () => {
     const { result } = renderHook(() => useCopyToClipboard());
     expect(result.current.copied).toBe(false);
   });
 
-  it("ghi đúng nội dung vào clipboard", async () => {
+  it("writes the exact content to the clipboard", async () => {
     const { result } = renderHook(() => useCopyToClipboard());
 
     await act(async () => {
@@ -30,21 +30,21 @@ describe("useCopyToClipboard", () => {
     expect(writeText).toHaveBeenCalledWith("a1b2c3d");
   });
 
-  it("bật cờ copied sau khi sao chép", async () => {
+  it("sets the copied flag after copying", async () => {
     const { result } = renderHook(() => useCopyToClipboard());
 
     await act(async () => {
-      await result.current.copy("nội dung");
+      await result.current.copy("content");
     });
 
     expect(result.current.copied).toBe(true);
   });
 
-  it("tự tắt cờ copied sau COPY_FEEDBACK_MS", async () => {
+  it("clears the copied flag after COPY_FEEDBACK_MS", async () => {
     const { result } = renderHook(() => useCopyToClipboard());
 
     await act(async () => {
-      await result.current.copy("nội dung");
+      await result.current.copy("content");
     });
     expect(result.current.copied).toBe(true);
 
@@ -55,12 +55,12 @@ describe("useCopyToClipboard", () => {
     expect(result.current.copied).toBe(false);
   });
 
-  it("huỷ timer khi unmount, tránh setState trên component đã gỡ", async () => {
+  it("clears the timer on unmount, avoiding setState on an unmounted component", async () => {
     const clearSpy = vi.spyOn(globalThis, "clearTimeout");
     const { result, unmount } = renderHook(() => useCopyToClipboard());
 
     await act(async () => {
-      await result.current.copy("nội dung");
+      await result.current.copy("content");
     });
 
     clearSpy.mockClear();
@@ -70,24 +70,25 @@ describe("useCopyToClipboard", () => {
     clearSpy.mockRestore();
   });
 
-  it("copy lần hai không bị timer của lần đầu cắt ngắn phản hồi", async () => {
+  it("a second copy is not cut short by the first copy's timer", async () => {
     const { result } = renderHook(() => useCopyToClipboard());
 
     await act(async () => {
-      await result.current.copy("lần một");
+      await result.current.copy("first");
     });
     act(() => {
       vi.advanceTimersByTime(1500);
     });
 
     await act(async () => {
-      await result.current.copy("lần hai");
+      await result.current.copy("second");
     });
     act(() => {
       vi.advanceTimersByTime(1500);
     });
 
-    // Mốc 3000ms tính từ đầu, nhưng timer lần hai mới chạy 1500ms nên vẫn còn hiệu lực
+    // 3000ms have elapsed from the start, but the second timer has only run
+    // for 1500ms, so it's still in effect.
     expect(result.current.copied).toBe(true);
   });
 });

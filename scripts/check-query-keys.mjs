@@ -1,17 +1,19 @@
 #!/usr/bin/env node
 
 /**
- * Chặn query key literal quay trở lại code.
+ * Blocks query key literals from creeping back into the code.
  *
- * Bối cảnh: dự án từng có bug cache vì cùng một dữ liệu được đặt key khác
- * chữ ở các file khác nhau — `["repo_status", path]` ở nơi này, nhưng
- * `["repoStatus", path]` ở nơi kia. React Query coi hai chuỗi đó là hai
- * cache riêng biệt, nên invalidate bên này không làm mới bên kia và người
- * dùng thấy dữ liệu cũ. Giai đoạn 1 đã gom toàn bộ về `src/domain/queryKeys.ts`.
+ * Background: the project once had a cache bug because the same data was
+ * keyed with differently-spelled keys in different files — `["repo_status",
+ * path]` in one place, but `["repoStatus", path]` in another. React Query
+ * treats those two strings as separate caches, so invalidating one didn't
+ * refresh the other and users saw stale data. Phase 1 consolidated all of
+ * this into `src/domain/queryKeys.ts`.
  *
- * Script này giữ cho nó không tái phát. Đáng lẽ dùng luật lint, nhưng oxlint
- * không có `no-restricted-syntax` (chỉ có các biến thể hẹp như
- * no-restricted-imports), nên kiểm tra bằng script giống `check-contrast.mjs`.
+ * This script keeps that from happening again. A lint rule would be the
+ * natural fit, but oxlint has no `no-restricted-syntax` (only narrower
+ * variants like no-restricted-imports), so this is enforced with a script,
+ * the same way `check-contrast.mjs` does.
  */
 
 import { readdirSync, readFileSync, statSync } from "node:fs";
@@ -20,18 +22,20 @@ import { join, relative } from "node:path";
 const ROOT = process.cwd();
 const SRC = join(ROOT, "src");
 
-/** Nơi query key literal được phép tồn tại. */
+/** Places where a query key literal is allowed to exist. */
 const ALLOWED = [join("src", "domain", "queryKeys.ts"), join("src", "domain", "queryKeys.test.ts")];
 
-/** Test được miễn: nhiều test cố tình dựng key thô để kiểm tra hành vi cache. */
+/** Tests are exempt: many tests intentionally build raw keys to check cache behavior. */
 const isTestFile = (path) => path.includes(`${join("src", "test")}`) || /\.test\.tsx?$/.test(path);
 
 /**
- * `queryKey` theo sau là mảng mở đầu bằng chuỗi, ví dụ `queryKey: ["repo_status"`.
+ * `queryKey` followed by an array that starts with a string literal, e.g.
+ * `queryKey: ["repo_status"`.
  *
- * `\s*` trước dấu hai chấm bắt cả `queryKey :`, và `\s` sau `[` bao gồm cả xuống
- * dòng nên bắt được mảng viết nhiều dòng (Prettier hay ngắt dòng key dài).
- * Vì vậy phải quét trên toàn bộ nội dung file chứ không quét từng dòng.
+ * The `\s*` before the colon also matches `queryKey :`, and the `\s` after
+ * `[` includes newlines, so it catches arrays written across multiple lines
+ * (Prettier often wraps long keys). Because of this, the whole file content
+ * must be scanned at once rather than line by line.
  */
 const LITERAL_KEY = /queryKey\s*:\s*\[\s*["'`]/g;
 
@@ -59,7 +63,7 @@ for (const file of collectFiles(SRC)) {
 
   let match;
   while ((match = LITERAL_KEY.exec(content)) !== null) {
-    // Đếm số xuống dòng trước vị trí khớp để suy ra số dòng.
+    // Count newlines before the match position to derive the line number.
     const line = content.slice(0, match.index).split(/\r?\n/).length;
     const text = content.slice(match.index, match.index + 80).split(/\r?\n/)[0];
     violations.push({ file: rel, line, text: text.trim() });
@@ -67,17 +71,17 @@ for (const file of collectFiles(SRC)) {
 }
 
 if (violations.length > 0) {
-  console.error(`\nTìm thấy ${violations.length} query key literal:\n`);
+  console.error(`\nFound ${violations.length} query key literal(s):\n`);
   for (const v of violations) {
     console.error(`  ${v.file}:${v.line}`);
     console.error(`    ${v.text}`);
   }
   console.error(
-    `\nDùng \`qk\` từ src/domain/queryKeys.ts thay vì viết key trực tiếp.` +
-      `\nKey viết tay từng gây bug cache: cùng dữ liệu nhưng khác chữ thì` +
-      `\ninvalidate không khớp, và người dùng thấy dữ liệu cũ.\n`
+    `\nUse \`qk\` from src/domain/queryKeys.ts instead of writing a key directly.` +
+      `\nHand-written keys have caused cache bugs before: the same data with a` +
+      `\ndifferent spelling means invalidation doesn't match, and users see stale data.\n`
   );
   process.exit(1);
 }
 
-console.log("Không có query key literal nào ngoài src/domain/queryKeys.ts.");
+console.log("No query key literals found outside src/domain/queryKeys.ts.");

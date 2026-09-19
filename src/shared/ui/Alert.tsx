@@ -26,11 +26,11 @@ const VARIANT_ICON: Record<AlertVariant, typeof AlertCircle> = {
 };
 
 /**
- * Khối thông báo trong modal và form.
+ * A notification block used in modals and forms.
  *
- * Chỉ variant "error" mang role="alert" — trình đọc màn hình sẽ đọc ngay
- * khi nó xuất hiện. Các variant khác là thông tin bổ trợ nên không cắt
- * ngang người dùng.
+ * Only the "error" variant carries role="alert" — screen readers announce
+ * it immediately when it appears. The other variants are supplementary
+ * information, so they shouldn't interrupt the user.
  */
 export const Alert: React.FC<AlertProps> = ({ variant, children, showIcon = true, className }) => {
   const Icon = VARIANT_ICON[variant];

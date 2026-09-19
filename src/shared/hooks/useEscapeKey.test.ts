@@ -13,7 +13,7 @@ function renderTwoHooks(enabledFirst: boolean, enabledSecond: boolean) {
 }
 
 describe("useEscapeKey", () => {
-  it("gọi callback khi bấm Escape lúc đang bật", () => {
+  it("calls the callback when Escape is pressed while enabled", () => {
     const onEscape = vi.fn();
     renderHook(() => useEscapeKey(true, onEscape));
 
@@ -22,7 +22,7 @@ describe("useEscapeKey", () => {
     expect(onEscape).toHaveBeenCalledTimes(1);
   });
 
-  it("không gọi callback khi đang tắt", () => {
+  it("does not call the callback when disabled", () => {
     const onEscape = vi.fn();
     renderHook(() => useEscapeKey(false, onEscape));
 
@@ -31,7 +31,7 @@ describe("useEscapeKey", () => {
     expect(onEscape).not.toHaveBeenCalled();
   });
 
-  it("bỏ qua các phím khác", () => {
+  it("ignores other keys", () => {
     const onEscape = vi.fn();
     renderHook(() => useEscapeKey(true, onEscape));
 
@@ -41,7 +41,7 @@ describe("useEscapeKey", () => {
     expect(onEscape).not.toHaveBeenCalled();
   });
 
-  it("gỡ listener khi unmount, tránh rò rỉ", () => {
+  it("removes the listener on unmount, avoiding a leak", () => {
     const onEscape = vi.fn();
     const { unmount } = renderHook(() => useEscapeKey(true, onEscape));
 
@@ -51,7 +51,7 @@ describe("useEscapeKey", () => {
     expect(onEscape).not.toHaveBeenCalled();
   });
 
-  it("dùng callback mới nhất mà không cần gắn lại listener", () => {
+  it("uses the latest callback without re-attaching the listener", () => {
     const first = vi.fn();
     const second = vi.fn();
     const { rerender } = renderHook(({ cb }) => useEscapeKey(true, cb), {
@@ -65,7 +65,7 @@ describe("useEscapeKey", () => {
     expect(second).toHaveBeenCalledTimes(1);
   });
 
-  it("không gắn lại listener khi callback đổi, chỉ giữ một listener duy nhất", () => {
+  it("does not re-attach the listener when the callback changes, keeping just one listener", () => {
     const addSpy = vi.spyOn(window, "addEventListener");
 
     const { rerender } = renderHook(({ cb }) => useEscapeKey(true, cb), {
@@ -81,7 +81,7 @@ describe("useEscapeKey", () => {
     addSpy.mockRestore();
   });
 
-  it("khi hai modal lồng nhau cùng bật, Escape chỉ đóng modal trên cùng (đăng ký sau)", () => {
+  it("when two nested modals are both enabled, Escape only closes the topmost (later-registered) one", () => {
     const { first, second } = renderTwoHooks(true, true);
 
     fireEvent.keyDown(window, { key: "Escape" });
@@ -90,7 +90,7 @@ describe("useEscapeKey", () => {
     expect(first).not.toHaveBeenCalled();
   });
 
-  it("sau khi modal trên cùng unmount, Escape tiếp theo gọi modal còn lại", () => {
+  it("after the topmost modal unmounts, the next Escape calls the remaining modal", () => {
     const { first, second, secondHook } = renderTwoHooks(true, true);
 
     secondHook.unmount();
@@ -100,7 +100,7 @@ describe("useEscapeKey", () => {
     expect(second).not.toHaveBeenCalled();
   });
 
-  it("modal đang tắt (enabled=false) không bao giờ được gọi, kể cả khi mount sau cùng", () => {
+  it("a disabled modal (enabled=false) is never called, even when mounted last", () => {
     const { first, second } = renderTwoHooks(true, false);
 
     fireEvent.keyDown(window, { key: "Escape" });

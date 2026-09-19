@@ -1,18 +1,18 @@
-/** Số ký tự hiển thị khi rút gọn commit SHA. */
+/** Number of characters shown when truncating a commit SHA. */
 export const SHORT_SHA_LENGTH = 7;
 
-/** Thời gian giữ trạng thái "đã sao chép" trước khi tự tắt. */
+/** How long the "copied" state stays on before it resets itself. */
 export const COPY_FEEDBACK_MS = 2000;
 
-/** Độ trễ trước khi focus input trong modal, chờ animation mở xong. */
+/** Delay before focusing an input in a modal, to let the open animation finish. */
 export const AUTOFOCUS_DELAY_MS = 50;
 
-/** Thời gian toast hoàn tác hiển thị, đủ dài để người dùng kịp bấm Undo. */
+/** How long the undo toast stays visible, long enough for the user to click Undo. */
 export const UNDO_TOAST_MS = 10000;
 
 export type ModalSize = "sm" | "md" | "lg" | "xl";
 
-/** Chiều rộng tối đa của modal theo từng bậc. */
+/** Max width of a modal for each size tier. */
 export const MODAL_SIZE: Record<ModalSize, string> = {
   sm: "max-w-sm",
   md: "max-w-md",

@@ -1,20 +1,20 @@
 /**
- * Hằng số cho các chuỗi mà backend Rust và GitHub API trả về.
+ * Constants for the string values returned by the Rust backend and the GitHub API.
  *
- * Dùng `as const` thay vì `enum` của TypeScript: enum sinh runtime code,
- * còn as const chỉ là dữ liệu thuần và suy ra type chính xác hơn.
+ * Uses `as const` instead of a TypeScript `enum`: an enum generates runtime
+ * code, whereas `as const` is plain data and infers a more precise type.
  *
- * Giá trị PHẢI khớp đúng chuỗi backend trả về — đổi ở đây mà không đổi
- * phía Rust sẽ gây lỗi lúc chạy.
+ * Values MUST match the backend's strings exactly — changing them here
+ * without changing the Rust side will cause runtime bugs.
  */
 
 /**
- * Loại thay đổi của một file trong diff (Git diff).
- * Nguồn: bindings.ts FileChange.change_type từ src-tauri/src/read/diff.rs
+ * The kind of change a file underwent in a diff (Git diff).
+ * Source: bindings.ts FileChange.change_type, from src-tauri/src/read/diff.rs
  *
- * CẢNH BÁO: GitHub API dùng từ vựng khác cho cùng khái niệm.
- * PullRequestFileItem.status ở bindings.ts:462 dùng "removed" thay vì "deleted".
- * KHÔNG dùng CHANGE_TYPE để so sánh với GitHub status — chúng KHÔNG khớp.
+ * WARNING: the GitHub API uses different wording for the same concept.
+ * PullRequestFileItem.status in bindings.ts:462 uses "removed" instead of "deleted".
+ * Do NOT use CHANGE_TYPE to compare against a GitHub status — they do NOT match.
  */
 export const CHANGE_TYPE = {
   ADDED: "added",
@@ -24,7 +24,7 @@ export const CHANGE_TYPE = {
 } as const;
 export type ChangeType = (typeof CHANGE_TYPE)[keyof typeof CHANGE_TYPE];
 
-/** Trạng thái pull request. Nguồn: bindings.ts PullRequestState */
+/** Pull request state. Source: bindings.ts PullRequestState */
 export const PR_STATE = {
   OPEN: "open",
   CLOSED: "closed",
@@ -32,7 +32,7 @@ export const PR_STATE = {
 } as const;
 export type PullRequestState = (typeof PR_STATE)[keyof typeof PR_STATE];
 
-/** Trạng thái CI check. Nguồn: bindings.ts CheckStatus */
+/** CI check status. Source: bindings.ts CheckStatus */
 export const CHECK_STATUS = {
   SUCCESS: "success",
   FAILURE: "failure",
@@ -42,14 +42,14 @@ export const CHECK_STATUS = {
 } as const;
 export type CheckStatus = (typeof CHECK_STATUS)[keyof typeof CHECK_STATUS];
 
-/** Phạm vi cấu hình Git. Nguồn: bindings.ts ConfigScope */
+/** Git config scope. Source: bindings.ts ConfigScope */
 export const CONFIG_SCOPE = {
   GLOBAL: "global",
   LOCAL: "local",
 } as const;
 export type ConfigScope = (typeof CONFIG_SCOPE)[keyof typeof CONFIG_SCOPE];
 
-/** Màn hình đang hiển thị trong một tab. Nguồn: types/tab.ts ScreenType */
+/** The screen currently shown in a tab. Source: types/tab.ts ScreenType */
 export const SCREEN_TYPE = {
   HISTORY: "history",
   CHANGES: "changes",

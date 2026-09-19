@@ -1,4 +1,4 @@
-/** Thời lượng animation (ms), dùng cho Transition và CSS duration. */
+/** Animation durations (ms), used by Transition and CSS duration. */
 export const MOTION = {
   fast: 150,
   normal: 200,
