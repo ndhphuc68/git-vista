@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { X } from "lucide-react";
 import { Transition } from "../../components/common/Transition";
 import { useEscapeKey } from "../hooks/useEscapeKey";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 import { MODAL_SIZE, type ModalSize } from "../../domain/constants/ui";
 import { MOTION } from "../../domain/constants/motion";
 import { Z_INDEX } from "../../domain/constants/zIndex";
@@ -44,9 +45,13 @@ interface ModalComposition {
 /**
  * Shared modal shell for the whole app.
  *
- * Handles the backdrop, the Escape key, role/aria attributes, stopping
+ * Handles the backdrop, the Escape key, focus management (trap, initial
+ * focus, restoring focus to the opener), role/aria attributes, stopping
  * click events from bubbling outside, and z-index — individual modals only
  * need to describe their content.
+ *
+ * Initial focus lands on the first focusable element in the panel. To focus
+ * something else instead (usually a text input), mark it `data-autofocus`.
  *
  * Uses a compound component (Modal.Header/Body/Footer) instead of boolean
  * props, because modal bodies vary widely; with boolean props we'd need to
@@ -65,7 +70,10 @@ const ModalRoot: React.FC<ModalProps> & ModalComposition = ({
   closeOnEscape = true,
   stacked = false,
 }) => {
+  const panelRef = React.useRef<HTMLDivElement>(null);
+
   useEscapeKey(isOpen && closeOnEscape, onClose);
+  useFocusTrap(panelRef, isOpen);
 
   return (
     <Transition
@@ -86,6 +94,7 @@ const ModalRoot: React.FC<ModalProps> & ModalComposition = ({
         aria-labelledby={labelledBy}
       >
         <div
+          ref={panelRef}
           data-testid="modal-panel"
           className={clsx(
             "w-full max-h-[90vh] bg-surface border border-border-subtle rounded-xl",

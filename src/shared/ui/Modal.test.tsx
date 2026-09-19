@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { Modal } from "./Modal";
 import { Button } from "./Button";
 import { Z_INDEX } from "../../domain/constants/zIndex";
@@ -126,5 +126,58 @@ describe("Modal", () => {
 
     expect(backdrop.style.zIndex).toBe(String(Z_INDEX.modalStacked));
     expect(Z_INDEX.modalStacked).toBeGreaterThan(Z_INDEX.modal);
+  });
+
+  describe("focus management", () => {
+    let opener: HTMLButtonElement;
+
+    beforeEach(() => {
+      opener = document.createElement("button");
+      document.body.appendChild(opener);
+      opener.focus();
+    });
+
+    afterEach(() => {
+      opener.remove();
+    });
+
+    it("moves focus into the panel when opened", () => {
+      renderModal();
+
+      expect(screen.getByTestId("modal-panel").contains(document.activeElement)).toBe(
+        true
+      );
+    });
+
+    it("keeps Tab inside the panel instead of reaching the page behind it", () => {
+      renderModal();
+      const panel = screen.getByTestId("modal-panel");
+      const cancel = screen.getByText("Cancel");
+      act(() => cancel.focus());
+
+      fireEvent.keyDown(cancel, { key: "Tab" });
+
+      expect(panel.contains(document.activeElement)).toBe(true);
+      expect(document.activeElement).not.toBe(opener);
+    });
+
+    it("returns focus to the element that opened it once closed", () => {
+      const { rerender, onClose } = renderModal();
+      expect(document.activeElement).not.toBe(opener);
+
+      rerender(
+        <Modal isOpen={false} onClose={onClose} labelledBy="test-title">
+          <Modal.Body>X</Modal.Body>
+        </Modal>
+      );
+
+      expect(document.activeElement).toBe(opener);
+    });
+
+    it("does not touch focus while closed", () => {
+      renderModal({ isOpen: false });
+
+      expect(document.activeElement).toBe(opener);
+    });
   });
 });
