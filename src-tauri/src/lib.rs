@@ -95,10 +95,9 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
 pub fn run() {
     let specta_builder = create_specta_builder();
 
-    // Không tự động ghi đè src/ipc/bindings.ts: file đó được viết tay và
-    // giữ hình dạng IPC riêng (invokeCommand trả Promise<T> trực tiếp, có
-    // fallback mock cho môi trường browser dev), khác với format mà
-    // tauri-specta tự sinh ra (commands.* trả {status, data|error}).
+    // The TypeScript bindings are not written here. `tests/export_bindings.rs`
+    // generates src/ipc/bindings.generated.ts, so the frontend build never needs
+    // a Rust toolchain and CI can check the committed file for drift.
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())

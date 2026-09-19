@@ -20,6 +20,7 @@
     "playwright-report/**",
     "src-tauri/**",
     "src/ipc/bindings.ts",
+    "src/ipc/bindings.generated.ts",
     "test-results/**"
   ],
   "rules": {
