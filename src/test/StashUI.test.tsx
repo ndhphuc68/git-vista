@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import { CreateStashModal } from "../components/stash/CreateStashModal";
+import { CreateStashModal } from "../features/stash";
 
 describe("CreateStashModal Component", () => {
   it("renders input, untracked checkbox, and calls onSaveStash", async () => {

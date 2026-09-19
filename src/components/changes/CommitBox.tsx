@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import clsx from "clsx";
 import { GitCommit, AlertCircle, RefreshCw } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
-import type { CommitDetails } from "../../ipc/bindings";
+import type { CommitDetails } from "../../ipc/bindings.generated";
 import { useToastStore } from "../../store/useToastStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { mapGitError } from "../../utils/errorMapping";

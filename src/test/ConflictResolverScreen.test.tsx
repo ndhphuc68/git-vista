@@ -1,7 +1,7 @@
 ﻿import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { ConflictResolverScreen } from "../components/conflict/ConflictResolverScreen";
-import { type ConflictFileData } from "../ipc/bindings";
+import { type ConflictFileData } from "../ipc/bindings.generated";
 
 describe("ConflictResolverScreen Component", () => {
   const mockData: ConflictFileData = {

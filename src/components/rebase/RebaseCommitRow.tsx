@@ -1,7 +1,7 @@
 import React from "react";
 import { GripVertical, ChevronUp, ChevronDown, Edit3 } from "lucide-react";
 import clsx from "clsx";
-import type { RebasePlanStep, RebaseCommitItem, RebaseActionKind } from "../../ipc/bindings";
+import type { RebasePlanStep, RebaseCommitItem, RebaseActionKind } from "../../ipc/bindings.generated";
 import { useTranslation } from "../../i18n";
 
 export interface RebaseCommitRowProps {

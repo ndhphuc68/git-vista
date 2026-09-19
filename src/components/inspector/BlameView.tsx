@@ -12,6 +12,7 @@ import {
   formatRelativeTime,
   formatExactDateTime,
 } from "../diff/CommitDetailPanel";
+import { qk } from "../../domain/queryKeys";
 
 interface BlameViewProps {
   repoPath: string;
@@ -35,7 +36,7 @@ export const BlameView: React.FC<BlameViewProps> = ({
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["file-blame", repoPath, filePath, commitId],
+    queryKey: qk.fileBlame(repoPath, filePath, commitId ?? ""),
     queryFn: () => invokeCommand.getFileBlame(repoPath, filePath, commitId),
   });
 

@@ -7,13 +7,13 @@ import { WindowTabBar } from "./components/header/WindowTabBar";
 import { ChangesScreen } from "./components/changes/ChangesScreen";
 import { InProgressOperationBanner } from "./components/banner/InProgressOperationBanner";
 import { listenToRepoChanged, invokeCommand } from "./ipc/client";
-import { type RepoSummary } from "./ipc/bindings";
+import { type RepoSummary } from "./ipc/bindings.generated";
 import { useRepoStore } from "./store/useRepoStore";
 import { useTabStore } from "./store/useTabStore";
 import { useViewStore } from "./store/useViewStore";
 import { useSettingsStore } from "./store/useSettingsStore";
 import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
-import { CreateBranchModal } from "./components/sidebar/CreateBranchModal";
+import { CreateBranchModal } from "./features/branch";
 import { ConflictResolverScreen } from "./components/conflict/ConflictResolverScreen";
 import { ToastContainer } from "./components/toast/ToastContainer";
 import { CommandPalette } from "./components/palette/CommandPalette";
@@ -21,13 +21,14 @@ import { ShortcutsHelpModal } from "./components/shortcuts/ShortcutsHelpModal";
 import { SplashScreen } from "./components/splash/SplashScreen";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import { FileInspectorDrawer } from "./components/inspector/FileInspectorDrawer";
-import { ManageRemotesModal } from "./components/remote/ManageRemotesModal";
+import { ManageRemotesModal } from "./features/remote";
 import { InteractiveRebaseModal } from "./components/rebase";
 import { CompareModal } from "./components/compare";
 import { PullRequestDetailDrawer, CreatePullRequestModal } from "./components/pullrequests";
 import { usePullRequestStore } from "./store/usePullRequestStore";
 import { useCommandPaletteStore } from "./store/useCommandPaletteStore";
 import { type CommandContext } from "./utils/commandRegistry";
+import { qk } from "./domain/queryKeys";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,19 +57,21 @@ const RepoContent: React.FC<RepoContentProps> = ({
     useViewStore();
 
   const { data: repoState } = useQuery({
-    queryKey: ["repo_state", currentRepo.path],
+    queryKey: qk.repo.state(currentRepo.path),
     queryFn: () => invokeCommand.getRepoState(currentRepo.path),
     enabled: Boolean(currentRepo),
   });
 
   const handleAbort = async (operation: string) => {
     await invokeCommand.abortInProgress(currentRepo.path, operation);
-    queryClient.invalidateQueries();
+    // Git operation on the current repo: only refresh this repo's cache
+    queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleContinue = async (operation: string) => {
     await invokeCommand.continueInProgress(currentRepo.path, operation);
-    queryClient.invalidateQueries();
+    // Git operation on the current repo: only refresh this repo's cache
+    queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   return (
@@ -96,7 +99,8 @@ const RepoContent: React.FC<RepoContentProps> = ({
                 true
               );
               closeConflictResolver();
-              queryClient.invalidateQueries();
+              // Git operation on the current repo: only refresh this repo's cache
+              queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
             }}
           />
         ) : (
@@ -107,7 +111,10 @@ const RepoContent: React.FC<RepoContentProps> = ({
         isOpen={isGlobalCreateBranchOpen}
         onClose={() => setIsGlobalCreateBranchOpen(false)}
         repoPath={currentRepo.path}
-        onSuccess={() => queryClient.invalidateQueries()}
+        onSuccess={() =>
+          // Created a new branch on the current repo: only refresh this repo's cache
+          queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) })
+        }
       />
       <FileInspectorDrawer repoPath={currentRepo.path} />
       <PullRequestDetailDrawer repoPath={currentRepo.path} />
@@ -149,7 +156,7 @@ export const App: React.FC<AppProps> = ({
     setMode(mode === "simple" ? "advanced" : "simple");
   };
 
-  // Đồng bộ tab đang active sang repoStore để tương thích ngược với mọi component con
+  // Sync the active tab into repoStore for backward compatibility with all child components
   useEffect(() => {
     const activeTab = tabs.find((t) => t.id === activeTabId);
     if (activeTab && activeTab.type === "repo" && activeTab.repo) {
@@ -159,7 +166,7 @@ export const App: React.FC<AppProps> = ({
     }
   }, [activeTabId, tabs, setRepo, clearRepo]);
 
-  // Khôi phục phiên làm việc trước đó khi khởi động app
+  // Restore the previous session on app startup
   useEffect(() => {
     restoreSession();
   }, [restoreSession]);
@@ -270,7 +277,7 @@ export const App: React.FC<AppProps> = ({
 
     listenToRepoChanged((payload) => {
       console.log("🔔 [Event] repo-changed payload:", payload);
-      // Invalidate có chọn lọc: chỉ làm mới query của riêng repo bị thay đổi
+      // Selective invalidation: only refresh queries belonging to the repo that changed
       if (payload?.repo_path) {
         queryClient.invalidateQueries({
           predicate: (query) => {
@@ -280,6 +287,9 @@ export const App: React.FC<AppProps> = ({
           },
         });
       } else {
+        // A repo-changed event without repo_path means we don't know which repo was
+        // affected: deliberately wipe the whole cache rather than guess the scope
+        // wrong and leave stale data behind.
         queryClient.invalidateQueries();
       }
     }).then((unlisten) => {
@@ -338,7 +348,8 @@ export const App: React.FC<AppProps> = ({
             baseCommitId={useRepoStore.getState().selectedCommitId || "HEAD~5"}
             onRebaseSuccess={() => {
               setIsGlobalInteractiveRebaseOpen(false);
-              queryClient.invalidateQueries();
+              // Interactive rebase on the current repo: only refresh this repo's cache
+              queryClient.invalidateQueries({ queryKey: qk.repo.all(repoToDisplay.path) });
             }}
           />
         )}

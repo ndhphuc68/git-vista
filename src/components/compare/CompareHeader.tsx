@@ -2,7 +2,7 @@ import React from "react";
 import clsx from "clsx";
 import { GitCompare, ArrowLeftRight, X, GitCommit, FileCode } from "lucide-react";
 import { useTranslation } from "../../i18n";
-import type { CompareMode, CompareSummary } from "../../ipc/bindings";
+import type { CompareMode, CompareSummary } from "../../ipc/bindings.generated";
 
 export interface CompareHeaderProps {
   baseRev: string;

@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, fireEvent, within } from "@testing-library/react";
-import { BranchSidebar } from "../components/sidebar/BranchSidebar";
+import { BranchSidebar, isDialog, type SidebarDialog } from "../features/branch";
+import { CreateTagModal, DeleteTagModal } from "../features/tag";
 import { useRepoStore } from "../store/useRepoStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { invokeCommand } from "../ipc/client";
-import { type TagItem } from "../ipc/bindings";
+import { type TagItem } from "../ipc/bindings.generated";
+import { qk } from "../domain/queryKeys";
 
 const mockTags: TagItem[] = [
   {
@@ -30,6 +32,35 @@ const mockTags: TagItem[] = [
     timestamp_sec: 1690000000,
   },
 ];
+
+/**
+ * The tag modals now live in Shell, not in the sidebar, so a bare
+ * <BranchSidebar /> no longer renders them. This mirrors what Shell supplies
+ * so the tag tests keep exercising the real modals end to end.
+ */
+const renderTagDialogs = (dialog: SidebarDialog, close: () => void) => (
+  <>
+    {isDialog(dialog, "createTag") && (
+      <CreateTagModal
+        isOpen
+        onClose={close}
+        repoPath="d:/project-v3"
+        targetCommitId={dialog.commitId}
+        targetCommitSummary={dialog.summary}
+      />
+    )}
+    {isDialog(dialog, "deleteTag") && (
+      <DeleteTagModal
+        isOpen
+        onClose={close}
+        repoPath="d:/project-v3"
+        tagName={dialog.tag.name}
+        targetCommitId={dialog.tag.target_commit_id}
+        hasRemote={false}
+      />
+    )}
+  </>
+);
 
 describe("BranchSidebar - Tags Management", () => {
   let queryClient: QueryClient;
@@ -81,7 +112,7 @@ describe("BranchSidebar - Tags Management", () => {
   it("opens CreateTagModal when clicking the (+) button in Tags header", async () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <BranchSidebar />
+        <BranchSidebar renderForeignDialog={renderTagDialogs} />
       </QueryClientProvider>
     );
 
@@ -189,7 +220,7 @@ describe("BranchSidebar - Tags Management", () => {
   it("opens DeleteTagModal when choosing Delete Tag from context menu", async () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <BranchSidebar />
+        <BranchSidebar renderForeignDialog={renderTagDialogs} />
       </QueryClientProvider>
     );
 
@@ -205,6 +236,36 @@ describe("BranchSidebar - Tags Management", () => {
       expect(dialog).toBeInTheDocument();
       expect(within(dialog).getByText("v1.0.0")).toBeInTheDocument();
       expect(screen.getByRole("heading", { name: /Xoá thẻ/i })).toBeInTheDocument();
+    });
+  });
+
+  it("refreshes the tag list after a tag is deleted without the sidebar invalidating it", async () => {
+    // The tag list refresh is owned by useDeleteTag, not by the sidebar's
+    // invalidateRepo. This test fails if that ownership moves back.
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <BranchSidebar renderForeignDialog={renderTagDialogs} />
+      </QueryClientProvider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /TAGS/i }));
+    await waitFor(() => expect(screen.getByText("v1.0.0")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByLabelText("Menu thao tác thẻ v1.0.0"));
+    fireEvent.click(screen.getByRole("button", { name: /Xoá thẻ/i }));
+
+    const dialog = await screen.findByRole("dialog");
+    const confirmBtn = within(dialog).getByRole("button", { name: /Xoá thẻ/i });
+    fireEvent.click(confirmBtn);
+
+    await waitFor(() => {
+      expect(invokeCommand.deleteTag).toHaveBeenCalledWith("d:/project-v3", "v1.0.0", false);
+    });
+
+    await waitFor(() => {
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.repo.all("d:/project-v3") });
     });
   });
 });

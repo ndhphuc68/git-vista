@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CompareModal } from "../components/compare/CompareModal";
 import { invokeCommand } from "../ipc/client";
-import type { CompareSummary, FileDiffResult } from "../ipc/bindings";
+import type { CompareSummary, FileDiffResult } from "../ipc/bindings.generated";
 
 const mockSummary: CompareSummary = {
   base_rev: "main",

@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import clsx from "clsx";
 import { Search, File } from "lucide-react";
 import { useTranslation } from "../../i18n";
-import type { CompareFileItem } from "../../ipc/bindings";
+import type { CompareFileItem } from "../../ipc/bindings.generated";
 
 export interface CompareFileListProps {
   files: CompareFileItem[];

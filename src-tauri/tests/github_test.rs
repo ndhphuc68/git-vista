@@ -7,6 +7,32 @@ use visual_git_lib::write::github_config::{
 };
 use visual_git_lib::write::remote::add_remote;
 
+/// Point token storage at `path` so tests never touch the real user token, and
+/// hide the `gh` CLI for the duration.
+///
+/// `get_github_token` falls back to `gh auth token` when no file is stored. On a
+/// developer machine with the GitHub CLI logged in, that returns a real token
+/// where the test expects none — and prints it into the test output. CI passes
+/// either way because no `gh` login exists there, which is why this only ever
+/// failed locally. `PATH` is restored when the returned guard drops.
+fn set_token_path(path: &std::path::Path) -> PathGuard {
+    std::env::set_var("GITVISTA_TOKEN_PATH", path);
+    let previous = std::env::var_os("PATH");
+    std::env::set_var("PATH", "");
+    PathGuard(previous)
+}
+
+struct PathGuard(Option<std::ffi::OsString>);
+
+impl Drop for PathGuard {
+    fn drop(&mut self) {
+        match self.0.take() {
+            Some(value) => std::env::set_var("PATH", value),
+            None => std::env::remove_var("PATH"),
+        }
+    }
+}
+
 #[test]
 fn test_parse_github_urls() {
     // HTTPS standard with .git
@@ -72,6 +98,12 @@ fn test_get_github_repo_info_with_and_without_remote() {
 
 #[test]
 fn test_github_token_storage_lifecycle() {
+    // Redirect token storage into a temp file. Without this, the test writes to
+    // and then deletes the real user token file at %APPDATA%/gitvista/github_token.
+    let temp = tempfile::tempdir().expect("create temp dir");
+    let token_path = temp.path().join("github_token");
+    let _path_guard = set_token_path(&token_path);
+
     // Save token
     let test_token = "ghp_test_token_1234567890abcdef";
     save_github_token(test_token).expect("save token");

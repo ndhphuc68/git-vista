@@ -7,8 +7,9 @@ import { useTranslation } from "../../i18n";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { useInspectorStore } from "../../store/useInspectorStore";
 import { pairHunkLines } from "../../utils/wordDiff";
-import { type DiffHunk, type CompareMode, type CompareFileItem } from "../../ipc/bindings";
+import { type DiffHunk, type CompareMode, type CompareFileItem } from "../../ipc/bindings.generated";
 import { DiffLineContent } from "../diff/DiffLineContent";
+import { qk } from "../../domain/queryKeys";
 
 export interface CompareDiffViewerProps {
   repoPath: string;
@@ -103,15 +104,7 @@ export const CompareDiffViewer: React.FC<CompareDiffViewerProps> = ({
   const filePath = file?.path ?? "";
 
   const { data: diff, isLoading } = useQuery({
-    queryKey: [
-      "compare-file-diff",
-      repoPath,
-      baseRev,
-      targetRev,
-      filePath,
-      mode,
-      diffIgnoreWhitespace,
-    ],
+    queryKey: qk.compareFileDiff(repoPath, baseRev, targetRev, filePath, mode, diffIgnoreWhitespace),
     queryFn: () =>
       invokeCommand.getCompareFileDiff(
         repoPath,

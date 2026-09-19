@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { AlertTriangle, Play, XCircle, FileText } from "lucide-react";
-import { type RepoStateInfo } from "../../ipc/bindings";
+import { type RepoStateInfo } from "../../ipc/bindings.generated";
 import { useTranslation } from "../../i18n";
 
 export interface InProgressOperationBannerProps {

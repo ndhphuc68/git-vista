@@ -9,6 +9,6 @@ test-results
 .codegraph
 .superpowers
 pnpm-lock.yaml
-src/ipc/bindings.ts
+src/ipc/bindings.generated.ts
 **/*.md
 skills-lock.json

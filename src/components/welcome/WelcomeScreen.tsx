@@ -17,17 +17,18 @@ import {
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { invokeCommand } from "../../ipc/client";
-import { type RepoSummary } from "../../ipc/bindings";
+import { type RepoSummary } from "../../ipc/bindings.generated";
 import { useTranslation } from "../../i18n";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { CloneModal } from "./CloneModal";
+import { qk } from "../../domain/queryKeys";
 
 interface WelcomeScreenProps {
   onSelectRepo: (repo: RepoSummary) => void;
 }
 
 /**
- * Định dạng thời gian tương đối thân thiện theo ngôn ngữ hiện tại
+ * Formats a friendly relative time in the active language
  */
 function formatRelativeTime(
   timestampMs: number | undefined,
@@ -66,7 +67,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRepo }) =>
   const [isDragging, setIsDragging] = useState(false);
   const [copiedPath, setCopiedPath] = useState<string | null>(null);
 
-  // Lưu trữ các repo được ghim vào localStorage
+  // Pinned repos are persisted to localStorage
   const [pinnedPaths, setPinnedPaths] = useState<string[]>(() => {
     try {
       const saved =
@@ -81,7 +82,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRepo }) =>
   const queryClient = useQueryClient();
 
   const { data: recents = [], isLoading } = useQuery({
-    queryKey: ["recent-repos"],
+    queryKey: qk.recentRepos(),
     queryFn: () => invokeCommand.getRecentRepos(),
   });
 
@@ -111,7 +112,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRepo }) =>
   const handleClearRecents = async () => {
     try {
       await invokeCommand.clearRecentRepos();
-      await queryClient.invalidateQueries({ queryKey: ["recent-repos"] });
+      await queryClient.invalidateQueries({ queryKey: qk.recentRepos() });
     } catch (err) {
       console.warn("Error clearing recents:", err);
     }
@@ -121,7 +122,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRepo }) =>
     e.stopPropagation();
     try {
       await invokeCommand.removeRecentRepo(path);
-      await queryClient.invalidateQueries({ queryKey: ["recent-repos"] });
+      await queryClient.invalidateQueries({ queryKey: qk.recentRepos() });
     } catch (err) {
       console.warn("Error removing recent repo:", err);
     }

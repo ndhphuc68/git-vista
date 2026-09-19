@@ -1,7 +1,8 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { CommitBox } from "../components/changes/CommitBox";
-import { DeleteBranchModal } from "../components/sidebar/DeleteBranchModal";
+import { DeleteBranchModal } from "../features/branch";
 import { useToastStore } from "../store/useToastStore";
 import { invokeCommand } from "../ipc/client";
 
@@ -44,14 +45,19 @@ describe("Undo & Toast Integration", () => {
     );
     const undoSpy = vi.spyOn(invokeCommand, "undoDeleteBranch").mockResolvedValue(undefined);
 
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
     render(
-      <DeleteBranchModal
-        isOpen={true}
-        onClose={vi.fn()}
-        repoPath="/test/repo"
-        branchName="feature-test"
-        onSuccess={vi.fn()}
-      />
+      <QueryClientProvider client={client}>
+        <DeleteBranchModal
+          isOpen={true}
+          onClose={vi.fn()}
+          repoPath="/test/repo"
+          branchName="feature-test"
+          onSuccess={vi.fn()}
+        />
+      </QueryClientProvider>
     );
 
     const deleteBtn = screen.getByRole("button", { name: /^Xoá nhánh$/i });

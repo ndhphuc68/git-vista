@@ -6,7 +6,7 @@ import {
   type CheckRunItem,
   type CheckStatus,
   type PullRequestFileItem,
-} from "../ipc/bindings";
+} from "../ipc/githubApi";
 
 const GITHUB_API_BASE = "https://api.github.com";
 

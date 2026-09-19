@@ -18,7 +18,8 @@ import { invokeCommand } from "../../ipc/client";
 import { fetchPullRequests } from "../../services/githubService";
 import { usePullRequestStore } from "../../store/usePullRequestStore";
 import { useToastStore } from "../../store/useToastStore";
-import { type GitHubPullRequest } from "../../ipc/bindings";
+import { type GitHubPullRequest } from "../../ipc/githubApi";
+import { qk } from "../../domain/queryKeys";
 
 interface PullRequestsSectionProps {
   repoPath: string;
@@ -37,13 +38,13 @@ export const PullRequestsSection: React.FC<PullRequestsSectionProps> = ({ repoPa
   const { showToast, showSuccess, showError } = useToastStore();
 
   const { data: repoInfo } = useQuery({
-    queryKey: ["github_repo_info", repoPath],
+    queryKey: qk.github.repoInfo(repoPath),
     queryFn: () => invokeCommand.getGitHubRepoInfo(repoPath),
     enabled: Boolean(repoPath),
   });
 
   const { data: token } = useQuery({
-    queryKey: ["github_token"],
+    queryKey: qk.githubToken(),
     queryFn: () => invokeCommand.getGitHubToken(),
   });
 
@@ -55,7 +56,7 @@ export const PullRequestsSection: React.FC<PullRequestsSectionProps> = ({ repoPa
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["github_prs", repoPath, repoInfo?.owner, repoInfo?.repo, apiState],
+    queryKey: qk.github.pullRequests(repoPath, apiState),
     queryFn: () => {
       if (!repoInfo?.owner || !repoInfo?.repo) return [];
       return fetchPullRequests(repoInfo.owner, repoInfo.repo, token, apiState);
@@ -81,8 +82,8 @@ export const PullRequestsSection: React.FC<PullRequestsSectionProps> = ({ repoPa
       showToast({ message: t.pullRequests.checkingOut, type: "info" });
       const res = await invokeCommand.checkoutPullRequest(repoPath, pr.number);
       showSuccess(t.pullRequests.checkoutSuccess.replace("{branch}", res.branch_name));
-      queryClient.invalidateQueries({ queryKey: ["branches", repoPath] });
-      queryClient.invalidateQueries({ queryKey: ["commit_graph", repoPath] });
+      queryClient.invalidateQueries({ queryKey: qk.branches(repoPath) });
+      queryClient.invalidateQueries({ queryKey: qk.commitGraph(repoPath) });
     } catch (err: any) {
       showError(err.message || "Lỗi khi checkout nhánh PR");
     }

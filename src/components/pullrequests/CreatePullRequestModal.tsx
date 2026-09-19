@@ -14,7 +14,10 @@ import { createPullRequest } from "../../services/githubService";
 import { usePullRequestStore } from "../../store/usePullRequestStore";
 import { useToastStore } from "../../store/useToastStore";
 import { useTranslation } from "../../i18n";
-import { Transition } from "../common/Transition";
+import { Modal } from "../../shared/ui";
+import { qk } from "../../domain/queryKeys";
+
+const TITLE_ID = "create-pr-title";
 
 export interface CreatePullRequestModalProps {
   repoPath: string;
@@ -51,7 +54,7 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
 
   // Fetch GitHub repo info (owner, repo, default_branch)
   const { data: repoInfo } = useQuery({
-    queryKey: ["github-repo-info", repoPath],
+    queryKey: qk.github.repoInfo(repoPath),
     queryFn: () => invokeCommand.getGitHubRepoInfo(repoPath),
     enabled: isOpen,
     staleTime: 60_000,
@@ -59,7 +62,7 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
 
   // Fetch branches
   const { data: branchData, refetch: refetchBranches } = useQuery({
-    queryKey: ["branches", repoPath],
+    queryKey: qk.branches(repoPath),
     queryFn: () => invokeCommand.getBranches(repoPath),
     enabled: isOpen,
     staleTime: 30_000,
@@ -79,9 +82,6 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
       setBaseBranch(repoInfo?.default_branch || "main");
       setCompareBranch(branchData?.current_branch || "main");
 
-      setTimeout(() => {
-        titleInputRef.current?.focus();
-      }, 60);
     } else if (!isOpen && prevOpenRef.current) {
       setBaseBranch("");
       setCompareBranch("");
@@ -100,19 +100,6 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
       }
     }
   }, [isOpen, repoInfo?.default_branch, branchData?.current_branch]);
-
-  // Handle ESC key to close
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        handleClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, handleClose]);
 
   // Check if compare branch has unpushed commits
   const currentCompareBranchItem = branchData?.local.find((b) => b.name === compareBranch);
@@ -197,12 +184,11 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
         type: "success",
       });
 
-      queryClient.invalidateQueries({
-        predicate: (query) =>
-          query.queryKey.some(
-            (part) => typeof part === "string" && part.includes("github-pull-requests")
-          ),
-      });
+      // This used to use a predicate searching for the string "github-pull-requests" —
+      // that string existed in no key, so the call matched nothing and the PR list
+      // never refreshed after creating a PR. Using the qk prefix instead refreshes
+      // every status filter, since we don't know which one the user is currently viewing.
+      queryClient.invalidateQueries({ queryKey: qk.github.pullRequestsAll(repoPath) });
 
       handleClose();
     } catch (err: unknown) {
@@ -214,25 +200,10 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
   };
 
   return (
-    <Transition
-      show={isOpen}
-      className="fixed inset-0 z-[9999]"
-      enterClass="animate-fade-in"
-      exitClass="opacity-0 transition-opacity duration-180 ease-macos pointer-events-none"
-      unmountOnExit={true}
-    >
-      <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
-        onClick={handleClose}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="create-pr-title"
-      >
-        <div
-          className="bg-surface rounded-xl border border-border-subtle w-full max-w-xl shadow-2xl overflow-hidden animate-scale-in"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
+    <Modal isOpen={isOpen} onClose={handleClose} size="lg" labelledBy={TITLE_ID}>
+      <>
+          {/* Header. Kept custom rather than using Modal.Header: it carries
+              the owner/repo subtitle under the title. */}
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle">
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
@@ -240,7 +211,7 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
               </div>
               <div>
                 <h3
-                  id="create-pr-title"
+                  id={TITLE_ID}
                   className="text-sm font-semibold text-primary m-0 leading-tight"
                 >
                   {t.pullRequests.createModalTitle}
@@ -365,6 +336,7 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
               </label>
               <input
                 ref={titleInputRef}
+                data-autofocus
                 id="pr-title-input"
                 aria-label={t.pullRequests.prTitle}
                 type="text"
@@ -446,8 +418,7 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
               </button>
             </div>
           </form>
-        </div>
-      </div>
-    </Transition>
+      </>
+    </Modal>
   );
 };

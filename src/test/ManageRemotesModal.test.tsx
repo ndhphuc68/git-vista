@@ -2,11 +2,12 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ManageRemotesModal } from "../components/remote/ManageRemotesModal";
-import { AddEditRemoteModal } from "../components/remote/AddEditRemoteModal";
-import { PruneConfirmModal } from "../components/remote/PruneConfirmModal";
-import { DeleteRemoteModal } from "../components/remote/DeleteRemoteModal";
+import { ManageRemotesModal } from "../features/remote/components/ManageRemotesModal";
+import { AddEditRemoteModal } from "../features/remote/components/AddEditRemoteModal";
+import { PruneConfirmModal } from "../features/remote/components/PruneConfirmModal";
+import { DeleteRemoteModal } from "../features/remote/components/DeleteRemoteModal";
 import { invokeCommand } from "../ipc/client";
+import { Z_INDEX } from "../domain/constants/zIndex";
 
 vi.mock("../ipc/client", () => ({
   invokeCommand: {
@@ -78,18 +79,75 @@ describe("ManageRemotesModal", () => {
     });
   });
 
-  it("renders with fullscreen overlay and animate-fade-in on the transition wrapper", () => {
-    renderWithClient(
-      <ManageRemotesModal isOpen={true} onClose={vi.fn()} repoPath="/test/repo" />
-    );
+  // The previous version of this test pinned the literal class "z-[9999]" on
+  // the transition wrapper. That hardcoded magic number is exactly what the
+  // shared Modal replaced with Z_INDEX, so keeping it would have frozen the
+  // defect in place (convention #4). The replacement asserts the property
+  // that actually matters and derives it from Z_INDEX rather than a literal.
+  it("renders a fullscreen overlay on the base modal layer, below stacked children", () => {
+    renderWithClient(<ManageRemotesModal isOpen={true} onClose={vi.fn()} repoPath="/test/repo" />);
 
     const dialog = screen.getByRole("dialog");
     expect(dialog).toHaveClass("fixed", "inset-0");
+    expect(dialog.style.zIndex).toBe(String(Z_INDEX.modal));
+
+    // The three sub-modals render with `stacked`, so the parent must sit
+    // strictly below them or a child's backdrop would fall behind its parent.
+    expect(Z_INDEX.modal).toBeLessThan(Z_INDEX.modalStacked);
 
     const transitionContainer = dialog.parentElement;
-    expect(transitionContainer).toHaveClass("fixed", "inset-0", "z-[9999]");
     expect(transitionContainer).toHaveClass("animate-fade-in");
     expect(transitionContainer).not.toHaveClass("animate-scale-in");
+  });
+
+  // This is the case the stacked/Escape-registry work in Phase 0 existed for,
+  // and the reason this modal was migrated last. Before that registry, each
+  // modal attached its own window listener and a single Escape press closed
+  // the whole stack; ManageRemotesModal worked around it with a manual
+  // "ignore Escape while a sub-modal is open" guard, which the migration
+  // deleted. These tests make sure the primitive really does replace it.
+  describe("nested sub-modals", () => {
+    it("Escape closes only the sub-modal, leaving the parent open", async () => {
+      const onClose = vi.fn();
+      renderWithClient(
+        <ManageRemotesModal isOpen={true} onClose={onClose} repoPath="/test/repo" />
+      );
+
+      fireEvent.click(screen.getAllByRole("button", { name: /Thêm Remote/i })[0]!);
+      await screen.findByPlaceholderText(/ví dụ: origin, upstream/i);
+
+      fireEvent.keyDown(window, { key: "Escape" });
+
+      // The child closed, the parent did not get an onClose call.
+      await waitFor(() =>
+        expect(screen.queryByPlaceholderText(/ví dụ: origin, upstream/i)).not.toBeInTheDocument()
+      );
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it("Escape closes the parent once no sub-modal is open", async () => {
+      const onClose = vi.fn();
+      renderWithClient(
+        <ManageRemotesModal isOpen={true} onClose={onClose} repoPath="/test/repo" />
+      );
+
+      fireEvent.keyDown(window, { key: "Escape" });
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it("renders the sub-modal above the parent", async () => {
+      renderWithClient(
+        <ManageRemotesModal isOpen={true} onClose={vi.fn()} repoPath="/test/repo" />
+      );
+
+      fireEvent.click(screen.getAllByRole("button", { name: /Thêm Remote/i })[0]!);
+      await screen.findByPlaceholderText(/ví dụ: origin, upstream/i);
+
+      const layers = screen.getAllByRole("dialog").map((d) => Number(d.style.zIndex));
+      expect(Math.max(...layers)).toBe(Z_INDEX.modalStacked);
+      expect(Math.min(...layers)).toBe(Z_INDEX.modal);
+    });
   });
 
   it("opens AddEditRemoteModal and submits new remote", async () => {
@@ -141,7 +199,7 @@ describe("ManageRemotesModal", () => {
     fireEvent.click(pruneBtn);
 
     await waitFor(() => {
-      expect(invokeCommand.pruneRemote).toHaveBeenCalledWith("/test/repo", "origin");
+      expect(invokeCommand.pruneRemote).toHaveBeenCalledWith("/test/repo", "origin", undefined);
       expect(onSuccess).toHaveBeenCalledWith(["origin/stale-branch"]);
     });
   });

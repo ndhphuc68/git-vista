@@ -13,7 +13,7 @@ import {
 import { useTranslation } from "../../../i18n";
 import { invokeCommand } from "../../../ipc/client";
 import { testGitHubToken } from "../../../services/githubService";
-import { type GitHubUserSummary } from "../../../ipc/bindings";
+import { type GitHubUserSummary } from "../../../ipc/githubApi";
 
 export const GitHubSettingsTab: React.FC = () => {
   const { t } = useTranslation();

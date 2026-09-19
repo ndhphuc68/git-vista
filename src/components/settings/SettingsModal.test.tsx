@@ -47,9 +47,12 @@ describe("SettingsModal", () => {
     useSettingsStore.getState().openSettings("profile");
     render(<SettingsModal currentRepoPath={null} />);
 
-    const dialog = screen.getByRole("dialog");
-    const modalBox = dialog.firstElementChild;
-    expect(modalBox).toHaveClass("w-[85vw]");
-    expect(modalBox).toHaveClass("h-[85vh]");
+    // Under the shared Modal the panel is the dialog's child and the sized
+    // container sits inside it, so this reaches for the sized box by test id
+    // rather than by position. The assertion itself is unchanged: the
+    // settings dialog is sized against the viewport, not its content.
+    const sizedBox = screen.getByTestId("modal-panel").firstElementChild;
+    expect(sizedBox).toHaveClass("w-[85vw]");
+    expect(sizedBox).toHaveClass("h-[85vh]");
   });
 });

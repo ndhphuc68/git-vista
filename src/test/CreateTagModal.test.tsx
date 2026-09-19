@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { CreateTagModal } from "../components/tag/CreateTagModal";
+import { CreateTagModal } from "../features/tag";
 import { invokeCommand } from "../ipc/client";
 
 vi.mock("../ipc/client", () => ({
@@ -9,13 +10,20 @@ vi.mock("../ipc/client", () => ({
   },
 }));
 
+function renderWithClient(ui: React.ReactElement) {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+}
+
 describe("CreateTagModal", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("does not render when isOpen is false", () => {
-    render(
+    renderWithClient(
       <CreateTagModal
         isOpen={false}
         onClose={vi.fn()}
@@ -27,7 +35,7 @@ describe("CreateTagModal", () => {
   });
 
   it("renders target commit SHA and summary", () => {
-    render(
+    renderWithClient(
       <CreateTagModal
         isOpen={true}
         onClose={vi.fn()}
@@ -42,7 +50,7 @@ describe("CreateTagModal", () => {
   });
 
   it("auto-sanitizes spaces to dash and removes invalid characters", () => {
-    render(
+    renderWithClient(
       <CreateTagModal
         isOpen={true}
         onClose={vi.fn()}
@@ -60,7 +68,7 @@ describe("CreateTagModal", () => {
     const onSuccess = vi.fn();
     (invokeCommand.createTag as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
 
-    render(
+    renderWithClient(
       <CreateTagModal
         isOpen={true}
         onClose={onClose}
@@ -93,7 +101,7 @@ describe("CreateTagModal", () => {
     const onSuccess = vi.fn();
     (invokeCommand.createTag as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
 
-    render(
+    renderWithClient(
       <CreateTagModal
         isOpen={true}
         onClose={onClose}
@@ -131,7 +139,7 @@ describe("CreateTagModal", () => {
   });
 
   it("displays validation errors for empty name and empty annotated message", async () => {
-    render(
+    renderWithClient(
       <CreateTagModal
         isOpen={true}
         onClose={vi.fn()}
@@ -159,7 +167,7 @@ describe("CreateTagModal", () => {
 
   it("closes when cancel button is clicked or Escape key pressed", () => {
     const onClose = vi.fn();
-    render(
+    renderWithClient(
       <CreateTagModal
         isOpen={true}
         onClose={onClose}

@@ -6,7 +6,7 @@ import { useTranslation } from "../../i18n";
 import { useToastStore } from "../../store/useToastStore";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
-import { Transition } from "../common/Transition";
+import { Modal } from "../../shared/ui";
 import { RebaseCommitRow } from "./RebaseCommitRow";
 import { RebaseLivePreview } from "./RebaseLivePreview";
 import type {
@@ -14,9 +14,12 @@ import type {
   RebasePlanStep,
   RebaseActionKind,
   InteractiveRebaseResult,
-} from "../../ipc/bindings";
+} from "../../ipc/bindings.generated";
+import { qk } from "../../domain/queryKeys";
 
 const EMPTY_COMMITS: RebaseCommitItem[] = [];
+
+const TITLE_ID = "interactive-rebase-title";
 
 export interface InteractiveRebaseModalProps {
   isOpen: boolean;
@@ -48,7 +51,7 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
 
   // Fetch commits between base and HEAD
   const { data: fetchedCommits = EMPTY_COMMITS, isLoading } = useQuery({
-    queryKey: ["rebase-commits", repoPath, baseCommitId],
+    queryKey: qk.rebaseCommits(repoPath, baseCommitId),
     queryFn: () => invokeCommand.getRebaseCommits(repoPath, baseCommitId),
     enabled: isOpen && Boolean(repoPath) && Boolean(baseCommitId),
   });
@@ -77,17 +80,8 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
     return map;
   }, [fetchedCommits]);
 
-  // Handle ESC key to close
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !submitting) {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, submitting, onClose]);
+  // Escape is handled by Modal via closeOnEscape below, which is disabled
+  // while a rebase is in flight.
 
   // Sanitize index 0 action: cannot be Squash or Fixup
   const sanitizeFirstAction = (updatedSteps: RebasePlanStep[]): RebasePlanStep[] => {
@@ -258,26 +252,26 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
   };
 
   return (
-    <Transition
-      show={isOpen}
-      duration={150}
-      className="fixed inset-0 z-[9999]"
-      enterClass="animate-fade-in"
-      exitClass="opacity-0 transition-opacity duration-150 ease-macos pointer-events-none"
-      unmountOnExit={true}
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="xl"
+      labelledBy={TITLE_ID}
+      // A rebase in flight must not be abandoned midway, so neither Escape
+      // nor a stray backdrop click may close the modal while submitting.
+      // The backdrop used to close regardless, which was inconsistent with
+      // the Escape guard and both Cancel buttons; it is now guarded too.
+      closeOnEscape={!submitting}
+      closeOnBackdrop={!submitting}
     >
-      <div
-        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
-        onClick={onClose}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="interactive-rebase-title"
-      >
-        <div
-          className="relative w-full max-w-5xl h-[85vh] bg-surface border border-border-subtle rounded-xl shadow-2xl overflow-hidden flex flex-col animate-scale-in"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
+      {/* Fixed height, not just a max: the two-column body below sizes its
+          scroll areas with flex-1/h-full, which needs a definite height to
+          resolve against. Modal's panel only caps height (max-h-[90vh]), so
+          without this the modal would shrink to fit a short commit list
+          instead of staying the 85vh it was before. */}
+      <div className="h-[85vh] flex flex-col min-h-0">
+          {/* Header. Kept custom rather than using Modal.Header: it carries a
+              subtitle and its close button is disabled while submitting. */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle bg-surface-subtle/40 shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
@@ -285,7 +279,7 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
               </div>
               <div>
                 <h2
-                  id="interactive-rebase-title"
+                  id={TITLE_ID}
                   className="text-base font-semibold text-primary flex items-center gap-2"
                 >
                   {t.modals.interactiveRebase.title}
@@ -437,8 +431,7 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
               </button>
             </div>
           </div>
-        </div>
       </div>
-    </Transition>
+    </Modal>
   );
 };

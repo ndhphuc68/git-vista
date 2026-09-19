@@ -11,16 +11,17 @@ import {
 } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
+import { qk } from "../../domain/queryKeys";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
 import { useToastStore } from "../../store/useToastStore";
 import { invokeCommand } from "../../ipc/client";
-import { type GraphCommitNode } from "../../ipc/bindings";
+import { type GraphCommitNode } from "../../ipc/bindings.generated";
 import { GraphSvgLane } from "./GraphSvgLane";
 import { useTranslation } from "../../i18n";
-import { CreateTagModal } from "../tag";
-import { CreateBranchModal } from "../sidebar/CreateBranchModal";
+import { CreateTagModal } from "../../features/tag";
+import { CreateBranchModal } from "../../features/branch";
 import { CherryPickModal } from "../modals/CherryPickModal";
 import { RevertModal } from "../modals/RevertModal";
 import { InteractiveRebaseModal } from "../rebase";
@@ -170,7 +171,7 @@ export const CommitGraph: React.FC = () => {
   };
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: ["commit-graph", currentRepo?.path],
+    queryKey: qk.commitGraph(currentRepo?.path ?? ""),
     queryFn: ({ pageParam = 0 }) =>
       invokeCommand.getCommitGraph(currentRepo!.path, pageParam, PAGE_SIZE),
     initialPageParam: 0,
@@ -182,7 +183,7 @@ export const CommitGraph: React.FC = () => {
   });
 
   const { data: repoStatus } = useQuery({
-    queryKey: ["repo_status", currentRepo?.path],
+    queryKey: qk.repo.status(currentRepo?.path ?? ""),
     queryFn: () => invokeCommand.getRepoStatus(currentRepo!.path),
     enabled: Boolean(currentRepo),
   });
@@ -636,8 +637,8 @@ export const CommitGraph: React.FC = () => {
           targetCommitSummary={createTagCommit.summary}
           onSuccess={() => {
             setCreateTagCommit(null);
-            queryClient.invalidateQueries({ queryKey: ["commit-graph"] });
-            queryClient.invalidateQueries({ queryKey: ["tags"] });
+            queryClient.invalidateQueries({ queryKey: qk.commitGraph(currentRepo.path) });
+            queryClient.invalidateQueries({ queryKey: qk.tags(currentRepo.path) });
           }}
         />
       )}
@@ -650,8 +651,8 @@ export const CommitGraph: React.FC = () => {
           targetCommit={createBranchCommit.id}
           onSuccess={() => {
             setCreateBranchCommit(null);
-            queryClient.invalidateQueries({ queryKey: ["commit-graph"] });
-            queryClient.invalidateQueries({ queryKey: ["branches"] });
+            queryClient.invalidateQueries({ queryKey: qk.commitGraph(currentRepo.path) });
+            queryClient.invalidateQueries({ queryKey: qk.branches(currentRepo.path) });
           }}
         />
       )}
@@ -671,10 +672,10 @@ export const CommitGraph: React.FC = () => {
           onSuccess={(result) => {
             setCherryPickCommit(null);
             if (result.status === "Committed") {
-              queryClient.invalidateQueries({ queryKey: ["commit-graph"] });
-              queryClient.invalidateQueries({ queryKey: ["repo_status"] });
-              queryClient.invalidateQueries({ queryKey: ["repo_head"] });
-              queryClient.invalidateQueries({ queryKey: ["branches"] });
+              queryClient.invalidateQueries({ queryKey: qk.commitGraph(currentRepo.path) });
+              queryClient.invalidateQueries({ queryKey: qk.repo.status(currentRepo.path) });
+              queryClient.invalidateQueries({ queryKey: qk.repo.head(currentRepo.path) });
+              queryClient.invalidateQueries({ queryKey: qk.branches(currentRepo.path) });
               const undoToken = result.undo_token;
               useToastStore.getState().showSuccess(
                 t.modals.cherryPick.successToast
@@ -683,21 +684,21 @@ export const CommitGraph: React.FC = () => {
                 undoToken
                   ? async () => {
                       await invokeCommand.undoCommit(currentRepo.path, undoToken);
-                      queryClient.invalidateQueries();
+                      queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
                     }
                   : undefined,
                 t.common.undo
               );
             } else if (result.status === "Staged") {
-              queryClient.invalidateQueries({ queryKey: ["repo_status"] });
+              queryClient.invalidateQueries({ queryKey: qk.repo.status(currentRepo.path) });
               useToastStore.getState().showToast({
                 message: t.modals.cherryPick.stagedToast,
                 type: "info",
               });
               setActiveScreen("changes");
             } else if (result.status === "Conflict") {
-              queryClient.invalidateQueries({ queryKey: ["repo_status"] });
-              queryClient.invalidateQueries({ queryKey: ["repo_state"] });
+              queryClient.invalidateQueries({ queryKey: qk.repo.status(currentRepo.path) });
+              queryClient.invalidateQueries({ queryKey: qk.repo.state(currentRepo.path) });
               useToastStore.getState().showToast({
                 message: t.modals.cherryPick.conflictToast,
                 type: "error",
@@ -722,10 +723,10 @@ export const CommitGraph: React.FC = () => {
           onSuccess={(result) => {
             setRevertCommit(null);
             if (result.status === "Committed") {
-              queryClient.invalidateQueries({ queryKey: ["commit-graph"] });
-              queryClient.invalidateQueries({ queryKey: ["repo_status"] });
-              queryClient.invalidateQueries({ queryKey: ["repo_head"] });
-              queryClient.invalidateQueries({ queryKey: ["branches"] });
+              queryClient.invalidateQueries({ queryKey: qk.commitGraph(currentRepo.path) });
+              queryClient.invalidateQueries({ queryKey: qk.repo.status(currentRepo.path) });
+              queryClient.invalidateQueries({ queryKey: qk.repo.head(currentRepo.path) });
+              queryClient.invalidateQueries({ queryKey: qk.branches(currentRepo.path) });
               const undoToken = result.undo_token;
               useToastStore.getState().showSuccess(
                 t.modals.revert.successToast
@@ -734,21 +735,21 @@ export const CommitGraph: React.FC = () => {
                 undoToken
                   ? async () => {
                       await invokeCommand.undoCommit(currentRepo.path, undoToken);
-                      queryClient.invalidateQueries();
+                      queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
                     }
                   : undefined,
                 t.common.undo
               );
             } else if (result.status === "Staged") {
-              queryClient.invalidateQueries({ queryKey: ["repo_status"] });
+              queryClient.invalidateQueries({ queryKey: qk.repo.status(currentRepo.path) });
               useToastStore.getState().showToast({
                 message: t.modals.revert.stagedToast,
                 type: "info",
               });
               setActiveScreen("changes");
             } else if (result.status === "Conflict") {
-              queryClient.invalidateQueries({ queryKey: ["repo_status"] });
-              queryClient.invalidateQueries({ queryKey: ["repo_state"] });
+              queryClient.invalidateQueries({ queryKey: qk.repo.status(currentRepo.path) });
+              queryClient.invalidateQueries({ queryKey: qk.repo.state(currentRepo.path) });
               useToastStore.getState().showToast({
                 message: t.modals.revert.conflictToast,
                 type: "error",
@@ -768,10 +769,10 @@ export const CommitGraph: React.FC = () => {
           baseCommitSummary={interactiveRebaseCommit.summary}
           onRebaseSuccess={() => {
             setInteractiveRebaseCommit(null);
-            queryClient.invalidateQueries({ queryKey: ["commit-graph"] });
-            queryClient.invalidateQueries({ queryKey: ["repo_status"] });
-            queryClient.invalidateQueries({ queryKey: ["repo_head"] });
-            queryClient.invalidateQueries({ queryKey: ["branches"] });
+            queryClient.invalidateQueries({ queryKey: qk.commitGraph(currentRepo.path) });
+            queryClient.invalidateQueries({ queryKey: qk.repo.status(currentRepo.path) });
+            queryClient.invalidateQueries({ queryKey: qk.repo.head(currentRepo.path) });
+            queryClient.invalidateQueries({ queryKey: qk.branches(currentRepo.path) });
           }}
         />
       )}

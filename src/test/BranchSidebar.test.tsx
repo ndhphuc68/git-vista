@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { BranchSidebar } from "../components/sidebar/BranchSidebar";
+import { BranchSidebar } from "../features/branch";
 import { useRepoStore } from "../store/useRepoStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 

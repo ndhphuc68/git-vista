@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { GitCommit, Trash2, Layers, Edit3, GitBranch } from "lucide-react";
 import clsx from "clsx";
-import type { RebasePlanStep, RebaseCommitItem } from "../../ipc/bindings";
+import type { RebasePlanStep, RebaseCommitItem } from "../../ipc/bindings.generated";
 import { useTranslation } from "../../i18n";
 
 export interface RebaseLivePreviewProps {
