@@ -20,6 +20,7 @@ import { AddEditRemoteModal } from "./AddEditRemoteModal";
 import { DeleteRemoteModal } from "./DeleteRemoteModal";
 import { PruneConfirmModal } from "./PruneConfirmModal";
 import type { RemoteItem } from "../../ipc/bindings";
+import { qk } from "../../domain/queryKeys";
 
 export interface ManageRemotesModalProps {
   isOpen: boolean;
@@ -51,7 +52,7 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["remotes", repoPath],
+    queryKey: qk.remotes(repoPath),
     queryFn: () => invokeCommand.getRemotes(repoPath),
     enabled: isOpen && Boolean(repoPath),
   });
@@ -101,8 +102,11 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
 
   const refreshData = () => {
     refetch();
-    queryClient.invalidateQueries({ queryKey: ["remotes", repoPath] });
-    queryClient.invalidateQueries({ queryKey: ["branches", repoPath] });
+    queryClient.invalidateQueries({ queryKey: qk.remotes(repoPath) });
+    queryClient.invalidateQueries({ queryKey: qk.branches(repoPath) });
+    // Sửa remote URL có thể đổi owner/repo GitHub tương ứng, nên phải làm mới
+    // luôn cache repoInfo — trước đây bug này khiến repoInfo bị stale sau khi đổi remote.
+    queryClient.invalidateQueries({ queryKey: qk.github.repoInfo(repoPath) });
   };
 
   return (

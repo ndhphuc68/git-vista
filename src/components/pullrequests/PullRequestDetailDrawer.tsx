@@ -18,6 +18,7 @@ import { invokeCommand } from "../../ipc/client";
 import { fetchPullRequestDetail } from "../../services/githubService";
 import { usePullRequestStore } from "../../store/usePullRequestStore";
 import { useToastStore } from "../../store/useToastStore";
+import { qk } from "../../domain/queryKeys";
 
 interface PullRequestDetailDrawerProps {
   repoPath: string;
@@ -42,18 +43,20 @@ export const PullRequestDetailDrawer: React.FC<PullRequestDetailDrawerProps> = (
   }, [isDrawerOpen, closeDrawer]);
 
   const { data: repoInfo } = useQuery({
-    queryKey: ["github_repo_info", repoPath],
+    queryKey: qk.github.repoInfo(repoPath),
     queryFn: () => invokeCommand.getGitHubRepoInfo(repoPath),
     enabled: Boolean(repoPath),
   });
 
   const { data: token } = useQuery({
-    queryKey: ["github_token"],
+    queryKey: qk.githubToken(),
     queryFn: () => invokeCommand.getGitHubToken(),
   });
 
+  // selectedPr?.number có thể undefined trước khi PR được chọn; enabled bên dưới
+  // đảm bảo query chỉ chạy khi có số PR hợp lệ, nên dùng ?? 0 làm giá trị giữ chỗ.
   const { data: detail } = useQuery({
-    queryKey: ["github_pr_detail", repoPath, repoInfo?.owner, repoInfo?.repo, selectedPr?.number],
+    queryKey: qk.github.pullRequestDetail(repoPath, selectedPr?.number ?? 0),
     queryFn: () => {
       if (!repoInfo?.owner || !repoInfo?.repo || !selectedPr?.number) {
         throw new Error("Missing parameters for PR detail");
@@ -73,8 +76,8 @@ export const PullRequestDetailDrawer: React.FC<PullRequestDetailDrawerProps> = (
       showToast({ message: t.pullRequests.checkingOut, type: "info" });
       const res = await invokeCommand.checkoutPullRequest(repoPath, pr.number);
       showSuccess(t.pullRequests.checkoutSuccess.replace("{branch}", res.branch_name));
-      queryClient.invalidateQueries({ queryKey: ["branches", repoPath] });
-      queryClient.invalidateQueries({ queryKey: ["commit_graph", repoPath] });
+      queryClient.invalidateQueries({ queryKey: qk.branches(repoPath) });
+      queryClient.invalidateQueries({ queryKey: qk.commitGraph(repoPath) });
     } catch (err: any) {
       showError(err.message || "Lỗi khi checkout nhánh PR");
     } finally {

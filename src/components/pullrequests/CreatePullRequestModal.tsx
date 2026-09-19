@@ -15,6 +15,7 @@ import { usePullRequestStore } from "../../store/usePullRequestStore";
 import { useToastStore } from "../../store/useToastStore";
 import { useTranslation } from "../../i18n";
 import { Transition } from "../common/Transition";
+import { qk } from "../../domain/queryKeys";
 
 export interface CreatePullRequestModalProps {
   repoPath: string;
@@ -51,7 +52,7 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
 
   // Fetch GitHub repo info (owner, repo, default_branch)
   const { data: repoInfo } = useQuery({
-    queryKey: ["github-repo-info", repoPath],
+    queryKey: qk.github.repoInfo(repoPath),
     queryFn: () => invokeCommand.getGitHubRepoInfo(repoPath),
     enabled: isOpen,
     staleTime: 60_000,
@@ -59,7 +60,7 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
 
   // Fetch branches
   const { data: branchData, refetch: refetchBranches } = useQuery({
-    queryKey: ["branches", repoPath],
+    queryKey: qk.branches(repoPath),
     queryFn: () => invokeCommand.getBranches(repoPath),
     enabled: isOpen,
     staleTime: 30_000,
