@@ -43,7 +43,7 @@ import { useTranslation } from "../../../i18n";
 import { buildBranchTree, type BranchTreeNode } from "../model/branchTree";
 import { NO_DIALOG, isDialog, type SidebarDialog } from "../model/sidebarDialog";
 import { useBranches, useCheckoutBranch } from "../api";
-import { useStashCommands } from "../model/useStashCommands";
+import { useApplyStash, useDropStash, usePopStash } from "../../stash/api";
 
 export const BranchSidebar: React.FC = () => {
   const { t } = useTranslation();
@@ -159,15 +159,53 @@ export const BranchSidebar: React.FC = () => {
   const branchTree = useMemo(() => buildBranchTree(localBranches), [localBranches]);
   const remoteBranchTree = useMemo(() => buildBranchTree(remoteBranches), [remoteBranches]);
 
-  // Stash commands live in their own module until features/stash exists. Called
-  // before the early return below, because hook order must not depend on it.
-  const {
-    applyStash: handleApplyStash,
-    popStash: handlePopStash,
-    dropStash: handleDropStash,
-  } = useStashCommands(currentRepo?.path ?? "", stashes, () => setSelectedStash(null));
+  // Stash commands come from features/stash. The wrappers below keep the
+  // confirm prompt, the undo toast and the error style that the sidebar had
+  // before — none of that belongs in a mutation hook.
+  const applyStashMutation = useApplyStash(currentRepo?.path ?? "");
+  const popStashMutation = usePopStash(currentRepo?.path ?? "");
+  const dropStashMutation = useDropStash(currentRepo?.path ?? "");
 
   if (!currentRepo) return null;
+
+  const handleApplyStash = async (index: number) => {
+    try {
+      await applyStashMutation.mutateAsync({ index });
+    } catch (err: unknown) {
+      alert(`Khong the ap dung stash: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
+
+  const handlePopStash = async (index: number) => {
+    try {
+      await popStashMutation.mutateAsync({ index });
+      setSelectedStash(null);
+    } catch (err: unknown) {
+      alert(`Khong the pop stash: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
+
+  const handleDropStash = async (index: number) => {
+    if (!window.confirm("Xoa stash nay?")) return;
+    const stashToDrop = stashes[index];
+    try {
+      const receipt = await dropStashMutation.mutateAsync({ index });
+      setSelectedStash(null);
+      if (stashToDrop) {
+        useToastStore.getState().showToast({
+          message: `Đã xoá stash@{${index}}`,
+          type: "success",
+          durationMs: 10000,
+          undoAction: async () => {
+            await invokeCommand.undoDropStash(currentRepo.path, receipt);
+            queryClient.invalidateQueries({ queryKey: qk.stashes(currentRepo.path) });
+          },
+        });
+      }
+    } catch (err: unknown) {
+      useToastStore.getState().showError(mapGitError(err));
+    }
+  };
 
   const invalidateRepo = () => {
     queryClient.invalidateQueries({ queryKey: qk.branches(currentRepo.path) });

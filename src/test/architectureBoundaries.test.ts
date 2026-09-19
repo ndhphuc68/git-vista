@@ -28,15 +28,12 @@ function collectSourceFiles(dir: string): string[] {
 /**
  * Files allowed to import ipc/ outside api/, each with its reason and exit
  * condition. Every entry is temporary — shrink this list, never grow it.
- * Task 9 adds CheckoutConflictModal here when it moves into the feature.
  */
 const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {
   "features/branch/components/DeleteBranchModal.tsx":
     "undo toast calls undoDeleteBranch; removed once the undo domain has a hook",
   "features/branch/components/BranchSidebar.tsx":
     "still queries remotes, stashes, tags and runs merge/rebase; removed as features/remote, features/stash and the remaining tag commands land in slice 2",
-  "features/branch/model/useStashCommands.ts":
-    "stash commands lifted out of the sidebar verbatim; moves to features/stash in slice 2",
   "features/stash/components/StashDiffView.tsx":
     "reads commit details to render the stash diff; removed once the commit domain has a hook",
 };
