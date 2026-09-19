@@ -1,8 +1,17 @@
+import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { PruneConfirmModal } from "../components/remote/PruneConfirmModal";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { PruneConfirmModal } from "../features/remote/components/PruneConfirmModal";
 import { invokeCommand } from "../ipc/client";
 import { useToastStore } from "../store/useToastStore";
+
+function renderWithClient(ui: React.ReactElement) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+}
 
 vi.mock("../ipc/client", () => ({
   invokeCommand: {
@@ -28,13 +37,13 @@ describe("PruneConfirmModal", () => {
   };
 
   it("does not render when closed", () => {
-    render(<PruneConfirmModal {...defaults} isOpen={false} onClose={vi.fn()} />);
+    renderWithClient(<PruneConfirmModal {...defaults} isOpen={false} onClose={vi.fn()} />);
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("shows the target remote and the safety notice", () => {
-    render(<PruneConfirmModal {...defaults} onClose={vi.fn()} />);
+    renderWithClient(<PruneConfirmModal {...defaults} onClose={vi.fn()} />);
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText("origin")).toBeInTheDocument();
@@ -42,7 +51,7 @@ describe("PruneConfirmModal", () => {
   });
 
   it("is labelled by its title for screen readers", () => {
-    render(<PruneConfirmModal {...defaults} onClose={vi.fn()} />);
+    renderWithClient(<PruneConfirmModal {...defaults} onClose={vi.fn()} />);
     const dialog = screen.getByRole("dialog");
 
     expect(dialog).toHaveAttribute("aria-modal", "true");
@@ -59,11 +68,11 @@ describe("PruneConfirmModal", () => {
     } as never);
     const showSuccess = vi.spyOn(useToastStore.getState(), "showSuccess");
 
-    render(<PruneConfirmModal {...defaults} onClose={onClose} onSuccess={onSuccess} />);
+    renderWithClient(<PruneConfirmModal {...defaults} onClose={onClose} onSuccess={onSuccess} />);
     fireEvent.click(screen.getByRole("button", { name: /dọn dẹp ngay/i }));
 
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
-    expect(invokeCommand.pruneRemote).toHaveBeenCalledWith("/test/repo", "origin");
+    expect(invokeCommand.pruneRemote).toHaveBeenCalledWith("/test/repo", "origin", undefined);
     expect(onSuccess).toHaveBeenCalledWith(["origin/old-a", "origin/old-b"]);
     expect(showSuccess).toHaveBeenCalledWith(expect.stringContaining("2"));
   });
@@ -74,7 +83,7 @@ describe("PruneConfirmModal", () => {
     const showToast = vi.spyOn(useToastStore.getState(), "showToast");
     const showSuccess = vi.spyOn(useToastStore.getState(), "showSuccess");
 
-    render(<PruneConfirmModal {...defaults} onClose={onClose} />);
+    renderWithClient(<PruneConfirmModal {...defaults} onClose={onClose} />);
     fireEvent.click(screen.getByRole("button", { name: /dọn dẹp ngay/i }));
 
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
@@ -87,7 +96,7 @@ describe("PruneConfirmModal", () => {
     const onSuccess = vi.fn();
     vi.mocked(invokeCommand.pruneRemote).mockRejectedValue(new Error("network unreachable"));
 
-    render(<PruneConfirmModal {...defaults} onClose={onClose} onSuccess={onSuccess} />);
+    renderWithClient(<PruneConfirmModal {...defaults} onClose={onClose} onSuccess={onSuccess} />);
     fireEvent.click(screen.getByRole("button", { name: /dọn dẹp ngay/i }));
 
     expect(await screen.findByText(/network unreachable/i)).toBeInTheDocument();
@@ -97,7 +106,7 @@ describe("PruneConfirmModal", () => {
 
   it("closes on cancel without pruning", () => {
     const onClose = vi.fn();
-    render(<PruneConfirmModal {...defaults} onClose={onClose} />);
+    renderWithClient(<PruneConfirmModal {...defaults} onClose={onClose} />);
 
     fireEvent.click(screen.getByRole("button", { name: /^Huỷ/i }));
 
@@ -107,7 +116,7 @@ describe("PruneConfirmModal", () => {
 
   it("closes on the header close button", () => {
     const onClose = vi.fn();
-    render(<PruneConfirmModal {...defaults} onClose={onClose} />);
+    renderWithClient(<PruneConfirmModal {...defaults} onClose={onClose} />);
 
     fireEvent.click(screen.getByLabelText("Đóng"));
 
@@ -116,7 +125,7 @@ describe("PruneConfirmModal", () => {
 
   it("closes on Escape", () => {
     const onClose = vi.fn();
-    render(<PruneConfirmModal {...defaults} onClose={onClose} />);
+    renderWithClient(<PruneConfirmModal {...defaults} onClose={onClose} />);
 
     fireEvent.keyDown(window, { key: "Escape" });
 
@@ -125,7 +134,7 @@ describe("PruneConfirmModal", () => {
 
   it("does not react to Escape while closed", () => {
     const onClose = vi.fn();
-    render(<PruneConfirmModal {...defaults} isOpen={false} onClose={onClose} />);
+    renderWithClient(<PruneConfirmModal {...defaults} isOpen={false} onClose={onClose} />);
 
     fireEvent.keyDown(window, { key: "Escape" });
 

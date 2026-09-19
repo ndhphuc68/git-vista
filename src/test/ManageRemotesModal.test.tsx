@@ -2,9 +2,9 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ManageRemotesModal } from "../components/remote/ManageRemotesModal";
+import { ManageRemotesModal } from "../features/remote/components/ManageRemotesModal";
 import { AddEditRemoteModal } from "../components/remote/AddEditRemoteModal";
-import { PruneConfirmModal } from "../components/remote/PruneConfirmModal";
+import { PruneConfirmModal } from "../features/remote/components/PruneConfirmModal";
 import { DeleteRemoteModal } from "../components/remote/DeleteRemoteModal";
 import { invokeCommand } from "../ipc/client";
 import { Z_INDEX } from "../domain/constants/zIndex";
@@ -85,9 +85,7 @@ describe("ManageRemotesModal", () => {
   // defect in place (convention #4). The replacement asserts the property
   // that actually matters and derives it from Z_INDEX rather than a literal.
   it("renders a fullscreen overlay on the base modal layer, below stacked children", () => {
-    renderWithClient(
-      <ManageRemotesModal isOpen={true} onClose={vi.fn()} repoPath="/test/repo" />
-    );
+    renderWithClient(<ManageRemotesModal isOpen={true} onClose={vi.fn()} repoPath="/test/repo" />);
 
     const dialog = screen.getByRole("dialog");
     expect(dialog).toHaveClass("fixed", "inset-0");
@@ -201,7 +199,7 @@ describe("ManageRemotesModal", () => {
     fireEvent.click(pruneBtn);
 
     await waitFor(() => {
-      expect(invokeCommand.pruneRemote).toHaveBeenCalledWith("/test/repo", "origin");
+      expect(invokeCommand.pruneRemote).toHaveBeenCalledWith("/test/repo", "origin", undefined);
       expect(onSuccess).toHaveBeenCalledWith(["origin/stale-branch"]);
     });
   });

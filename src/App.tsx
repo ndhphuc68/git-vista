@@ -21,7 +21,7 @@ import { ShortcutsHelpModal } from "./components/shortcuts/ShortcutsHelpModal";
 import { SplashScreen } from "./components/splash/SplashScreen";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import { FileInspectorDrawer } from "./components/inspector/FileInspectorDrawer";
-import { ManageRemotesModal } from "./components/remote/ManageRemotesModal";
+import { ManageRemotesModal } from "./features/remote/components/ManageRemotesModal";
 import { InteractiveRebaseModal } from "./components/rebase";
 import { CompareModal } from "./components/compare";
 import { PullRequestDetailDrawer, CreatePullRequestModal } from "./components/pullrequests";

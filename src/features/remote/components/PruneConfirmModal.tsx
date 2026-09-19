@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Scissors, Cloud } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
-import { useTranslation } from "../../i18n";
-import { useToastStore } from "../../store/useToastStore";
-import { mapGitError } from "../../utils/errorMapping";
-import { Modal, Button, Alert } from "../../shared/ui";
+import { useTranslation } from "../../../i18n";
+import { useToastStore } from "../../../store/useToastStore";
+import { mapGitError } from "../../../utils/errorMapping";
+import { Modal, Button, Alert } from "../../../shared/ui";
+import { usePruneRemote } from "../api";
 
 export interface PruneConfirmModalProps {
   isOpen: boolean;
@@ -24,22 +24,21 @@ export const PruneConfirmModal: React.FC<PruneConfirmModalProps> = ({
   onSuccess,
 }) => {
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const pruneRemote = usePruneRemote(repoPath);
+  const loading = pruneRemote.isPending;
 
   useEffect(() => {
     if (isOpen) {
       setError(null);
-      setLoading(false);
     }
   }, [isOpen, remoteName]);
 
   const handlePrune = async () => {
-    setLoading(true);
     setError(null);
 
     try {
-      const res = await invokeCommand.pruneRemote(repoPath, remoteName);
+      const res = await pruneRemote.mutateAsync({ remote: remoteName });
       if (res.pruned_branches.length > 0) {
         useToastStore
           .getState()
@@ -60,8 +59,6 @@ export const PruneConfirmModal: React.FC<PruneConfirmModalProps> = ({
       onClose();
     } catch (err) {
       setError(mapGitError(err).message);
-    } finally {
-      setLoading(false);
     }
   };
 

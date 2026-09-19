@@ -33,12 +33,9 @@ import { MergeBranchModal } from "../../../components/merge/MergeBranchModal";
 import { RebaseBranchModal } from "../../../components/merge/RebaseBranchModal";
 import { CreateTagModal, DeleteTagModal } from "../../../features/tag";
 import { CompareModal } from "../../../components/compare";
-import {
-  ManageRemotesModal,
-  AddEditRemoteModal,
-  DeleteRemoteModal,
-  PruneConfirmModal,
-} from "../../../components/remote";
+import { AddEditRemoteModal, DeleteRemoteModal } from "../../../components/remote";
+import { ManageRemotesModal } from "../../remote/components/ManageRemotesModal";
+import { PruneConfirmModal } from "../../remote/components/PruneConfirmModal";
 import { useTranslation } from "../../../i18n";
 import { buildBranchTree, type BranchTreeNode } from "../model/branchTree";
 import { NO_DIALOG, isDialog, type SidebarDialog } from "../model/sidebarDialog";

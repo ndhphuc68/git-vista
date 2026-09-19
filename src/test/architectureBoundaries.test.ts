@@ -46,7 +46,10 @@ const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {
  * them is gone.
  */
 const CROSS_FEATURE_EXCEPTIONS: Record<string, string[]> = {
-  "features/branch/components/BranchSidebar.tsx": ["tag", "stash"],
+  // "remote" added when ManageRemotesModal/PruneConfirmModal moved into
+  // features/remote/components; removable once BranchSidebar's remote
+  // dialogs are reached through features/remote's own barrel (task 7).
+  "features/branch/components/BranchSidebar.tsx": ["tag", "stash", "remote"],
   // This modal belongs to the checkout-branch flow but must stash first;
   // removable once "stash then checkout" has a home of its own.
   "features/branch/components/CheckoutConflictModal.tsx": ["stash"],
