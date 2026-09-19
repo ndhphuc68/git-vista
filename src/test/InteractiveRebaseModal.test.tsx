@@ -200,4 +200,133 @@ describe("InteractiveRebaseModal", () => {
       expect(handleClose).toHaveBeenCalled();
     });
   });
+// Pinned before migrating onto the shared Modal: nothing covered the shell,
+  // and this modal guards Escape behind !submitting, which has to survive.
+  describe("shell", () => {
+    const props = {
+      isOpen: true,
+      baseCommitId: "0000000000000000000000000000000000000000",
+      baseCommitSummary: "Initial base",
+      repoPath: "/mock/repo",
+    };
+
+    it("does not render when closed", () => {
+      renderWithClient(
+        <InteractiveRebaseModal {...props} isOpen={false} onClose={vi.fn()} onRebaseSuccess={vi.fn()} />
+      );
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    it("is labelled by its title for screen readers", async () => {
+      renderWithClient(
+        <InteractiveRebaseModal {...props} onClose={vi.fn()} onRebaseSuccess={vi.fn()} />
+      );
+      const dialog = await screen.findByRole("dialog");
+
+      expect(dialog).toHaveAttribute("aria-modal", "true");
+      const labelledBy = dialog.getAttribute("aria-labelledby");
+      expect(labelledBy).toBeTruthy();
+      expect(document.getElementById(labelledBy!)).toBeTruthy();
+    });
+
+    it("closes on Escape while idle", async () => {
+      const onClose = vi.fn();
+      renderWithClient(
+        <InteractiveRebaseModal {...props} onClose={onClose} onRebaseSuccess={vi.fn()} />
+      );
+      await screen.findByRole("dialog");
+
+      fireEvent.keyDown(window, { key: "Escape" });
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not react to Escape while closed", () => {
+      const onClose = vi.fn();
+      renderWithClient(
+        <InteractiveRebaseModal {...props} isOpen={false} onClose={onClose} onRebaseSuccess={vi.fn()} />
+      );
+
+      fireEvent.keyDown(window, { key: "Escape" });
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    // A rebase in flight must not be abandoned by a stray Escape — the plan
+    // is already executing against the repo.
+    it("ignores Escape while a rebase is submitting", async () => {
+      let release: (v: unknown) => void = () => {};
+      vi.mocked(invokeCommand.executeInteractiveRebase).mockReturnValue(
+        new Promise((resolve) => {
+          release = resolve;
+        }) as never
+      );
+      const onClose = vi.fn();
+      renderWithClient(
+        <InteractiveRebaseModal {...props} onClose={onClose} onRebaseSuccess={vi.fn()} />
+      );
+      await screen.findByRole("dialog");
+
+      const submitBtn = await screen.findByRole("button", { name: /Bắt đầu Rebase/i });
+      fireEvent.click(submitBtn);
+
+      await waitFor(() => expect(invokeCommand.executeInteractiveRebase).toHaveBeenCalled());
+      fireEvent.keyDown(window, { key: "Escape" });
+
+      expect(onClose).not.toHaveBeenCalled();
+
+      release({
+        success: true,
+        status: "Success",
+        head_commit_id: "x",
+        undo_token: "t",
+        output: "",
+      });
+    });
+// Deliberate change, not a mechanical carry-over: the backdrop used to
+    // close the modal even mid-rebase, while Escape and both Cancel buttons
+    // were already guarded by !submitting. That inconsistency is now fixed,
+    // so it is pinned here.
+    it("ignores a backdrop click while a rebase is submitting", async () => {
+      let release: (v: unknown) => void = () => {};
+      vi.mocked(invokeCommand.executeInteractiveRebase).mockReturnValue(
+        new Promise((resolve) => {
+          release = resolve;
+        }) as never
+      );
+      const onClose = vi.fn();
+      renderWithClient(
+        <InteractiveRebaseModal {...props} onClose={onClose} onRebaseSuccess={vi.fn()} />
+      );
+      await screen.findByRole("dialog");
+
+      fireEvent.click(await screen.findByRole("button", { name: /Bắt đầu Rebase/i }));
+      await waitFor(() => expect(invokeCommand.executeInteractiveRebase).toHaveBeenCalled());
+
+      fireEvent.click(screen.getByTestId("modal-backdrop"));
+
+      expect(onClose).not.toHaveBeenCalled();
+
+      release({
+        success: true,
+        status: "Success",
+        head_commit_id: "x",
+        undo_token: "t",
+        output: "",
+      });
+    });
+
+    it("closes on a backdrop click while idle", async () => {
+      const onClose = vi.fn();
+      renderWithClient(
+        <InteractiveRebaseModal {...props} onClose={onClose} onRebaseSuccess={vi.fn()} />
+      );
+      await screen.findByRole("dialog");
+
+      fireEvent.click(screen.getByTestId("modal-backdrop"));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+  });
 });
