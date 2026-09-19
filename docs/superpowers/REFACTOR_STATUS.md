@@ -3,13 +3,15 @@
 > **Đọc file này trước khi làm tiếp.** Đây là điểm vào duy nhất cho công việc tái cấu trúc — nó cho biết đã làm gì, đang ở đâu, và làm gì tiếp theo.
 
 **Cập nhật**: 2026-09-19
-**Nhánh làm việc**: `refactor/phase0-foundation` (chứa GĐ0–GĐ4 + GĐ5 lát 1 dở dang, chưa merge vào `main`)
-**Tiến độ**: 5 / 8 giai đoạn xong, **GĐ5 đang làm dở — 6/11 task**
-**Việc tiếp theo**: Task 7 của GĐ5 lát 1 (union trạng thái dialog). Xem mục 10.
+**Nhánh làm việc**: `refactor/phase0-foundation` (chứa GĐ0–GĐ4 + GĐ5 lát 1, chưa merge vào `main`)
+**Tiến độ**: 5 / 8 giai đoạn xong, **GĐ5 lát 1 xong — 11/11 task**
+**Việc tiếp theo**: Giai đoạn 5 (lát 2): `remote` → `changes`. Xem mục 10.
 
-> **GĐ5 đang thực hiện, chưa xong.** Feature `tag` đã migrate trọn vẹn.
-> Feature `branch` mới làm được phần logic cây. `BranchSidebar` **chưa** tách.
-> Chi tiết ở **mục 10** — đọc mục đó trước khi làm tiếp.
+> **GĐ5 lát 1 đã xong.** Feature `tag` và `branch` đều đã migrate:
+> `src/components/sidebar/` giờ chỉ còn `PullRequestsSection.tsx`.
+> `BranchSidebar` đã tách từ 1274 xuống 619 dòng — **chưa đạt** mốc 300 dòng
+> của kế hoạch; phần còn lại phụ thuộc vào `features/remote` + `features/stash`
+> ở lát 2. Chi tiết ở **mục 10** — đọc mục đó trước khi làm tiếp.
 
 > **Còn một việc chưa xác minh của GĐ3:** chạy app Tauri thật để kiểm chứng đầu-cuối (Task 5 trong kế hoạch GĐ3). `pnpm build` xanh chứng minh kiểu khớp, **không** chứng minh dây IPC chạy đúng. Phiên làm GĐ3 không chạy được GUI nên bước này còn nợ. Xem mục 9.
 
@@ -25,7 +27,7 @@ pnpm install
 # Xác nhận mọi thứ xanh trước khi làm gì
 pnpm lint                     # phải exit 0
 pnpm build                    # phải exit 0
-pnpm test                     # phải 97 file / 602 test xanh
+pnpm test                     # phải 99 file / 618 test xanh
 pnpm check-query-keys         # "No query key literals found..."
 pnpm check-comment-language   # "All comments are in English."
 pnpm check-bindings           # "...is in sync with the Rust commands."
@@ -45,7 +47,7 @@ Nếu một trong các lệnh trên đỏ, **dừng lại và tìm nguyên nhân
 | `docs/superpowers/plans/2026-09-18-refactor-phase1-querykeys.md` | Kế hoạch GĐ1 (đã xong) |
 | `docs/superpowers/plans/2026-09-19-refactor-phase3-tauri-specta.md` | Kế hoạch GĐ3 (đã xong, trừ Task 5) |
 | `docs/superpowers/plans/2026-09-19-refactor-phase4-split-ipc-client.md` | Kế hoạch GĐ4 (đã xong) |
-| `docs/superpowers/plans/2026-09-19-refactor-phase5-features-tag-branch.md` | **Kế hoạch GĐ5 lát 1 (đang làm, 6/11 task)** |
+| `docs/superpowers/plans/2026-09-19-refactor-phase5-features-tag-branch.md` | **Kế hoạch GĐ5 lát 1 (đã xong, 11/11 task)** |
 | `docs/DESIGN_SYSTEM.md` | Design token — nguồn chuẩn cho màu, bo góc, khoảng cách |
 
 ---
@@ -221,11 +223,25 @@ Chỉ `repo` vượt 300 dòng (28 method, ~389 dòng). Xẻ **theo chỗ `comma
 
 **Một lỗi mà `pnpm build` không bắt được — phải có test riêng:** nếu quên một dòng `...xxxCommands` trong facade, **build vẫn xanh**. Call site vẫn typecheck vì kiểu của facade là kiểu suy ra, chỉ đơn giản là mất method đó — lỗi chỉ lộ lúc chạy. Đã thêm `ipcFacade.test.ts` ghim đúng **77 key** + một đại diện mỗi domain. Thí nghiệm phá: bỏ một spread → cả hai assertion đỏ.
 
+### Giai đoạn 5 lát 1 — Feature `tag` và `branch` ✅
+
+Dựng tầng `features/` và migrate trọn vẹn hai feature đầu tiên. `src/components/tag/` xoá hẳn; `src/components/sidebar/` từ 6 file còn **1** (`PullRequestsSection.tsx`).
+
+Ba thứ mới về mặt kiến trúc:
+
+- **Ranh giới ép bằng test, không chỉ bằng lint.** `architectureBoundaries.test.ts` quét source để ghim hai luật: feature không import feature khác, và chỉ `features/*/api` được chạm `ipc/`. Kèm danh sách ngoại lệ **có tên, có lý do, có điều kiện gỡ** — và một test làm đỏ nếu ngoại lệ còn sống sau khi nguyên nhân đã hết.
+- **Hook tự lo invalidation.** Modal không còn nhận `onSuccess` để gọi `invalidateRepo()` hộ; mutation hook tự invalidate `qk.repo.all` trong `onSuccess`. Có test ghim cả chiều ngược: mutation lỗi thì **không** invalidate gì.
+- **Union thay cờ rời rạc.** 12 `useState` modal trong `BranchSidebar` gom về một `SidebarDialog`. Hai dialog mở cùng lúc giờ là trạng thái **không biểu diễn được**.
+
+`BranchSidebar` tách từ 1274 → 619 dòng (4 component + 1 hook). **Chưa đạt** mốc 300 dòng của kế hoạch — lý do và phần còn lại ghi ở **mục 10.6**.
+
+Chi tiết đầy đủ, gồm ba lỗi thật phát hiện được, ở **mục 10**.
+
 ### Số liệu hiện tại
 
 | Chỉ số | Khi bắt đầu | Bây giờ |
 | --- | --- | --- |
-| Test | 73 file / ~370 | **94 file / 572** |
+| Test | 73 file / ~370 | **99 file / 618** |
 | `src/ipc/bindings.ts` viết tay | 486 dòng | **0** (do máy sinh) |
 | `src/ipc/client.ts` | 1748 dòng | **124** (facade) |
 | File IPC viết tay quá 300 dòng | 1 | **0** |
@@ -235,8 +251,12 @@ Chỉ `repo` vượt 300 dòng (28 method, ~389 dòng). Xẻ **theo chỗ `comma
 | Modal tự dựng overlay | 26 | **4** (drawer/palette/splash, cố ý) |
 | Escape handler lặp | ~30 | **1** (`useEscapeKey`) |
 | Nút Cancel/Submit bespoke | 13 + ~20 | **0** (dùng `Button`) |
+| Component gọi thẳng `ipc/client` | 36 / 60 file | **37 / 71 file** ¹ |
+| `src/components/sidebar/BranchSidebar.tsx` | 1327 dòng, 25 `useState` | **619 dòng, 10 `useState`** (đã sang `features/branch/`) |
 | `pnpm lint` | exit 1 | **exit 0** |
 | `pnpm build` | exit 0 | exit 0 |
+
+> ¹ Con số tuyệt đối gần như đứng yên (36 → 37) **không** phải vì migrate đứng yên. Mẫu số đổi: `src/components/` có thêm file từ các tính năng làm song song, còn file đã migrate thì **rời khỏi `components/`** sang `features/` nên không còn được đếm ở đây. Chỉ số theo dõi tiến độ đáng tin hơn là **76 warning `no-restricted-imports`** — nó đếm đúng số chỗ còn gọi thẳng `ipc/`, ở bất kỳ thư mục nào.
 
 ---
 
@@ -244,7 +264,7 @@ Chỉ `repo` vượt 300 dòng (28 method, ~389 dòng). Xẻ **theo chỗ `comma
 
 | GĐ | Nội dung | Rủi ro | Ghi chú |
 | --- | --- | --- | --- |
-| **5 lát 1** | ⏳ **Đang làm — 6/11 task.** Hạ tầng `features/` + `tag` (xong) + `branch` (mới xong phần logic) | Thấp mỗi bước | Chi tiết ở **mục 10** |
+| **5 lát 1** | ✅ **Xong — 11/11 task.** Hạ tầng `features/` + `tag` + `branch` đã migrate | Thấp mỗi bước | Chi tiết ở **mục 10** |
 | **5 lát 2** | Migrate `remote` rồi `changes` | Thấp mỗi bước | Chưa lập kế hoạch |
 | **5b** | Xẻ nhỏ file khổng lồ, gom state modal về union | Trung bình | Task 10 của lát 1 làm phần `BranchSidebar`; các file còn lại theo feature tương ứng |
 | **6** | Rust: `with_repo()` thay 58 chỗ lặp, gom `emit_repo_changed` (9 bản, 2 chữ ký) | Thấp | |
@@ -286,7 +306,8 @@ Thêm `src/shared/hooks/useFocusTrap.ts` — `useFocusTrap(containerRef, enabled
 | `App.tsx:284` dùng `part.includes(repo_path)` thay vì so sánh bằng | Minor | Repo `/proj` cũng khớp `/proj-legacy` → thừa refetch, không sai dữ liệu. Giờ `qk` đặt path ở vị trí cố định nên sửa rất dễ. |
 | `qk.githubToken()` chưa ai invalidate | Minor | An toàn hiện tại (không có UI ghi token). Sẽ thành bẫy khi thêm màn hình cài đặt token. |
 | `qk.github.repoInfo` không được invalidate khi đổi remote URL | Minor | Đã giảm nhẹ ở GĐ1 (`refreshData()` giờ có invalidate), nhưng chưa phủ hết đường. |
-| 175 warning lint độ phức tạp | Theo kế hoạch | Giảm dần qua GĐ5b, nâng lên `error` ở GĐ7. |
+| 248 warning lint độ phức tạp | Theo kế hoạch | Số tăng vì GĐ5 bật thêm `no-restricted-imports` (76 warning, dùng để **đo tiến độ migrate** — mỗi cái là một component còn gọi thẳng `ipc/`). Giảm dần qua các lát sau, nâng lên `error` ở GĐ7. |
+| `BranchSidebar.tsx` còn 619 dòng, mốc kế hoạch là dưới 300 | Theo kế hoạch | Phần dư là logic của domain chưa có feature (remote, stash, 2 lệnh tag, merge/rebase). Tách thêm bây giờ chỉ là cắt cho đủ số dòng. Xem **mục 10.6**. |
 | `useFocusTrap` coi phần tử là "nhìn thấy được" nếu không có `hidden`/`aria-hidden` | Minor | jsdom trả rect bằng 0 cho mọi thứ nên không dùng kích thước để xét được. Phần tử ẩn bằng CSS (`display:none`) vẫn lọt vào danh sách focus được. Chưa gặp trong thực tế vì modal ẩn nội dung bằng cách không render. |
 
 ---
@@ -343,6 +364,16 @@ Những nguyên tắc này rút ra từ GĐ0–1 và đã nhiều lần chứng 
 
 > Hai bài học tách bạch. **(a)** Khi nới một guard, liệt kê *mọi dạng cú pháp* mà nó phải bắt, đừng chỉ thử dạng mình vừa gặp. **(b)** Guard là code — nó cần test của riêng nó. Giờ có 13 test bảng ghim thẳng hàm kiểm tra (8 dạng phải bắt, 5 dạng phải bỏ qua), thay vì dựa vào việc tôi nhớ thử tay.
 
+**15. Luật lint phải thử trước khi tin là nó tồn tại.** GĐ5 Task 1 dựng một repo tạm để xác minh oxlint 1.83 thật sự có `no-restricted-imports` trước khi viết vào config. Đây là phản ứng trực tiếp với GĐ1: khi đó giả định `no-restricted-syntax` tồn tại, viết xong mới phát hiện oxlint không có luật đó và phải làm lại bằng script. Một lệnh thử mất 2 phút, rẻ hơn nhiều so với viết lại.
+
+**16. Glob không diễn tả được "feature khác".** Luật "`features/a` không được import `features/b`" nghe như việc của lint, nhưng `no-restricted-imports` chỉ so khớp đường dẫn cố định — nó không biết file *đang bị kiểm tra* nằm trong feature nào, nên không viết được luật "mọi feature khác chính nó". Quy tắc này phải ghim bằng **test quét source**. Hệ quả đáng giá: test đọc được thư mục, nên nó cũng giữ được danh sách ngoại lệ có tên kèm điều kiện gỡ — thứ mà một luật lint không làm được.
+
+**17. Khi guard báo đỏ ở chỗ trông vô lý, nghi ngờ guard trước.** GĐ5 Task 10: guard bắt 3 file chỉ import **kiểu** — đúng thứ nó được thiết kế để cho qua. Cám dỗ là thêm 3 ngoại lệ cho xanh. Nguyên nhân thật là lỗi regex: `[\s\S]*?` vượt qua ranh giới câu lệnh nên gộp `import React from "react"` với lệnh import kiểu vài dòng sau thành một. Thêm ngoại lệ ở đây là **giấu lỗi và nới luật vĩnh viễn**.
+
+> Cách phân biệt: ngoại lệ là để ghi một phụ thuộc **có thật** chưa gỡ được. Nếu file không thật sự vi phạm mà vẫn bị bắt, đó là bug của guard, không phải trường hợp cần ngoại lệ.
+
+**18. Hai khối JSX trông giống hệt nhau vẫn phải diff trước khi gộp.** GĐ5 tách `BranchSidebar`: leaf nhánh local và remote nhìn qua là một, gộp lại thành một component parameterised là chuyện hiển nhiên. Diff ra ba khác biệt thật — remote **luôn** checkout khi double-click (local chặn nếu `is_head`), có `aria-label`, không có styling HEAD. Gộp là đổi hành vi mà không test nào bắt được. Tương tự, header TAGS đếm danh sách **chưa lọc** còn thân render danh sách **đã lọc**; gộp thành một prop thì số trên header nhảy theo ô search.
+
 ---
 
 ## 8. Nếu muốn merge nhánh này
@@ -381,7 +412,7 @@ Nếu có gì sai, nghi ngờ trước hết ở `unwrap()` trong `client.ts` v�
 
 ---
 
-## 10. Giai đoạn 5 — ĐANG LÀM DỞ (6/11 task)
+## 10. Giai đoạn 5 lát 1 — ĐÃ XONG (11/11 task)
 
 **Kế hoạch**: `docs/superpowers/plans/2026-09-19-refactor-phase5-features-tag-branch.md`
 
@@ -397,24 +428,27 @@ GĐ5 được **thu hẹp phạm vi**: thay vì làm cả 4 feature trong một 
 | 4 | Chuyển 2 modal tag vào feature | ✅ `6a433a4` |
 | 5 | Gỡ shim tag, thu hẹp `invalidateRepo` | ✅ `c6db636` |
 | 6 | Tách logic cây nhánh ra `model/` | ✅ `8f970b7`, `7717a82` |
-| **7** | **Union trạng thái dialog** | ⬜ **← việc tiếp theo** |
-| 8 | `features/branch/api` — 4 mutation + 1 query | ⬜ |
-| 9 | Chuyển 4 modal branch vào feature | ⬜ |
-| 10 | **Xẻ nhỏ `BranchSidebar`** (1272 dòng → dưới 300) | ⬜ rủi ro cao nhất |
-| 11 | Cập nhật tài liệu này | ⬜ |
+| 7 | Union trạng thái dialog | ✅ `70a38b4` |
+| 8 | `features/branch/api` — 4 mutation + 1 query | ✅ |
+| 9 | Chuyển 4 modal branch vào feature | ✅ |
+| 10 | Xẻ nhỏ `BranchSidebar` | ⚠️ xong nhưng **chưa đạt mốc dòng** — xem 10.6 |
+| 11 | Cập nhật tài liệu này | ✅ |
 
 ### 10.2 Số liệu hiện tại (đo thật, không ước lượng)
 
 | Chỉ số | Đầu GĐ5 | Bây giờ |
 | --- | --- | --- |
-| Test | 94 file / 572 | **97 file / 602** |
+| Test | 94 file / 572 | **99 file / 618** |
 | `pnpm lint` | exit 0 | exit 0 |
 | `pnpm build` | exit 0 | exit 0 |
-| File `components/` còn import thẳng `ipc/` | 41 | **39** |
-| Warning `no-restricted-imports` | — | 73 (đo tiến độ migrate) |
-| `BranchSidebar.tsx` | 1332 dòng, 25 `useState` | **1272 dòng, 25 `useState`** |
+| File `components/` còn import thẳng `ipc/` | 41 | **37** |
+| Warning `no-restricted-imports` | — | 76 (đo tiến độ migrate) |
+| `BranchSidebar.tsx` | 1332 dòng, 25 `useState` | **619 dòng, 10 `useState`** ² |
+| `src/components/sidebar/` | 6 file | **1 file** (`PullRequestsSection.tsx`) |
 
 > **Lưu ý về mốc test:** một ghi chú trung gian từng viết "583 test" — đó là lỗi cộng nhầm. Mốc đúng trước Task 4 là **580**, đo trực tiếp tại commit `98a0a6e`.
+
+> ² Hai con số mốc khác nhau, cả hai đều đúng: **1332** là lúc bắt đầu GĐ5, **1274** là ngay trước khi bắt đầu Task 10 (Task 6 đã rút bớt phần logic cây nhánh ra `model/`).
 
 ### 10.3 Feature `tag` — đã migrate trọn vẹn ✅
 
@@ -431,16 +465,22 @@ src/features/tag/
 
 **Một regression suýt xảy ra, đã chặn được:** gỡ `qk.tags` khỏi `invalidateRepo()` là đúng cho modal, nhưng `handleCheckoutTag` và `handlePushTag` cũng gọi hàm đó — hai lệnh này gọi IPC thẳng, **không có hook**. Nếu gỡ mà không bù, checkout/push tag xong danh sách tag sẽ đứng yên. Đã bù invalidate riêng trong từng handler, có comment giải thích. Gỡ được khi hai lệnh đó có hook ở lát sau.
 
-### 10.4 Feature `branch` — mới xong phần logic
+### 10.4 Feature `branch` — đã migrate ✅
 
 ```
 src/features/branch/
-└─ model/branchTree.ts    buildBranchTree, countBranchesInNode (8 test)
+├─ api/          useBranches + 4 mutation (checkout/create/rename/delete)
+├─ components/   BranchSidebar, BranchTreeNode, RemoteTreeNode,
+│                TagSection, StashSection, 4 modal branch
+├─ model/        branchTree, sidebarDialog, useStashCommands
+└─ index.ts      cổng public
 ```
 
-`BranchSidebar.tsx` giờ import từ đây thay vì tự định nghĩa. **Chưa** có `api/`, **chưa** có `components/`, **chưa** tách component.
+**`deleteBranch` trả undo token, không phải `void`.** `UndoIntegration.test.tsx` dựng toast hoàn tác từ giá trị đó. `mutationFn` phải `return`, không được nuốt — có test riêng ghim đúng điều này, vì một `mutationFn` quên `return` vẫn type-check và vẫn qua mọi test khác.
 
-### 10.5 Hai lỗi thật phát hiện trong quá trình làm
+**Union trạng thái dialog.** 12 cờ `useState` rời rạc (cho phép hai dialog mở cùng lúc) gom về một `SidebarDialog`. Trạng thái vô nghĩa giờ **không biểu diễn được**.
+
+### 10.5 Ba lỗi thật phát hiện trong quá trình làm
 
 **(a) Test rỗng trong chính kế hoạch — bắt được trước khi viết code.**
 
@@ -455,27 +495,50 @@ expect(kinds).toHaveLength(1);
 
 **(b) Lỗ hổng trong chính guard ranh giới — review bắt được, không phải tự test ra.**
 
-Khi tách `branchTree.ts`, file này cần import **kiểu** `BranchItem` từ `ipc/`. Guard ban đầu chặn mọi import `ipc/` ngoài `api/`, nên báo đỏ. Cách sửa đúng là phân biệt import kiểu (bị xoá lúc compile, không tạo phụ thuộc runtime) với import giá trị — **không** phải nới danh sách ngoại lệ.
+Khi tách `branchTree.ts`, file này cần import **kiểu** `BranchItem` từ `ipc/`. Cách sửa đúng là phân biệt import kiểu với import giá trị — **không** phải nới danh sách ngoại lệ. Bản sửa đầu tiên **không kín**; review tìm ra 3 lỗ: `import "…/ipc/client"` (side effect), `export { x } from "…"` (re-export), và `import d, { type X } from "…"` (default ngoài `{}`). Giờ có **13 test bảng** ghim hàm `importsIpcAtRuntime`.
 
-Bản sửa đầu tiên của tôi **không kín**. Tôi thử phá 4 hướng và tin là ổn; review tìm ra 3 lỗ tôi không nghĩ tới:
+**(c) Guard đó còn một lỗi nữa — false positive, phát hiện ở Task 10.**
 
-| Dạng | Vì sao lọt |
-| --- | --- |
-| `import "…/ipc/client"` | Không có `from`, regex không khớp — nhưng nó **chạy module** |
-| `export { x } from "…/ipc/…"` | Regex chỉ bắt câu bắt đầu bằng `import` |
-| `import d, { type X } from "…/ipc/…"` | Chỉ soi phần trong `{}`, bỏ qua specifier mặc định bên ngoài |
+`importsIpcAtRuntime` dùng `[\s\S]*?` giữa `import` và `from`. Lazy quantifier này **vượt qua ranh giới câu lệnh**: với file mở đầu bằng `import React from "react"` rồi vài dòng sau mới `import { type TagItem } from "…/ipc/…"`, regex khớp thành **một** câu lệnh có default specifier → báo vi phạm sai.
 
-Đã xác minh cả 3 lọt thật trên file thật, rồi sửa. Giờ có **13 test bảng** ghim thẳng hàm `importsIpcAtRuntime`: 8 dạng phải bắt, 5 dạng phải bỏ qua.
+Ba file (`RemoteTreeNode`, `StashSection`, `TagSection`) bị bắt oan. Cám dỗ ở đây là thêm chúng vào danh sách ngoại lệ — làm vậy là **giấu lỗi và nới luật**. Cách sửa đúng: đổi `[\s\S]` thành `[^;]` để match không vượt dấu chấm phẩy, và thêm test hồi quy `"a type-only ipc import preceded by other imports"`.
 
-> Bài học ghi vào quy ước 14 ở mục 7.
+> Bài học: một guard tự nó cũng là code, và cũng cần bị nghi ngờ. Khi guard báo đỏ ở chỗ trông vô lý, kiểm tra guard trước khi kiểm tra ngoại lệ.
 
-### 10.6 Việc còn nợ khi làm tiếp
+### 10.6 Nợ lại từ Task 10 — đọc trước khi làm lát 2
 
-- **Task 9 sẽ cần một ngoại lệ có thật.** `CheckoutConflictModal` gọi `saveStash` rồi `checkoutBranch`. `saveStash` thuộc domain stash — **không** có `features/stash` trong lát này. Kế hoạch đã ghi: giữ `invokeCommand.saveStash` trong file kèm comment, và thêm tên file vào `IPC_IMPORT_EXCEPTIONS`. Danh sách đó hiện **rỗng**; đây sẽ là entry đầu tiên và duy nhất. Cần thêm ngoại lệ nào khác là dấu hiệu phạm vi đã trượt.
-- **Thứ tự `saveStash` → `checkoutBranch` phải giữ nguyên.** Đảo lại là mất thay đổi chưa commit của người dùng.
-- **Task 10 cần lưới an toàn trước khi xẻ.** Kế hoạch bắt buộc viết test cho menu ngữ cảnh nhánh (mở/đóng/chỉ một menu) **trên code hiện tại**, xác nhận xanh, commit riêng — rồi mới tách. Đó là bằng chứng việc xẻ không đổi hành vi.
-- **`BranchSidebar` render modal tag.** Khi nó chuyển vào `features/branch`, test ranh giới sẽ báo đỏ vì `features/branch` import `features/tag`. Kế hoạch bắt tái hiện lỗi đó rồi mới chọn cách sửa (truyền qua props từ `Shell`, hoặc đẩy xuống `shared/`).
+**`BranchSidebar` còn 619 dòng, mốc kế hoạch là dưới 300.** Đã tách 4 component + 1 hook; phần còn lại **không tách tiếp được một cách sạch sẽ** trong phạm vi lát 1, vì nó là logic của những domain chưa có feature:
 
-### 10.7 Sai lệch có chủ đích so với spec
+- query + handler cho `remote` (chờ `features/remote`)
+- query + handler cho `stash` (chờ `features/stash`) — đã gom tạm vào `model/useStashCommands.ts`
+- `handleCheckoutTag` / `handlePushTag` (chờ hook cho 2 lệnh tag còn lại)
+- `mergeBranch` / `rebaseBranch` gọi thẳng IPC trong modal callback
 
-**Bỏ hẳn `useAsyncAction`** (spec mục 4.4). Spec đề xuất hook này để gom mẫu `setLoading`/try/catch/finally lặp 16 lần. Nhưng `features/*/api` dùng `useMutation`, mà `useMutation` đã cung cấp `isPending`, `error`, `onSuccess` — dựng thêm `useAsyncAction` là hai đường làm cùng một việc. Quyết định: dùng `useMutation`, không làm `useAsyncAction`.
+Tách thêm bây giờ chỉ là cắt cho đủ số dòng, trái với tinh thần "tách theo ranh giới trách nhiệm" của GĐ4. **Việc đúng là làm lát 2 rồi dòng tự rụng.**
+
+**Ngoại lệ ranh giới đang mở** — mỗi cái có lý do và điều kiện gỡ, ghi trong `architectureBoundaries.test.ts`:
+
+| File | Vi phạm | Gỡ khi |
+| --- | --- | --- |
+| `BranchSidebar.tsx` | import `ipc/` + import `features/tag` | có `features/remote` + `features/stash` + hook tag còn lại |
+| `useStashCommands.ts` | import `ipc/` | có `features/stash` |
+| `CheckoutConflictModal.tsx` | `saveStash` | có `features/stash` |
+| `DeleteBranchModal.tsx` | `undoDeleteBranch` | domain undo có hook |
+
+Có test **`every cross-feature exception still names a real import`** — nó đỏ nếu một ngoại lệ còn nằm đó sau khi import tương ứng đã biến mất. Danh sách này chỉ được **co lại**, không được phình ra.
+
+### 10.7 Sai lệch có chủ đích so với spec — bỏ `useAsyncAction`
+
+Spec thiết kế (`2026-09-18-frontend-architecture-refactor-design.md`, mục 4.4) có `shared/hooks/useAsyncAction` để gói cặp `loading` + `error` cho mọi thao tác bất đồng bộ. **Hook này không được viết, và sẽ không viết.**
+
+Lý do: `useMutation` của React Query đã phủ đúng vai trò đó — `isPending` thay `loading`, `error` thay `error`, cộng thêm invalidation và trạng thái vòng đời mà `useAsyncAction` không có. Viết thêm một hook nữa nghĩa là mỗi modal phải chọn giữa hai cách làm cùng một việc, và người đọc phải biết cả hai.
+
+Hệ quả cụ thể trong code: các modal đã migrate xoá `const [loading, setLoading] = useState(false)` và dùng `mutation.isPending`. Chỗ nào còn thấy cặp `loading`/`setLoading` thủ công là chỗ **chưa** migrate, không phải chỗ cố ý làm khác.
+
+> Một ngoại lệ thật: `CheckoutConflictModal` giữ `isStashing` riêng. Nút đó chạy **hai** lệnh nối tiếp (`saveStash` rồi `checkoutBranch`), mà mutation chỉ phủ lệnh thứ hai — dùng `isPending` thì nút vẫn bấm được trong lúc đang stash.
+
+### 10.8 Hai chi tiết dễ làm sai ở lát 2
+
+**Leaf nhánh local và remote trông giống nhau nhưng KHÔNG giống nhau.** Khi tách `RemoteTreeNode`, cám dỗ là dùng chung `BranchTreeNode` với props khác. Đã diff và phát hiện khác thật: bản remote **luôn** checkout khi double-click (bản local chặn nếu `is_head`), có `aria-label`, và không có styling HEAD. Gộp lại là **đổi hành vi**. Hai component tách riêng là có chủ đích.
+
+**Header TAGS đếm `tagItems` (chưa lọc), danh sách bên dưới render `filteredTags` (đã lọc).** Khi tách `TagSection` phải truyền **hai** prop riêng. Gộp thành một là đổi hành vi thầm lặng: gõ vào ô search thì số trên header sẽ nhảy theo, trong khi bản gốc giữ nguyên tổng số.
