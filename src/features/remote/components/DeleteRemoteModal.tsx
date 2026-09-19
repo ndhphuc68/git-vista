@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, Cloud } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
-import { useTranslation } from "../../i18n";
-import { useToastStore } from "../../store/useToastStore";
-import { mapGitError } from "../../utils/errorMapping";
-import { Modal, Button, Alert } from "../../shared/ui";
-import type { RemoteItem } from "../../ipc/bindings.generated";
+import { useTranslation } from "../../../i18n";
+import { useToastStore } from "../../../store/useToastStore";
+import { mapGitError } from "../../../utils/errorMapping";
+import { Modal, Button, Alert } from "../../../shared/ui";
+import type { RemoteItem } from "../../../ipc/bindings.generated";
+import { useRemoveRemote } from "../api";
 
 export interface DeleteRemoteModalProps {
   isOpen: boolean;
@@ -25,23 +25,22 @@ export const DeleteRemoteModal: React.FC<DeleteRemoteModalProps> = ({
   onSuccess,
 }) => {
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const removeRemote = useRemoveRemote(repoPath);
+  const loading = removeRemote.isPending;
 
   useEffect(() => {
     if (isOpen) {
       setError(null);
-      setLoading(false);
     }
   }, [isOpen, remote]);
 
   const handleDelete = async () => {
     if (!remote) return;
-    setLoading(true);
     setError(null);
 
     try {
-      await invokeCommand.removeRemote(repoPath, remote.name);
+      await removeRemote.mutateAsync({ name: remote.name });
       useToastStore
         .getState()
         .showSuccess(t.modals.remotes.deleteModal.successToast.replace("{name}", remote.name));
@@ -49,18 +48,11 @@ export const DeleteRemoteModal: React.FC<DeleteRemoteModalProps> = ({
       onClose();
     } catch (err) {
       setError(mapGitError(err).message);
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <Modal
-      isOpen={isOpen && remote !== null}
-      onClose={onClose}
-      labelledBy={TITLE_ID}
-      stacked
-    >
+    <Modal isOpen={isOpen && remote !== null} onClose={onClose} labelledBy={TITLE_ID} stacked>
       <Modal.Header
         title={t.modals.remotes.deleteModal.title}
         onClose={onClose}

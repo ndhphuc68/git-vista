@@ -1,6 +1,8 @@
+import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { AddEditRemoteModal } from "../components/remote/AddEditRemoteModal";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AddEditRemoteModal } from "../features/remote/components/AddEditRemoteModal";
 import { invokeCommand } from "../ipc/client";
 
 vi.mock("../ipc/client", () => ({
@@ -10,6 +12,13 @@ vi.mock("../ipc/client", () => ({
     setRemoteUrl: vi.fn(),
   },
 }));
+
+function renderWithClient(ui: React.ReactElement) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+}
 
 const existing = {
   name: "origin",
@@ -40,13 +49,13 @@ describe("AddEditRemoteModal", () => {
   const submit = () => screen.getByRole("button", { name: /Thêm Remote|Lưu thay đổi/i });
 
   it("does not render when closed", () => {
-    render(<AddEditRemoteModal {...defaults} onClose={vi.fn()} isOpen={false} />);
+    renderWithClient(<AddEditRemoteModal {...defaults} onClose={vi.fn()} isOpen={false} />);
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("starts empty in add mode", () => {
-    render(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
+    renderWithClient(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(nameInput()).toHaveValue("");
@@ -55,7 +64,9 @@ describe("AddEditRemoteModal", () => {
   });
 
   it("prefills the existing remote in edit mode", () => {
-    render(<AddEditRemoteModal {...defaults} onClose={vi.fn()} initialRemote={existing} />);
+    renderWithClient(
+      <AddEditRemoteModal {...defaults} onClose={vi.fn()} initialRemote={existing} />
+    );
 
     expect(nameInput()).toHaveValue("origin");
     expect(fetchInput()).toHaveValue("https://github.com/user/repo.git");
@@ -63,7 +74,7 @@ describe("AddEditRemoteModal", () => {
   });
 
   it("is labelled by its title for screen readers", () => {
-    render(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
+    renderWithClient(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
     const dialog = screen.getByRole("dialog");
 
     expect(dialog).toHaveAttribute("aria-modal", "true");
@@ -73,7 +84,7 @@ describe("AddEditRemoteModal", () => {
   });
 
   it("strips characters git forbids in a remote name", () => {
-    render(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
+    renderWithClient(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
 
     fireEvent.change(nameInput(), { target: { value: "up stream~^:?*" } });
 
@@ -81,7 +92,7 @@ describe("AddEditRemoteModal", () => {
   });
 
   it("keeps submit disabled until both required fields are filled", () => {
-    render(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
+    renderWithClient(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
     expect(submit()).toBeDisabled();
 
     fireEvent.change(nameInput(), { target: { value: "upstream" } });
@@ -96,7 +107,7 @@ describe("AddEditRemoteModal", () => {
     const onSuccess = vi.fn();
     vi.mocked(invokeCommand.addRemote).mockResolvedValue(undefined as never);
 
-    render(<AddEditRemoteModal {...defaults} onClose={onClose} onSuccess={onSuccess} />);
+    renderWithClient(<AddEditRemoteModal {...defaults} onClose={onClose} onSuccess={onSuccess} />);
     fireEvent.change(nameInput(), { target: { value: "upstream" } });
     fireEvent.change(fetchInput(), { target: { value: "https://example.com/a.git" } });
     fireEvent.click(submit());
@@ -114,7 +125,7 @@ describe("AddEditRemoteModal", () => {
     const onClose = vi.fn();
     vi.mocked(invokeCommand.addRemote).mockResolvedValue(undefined as never);
 
-    const { container } = render(<AddEditRemoteModal {...defaults} onClose={onClose} />);
+    const { container } = renderWithClient(<AddEditRemoteModal {...defaults} onClose={onClose} />);
     fireEvent.change(nameInput(), { target: { value: "upstream" } });
     fireEvent.change(fetchInput(), { target: { value: "https://example.com/a.git" } });
     fireEvent.submit(container.querySelector("form")!);
@@ -126,7 +137,7 @@ describe("AddEditRemoteModal", () => {
     vi.mocked(invokeCommand.addRemote).mockResolvedValue(undefined as never);
     vi.mocked(invokeCommand.setRemoteUrl).mockResolvedValue(undefined as never);
 
-    render(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
+    renderWithClient(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
     fireEvent.change(nameInput(), { target: { value: "upstream" } });
     fireEvent.change(fetchInput(), { target: { value: "https://example.com/a.git" } });
     fireEvent.click(screen.getByRole("checkbox"));
@@ -149,7 +160,9 @@ describe("AddEditRemoteModal", () => {
     vi.mocked(invokeCommand.renameRemote).mockResolvedValue(undefined as never);
     vi.mocked(invokeCommand.setRemoteUrl).mockResolvedValue(undefined as never);
 
-    render(<AddEditRemoteModal {...defaults} onClose={vi.fn()} initialRemote={existing} />);
+    renderWithClient(
+      <AddEditRemoteModal {...defaults} onClose={vi.fn()} initialRemote={existing} />
+    );
     fireEvent.change(nameInput(), { target: { value: "upstream" } });
     fireEvent.click(submit());
 
@@ -165,7 +178,7 @@ describe("AddEditRemoteModal", () => {
   });
 
   it("rejects a name that starts with a dash", async () => {
-    render(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
+    renderWithClient(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
     fireEvent.change(nameInput(), { target: { value: "-bad" } });
     fireEvent.change(fetchInput(), { target: { value: "https://example.com/a.git" } });
     fireEvent.click(submit());
@@ -178,7 +191,7 @@ describe("AddEditRemoteModal", () => {
     const onClose = vi.fn();
     vi.mocked(invokeCommand.addRemote).mockRejectedValue(new Error("remote already exists"));
 
-    render(<AddEditRemoteModal {...defaults} onClose={onClose} />);
+    renderWithClient(<AddEditRemoteModal {...defaults} onClose={onClose} />);
     fireEvent.change(nameInput(), { target: { value: "upstream" } });
     fireEvent.change(fetchInput(), { target: { value: "https://example.com/a.git" } });
     fireEvent.click(submit());
@@ -190,7 +203,7 @@ describe("AddEditRemoteModal", () => {
   it("clears the error as soon as the user edits a field again", async () => {
     vi.mocked(invokeCommand.addRemote).mockRejectedValue(new Error("remote already exists"));
 
-    render(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
+    renderWithClient(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
     fireEvent.change(nameInput(), { target: { value: "upstream" } });
     fireEvent.change(fetchInput(), { target: { value: "https://example.com/a.git" } });
     fireEvent.click(submit());
@@ -203,7 +216,7 @@ describe("AddEditRemoteModal", () => {
 
   it("closes on cancel, the header button and Escape", () => {
     const onClose = vi.fn();
-    const { rerender } = render(<AddEditRemoteModal {...defaults} onClose={onClose} />);
+    const { rerender } = renderWithClient(<AddEditRemoteModal {...defaults} onClose={onClose} />);
 
     fireEvent.click(screen.getByRole("button", { name: /^Huỷ/i }));
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -214,20 +227,28 @@ describe("AddEditRemoteModal", () => {
     fireEvent.keyDown(window, { key: "Escape" });
     expect(onClose).toHaveBeenCalledTimes(3);
 
-    rerender(<AddEditRemoteModal {...defaults} onClose={onClose} isOpen={false} />);
+    rerender(
+      <QueryClientProvider
+        client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+      >
+        <AddEditRemoteModal {...defaults} onClose={onClose} isOpen={false} />
+      </QueryClientProvider>
+    );
     fireEvent.keyDown(window, { key: "Escape" });
     expect(onClose).toHaveBeenCalledTimes(3);
   });
 
   describe("initial focus", () => {
     it("focuses the name field when adding", async () => {
-      render(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
+      renderWithClient(<AddEditRemoteModal {...defaults} onClose={vi.fn()} />);
 
       await waitFor(() => expect(document.activeElement).toBe(nameInput()));
     });
 
     it("focuses the fetch url field when editing, since the name already exists", async () => {
-      render(<AddEditRemoteModal {...defaults} onClose={vi.fn()} initialRemote={existing} />);
+      renderWithClient(
+        <AddEditRemoteModal {...defaults} onClose={vi.fn()} initialRemote={existing} />
+      );
 
       await waitFor(() => expect(document.activeElement).toBe(fetchInput()));
     });

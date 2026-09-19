@@ -3,9 +3,9 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ManageRemotesModal } from "../features/remote/components/ManageRemotesModal";
-import { AddEditRemoteModal } from "../components/remote/AddEditRemoteModal";
+import { AddEditRemoteModal } from "../features/remote/components/AddEditRemoteModal";
 import { PruneConfirmModal } from "../features/remote/components/PruneConfirmModal";
-import { DeleteRemoteModal } from "../components/remote/DeleteRemoteModal";
+import { DeleteRemoteModal } from "../features/remote/components/DeleteRemoteModal";
 import { invokeCommand } from "../ipc/client";
 import { Z_INDEX } from "../domain/constants/zIndex";
 

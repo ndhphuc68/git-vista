@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Cloud } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
-import { useTranslation } from "../../i18n";
-import { useToastStore } from "../../store/useToastStore";
-import { mapGitError } from "../../utils/errorMapping";
-import { Modal, Button, Alert } from "../../shared/ui";
-import type { RemoteItem } from "../../ipc/bindings.generated";
+import { useTranslation } from "../../../i18n";
+import { useToastStore } from "../../../store/useToastStore";
+import { mapGitError } from "../../../utils/errorMapping";
+import { Modal, Button, Alert } from "../../../shared/ui";
+import type { RemoteItem } from "../../../ipc/bindings.generated";
+import { useAddRemote, useRenameRemote, useSetRemoteUrl } from "../api";
 
 export interface AddEditRemoteModalProps {
   isOpen: boolean;
@@ -36,8 +36,16 @@ export const AddEditRemoteModal: React.FC<AddEditRemoteModalProps> = ({
   const [fetchUrl, setFetchUrl] = useState("");
   const [useSeparatePush, setUseSeparatePush] = useState(false);
   const [pushUrl, setPushUrl] = useState("");
+  // A real useState rather than mutation.isPending: the submit is a sequence
+  // of up to two mutateAsync calls (rename then setUrl, or add then setUrl),
+  // and the button must stay disabled across the whole sequence, not flicker
+  // enabled between the two awaits.
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const addRemote = useAddRemote(repoPath);
+  const renameRemote = useRenameRemote(repoPath);
+  const setRemoteUrl = useSetRemoteUrl(repoPath);
 
   const nameInputRef = useRef<HTMLInputElement>(null);
   const fetchUrlInputRef = useRef<HTMLInputElement>(null);
@@ -97,21 +105,32 @@ export const AddEditRemoteModal: React.FC<AddEditRemoteModalProps> = ({
       if (isEdit && initialRemote) {
         let currentName = initialRemote.name;
         if (trimmedName !== initialRemote.name) {
-          await invokeCommand.renameRemote(repoPath, initialRemote.name, trimmedName);
+          // Rename first: setRemoteUrl below addresses the remote by its new
+          // name, so reversing the order would set the URL on a remote that
+          // no longer exists.
+          await renameRemote.mutateAsync({ oldName: initialRemote.name, newName: trimmedName });
           currentName = trimmedName;
         }
 
         const effectivePush = useSeparatePush && trimmedPush ? trimmedPush : null;
-        await invokeCommand.setRemoteUrl(repoPath, currentName, trimmedFetch, effectivePush);
+        await setRemoteUrl.mutateAsync({
+          name: currentName,
+          fetchUrl: trimmedFetch,
+          pushUrl: effectivePush,
+        });
 
         useToastStore
           .getState()
           .showSuccess(t.modals.remotes.addModal.editSuccess.replace("{name}", currentName));
       } else {
-        await invokeCommand.addRemote(repoPath, trimmedName, trimmedFetch);
+        await addRemote.mutateAsync({ name: trimmedName, url: trimmedFetch });
 
         if (useSeparatePush && trimmedPush && trimmedPush !== trimmedFetch) {
-          await invokeCommand.setRemoteUrl(repoPath, trimmedName, trimmedFetch, trimmedPush);
+          await setRemoteUrl.mutateAsync({
+            name: trimmedName,
+            fetchUrl: trimmedFetch,
+            pushUrl: trimmedPush,
+          });
         }
 
         useToastStore
@@ -229,11 +248,7 @@ export const AddEditRemoteModal: React.FC<AddEditRemoteModalProps> = ({
           <Button variant="secondary" onClick={onClose} disabled={loading}>
             {t.common.cancel}
           </Button>
-          <Button
-            type="submit"
-            loading={loading}
-            disabled={!name.trim() || !fetchUrl.trim()}
-          >
+          <Button type="submit" loading={loading} disabled={!name.trim() || !fetchUrl.trim()}>
             {loading
               ? t.modals.remotes.addModal.saving
               : isEdit

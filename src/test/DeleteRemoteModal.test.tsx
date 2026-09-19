@@ -1,6 +1,8 @@
+import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { DeleteRemoteModal } from "../components/remote/DeleteRemoteModal";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { DeleteRemoteModal } from "../features/remote/components/DeleteRemoteModal";
 import { invokeCommand } from "../ipc/client";
 import { useToastStore } from "../store/useToastStore";
 
@@ -9,6 +11,13 @@ vi.mock("../ipc/client", () => ({
     removeRemote: vi.fn(),
   },
 }));
+
+function renderWithClient(ui: React.ReactElement) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+}
 
 const remote = {
   name: "origin",
@@ -36,19 +45,19 @@ describe("DeleteRemoteModal", () => {
   };
 
   it("does not render when closed", () => {
-    render(<DeleteRemoteModal {...defaults} isOpen={false} onClose={vi.fn()} />);
+    renderWithClient(<DeleteRemoteModal {...defaults} isOpen={false} onClose={vi.fn()} />);
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("does not render without a remote", () => {
-    render(<DeleteRemoteModal {...defaults} remote={null} onClose={vi.fn()} />);
+    renderWithClient(<DeleteRemoteModal {...defaults} remote={null} onClose={vi.fn()} />);
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("shows the remote name, its url and the safety warning", () => {
-    render(<DeleteRemoteModal {...defaults} onClose={vi.fn()} />);
+    renderWithClient(<DeleteRemoteModal {...defaults} onClose={vi.fn()} />);
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText("origin")).toBeInTheDocument();
@@ -57,7 +66,7 @@ describe("DeleteRemoteModal", () => {
   });
 
   it("is labelled by its title for screen readers", () => {
-    render(<DeleteRemoteModal {...defaults} onClose={vi.fn()} />);
+    renderWithClient(<DeleteRemoteModal {...defaults} onClose={vi.fn()} />);
     const dialog = screen.getByRole("dialog");
 
     expect(dialog).toHaveAttribute("aria-modal", "true");
@@ -72,7 +81,7 @@ describe("DeleteRemoteModal", () => {
     vi.mocked(invokeCommand.removeRemote).mockResolvedValue(undefined as never);
     const showSuccess = vi.spyOn(useToastStore.getState(), "showSuccess");
 
-    render(<DeleteRemoteModal {...defaults} onClose={onClose} onSuccess={onSuccess} />);
+    renderWithClient(<DeleteRemoteModal {...defaults} onClose={onClose} onSuccess={onSuccess} />);
     fireEvent.click(screen.getByRole("button", { name: /Xoá Remote/i }));
 
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
@@ -86,7 +95,7 @@ describe("DeleteRemoteModal", () => {
     const onSuccess = vi.fn();
     vi.mocked(invokeCommand.removeRemote).mockRejectedValue(new Error("remote is locked"));
 
-    render(<DeleteRemoteModal {...defaults} onClose={onClose} onSuccess={onSuccess} />);
+    renderWithClient(<DeleteRemoteModal {...defaults} onClose={onClose} onSuccess={onSuccess} />);
     fireEvent.click(screen.getByRole("button", { name: /Xoá Remote/i }));
 
     expect(await screen.findByText(/remote is locked/i)).toBeInTheDocument();
@@ -96,7 +105,7 @@ describe("DeleteRemoteModal", () => {
 
   it("closes on cancel without touching the remote", () => {
     const onClose = vi.fn();
-    render(<DeleteRemoteModal {...defaults} onClose={onClose} />);
+    renderWithClient(<DeleteRemoteModal {...defaults} onClose={onClose} />);
 
     fireEvent.click(screen.getByRole("button", { name: /^Huỷ/i }));
 
@@ -106,7 +115,7 @@ describe("DeleteRemoteModal", () => {
 
   it("closes on the header close button", () => {
     const onClose = vi.fn();
-    render(<DeleteRemoteModal {...defaults} onClose={onClose} />);
+    renderWithClient(<DeleteRemoteModal {...defaults} onClose={onClose} />);
 
     fireEvent.click(screen.getByLabelText("Đóng"));
 
@@ -115,7 +124,7 @@ describe("DeleteRemoteModal", () => {
 
   it("closes on Escape", () => {
     const onClose = vi.fn();
-    render(<DeleteRemoteModal {...defaults} onClose={onClose} />);
+    renderWithClient(<DeleteRemoteModal {...defaults} onClose={onClose} />);
 
     fireEvent.keyDown(window, { key: "Escape" });
 
@@ -124,7 +133,7 @@ describe("DeleteRemoteModal", () => {
 
   it("does not react to Escape while closed", () => {
     const onClose = vi.fn();
-    render(<DeleteRemoteModal {...defaults} isOpen={false} onClose={onClose} />);
+    renderWithClient(<DeleteRemoteModal {...defaults} isOpen={false} onClose={onClose} />);
 
     fireEvent.keyDown(window, { key: "Escape" });
 
@@ -133,16 +142,23 @@ describe("DeleteRemoteModal", () => {
 
   it("clears a previous error when reopened", async () => {
     vi.mocked(invokeCommand.removeRemote).mockRejectedValue(new Error("remote is locked"));
-    const { rerender } = render(<DeleteRemoteModal {...defaults} onClose={vi.fn()} />);
+    const { rerender } = renderWithClient(<DeleteRemoteModal {...defaults} onClose={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Xoá Remote/i }));
     expect(await screen.findByText(/remote is locked/i)).toBeInTheDocument();
 
-    rerender(<DeleteRemoteModal {...defaults} isOpen={false} onClose={vi.fn()} />);
-    rerender(<DeleteRemoteModal {...defaults} isOpen={true} onClose={vi.fn()} />);
-
-    await waitFor(() =>
-      expect(screen.queryByText(/remote is locked/i)).not.toBeInTheDocument()
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <DeleteRemoteModal {...defaults} isOpen={false} onClose={vi.fn()} />
+      </QueryClientProvider>
     );
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <DeleteRemoteModal {...defaults} isOpen={true} onClose={vi.fn()} />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => expect(screen.queryByText(/remote is locked/i)).not.toBeInTheDocument());
   });
 });
