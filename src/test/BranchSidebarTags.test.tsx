@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, fireEvent, within } from "@testing-library/react";
-import { BranchSidebar } from "../features/branch";
+import { BranchSidebar, isDialog, type SidebarDialog } from "../features/branch";
+import { CreateTagModal, DeleteTagModal } from "../features/tag";
 import { useRepoStore } from "../store/useRepoStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { invokeCommand } from "../ipc/client";
@@ -31,6 +32,35 @@ const mockTags: TagItem[] = [
     timestamp_sec: 1690000000,
   },
 ];
+
+/**
+ * The tag modals now live in Shell, not in the sidebar, so a bare
+ * <BranchSidebar /> no longer renders them. This mirrors what Shell supplies
+ * so the tag tests keep exercising the real modals end to end.
+ */
+const renderTagDialogs = (dialog: SidebarDialog, close: () => void) => (
+  <>
+    {isDialog(dialog, "createTag") && (
+      <CreateTagModal
+        isOpen
+        onClose={close}
+        repoPath="d:/project-v3"
+        targetCommitId={dialog.commitId}
+        targetCommitSummary={dialog.summary}
+      />
+    )}
+    {isDialog(dialog, "deleteTag") && (
+      <DeleteTagModal
+        isOpen
+        onClose={close}
+        repoPath="d:/project-v3"
+        tagName={dialog.tag.name}
+        targetCommitId={dialog.tag.target_commit_id}
+        hasRemote={false}
+      />
+    )}
+  </>
+);
 
 describe("BranchSidebar - Tags Management", () => {
   let queryClient: QueryClient;
@@ -82,7 +112,7 @@ describe("BranchSidebar - Tags Management", () => {
   it("opens CreateTagModal when clicking the (+) button in Tags header", async () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <BranchSidebar />
+        <BranchSidebar renderForeignDialog={renderTagDialogs} />
       </QueryClientProvider>
     );
 
@@ -190,7 +220,7 @@ describe("BranchSidebar - Tags Management", () => {
   it("opens DeleteTagModal when choosing Delete Tag from context menu", async () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <BranchSidebar />
+        <BranchSidebar renderForeignDialog={renderTagDialogs} />
       </QueryClientProvider>
     );
 
@@ -216,7 +246,7 @@ describe("BranchSidebar - Tags Management", () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <BranchSidebar />
+        <BranchSidebar renderForeignDialog={renderTagDialogs} />
       </QueryClientProvider>
     );
 

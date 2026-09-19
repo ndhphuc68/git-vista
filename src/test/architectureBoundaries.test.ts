@@ -33,23 +33,31 @@ const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {
   "features/branch/components/DeleteBranchModal.tsx":
     "undo toast calls undoDeleteBranch; removed once the undo domain has a hook",
   "features/branch/components/BranchSidebar.tsx":
-    "still queries remotes, stashes, tags and runs merge/rebase; removed as features/remote, features/stash and the remaining tag commands land in slice 2",
+    "queries getRemotes/getRepoStatus/getTags directly and runs checkoutTag, pushTag, mergeBranch, rebaseBranch and undoDropStash; removed once the two remaining tag commands, merge/rebase and the undo domain each have a hook",
   "features/stash/components/StashDiffView.tsx":
     "reads commit details to render the stash diff; removed once the commit domain has a hook",
 };
 
 /**
  * Cross-feature imports allowed while a feature is mid-migration, as
- * "<importing file>" -> ["<imported feature>", ...]. Same rule as above:
- * temporary, named one by one, and shrinking. Every feature named for a file
- * must still be a real import — the staleness check below fails once one of
- * them is gone.
+ * "<importing file>" -> ["<imported feature>", ...]. Every feature named for a
+ * file must still be a real import — the staleness check below fails once one
+ * of them is gone.
+ *
+ * Both remaining entries are api-level only: features/branch consumes
+ * features/stash's HOOKS, never its components. That is a far weaker coupling
+ * than the component imports this list used to hold — BranchSidebar once
+ * rendered features/tag's and features/remote's modals and features/stash's
+ * diff panel, and Shell now supplies all of those instead.
+ *
+ * Exit condition: these go away when the stash actions move behind a boundary
+ * branch does not have to reach across — a shared action layer, or the stash
+ * panel owning its own commands. Neither is in this slice.
  */
 const CROSS_FEATURE_EXCEPTIONS: Record<string, string[]> = {
-  // "remote" added when ManageRemotesModal/PruneConfirmModal moved into
-  // features/remote/components; removable once BranchSidebar's remote
-  // dialogs are reached through features/remote's own barrel (task 7).
-  "features/branch/components/BranchSidebar.tsx": ["tag", "stash", "remote"],
+  // Uses useApplyStash/usePopStash/useDropStash; the confirm prompt, the undo
+  // toast and undoDropStash stay here, so only the mutations are borrowed.
+  "features/branch/components/BranchSidebar.tsx": ["stash"],
   // This modal belongs to the checkout-branch flow but must stash first;
   // removable once "stash then checkout" has a home of its own.
   "features/branch/components/CheckoutConflictModal.tsx": ["stash"],

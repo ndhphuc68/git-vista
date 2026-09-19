@@ -28,24 +28,44 @@ import { RemoteTreeNode } from "./RemoteTreeNode";
 import { TagSection } from "./TagSection";
 import { StashSection } from "./StashSection";
 import { PullRequestsSection } from "../../../components/sidebar/PullRequestsSection";
-import { StashDiffView } from "../../../features/stash";
 import { MergeBranchModal } from "../../../components/merge/MergeBranchModal";
 import { RebaseBranchModal } from "../../../components/merge/RebaseBranchModal";
-import { CreateTagModal, DeleteTagModal } from "../../../features/tag";
 import { CompareModal } from "../../../components/compare";
-import {
-  AddEditRemoteModal,
-  DeleteRemoteModal,
-  ManageRemotesModal,
-  PruneConfirmModal,
-} from "../../remote";
 import { useTranslation } from "../../../i18n";
 import { buildBranchTree, type BranchTreeNode } from "../model/branchTree";
 import { NO_DIALOG, isDialog, type SidebarDialog } from "../model/sidebarDialog";
 import { useBranches, useCheckoutBranch } from "../api";
 import { useApplyStash, useDropStash, usePopStash } from "../../stash/api";
 
-export const BranchSidebar: React.FC = () => {
+export interface BranchSidebarProps {
+  /**
+   * Dialogs owned by other features. The sidebar decides *when* they open —
+   * it holds the dialog slot — but must not import them: a feature importing
+   * another feature is what the boundary test forbids. Shell supplies them.
+   */
+  renderForeignDialog?: (dialog: SidebarDialog, close: () => void) => React.ReactNode;
+  /**
+   * Panel shown beside the sidebar for the selected stash.
+   *
+   * The sidebar keeps owning the three stash actions — the confirm prompt, the
+   * undo toast and undoDropStash live here — and passes them through, so Shell
+   * only lays out the JSX.
+   */
+  renderStashPanel?: (
+    stash: StashItem,
+    handlers: {
+      onApply: (index: number) => void;
+      onPop: (index: number) => void;
+      onDrop: (index: number) => void;
+    },
+    close: () => void
+  ) => React.ReactNode;
+}
+
+export const BranchSidebar: React.FC<BranchSidebarProps> = ({
+  renderForeignDialog,
+  renderStashPanel,
+}) => {
   const { t } = useTranslation();
   const { currentRepo, selectedBranch, setSelectedBranch } = useRepoStore();
   const { setActiveScreen } = useViewStore();
@@ -212,12 +232,6 @@ export const BranchSidebar: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: qk.commitGraph(currentRepo.path) });
     queryClient.invalidateQueries({ queryKey: qk.repo.status(currentRepo.path) });
     queryClient.invalidateQueries({ queryKey: qk.repo.head(currentRepo.path) });
-  };
-
-  /** Remote edits change the remote list and the remote-tracking branches. */
-  const invalidateRemotes = () => {
-    queryClient.invalidateQueries({ queryKey: qk.remotes(currentRepo.path) });
-    queryClient.invalidateQueries({ queryKey: qk.branches(currentRepo.path) });
   };
 
   const handleCheckoutTag = async (tag: TagItem) => {
@@ -495,17 +509,12 @@ export const BranchSidebar: React.FC = () => {
       </aside>
 
       {/* Stash diff panel (shown beside sidebar when stash is selected) */}
-      {selectedStash && (
-        <aside className="bg-surface border-r border-border-subtle w-72 shrink-0 h-full flex flex-col overflow-y-auto">
-          <StashDiffView
-            stashItem={selectedStash}
-            repoPath={currentRepo.path}
-            onApply={handleApplyStash}
-            onPop={handlePopStash}
-            onDrop={handleDropStash}
-          />
-        </aside>
-      )}
+      {selectedStash &&
+        renderStashPanel?.(
+          selectedStash,
+          { onApply: handleApplyStash, onPop: handlePopStash, onDrop: handleDropStash },
+          () => setSelectedStash(null)
+        )}
 
       {/* MODALS — one slot, so at most one of these renders at a time. */}
       {isDialog(dialog, "createBranch") && (
@@ -514,29 +523,6 @@ export const BranchSidebar: React.FC = () => {
           onClose={closeDialog}
           repoPath={currentRepo.path}
           targetCommit={dialog.fromRef}
-          onSuccess={invalidateRepo}
-        />
-      )}
-
-      {isDialog(dialog, "createTag") && (
-        <CreateTagModal
-          isOpen
-          onClose={closeDialog}
-          repoPath={currentRepo.path}
-          targetCommitId={dialog.commitId}
-          targetCommitSummary={dialog.summary}
-          onSuccess={invalidateRepo}
-        />
-      )}
-
-      {isDialog(dialog, "deleteTag") && (
-        <DeleteTagModal
-          isOpen
-          onClose={closeDialog}
-          repoPath={currentRepo.path}
-          tagName={dialog.tag.name}
-          targetCommitId={dialog.tag.target_commit_id}
-          hasRemote={Boolean(branchData?.remote && branchData.remote.length > 0)}
           onSuccess={invalidateRepo}
         />
       )}
@@ -619,39 +605,7 @@ export const BranchSidebar: React.FC = () => {
         />
       )}
 
-      {isDialog(dialog, "manageRemotes") && (
-        <ManageRemotesModal isOpen onClose={closeDialog} repoPath={currentRepo.path} />
-      )}
-
-      {(isDialog(dialog, "addRemote") || isDialog(dialog, "editRemote")) && (
-        <AddEditRemoteModal
-          isOpen
-          onClose={closeDialog}
-          repoPath={currentRepo.path}
-          initialRemote={isDialog(dialog, "editRemote") ? dialog.remote : null}
-          onSuccess={invalidateRemotes}
-        />
-      )}
-
-      {isDialog(dialog, "pruneRemote") && (
-        <PruneConfirmModal
-          isOpen
-          onClose={closeDialog}
-          repoPath={currentRepo.path}
-          remoteName={dialog.remoteName}
-          onSuccess={invalidateRemotes}
-        />
-      )}
-
-      {isDialog(dialog, "deleteRemote") && (
-        <DeleteRemoteModal
-          isOpen
-          onClose={closeDialog}
-          repoPath={currentRepo.path}
-          remote={dialog.remote}
-          onSuccess={invalidateRemotes}
-        />
-      )}
+      {renderForeignDialog?.(dialog, closeDialog)}
     </>
   );
 };

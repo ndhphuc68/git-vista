@@ -1,12 +1,22 @@
 import React from "react";
 import clsx from "clsx";
-import { BranchSidebar } from "../features/branch";
+import { useQueryClient } from "@tanstack/react-query";
+import { BranchSidebar, isDialog, useBranches } from "../features/branch";
+import { CreateTagModal, DeleteTagModal } from "../features/tag";
+import {
+  AddEditRemoteModal,
+  DeleteRemoteModal,
+  ManageRemotesModal,
+  PruneConfirmModal,
+} from "../features/remote";
+import { StashDiffView } from "../features/stash";
 import { CommitGraph } from "./graph/CommitGraph";
 import { CommitDetailPanel } from "./diff/CommitDetailPanel";
 import { useLayoutStore } from "../store/useLayoutStore";
 import { useRepoStore } from "../store/useRepoStore";
 import { useWindowDimensions } from "../hooks/useWindowDimensions";
 import { useTranslation } from "../i18n";
+import { qk } from "../domain/queryKeys";
 
 export const Shell: React.FC = () => {
   const { t } = useTranslation();
@@ -18,8 +28,29 @@ export const Shell: React.FC = () => {
     toggleSidebar,
     setDetailPanelOpen,
   } = useLayoutStore();
-  const { setSelectedCommit } = useRepoStore();
+  // Shell is not a feature, so it may read the repo store directly — the same
+  // way BranchSidebar does. This avoids drilling repoPath down from App.
+  const { setSelectedCommit, currentRepo } = useRepoStore();
   const { isMobile } = useWindowDimensions();
+  const queryClient = useQueryClient();
+  const repoPath = currentRepo?.path ?? "";
+
+  // Only needed to tell DeleteTagModal whether a remote exists, exactly as the
+  // sidebar did before these dialogs moved up here.
+  const { data: branchData } = useBranches(repoPath);
+
+  const invalidateRepo = () => {
+    queryClient.invalidateQueries({ queryKey: qk.branches(repoPath) });
+    queryClient.invalidateQueries({ queryKey: qk.commitGraph(repoPath) });
+    queryClient.invalidateQueries({ queryKey: qk.repo.status(repoPath) });
+    queryClient.invalidateQueries({ queryKey: qk.repo.head(repoPath) });
+  };
+
+  /** Remote edits change the remote list and the remote-tracking branches. */
+  const invalidateRemotes = () => {
+    queryClient.invalidateQueries({ queryKey: qk.remotes(repoPath) });
+    queryClient.invalidateQueries({ queryKey: qk.branches(repoPath) });
+  };
 
   const handleCloseDetail = () => {
     setDetailPanelOpen(false);
@@ -74,7 +105,79 @@ export const Shell: React.FC = () => {
             )}
           >
             <div className="flex-1 h-full min-w-0 overflow-hidden">
-              <BranchSidebar />
+              <BranchSidebar
+                renderStashPanel={(stash, handlers) => (
+                  <aside className="bg-surface border-r border-border-subtle w-72 shrink-0 h-full flex flex-col overflow-y-auto">
+                    <StashDiffView
+                      stashItem={stash}
+                      repoPath={repoPath}
+                      onApply={handlers.onApply}
+                      onPop={handlers.onPop}
+                      onDrop={handlers.onDrop}
+                    />
+                  </aside>
+                )}
+                renderForeignDialog={(dialog, closeDialog) => (
+                  <>
+                    {isDialog(dialog, "createTag") && (
+                      <CreateTagModal
+                        isOpen
+                        onClose={closeDialog}
+                        repoPath={repoPath}
+                        targetCommitId={dialog.commitId}
+                        targetCommitSummary={dialog.summary}
+                        onSuccess={invalidateRepo}
+                      />
+                    )}
+
+                    {isDialog(dialog, "deleteTag") && (
+                      <DeleteTagModal
+                        isOpen
+                        onClose={closeDialog}
+                        repoPath={repoPath}
+                        tagName={dialog.tag.name}
+                        targetCommitId={dialog.tag.target_commit_id}
+                        hasRemote={Boolean(branchData?.remote && branchData.remote.length > 0)}
+                        onSuccess={invalidateRepo}
+                      />
+                    )}
+
+                    {isDialog(dialog, "manageRemotes") && (
+                      <ManageRemotesModal isOpen onClose={closeDialog} repoPath={repoPath} />
+                    )}
+
+                    {(isDialog(dialog, "addRemote") || isDialog(dialog, "editRemote")) && (
+                      <AddEditRemoteModal
+                        isOpen
+                        onClose={closeDialog}
+                        repoPath={repoPath}
+                        initialRemote={isDialog(dialog, "editRemote") ? dialog.remote : null}
+                        onSuccess={invalidateRemotes}
+                      />
+                    )}
+
+                    {isDialog(dialog, "pruneRemote") && (
+                      <PruneConfirmModal
+                        isOpen
+                        onClose={closeDialog}
+                        repoPath={repoPath}
+                        remoteName={dialog.remoteName}
+                        onSuccess={invalidateRemotes}
+                      />
+                    )}
+
+                    {isDialog(dialog, "deleteRemote") && (
+                      <DeleteRemoteModal
+                        isOpen
+                        onClose={closeDialog}
+                        repoPath={repoPath}
+                        remote={dialog.remote}
+                        onSuccess={invalidateRemotes}
+                      />
+                    )}
+                  </>
+                )}
+              />
             </div>
 
             {/* Resizer Handle */}
