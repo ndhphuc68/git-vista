@@ -5,6 +5,7 @@ import { useRepoStore } from "../store/useRepoStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { invokeCommand } from "../ipc/client";
 import { type TagItem } from "../ipc/bindings.generated";
+import { qk } from "../domain/queryKeys";
 
 const mockTags: TagItem[] = [
   {
@@ -205,6 +206,36 @@ describe("BranchSidebar - Tags Management", () => {
       expect(dialog).toBeInTheDocument();
       expect(within(dialog).getByText("v1.0.0")).toBeInTheDocument();
       expect(screen.getByRole("heading", { name: /Xoá thẻ/i })).toBeInTheDocument();
+    });
+  });
+
+  it("refreshes the tag list after a tag is deleted without the sidebar invalidating it", async () => {
+    // The tag list refresh is owned by useDeleteTag, not by the sidebar's
+    // invalidateRepo. This test fails if that ownership moves back.
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <BranchSidebar />
+      </QueryClientProvider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /TAGS/i }));
+    await waitFor(() => expect(screen.getByText("v1.0.0")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByLabelText("Menu thao tác thẻ v1.0.0"));
+    fireEvent.click(screen.getByRole("button", { name: /Xoá thẻ/i }));
+
+    const dialog = await screen.findByRole("dialog");
+    const confirmBtn = within(dialog).getByRole("button", { name: /Xoá thẻ/i });
+    fireEvent.click(confirmBtn);
+
+    await waitFor(() => {
+      expect(invokeCommand.deleteTag).toHaveBeenCalledWith("d:/project-v3", "v1.0.0", false);
+    });
+
+    await waitFor(() => {
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: qk.repo.all("d:/project-v3") });
     });
   });
 });

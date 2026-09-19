@@ -265,7 +265,6 @@ export const BranchSidebar: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: qk.commitGraph(currentRepo.path) });
     queryClient.invalidateQueries({ queryKey: qk.repo.status(currentRepo.path) });
     queryClient.invalidateQueries({ queryKey: qk.repo.head(currentRepo.path) });
-    queryClient.invalidateQueries({ queryKey: qk.tags(currentRepo.path) });
   };
 
   const handleCheckoutTag = async (tag: TagItem) => {
@@ -277,6 +276,8 @@ export const BranchSidebar: React.FC = () => {
         type: "success",
       });
       invalidateRepo();
+      // checkoutTag has no feature hook yet, so it must refresh tags itself.
+      queryClient.invalidateQueries({ queryKey: qk.tags(currentRepo.path) });
     } catch (err: unknown) {
       useToastStore.getState().showError(mapGitError(err));
     }
@@ -291,6 +292,8 @@ export const BranchSidebar: React.FC = () => {
         type: "success",
       });
       invalidateRepo();
+      // pushTag has no feature hook yet, so it must refresh tags itself.
+      queryClient.invalidateQueries({ queryKey: qk.tags(currentRepo.path) });
     } catch (err: unknown) {
       useToastStore.getState().showError(mapGitError(err));
     }
