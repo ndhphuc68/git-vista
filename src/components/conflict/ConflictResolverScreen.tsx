@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { ArrowLeft, Check, ChevronUp, ChevronDown, RefreshCw } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
-import { type ConflictFileData } from "../../ipc/bindings";
+import { type ConflictFileData } from "../../ipc/bindings.generated";
 import { useTranslation } from "../../i18n";
 import { qk } from "../../domain/queryKeys";
 

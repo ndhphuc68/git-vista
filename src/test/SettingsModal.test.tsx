@@ -4,7 +4,7 @@ import { SettingsModal } from "../components/settings/SettingsModal";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { useTabStore } from "../store/useTabStore";
 import { resetMockGitConfig } from "../ipc/client";
-import { type RepoSummary } from "../ipc/bindings";
+import { type RepoSummary } from "../ipc/bindings.generated";
 
 const mockRepo1: RepoSummary = {
   path: "d:/project-alpha",

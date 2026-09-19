@@ -155,6 +155,7 @@ describe("CommitGraph Context Menu", () => {
       success: true,
       status: "Committed",
       undo_token: "token-undo-cp-123",
+      new_commit_id: null,
       output: "Cherry-pick completed",
     });
     const undoSpy = vi.spyOn(invokeCommand, "undoCommit").mockResolvedValue(undefined);
@@ -212,6 +213,7 @@ describe("CommitGraph Context Menu", () => {
       success: true,
       status: "Committed",
       undo_token: "token-undo-cp-789",
+      new_commit_id: null,
       output: "Cherry-pick completed",
     });
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
@@ -253,6 +255,8 @@ describe("CommitGraph Context Menu", () => {
     vi.spyOn(invokeCommand, "cherryPickCommit").mockResolvedValue({
       success: true,
       status: "Staged",
+      undo_token: null,
+      new_commit_id: null,
       output: "Changes staged",
     });
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
@@ -290,6 +294,8 @@ describe("CommitGraph Context Menu", () => {
     vi.spyOn(invokeCommand, "cherryPickCommit").mockResolvedValue({
       success: false,
       status: "Conflict",
+      undo_token: null,
+      new_commit_id: null,
       output: "Conflict occurred",
     });
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
@@ -329,6 +335,7 @@ describe("CommitGraph Context Menu", () => {
       success: true,
       status: "Committed",
       undo_token: "token-undo-rev-456",
+      new_commit_id: null,
       output: "Revert completed",
     });
     const undoSpy = vi.spyOn(invokeCommand, "undoCommit").mockResolvedValue(undefined);
@@ -377,6 +384,8 @@ describe("CommitGraph Context Menu", () => {
     vi.spyOn(invokeCommand, "revertCommit").mockResolvedValue({
       success: true,
       status: "Staged",
+      undo_token: null,
+      new_commit_id: null,
       output: "Inverted changes staged",
     });
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
@@ -414,6 +423,8 @@ describe("CommitGraph Context Menu", () => {
     vi.spyOn(invokeCommand, "revertCommit").mockResolvedValue({
       success: false,
       status: "Conflict",
+      undo_token: null,
+      new_commit_id: null,
       output: "Conflict occurred",
     });
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");

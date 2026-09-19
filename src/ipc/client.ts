@@ -1,4 +1,5 @@
 import {
+  commands,
   type SystemInfo,
   type RepoHeadInfo,
   type RepoChangedPayload,
@@ -36,7 +37,7 @@ import {
   type CompareSummary,
   type GitHubRepoInfo,
   type CheckoutPrResult,
-} from "./bindings";
+} from "./bindings.generated";
 
 let mockTags: TagItem[] = [
   {
@@ -334,13 +335,31 @@ export const isTauri = (): boolean => {
   );
 };
 
+/**
+ * Unwraps a generated command result into the shape the app expects.
+ *
+ * The generated bindings return `{ status: "ok" | "error" }` so callers can
+ * branch on failure, but every call site here predates that and expects a
+ * promise that resolves to the value or rejects. The error is rethrown exactly
+ * as it arrived — a serialized `AppError` is `{ type, message }`, and
+ * `toErrorMessage` reads that `message`. Wrapping it in an `Error` would lose
+ * the variant and change what the UI displays.
+ */
+function unwrap<T, E>(result: { status: "ok"; data: T } | { status: "error"; error: E }): T {
+  if (result.status === "error") {
+    throw result.error;
+  }
+  return result.data;
+}
+
 export const invokeCommand = {
   ping: async (msg: string): Promise<string> => {
     if (!isTauri()) {
       return `[Browser mock] Pong: ${msg} (at ${new Date().toLocaleTimeString()})`;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<string>("ping", { msg });
+    // `ping` is the only command that does not return a Result, so it has no
+    // status envelope to unwrap.
+    return await commands.ping(msg);
   },
 
   getSystemInfo: async (): Promise<SystemInfo> => {
@@ -352,8 +371,7 @@ export const invokeCommand = {
         app_version: "0.1.0",
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<SystemInfo>("get_system_info");
+    return unwrap(await commands.getSystemInfo());
   },
 
   getRepoHeadInfo: async (repoPath: string): Promise<RepoHeadInfo> => {
@@ -367,8 +385,7 @@ export const invokeCommand = {
         upstream: "origin/main",
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<RepoHeadInfo>("get_repo_head_info", { repoPath });
+    return unwrap(await commands.getRepoHeadInfo(repoPath));
   },
 
   simulateRepoChange: async (repoPath: string): Promise<void> => {
@@ -384,8 +401,7 @@ export const invokeCommand = {
       );
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    await invoke("simulate_repo_change", { repoPath });
+    unwrap(await commands.simulateRepoChange(repoPath));
   },
 
   openRepository: async (path: string): Promise<RepoSummary> => {
@@ -398,22 +414,19 @@ export const invokeCommand = {
         head_commit_id: "a1b2c3d",
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<RepoSummary>("open_repository", { path });
+    return unwrap(await commands.openRepository(path));
   },
 
   closeRepository: async (path: string): Promise<void> => {
     if (!isTauri()) return;
-    const { invoke } = await import("@tauri-apps/api/core");
-    await invoke("close_repository", { path });
+    unwrap(await commands.closeRepository(path));
   },
 
   getOpenRepositories: async (): Promise<RepoSummary[]> => {
     if (!isTauri()) {
       return [];
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<RepoSummary[]>("get_open_repositories");
+    return unwrap(await commands.getOpenRepositories());
   },
 
   getRecentRepos: async (): Promise<RecentRepoEntry[]> => {
@@ -422,26 +435,22 @@ export const invokeCommand = {
         { path: "d:/project-v3", name: "project-v3", last_opened_at_ms: Date.now() - 3600000 },
       ];
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<RecentRepoEntry[]>("get_recent_repos");
+    return unwrap(await commands.getRecentRepos());
   },
 
   clearRecentRepos: async (): Promise<void> => {
     if (!isTauri()) return;
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("clear_recent_repos");
+    await commands.clearRecentRepos();
   },
 
   removeRecentRepo: async (path: string): Promise<void> => {
     if (!isTauri()) return;
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("remove_recent_repo", { path });
+    await commands.removeRecentRepo(path);
   },
 
   selectRepoFolder: async (): Promise<string | null> => {
     if (!isTauri()) return "d:/project-v3";
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<string | null>("select_repo_folder");
+    return unwrap(await commands.selectRepoFolder());
   },
 
   getBranches: async (repoPath: string): Promise<BranchListResult> => {
@@ -472,8 +481,7 @@ export const invokeCommand = {
         tags: ["v0.1.0"],
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<BranchListResult>("get_branches", { repoPath });
+    return unwrap(await commands.getBranches(repoPath));
   },
 
   getCommitGraph: async (
@@ -502,8 +510,7 @@ export const invokeCommand = {
         total_count: 1,
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<CommitGraphPage>("get_commit_graph", { repoPath, offset, limit });
+    return unwrap(await commands.getCommitGraph(repoPath, offset, limit));
   },
 
   getCommitDetails: async (repoPath: string, commitId: string): Promise<CommitDetails> => {
@@ -520,8 +527,7 @@ export const invokeCommand = {
         total_deletions: 2,
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<CommitDetails>("get_commit_details", { repoPath, commitId });
+    return unwrap(await commands.getCommitDetails(repoPath, commitId));
   },
 
   getCommitFileDiff: async (
@@ -556,13 +562,9 @@ export const invokeCommand = {
         ],
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<FileDiffResult>("get_commit_file_diff", {
-      repoPath,
-      commitId,
-      filePath,
-      ignoreWhitespace: ignoreWhitespace ?? false,
-    });
+    return unwrap(
+      await commands.getCommitFileDiff(repoPath, commitId, filePath, ignoreWhitespace ?? false)
+    );
   },
 
   getRepoStatus: async (repoPath: string): Promise<RepoStatusResult> => {
@@ -576,8 +578,7 @@ export const invokeCommand = {
         conflicted: [],
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<RepoStatusResult>("get_repo_status", { repoPath });
+    return unwrap(await commands.getRepoStatus(repoPath));
   },
 
   getWorkingFileDiff: async (
@@ -609,13 +610,9 @@ export const invokeCommand = {
         ],
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<FileDiffResult>("get_working_file_diff", {
-      repoPath,
-      filePath,
-      isStaged,
-      ignoreWhitespace: ignoreWhitespace ?? false,
-    });
+    return unwrap(
+      await commands.getWorkingFileDiff(repoPath, filePath, isStaged, ignoreWhitespace ?? false)
+    );
   },
 
   getFileBlame: async (
@@ -676,12 +673,7 @@ export const invokeCommand = {
         ],
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<FileBlameResult>("get_file_blame", {
-      repoPath,
-      filePath,
-      commitId: commitId ?? null,
-    });
+    return unwrap(await commands.getFileBlame(repoPath, filePath, commitId ?? null));
   },
 
   getFileHistory: async (
@@ -717,49 +709,37 @@ export const invokeCommand = {
         ],
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<FileHistoryResult>("get_file_history", {
-      repoPath,
-      filePath,
-      offset: offset ?? null,
-      limit: limit ?? null,
-    });
+    return unwrap(await commands.getFileHistory(repoPath, filePath, offset ?? null, limit ?? null));
   },
 
   stageFile: async (repoPath: string, filePath: string): Promise<void> => {
     if (!isTauri()) return;
-    const { invoke } = await import("@tauri-apps/api/core");
-    await invoke("stage_file", { repoPath, filePath });
+    unwrap(await commands.stageFile(repoPath, filePath));
   },
 
   unstageFile: async (repoPath: string, filePath: string): Promise<void> => {
     if (!isTauri()) return;
-    const { invoke } = await import("@tauri-apps/api/core");
-    await invoke("unstage_file", { repoPath, filePath });
+    unwrap(await commands.unstageFile(repoPath, filePath));
   },
 
   stageAll: async (repoPath: string): Promise<void> => {
     if (!isTauri()) return;
-    const { invoke } = await import("@tauri-apps/api/core");
-    await invoke("stage_all", { repoPath });
+    unwrap(await commands.stageAll(repoPath));
   },
 
   unstageAll: async (repoPath: string): Promise<void> => {
     if (!isTauri()) return;
-    const { invoke } = await import("@tauri-apps/api/core");
-    await invoke("unstage_all", { repoPath });
+    unwrap(await commands.unstageAll(repoPath));
   },
 
   discardFileChanges: async (repoPath: string, filePath: string): Promise<string> => {
     if (!isTauri()) return "browser-discard-receipt";
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<string>("discard_file_changes", { repoPath, filePath });
+    return unwrap(await commands.discardFileChanges(repoPath, filePath));
   },
 
   restoreDiscard: async (repoPath: string, token: string): Promise<void> => {
     if (!isTauri()) return;
-    const { invoke } = await import("@tauri-apps/api/core");
-    await invoke("restore_discard", { repoPath, token });
+    unwrap(await commands.restoreDiscard(repoPath, token));
   },
 
   stageHunk: async (
@@ -769,8 +749,7 @@ export const invokeCommand = {
     isStaged: boolean
   ): Promise<void> => {
     if (!isTauri()) return;
-    const { invoke } = await import("@tauri-apps/api/core");
-    await invoke("stage_hunk", { repoPath, filePath, hunkIndex, isStaged });
+    unwrap(await commands.stageHunk(repoPath, filePath, hunkIndex, isStaged));
   },
 
   stageLines: async (
@@ -781,8 +760,7 @@ export const invokeCommand = {
     isStaged: boolean
   ): Promise<void> => {
     if (!isTauri()) return;
-    const { invoke } = await import("@tauri-apps/api/core");
-    await invoke("stage_lines", { repoPath, filePath, hunkIndex, lineIndices, isStaged });
+    unwrap(await commands.stageLines(repoPath, filePath, hunkIndex, lineIndices, isStaged));
   },
 
   createCommit: async (
@@ -805,8 +783,9 @@ export const invokeCommand = {
         total_deletions: 0,
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<CommitDetails>("create_commit", { repoPath, summary, description, amend });
+    return unwrap(
+      await commands.createCommit(repoPath, summary, description ?? null, amend ?? null)
+    );
   },
 
   createBranch: async (
@@ -818,40 +797,35 @@ export const invokeCommand = {
     if (!isTauri()) {
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("create_branch", { repoPath, name, targetCommit, checkout });
+    await commands.createBranch(repoPath, name, targetCommit ?? null, checkout ?? null);
   },
 
   checkoutBranch: async (repoPath: string, branchName: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("checkout_branch", { repoPath, branchName });
+    await commands.checkoutBranch(repoPath, branchName);
   },
 
   renameBranch: async (repoPath: string, oldName: string, newName: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("rename_branch", { repoPath, oldName, newName });
+    await commands.renameBranch(repoPath, oldName, newName);
   },
 
   deleteBranch: async (repoPath: string, branchName: string, force?: boolean): Promise<string> => {
     if (!isTauri()) {
       return `refs/gitui-backup/delete-branch-${branchName}-${Date.now()}`;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<string>("delete_branch", { repoPath, branchName, force });
+    return unwrap(await commands.deleteBranch(repoPath, branchName, force ?? null));
   },
 
   getTags: async (repoPath: string): Promise<TagItem[]> => {
     if (!isTauri()) {
       return [...mockTags];
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<TagItem[]>("get_tags", { repoPath });
+    return unwrap(await commands.getTags(repoPath));
   },
 
   createTag: async (
@@ -887,13 +861,7 @@ export const invokeCommand = {
       }
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("create_tag", {
-      repoPath,
-      name,
-      targetCommit,
-      message: message ?? null,
-    });
+    await commands.createTag(repoPath, name, targetCommit, message ?? null);
   },
 
   deleteTag: async (repoPath: string, name: string, deleteRemote?: boolean): Promise<void> => {
@@ -912,12 +880,7 @@ export const invokeCommand = {
       }
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("delete_tag", {
-      repoPath,
-      name,
-      deleteRemote: deleteRemote ?? null,
-    });
+    await commands.deleteTag(repoPath, name, deleteRemote ?? null);
   },
 
   checkoutTag: async (repoPath: string, name: string): Promise<void> => {
@@ -935,28 +898,21 @@ export const invokeCommand = {
       }
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("checkout_tag", { repoPath, name });
+    await commands.checkoutTag(repoPath, name);
   },
 
   pushTag: async (repoPath: string, name: string, remoteName?: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("push_tag", {
-      repoPath,
-      name,
-      remoteName: remoteName ?? null,
-    });
+    await commands.pushTag(repoPath, name, remoteName ?? null);
   },
 
   getRemotes: async (repoPath: string): Promise<RemoteItem[]> => {
     if (!isTauri()) {
       return [...mockRemotes];
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<RemoteItem[]>("get_remotes", { repoPath });
+    return unwrap(await commands.getRemotes(repoPath));
   },
 
   addRemote: async (repoPath: string, name: string, url: string): Promise<RemoteItem> => {
@@ -982,8 +938,7 @@ export const invokeCommand = {
       }
       return newRemote;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<RemoteItem>("add_remote", { repoPath, name, url });
+    return unwrap(await commands.addRemote(repoPath, name, url));
   },
 
   renameRemote: async (repoPath: string, oldName: string, newName: string): Promise<void> => {
@@ -1003,8 +958,7 @@ export const invokeCommand = {
       }
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("rename_remote", { repoPath, oldName, newName });
+    await commands.renameRemote(repoPath, oldName, newName);
   },
 
   removeRemote: async (repoPath: string, name: string): Promise<void> => {
@@ -1023,8 +977,7 @@ export const invokeCommand = {
       }
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("remove_remote", { repoPath, name });
+    await commands.removeRemote(repoPath, name);
   },
 
   setRemoteUrl: async (
@@ -1052,13 +1005,7 @@ export const invokeCommand = {
       }
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("set_remote_url", {
-      repoPath,
-      name,
-      fetchUrl,
-      pushUrl: pushUrl ?? null,
-    });
+    await commands.setRemoteUrl(repoPath, name, fetchUrl, pushUrl ?? null);
   },
 
   pruneRemote: async (repoPath: string, remote: string, taskId?: string): Promise<PruneResult> => {
@@ -1080,12 +1027,7 @@ export const invokeCommand = {
         message: "Đã dọn dẹp 1 nhánh remote.",
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<PruneResult>("prune_remote", {
-      repoPath,
-      remote,
-      taskId: taskId ?? null,
-    });
+    return unwrap(await commands.pruneRemote(repoPath, remote, taskId ?? null));
   },
 
   fetchRepo: async (
@@ -1097,13 +1039,9 @@ export const invokeCommand = {
     if (!isTauri()) {
       return "[Browser mock] Fetch hoàn tất";
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<string>("fetch_repo", {
-      repoPath,
-      remote,
-      prune,
-      taskId,
-    });
+    return unwrap(
+      await commands.fetchRepo(repoPath, remote ?? null, prune ?? null, taskId ?? null)
+    );
   },
 
   pullRepo: async (
@@ -1116,14 +1054,15 @@ export const invokeCommand = {
     if (!isTauri()) {
       return "[Browser mock] Pull hoàn tất";
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<string>("pull_repo", {
-      repoPath,
-      remote,
-      branch,
-      rebase,
-      taskId,
-    });
+    return unwrap(
+      await commands.pullRepo(
+        repoPath,
+        remote ?? null,
+        branch ?? null,
+        rebase ?? null,
+        taskId ?? null
+      )
+    );
   },
 
   pushRepo: async (
@@ -1137,35 +1076,30 @@ export const invokeCommand = {
     if (!isTauri()) {
       return "[Browser mock] Push hoàn tất";
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<string>("push_repo", {
-      repoPath,
-      remote,
-      branch,
-      setUpstream,
-      force,
-      taskId,
-    });
+    return unwrap(
+      await commands.pushRepo(
+        repoPath,
+        remote ?? null,
+        branch ?? null,
+        setUpstream ?? null,
+        force ?? null,
+        taskId ?? null
+      )
+    );
   },
 
   cloneRepo: async (url: string, targetDir: string, taskId?: string): Promise<string> => {
     if (!isTauri()) {
       return "[Browser mock] Clone hoàn tất";
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<string>("clone_repo", {
-      url,
-      targetDir,
-      taskId,
-    });
+    return unwrap(await commands.cloneRepo(url, targetDir, taskId ?? null));
   },
 
   cancelRemoteTask: async (taskId: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("cancel_remote_task", { taskId });
+    await commands.cancelRemoteTask(taskId);
   },
 
   setRepoPullRebase: async (repoPath: string, rebase: boolean): Promise<void> => {
@@ -1174,16 +1108,14 @@ export const invokeCommand = {
       mockLocalConfigs[repoPath].pullRebase = rebase;
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("set_repo_pull_rebase", { repoPath, rebase });
+    await commands.setRepoPullRebase(repoPath, rebase);
   },
 
   getStashes: async (repoPath: string): Promise<StashItem[]> => {
     if (!isTauri()) {
       return [...mockStashes];
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<StashItem[]>("get_stashes", { repoPath });
+    return unwrap(await commands.getStashes(repoPath));
   },
 
   saveStash: async (
@@ -1202,16 +1134,14 @@ export const invokeCommand = {
       mockStashes = [newStash, ...mockStashes.map((s, idx) => ({ ...s, index: idx + 1 }))];
       return commitId;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<string>("save_stash", { repoPath, message, includeUntracked });
+    return unwrap(await commands.saveStash(repoPath, message ?? null, includeUntracked ?? null));
   },
 
   applyStash: async (repoPath: string, index: number): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("apply_stash", { repoPath, index });
+    await commands.applyStash(repoPath, index);
   },
 
   popStash: async (repoPath: string, index: number): Promise<void> => {
@@ -1221,8 +1151,7 @@ export const invokeCommand = {
         .map((s, idx) => ({ ...s, index: idx }));
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("pop_stash", { repoPath, index });
+    await commands.popStash(repoPath, index);
   },
 
   dropStash: async (repoPath: string, index: number): Promise<string> => {
@@ -1232,8 +1161,7 @@ export const invokeCommand = {
         .map((s, idx) => ({ ...s, index: idx }));
       return `refs/gitui-backup/stash-drop-undo-${Date.now()}`;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<string>("drop_stash", { repoPath, index });
+    return unwrap(await commands.dropStash(repoPath, index));
   },
 
   getRepoState: async (repoPath: string): Promise<RepoStateInfo> => {
@@ -1246,8 +1174,7 @@ export const invokeCommand = {
         conflict_count: 0,
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<RepoStateInfo>("get_repo_state", { repoPath });
+    return unwrap(await commands.getRepoState(repoPath));
   },
 
   mergeBranch: async (
@@ -1262,8 +1189,7 @@ export const invokeCommand = {
         output: `Merged branch ${targetBranch} into HEAD`,
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<MergeResult>("merge_branch", { repoPath, targetBranch, noFf });
+    return unwrap(await commands.mergeBranch(repoPath, targetBranch, noFf ?? null));
   },
 
   rebaseBranch: async (repoPath: string, upstreamBranch: string): Promise<RebaseResult> => {
@@ -1274,19 +1200,14 @@ export const invokeCommand = {
         output: `Successfully rebased and updated refs/heads/main`,
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<RebaseResult>("rebase_branch", { repoPath, upstreamBranch });
+    return unwrap(await commands.rebaseBranch(repoPath, upstreamBranch));
   },
 
   getRebaseCommits: async (repoPath: string, baseCommitId: string): Promise<RebaseCommitItem[]> => {
     if (!isTauri()) {
       return [...mockRebaseCommits];
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<RebaseCommitItem[]>("get_rebase_commits", {
-      repoPath,
-      baseCommitId,
-    });
+    return unwrap(await commands.getRebaseCommits(repoPath, baseCommitId));
   },
 
   executeInteractiveRebase: async (
@@ -1315,13 +1236,9 @@ export const invokeCommand = {
         output: "Successfully rebased and updated refs/heads/main.",
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<InteractiveRebaseResult>("execute_interactive_rebase", {
-      repoPath,
-      baseCommitId,
-      steps,
-      autoStash: autoStash ?? false,
-    });
+    return unwrap(
+      await commands.executeInteractiveRebase(repoPath, baseCommitId, steps, autoStash ?? false)
+    );
   },
 
   cherryPickCommit: async (
@@ -1338,12 +1255,7 @@ export const invokeCommand = {
         output: "Mock cherry-pick output",
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<CommitActionResult>("cherry_pick_commit", {
-      repoPath,
-      commitId,
-      autoCommit,
-    });
+    return unwrap(await commands.cherryPickCommit(repoPath, commitId, autoCommit));
   },
 
   revertCommit: async (
@@ -1360,28 +1272,21 @@ export const invokeCommand = {
         output: "Mock revert output",
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<CommitActionResult>("revert_commit", {
-      repoPath,
-      commitId,
-      autoCommit,
-    });
+    return unwrap(await commands.revertCommit(repoPath, commitId, autoCommit));
   },
 
   abortInProgress: async (repoPath: string, operation: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("abort_in_progress", { repoPath, operation });
+    await commands.abortInProgress(repoPath, operation);
   },
 
   continueInProgress: async (repoPath: string, operation: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("continue_in_progress", { repoPath, operation });
+    await commands.continueInProgress(repoPath, operation);
   },
 
   getConflictFileData: async (repoPath: string, filePath: string): Promise<ConflictFileData> => {
@@ -1413,8 +1318,7 @@ export const invokeCommand = {
         ],
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<ConflictFileData>("get_conflict_file_data", { repoPath, filePath });
+    return unwrap(await commands.getConflictFileData(repoPath, filePath));
   },
 
   resolveConflictFile: async (
@@ -1426,21 +1330,14 @@ export const invokeCommand = {
     if (!isTauri()) {
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("resolve_conflict_file", {
-      repoPath,
-      filePath,
-      resolvedContent,
-      autoStage,
-    });
+    await commands.resolveConflictFile(repoPath, filePath, resolvedContent, autoStage ?? null);
   },
 
   undoCommit: async (repoPath: string, undoToken: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("undo_commit", { repoPath, undoToken });
+    await commands.undoCommit(repoPath, undoToken);
   },
 
   undoDeleteBranch: async (
@@ -1451,16 +1348,14 @@ export const invokeCommand = {
     if (!isTauri()) {
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("undo_delete_branch", { repoPath, branchName, backupRef });
+    await commands.undoDeleteBranch(repoPath, branchName, backupRef);
   },
 
   undoDropStash: async (repoPath: string, receipt: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("undo_drop_stash", { repoPath, receipt });
+    await commands.undoDropStash(repoPath, receipt);
   },
 
   getGitConfig: async (repoPath?: string | null): Promise<GitConfigDto> => {
@@ -1482,8 +1377,7 @@ export const invokeCommand = {
       }
       return { ...mockGlobalConfig };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<GitConfigDto>("get_git_config", { repoPath: repoPath ?? null });
+    return unwrap(await commands.getGitConfig(repoPath ?? null));
   },
 
   setGitConfig: async (
@@ -1525,13 +1419,7 @@ export const invokeCommand = {
       }
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke("set_git_config", {
-      repoPath: repoPath ?? null,
-      scope,
-      key,
-      value,
-    });
+    await commands.setGitConfig(repoPath ?? null, scope, key, value);
   },
 
   compareCommits: async (
@@ -1548,13 +1436,7 @@ export const invokeCommand = {
         mode,
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<CompareSummary>("compare_commits", {
-      repoPath,
-      baseRev,
-      targetRev,
-      mode,
-    });
+    return unwrap(await commands.compareCommits(repoPath, baseRev, targetRev, mode));
   },
 
   getCompareFileDiff: async (
@@ -1614,15 +1496,16 @@ export const invokeCommand = {
         ],
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<FileDiffResult>("get_compare_file_diff", {
-      repoPath,
-      baseRev,
-      targetRev,
-      filePath,
-      mode,
-      ignoreWs: ignoreWhitespace ?? false,
-    });
+    return unwrap(
+      await commands.getCompareFileDiff(
+        repoPath,
+        baseRev,
+        targetRev,
+        filePath,
+        mode,
+        ignoreWhitespace ?? false
+      )
+    );
   },
 
   getGitHubRepoInfo: async (repoPath: string): Promise<GitHubRepoInfo> => {
@@ -1634,16 +1517,14 @@ export const invokeCommand = {
         default_branch: "main",
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<GitHubRepoInfo>("get_github_repo_info", { repoPath });
+    return unwrap(await commands.getGithubRepoInfo(repoPath));
   },
 
   getGitHubToken: async (): Promise<string | null> => {
     if (!isTauri()) {
       return localStorage.getItem("gitvista_github_token");
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<string | null>("get_github_token");
+    return unwrap(await commands.getGithubToken());
   },
 
   saveGitHubToken: async (token: string): Promise<void> => {
@@ -1651,8 +1532,7 @@ export const invokeCommand = {
       localStorage.setItem("gitvista_github_token", token);
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<void>("save_github_token", { token });
+    await commands.saveGithubToken(token);
   },
 
   removeGitHubToken: async (): Promise<void> => {
@@ -1660,8 +1540,7 @@ export const invokeCommand = {
       localStorage.removeItem("gitvista_github_token");
       return;
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<void>("remove_github_token");
+    await commands.removeGithubToken();
   },
 
   checkoutPullRequest: async (repoPath: string, prNumber: number): Promise<CheckoutPrResult> => {
@@ -1671,11 +1550,7 @@ export const invokeCommand = {
         message: `Đã chuyển sang nhánh pr/${prNumber} thành công.`,
       };
     }
-    const { invoke } = await import("@tauri-apps/api/core");
-    return await invoke<CheckoutPrResult>("checkout_pull_request", {
-      repoPath,
-      prNumber,
-    });
+    return unwrap(await commands.checkoutPullRequest(repoPath, prNumber));
   },
 };
 

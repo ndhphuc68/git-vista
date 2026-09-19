@@ -1,7 +1,7 @@
 import React from "react";
 import { GitCommit, Calendar, User } from "lucide-react";
 import { useTranslation } from "../../i18n";
-import type { CompareCommitItem } from "../../ipc/bindings";
+import type { CompareCommitItem } from "../../ipc/bindings.generated";
 
 export interface CompareCommitListProps {
   commits: CompareCommitItem[];

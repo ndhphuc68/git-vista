@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FolderOpen, X, Download, AlertCircle, Loader2 } from "lucide-react";
 import { invokeCommand, listenToTaskProgress } from "../../ipc/client";
-import { type RepoSummary } from "../../ipc/bindings";
+import { type RepoSummary } from "../../ipc/bindings.generated";
 import { useTranslation } from "../../i18n";
 import { Modal } from "../../shared/ui";
 

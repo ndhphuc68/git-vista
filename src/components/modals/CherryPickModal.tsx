@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { GitPullRequest, GitBranch } from "lucide-react";
 import { invokeCommand } from "../../ipc/client";
-import type { CommitActionResult } from "../../ipc/bindings";
+import type { CommitActionResult } from "../../ipc/bindings.generated";
 import { useTranslation } from "../../i18n";
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";

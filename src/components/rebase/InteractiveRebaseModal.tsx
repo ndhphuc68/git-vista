@@ -14,7 +14,7 @@ import type {
   RebasePlanStep,
   RebaseActionKind,
   InteractiveRebaseResult,
-} from "../../ipc/bindings";
+} from "../../ipc/bindings.generated";
 import { qk } from "../../domain/queryKeys";
 
 const EMPTY_COMMITS: RebaseCommitItem[] = [];

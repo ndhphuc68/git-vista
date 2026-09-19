@@ -1,4 +1,4 @@
-import { type DiffLine } from "../ipc/bindings";
+import { type DiffLine } from "../ipc/bindings.generated";
 
 export type WordDiffType = "equal" | "removed" | "added";
 

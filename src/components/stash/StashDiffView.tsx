@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Play, PlayCircle, Trash2 } from "lucide-react";
-import { type StashItem, type CommitDetails } from "../../ipc/bindings";
+import { type StashItem, type CommitDetails } from "../../ipc/bindings.generated";
 import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
 

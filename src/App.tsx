@@ -7,7 +7,7 @@ import { WindowTabBar } from "./components/header/WindowTabBar";
 import { ChangesScreen } from "./components/changes/ChangesScreen";
 import { InProgressOperationBanner } from "./components/banner/InProgressOperationBanner";
 import { listenToRepoChanged, invokeCommand } from "./ipc/client";
-import { type RepoSummary } from "./ipc/bindings";
+import { type RepoSummary } from "./ipc/bindings.generated";
 import { useRepoStore } from "./store/useRepoStore";
 import { useTabStore } from "./store/useTabStore";
 import { useViewStore } from "./store/useViewStore";

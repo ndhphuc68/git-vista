@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { InteractiveRebaseModal } from "../components/rebase/InteractiveRebaseModal";
 import { invokeCommand } from "../ipc/client";
 import { useRepoStore } from "../store/useRepoStore";
-import type { RebaseCommitItem } from "../ipc/bindings";
+import type { RebaseCommitItem } from "../ipc/bindings.generated";
 
 vi.mock("../ipc/client", () => ({
   invokeCommand: {

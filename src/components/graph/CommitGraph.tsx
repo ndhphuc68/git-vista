@@ -17,7 +17,7 @@ import { useViewStore } from "../../store/useViewStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
 import { useToastStore } from "../../store/useToastStore";
 import { invokeCommand } from "../../ipc/client";
-import { type GraphCommitNode } from "../../ipc/bindings";
+import { type GraphCommitNode } from "../../ipc/bindings.generated";
 import { GraphSvgLane } from "./GraphSvgLane";
 import { useTranslation } from "../../i18n";
 import { CreateTagModal } from "../tag";

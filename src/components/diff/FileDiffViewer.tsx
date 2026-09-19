@@ -7,7 +7,7 @@ import { useTranslation } from "../../i18n";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { useInspectorStore } from "../../store/useInspectorStore";
 import { pairHunkLines } from "../../utils/wordDiff";
-import { type DiffHunk } from "../../ipc/bindings";
+import { type DiffHunk } from "../../ipc/bindings.generated";
 import { DiffLineContent } from "./DiffLineContent";
 import { qk } from "../../domain/queryKeys";
 

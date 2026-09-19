@@ -5,7 +5,7 @@ import { useTranslation } from "../../i18n";
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
 import { Modal, Button, Alert } from "../../shared/ui";
-import type { RemoteItem } from "../../ipc/bindings";
+import type { RemoteItem } from "../../ipc/bindings.generated";
 
 export interface AddEditRemoteModalProps {
   isOpen: boolean;

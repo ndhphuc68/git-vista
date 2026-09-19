@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { type GitHubPullRequest } from "../ipc/bindings";
+import { type GitHubPullRequest } from "../ipc/githubApi";
 
 interface PullRequestStoreState {
   isDrawerOpen: boolean;

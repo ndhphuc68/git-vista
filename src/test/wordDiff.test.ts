@@ -3,7 +3,7 @@ import { render } from "@testing-library/react";
 import React from "react";
 import { tokenize, computeWordDiff, pairHunkLines, type WordDiffToken } from "../utils/wordDiff";
 import { DiffLineContent } from "../components/diff/DiffLineContent";
-import { type DiffLine } from "../ipc/bindings";
+import { type DiffLine } from "../ipc/bindings.generated";
 
 describe("wordDiff tokenizer", () => {
   it("handles empty string", () => {

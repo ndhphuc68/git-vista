@@ -19,7 +19,6 @@
     "node_modules/**",
     "playwright-report/**",
     "src-tauri/**",
-    "src/ipc/bindings.ts",
     "src/ipc/bindings.generated.ts",
     "test-results/**"
   ],
@@ -52,12 +51,6 @@
     "max-nested-callbacks": ["warn", 3]
   },
   "overrides": [
-    {
-      "files": ["src/ipc/bindings.ts"],
-      "rules": {
-        "typescript/no-explicit-any": "off"
-      }
-    },
     {
       "files": ["src/test/**", "**/*.test.ts", "**/*.test.tsx", "e2e/**"],
       "rules": {

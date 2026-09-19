@@ -383,6 +383,12 @@ export type RemoteItem = {
 	is_default: boolean,
 };
 
+export type RepoChangedPayload = {
+	repo_path: string,
+	reason: string,
+	timestamp_ms: number,
+};
+
 export type RepoHeadInfo = {
 	branch_name: string | null,
 	head_commit_id: string | null,
@@ -446,6 +452,12 @@ export type TagItem = {
 	tagger_name: string | null,
 	tagger_email: string | null,
 	timestamp_sec: number | null,
+};
+
+export type TaskProgressPayload = {
+	task_id: string,
+	progress_percent: number,
+	status_text: string,
 };
 
 /* Tauri Specta runtime */

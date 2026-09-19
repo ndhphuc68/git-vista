@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import clsx from "clsx";
 import { Plus, Minus, Trash2, CheckCircle2, AlertCircle, FileText, History } from "lucide-react";
-import { type RepoStatusResult, type StatusFileItem, type FileStatus } from "../../ipc/bindings";
+import { type RepoStatusResult, type StatusFileItem, type FileStatus } from "../../ipc/bindings.generated";
 import { DiscardConfirmModal } from "./DiscardConfirmModal";
 import { useTranslation } from "../../i18n";
 import { useInspectorStore } from "../../store/useInspectorStore";

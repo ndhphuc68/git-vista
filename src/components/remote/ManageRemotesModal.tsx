@@ -19,7 +19,7 @@ import { Modal, Button } from "../../shared/ui";
 import { AddEditRemoteModal } from "./AddEditRemoteModal";
 import { DeleteRemoteModal } from "./DeleteRemoteModal";
 import { PruneConfirmModal } from "./PruneConfirmModal";
-import type { RemoteItem } from "../../ipc/bindings";
+import type { RemoteItem } from "../../ipc/bindings.generated";
 import { qk } from "../../domain/queryKeys";
 
 const TITLE_ID = "manage-remotes-title";

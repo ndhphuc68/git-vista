@@ -1,5 +1,5 @@
 import React from "react";
-import { type GraphEdge } from "../../ipc/bindings";
+import { type GraphEdge } from "../../ipc/bindings.generated";
 
 const LANE_COLORS = ["#2F6FEB", "#8E44AD", "#27AE60", "#E67E22", "#E74C3C", "#16A085"];
 

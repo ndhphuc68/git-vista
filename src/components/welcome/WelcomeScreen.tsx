@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { invokeCommand } from "../../ipc/client";
-import { type RepoSummary } from "../../ipc/bindings";
+import { type RepoSummary } from "../../ipc/bindings.generated";
 import { useTranslation } from "../../i18n";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { CloneModal } from "./CloneModal";

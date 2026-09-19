@@ -28,7 +28,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { invokeCommand } from "../../ipc/client";
-import { type StashItem, type BranchItem, type TagItem, type RemoteItem } from "../../ipc/bindings";
+import { type StashItem, type BranchItem, type TagItem, type RemoteItem } from "../../ipc/bindings.generated";
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
 import { qk } from "../../domain/queryKeys";

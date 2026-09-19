@@ -18,7 +18,7 @@ import { invokeCommand } from "../../ipc/client";
 import { fetchPullRequests } from "../../services/githubService";
 import { usePullRequestStore } from "../../store/usePullRequestStore";
 import { useToastStore } from "../../store/useToastStore";
-import { type GitHubPullRequest } from "../../ipc/bindings";
+import { type GitHubPullRequest } from "../../ipc/githubApi";
 import { qk } from "../../domain/queryKeys";
 
 interface PullRequestsSectionProps {

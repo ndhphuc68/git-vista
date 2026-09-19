@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { type RepoSummary } from "../ipc/bindings";
+import { type RepoSummary } from "../ipc/bindings.generated";
 import { type TabItem, type TabSessionData } from "../types/tab";
 import { invokeCommand } from "../ipc/client";
 import { useRepoStore } from "./useRepoStore";
