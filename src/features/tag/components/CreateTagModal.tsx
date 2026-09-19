@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Tag } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
-import { useTranslation } from "../../i18n";
-import { useToastStore } from "../../store/useToastStore";
-import { mapGitError } from "../../utils/errorMapping";
-import { Modal, Button, Alert } from "../../shared/ui";
+import { useTranslation } from "../../../i18n";
+import { useToastStore } from "../../../store/useToastStore";
+import { mapGitError } from "../../../utils/errorMapping";
+import { Modal, Button, Alert } from "../../../shared/ui";
+import { useCreateTag } from "../api";
 
 const TITLE_ID = "create-tag-title";
 
@@ -26,10 +26,10 @@ export const CreateTagModal: React.FC<CreateTagModalProps> = ({
   onSuccess,
 }) => {
   const { t } = useTranslation();
+  const createTag = useCreateTag(repoPath);
   const [name, setName] = useState("");
   const [isAnnotated, setIsAnnotated] = useState(false);
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -38,7 +38,6 @@ export const CreateTagModal: React.FC<CreateTagModalProps> = ({
       setIsAnnotated(false);
       setMessage("");
       setError(null);
-      setLoading(false);
     }
   }, [isOpen]);
 
@@ -65,16 +64,14 @@ export const CreateTagModal: React.FC<CreateTagModalProps> = ({
       return;
     }
 
-    setLoading(true);
     setError(null);
 
     try {
-      await invokeCommand.createTag(
-        repoPath,
-        trimmedName,
+      await createTag.mutateAsync({
+        name: trimmedName,
         targetCommitId,
-        isAnnotated ? message : undefined
-      );
+        message: isAnnotated ? message : undefined,
+      });
       useToastStore.getState().showToast({
         message: t.modals.createTag.successToast.replace("{name}", trimmedName),
         type: "success",
@@ -85,8 +82,6 @@ export const CreateTagModal: React.FC<CreateTagModalProps> = ({
       const msg = err instanceof Error ? err.message : String(err);
       setError(msg || t.common.error);
       useToastStore.getState().showError(mapGitError(err));
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -132,7 +127,7 @@ export const CreateTagModal: React.FC<CreateTagModalProps> = ({
               placeholder={t.modals.createTag.namePlaceholder}
               value={name}
               onChange={handleNameChange}
-              disabled={loading}
+              disabled={createTag.isPending}
               className="bg-window text-primary border border-border-subtle rounded-sm px-3 py-1.5 text-xs outline-none focus:border-accent transition-colors w-full"
             />
           </div>
@@ -142,7 +137,7 @@ export const CreateTagModal: React.FC<CreateTagModalProps> = ({
               type="checkbox"
               checked={isAnnotated}
               onChange={(e) => setIsAnnotated(e.target.checked)}
-              disabled={loading}
+              disabled={createTag.isPending}
               aria-label={t.modals.createTag.annotatedLabel}
               className="accent-accent cursor-pointer rounded-sm"
             />
@@ -163,7 +158,7 @@ export const CreateTagModal: React.FC<CreateTagModalProps> = ({
                   setMessage(e.target.value);
                   if (error) setError(null);
                 }}
-                disabled={loading}
+                disabled={createTag.isPending}
                 rows={3}
                 className="bg-window text-primary border border-border-subtle rounded-sm px-3 py-1.5 text-xs outline-none focus:border-accent transition-colors w-full resize-none"
               />
@@ -174,11 +169,11 @@ export const CreateTagModal: React.FC<CreateTagModalProps> = ({
         </Modal.Body>
 
         <Modal.Footer>
-          <Button variant="secondary" onClick={onClose} disabled={loading}>
+          <Button variant="secondary" onClick={onClose} disabled={createTag.isPending}>
             {t.modals.createTag.cancel}
           </Button>
-          <Button type="submit" loading={loading}>
-            {loading ? t.modals.createTag.creating : t.modals.createTag.submit}
+          <Button type="submit" loading={createTag.isPending}>
+            {createTag.isPending ? t.modals.createTag.creating : t.modals.createTag.submit}
           </Button>
         </Modal.Footer>
       </form>

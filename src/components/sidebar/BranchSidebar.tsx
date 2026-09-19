@@ -40,7 +40,7 @@ import { CheckoutConflictModal } from "./CheckoutConflictModal";
 import { StashDiffView } from "../stash/StashDiffView";
 import { MergeBranchModal } from "../merge/MergeBranchModal";
 import { RebaseBranchModal } from "../merge/RebaseBranchModal";
-import { CreateTagModal, DeleteTagModal } from "../tag";
+import { CreateTagModal, DeleteTagModal } from "../../features/tag";
 import { CompareModal } from "../compare";
 import {
   ManageRemotesModal,

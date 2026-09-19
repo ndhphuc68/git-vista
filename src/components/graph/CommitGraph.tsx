@@ -20,7 +20,7 @@ import { invokeCommand } from "../../ipc/client";
 import { type GraphCommitNode } from "../../ipc/bindings.generated";
 import { GraphSvgLane } from "./GraphSvgLane";
 import { useTranslation } from "../../i18n";
-import { CreateTagModal } from "../tag";
+import { CreateTagModal } from "../../features/tag";
 import { CreateBranchModal } from "../sidebar/CreateBranchModal";
 import { CherryPickModal } from "../modals/CherryPickModal";
 import { RevertModal } from "../modals/RevertModal";

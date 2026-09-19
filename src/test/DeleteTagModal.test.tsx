@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { DeleteTagModal } from "../components/tag/DeleteTagModal";
+import { DeleteTagModal } from "../features/tag";
 import { invokeCommand } from "../ipc/client";
 
 vi.mock("../ipc/client", () => ({
@@ -9,20 +10,27 @@ vi.mock("../ipc/client", () => ({
   },
 }));
 
+function renderWithClient(ui: React.ReactElement) {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+}
+
 describe("DeleteTagModal", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("does not render when isOpen is false", () => {
-    render(
+    renderWithClient(
       <DeleteTagModal isOpen={false} onClose={vi.fn()} repoPath="/test/repo" tagName="v1.0.0" />
     );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("renders warning with tag name and target commit SHA", () => {
-    render(
+    renderWithClient(
       <DeleteTagModal
         isOpen={true}
         onClose={vi.fn()}
@@ -38,25 +46,32 @@ describe("DeleteTagModal", () => {
   });
 
   it("shows remote delete checkbox only when hasRemote is true", () => {
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
     const { rerender } = render(
-      <DeleteTagModal
-        isOpen={true}
-        onClose={vi.fn()}
-        repoPath="/test/repo"
-        tagName="v1.0.0"
-        hasRemote={false}
-      />
+      <QueryClientProvider client={client}>
+        <DeleteTagModal
+          isOpen={true}
+          onClose={vi.fn()}
+          repoPath="/test/repo"
+          tagName="v1.0.0"
+          hasRemote={false}
+        />
+      </QueryClientProvider>
     );
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
 
     rerender(
-      <DeleteTagModal
-        isOpen={true}
-        onClose={vi.fn()}
-        repoPath="/test/repo"
-        tagName="v1.0.0"
-        hasRemote={true}
-      />
+      <QueryClientProvider client={client}>
+        <DeleteTagModal
+          isOpen={true}
+          onClose={vi.fn()}
+          repoPath="/test/repo"
+          tagName="v1.0.0"
+          hasRemote={true}
+        />
+      </QueryClientProvider>
     );
     expect(screen.getByRole("checkbox")).toBeInTheDocument();
   });
@@ -66,7 +81,7 @@ describe("DeleteTagModal", () => {
     const onSuccess = vi.fn();
     (invokeCommand.deleteTag as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
 
-    render(
+    renderWithClient(
       <DeleteTagModal
         isOpen={true}
         onClose={onClose}
@@ -92,7 +107,7 @@ describe("DeleteTagModal", () => {
     const onSuccess = vi.fn();
     (invokeCommand.deleteTag as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
 
-    render(
+    renderWithClient(
       <DeleteTagModal
         isOpen={true}
         onClose={onClose}
@@ -121,7 +136,7 @@ describe("DeleteTagModal", () => {
       new Error("Remote rejected")
     );
 
-    render(
+    renderWithClient(
       <DeleteTagModal isOpen={true} onClose={vi.fn()} repoPath="/test/repo" tagName="v1.0.0" />
     );
 
@@ -135,7 +150,7 @@ describe("DeleteTagModal", () => {
 
   it("closes when cancel button is clicked or Escape key is pressed", () => {
     const onClose = vi.fn();
-    render(
+    renderWithClient(
       <DeleteTagModal isOpen={true} onClose={onClose} repoPath="/test/repo" tagName="v1.0.0" />
     );
 

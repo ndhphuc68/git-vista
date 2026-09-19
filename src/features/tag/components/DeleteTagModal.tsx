@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, AlertTriangle, Tag } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
-import { useTranslation } from "../../i18n";
-import { useToastStore } from "../../store/useToastStore";
-import { mapGitError } from "../../utils/errorMapping";
-import { Modal, Button, Alert } from "../../shared/ui";
+import { useTranslation } from "../../../i18n";
+import { useToastStore } from "../../../store/useToastStore";
+import { mapGitError } from "../../../utils/errorMapping";
+import { Modal, Button, Alert } from "../../../shared/ui";
+import { useDeleteTag } from "../api";
 
 const TITLE_ID = "delete-tag-title";
 
@@ -28,24 +28,22 @@ export const DeleteTagModal: React.FC<DeleteTagModalProps> = ({
   onSuccess,
 }) => {
   const { t } = useTranslation();
+  const deleteTag = useDeleteTag(repoPath);
   const [deleteRemote, setDeleteRemote] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       setDeleteRemote(false);
       setError(null);
-      setLoading(false);
     }
   }, [isOpen, tagName]);
 
   const handleDelete = async () => {
-    setLoading(true);
     setError(null);
 
     try {
-      await invokeCommand.deleteTag(repoPath, tagName, deleteRemote);
+      await deleteTag.mutateAsync({ name: tagName, deleteRemote });
       useToastStore.getState().showToast({
         message: t.modals.deleteTag.successToast.replace("{name}", tagName),
         type: "success",
@@ -56,8 +54,6 @@ export const DeleteTagModal: React.FC<DeleteTagModalProps> = ({
       const msg = err instanceof Error ? err.message : String(err);
       setError(t.modals.deleteTag.errorGeneric.replace("{msg}", msg));
       useToastStore.getState().showError(mapGitError(err));
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -100,7 +96,7 @@ export const DeleteTagModal: React.FC<DeleteTagModalProps> = ({
               type="checkbox"
               checked={deleteRemote}
               onChange={(e) => setDeleteRemote(e.target.checked)}
-              disabled={loading}
+              disabled={deleteTag.isPending}
               aria-label={t.modals.deleteTag.deleteRemoteLabel}
               className="accent-accent cursor-pointer rounded-sm"
             />
@@ -112,11 +108,11 @@ export const DeleteTagModal: React.FC<DeleteTagModalProps> = ({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose} disabled={loading}>
+        <Button variant="secondary" onClick={onClose} disabled={deleteTag.isPending}>
           {t.modals.deleteTag.cancel}
         </Button>
-        <Button variant="danger" onClick={handleDelete} loading={loading}>
-          {loading ? t.modals.deleteTag.deleting : t.modals.deleteTag.submit}
+        <Button variant="danger" onClick={handleDelete} loading={deleteTag.isPending}>
+          {deleteTag.isPending ? t.modals.deleteTag.deleting : t.modals.deleteTag.submit}
         </Button>
       </Modal.Footer>
     </Modal>
