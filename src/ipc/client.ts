@@ -40,6 +40,10 @@ import {
 } from "./bindings.generated";
 import { mockState } from "./mocks";
 import { isTauri, unwrap } from "./core";
+import { undoCommands } from "./undo";
+import { commitActionCommands } from "./commitActions";
+import { rebaseCommands } from "./rebase";
+import { conflictCommands } from "./conflict";
 
 export { isTauri };
 
@@ -52,6 +56,11 @@ export {
 } from "./mocks";
 
 export const invokeCommand = {
+  ...undoCommands,
+  ...commitActionCommands,
+  ...rebaseCommands,
+  ...conflictCommands,
+
   ping: async (msg: string): Promise<string> => {
     if (!isTauri()) {
       return `[Browser mock] Pong: ${msg} (at ${new Date().toLocaleTimeString()})`;
@@ -905,78 +914,6 @@ export const invokeCommand = {
     return unwrap(await commands.rebaseBranch(repoPath, upstreamBranch));
   },
 
-  getRebaseCommits: async (repoPath: string, baseCommitId: string): Promise<RebaseCommitItem[]> => {
-    if (!isTauri()) {
-      return [...mockState.rebaseCommits];
-    }
-    return unwrap(await commands.getRebaseCommits(repoPath, baseCommitId));
-  },
-
-  executeInteractiveRebase: async (
-    repoPath: string,
-    baseCommitId: string,
-    steps: RebasePlanStep[],
-    autoStash?: boolean
-  ): Promise<InteractiveRebaseResult> => {
-    if (!isTauri()) {
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("mock-repo-changed", {
-            detail: {
-              repo_path: repoPath,
-              reason: "execute_interactive_rebase",
-              timestamp_ms: Date.now(),
-            },
-          })
-        );
-      }
-      return {
-        success: true,
-        status: "Success",
-        head_commit_id: "mock-new-head-oid",
-        undo_token: "refs/gitui-backup/commit-undo-mock-123",
-        output: "Successfully rebased and updated refs/heads/main.",
-      };
-    }
-    return unwrap(
-      await commands.executeInteractiveRebase(repoPath, baseCommitId, steps, autoStash ?? false)
-    );
-  },
-
-  cherryPickCommit: async (
-    repoPath: string,
-    commitId: string,
-    autoCommit: boolean = true
-  ): Promise<CommitActionResult> => {
-    if (!isTauri()) {
-      return {
-        success: true,
-        status: autoCommit ? "Committed" : "Staged",
-        new_commit_id: autoCommit ? "mock_cherry_pick_" + commitId.slice(0, 7) : null,
-        undo_token: autoCommit ? "refs/gitui-backup/commit-undo-mock" : null,
-        output: "Mock cherry-pick output",
-      };
-    }
-    return unwrap(await commands.cherryPickCommit(repoPath, commitId, autoCommit));
-  },
-
-  revertCommit: async (
-    repoPath: string,
-    commitId: string,
-    autoCommit: boolean = true
-  ): Promise<CommitActionResult> => {
-    if (!isTauri()) {
-      return {
-        success: true,
-        status: autoCommit ? "Committed" : "Staged",
-        new_commit_id: autoCommit ? "mock_revert_" + commitId.slice(0, 7) : null,
-        undo_token: autoCommit ? "refs/gitui-backup/commit-undo-mock" : null,
-        output: "Mock revert output",
-      };
-    }
-    return unwrap(await commands.revertCommit(repoPath, commitId, autoCommit));
-  },
-
   abortInProgress: async (repoPath: string, operation: string): Promise<void> => {
     if (!isTauri()) {
       return;
@@ -989,75 +926,6 @@ export const invokeCommand = {
       return;
     }
     await commands.continueInProgress(repoPath, operation);
-  },
-
-  getConflictFileData: async (repoPath: string, filePath: string): Promise<ConflictFileData> => {
-    if (!isTauri()) {
-      return {
-        file_path: filePath,
-        total_conflicts: 1,
-        hunks: [
-          {
-            id: "hunk_0",
-            is_conflict: false,
-            content: "// Header code\n",
-            ours: null,
-            theirs: null,
-            base: null,
-            ours_label: null,
-            theirs_label: null,
-          },
-          {
-            id: "hunk_1",
-            is_conflict: true,
-            content: null,
-            ours: "console.log('ours');\n",
-            theirs: "console.log('theirs');\n",
-            base: null,
-            ours_label: "HEAD",
-            theirs_label: "feature",
-          },
-        ],
-      };
-    }
-    return unwrap(await commands.getConflictFileData(repoPath, filePath));
-  },
-
-  resolveConflictFile: async (
-    repoPath: string,
-    filePath: string,
-    resolvedContent: string,
-    autoStage?: boolean
-  ): Promise<void> => {
-    if (!isTauri()) {
-      return;
-    }
-    await commands.resolveConflictFile(repoPath, filePath, resolvedContent, autoStage ?? null);
-  },
-
-  undoCommit: async (repoPath: string, undoToken: string): Promise<void> => {
-    if (!isTauri()) {
-      return;
-    }
-    await commands.undoCommit(repoPath, undoToken);
-  },
-
-  undoDeleteBranch: async (
-    repoPath: string,
-    branchName: string,
-    backupRef: string
-  ): Promise<void> => {
-    if (!isTauri()) {
-      return;
-    }
-    await commands.undoDeleteBranch(repoPath, branchName, backupRef);
-  },
-
-  undoDropStash: async (repoPath: string, receipt: string): Promise<void> => {
-    if (!isTauri()) {
-      return;
-    }
-    await commands.undoDropStash(repoPath, receipt);
   },
 
   getGitConfig: async (repoPath?: string | null): Promise<GitConfigDto> => {
