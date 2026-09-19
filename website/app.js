@@ -38,7 +38,7 @@
     if (localStorage) {
       try {
         localStorage.setItem(STORAGE_KEY, currentLang);
-      } catch (e) {
+      } catch (_e) {
         // LocalStorage disabled or unavailable
       }
     }
@@ -109,7 +109,7 @@
     if (localStorage) {
       try {
         savedLang = localStorage.getItem(STORAGE_KEY);
-      } catch (e) {}
+      } catch (_e) {}
     }
 
     if (!savedLang && navigator && navigator.language && navigator.language.startsWith("vi")) {
