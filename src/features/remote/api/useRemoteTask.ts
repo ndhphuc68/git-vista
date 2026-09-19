@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { invokeCommand, listenToTaskProgress } from "../ipc/client";
-import { useTranslation } from "../i18n";
-import type { RemoteTaskState } from "../components/common/RemoteProgressBanner";
-import { mapGitError } from "../utils/errorMapping";
-import { qk } from "../domain/queryKeys";
+import { invokeCommand, listenToTaskProgress } from "../../../ipc/client";
+import { useTranslation } from "../../../i18n";
+import type { RemoteTaskState } from "../../../components/common/RemoteProgressBanner";
+import { mapGitError } from "../../../utils/errorMapping";
+import { qk } from "../../../domain/queryKeys";
 
 export type RemoteOperation = "fetch" | "pull" | "push";
 interface TaskOwner {

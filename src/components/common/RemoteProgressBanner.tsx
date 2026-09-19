@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useTranslation } from "../../i18n";
 import type { FriendlyError } from "../../utils/errorMapping";
-import type { RemoteOperation } from "../../hooks/useRemoteTask";
+import type { RemoteOperation } from "../../features/remote/api";
 
 export interface RemoteTaskState {
   taskId: string;

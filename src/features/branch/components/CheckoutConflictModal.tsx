@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { AlertTriangle, ArrowRight, Archive } from "lucide-react";
-// Stash has no feature hook yet — features/stash arrives in the next slice.
-// Until then saveStash stays on invokeCommand directly.
-import { invokeCommand } from "../../../ipc/client";
+import { useSaveStash } from "../../stash/api";
 import { useCheckoutBranch } from "../api";
 import { useTranslation } from "../../../i18n";
 import { Modal, Button, Alert } from "../../../shared/ui";
@@ -32,6 +30,7 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
   // repoPath is optional on this modal: the stash-and-checkout button only
   // renders when it is set, so an empty path never reaches the mutation.
   const checkoutBranch = useCheckoutBranch(repoPath ?? "");
+  const saveStash = useSaveStash(repoPath ?? "");
   const [actionError, setActionError] = useState<string | null>(null);
   const [isStashing, setIsStashing] = useState(false);
 
@@ -47,11 +46,10 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
     setIsStashing(true);
     setActionError(null);
     try {
-      await invokeCommand.saveStash(
-        repoPath,
-        t.modals.checkoutConflict.autoStashMessage.replace("{target}", targetBranch),
-        true
-      );
+      await saveStash.mutateAsync({
+        message: t.modals.checkoutConflict.autoStashMessage.replace("{target}", targetBranch),
+        includeUntracked: true,
+      });
       await checkoutBranch.mutateAsync({ name: targetBranch });
       onClose();
       onSuccess?.();

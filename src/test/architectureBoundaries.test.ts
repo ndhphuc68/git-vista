@@ -31,8 +31,6 @@ function collectSourceFiles(dir: string): string[] {
  * Task 9 adds CheckoutConflictModal here when it moves into the feature.
  */
 const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {
-  "features/branch/components/CheckoutConflictModal.tsx":
-    "calls saveStash; removed once features/stash exists",
   "features/branch/components/DeleteBranchModal.tsx":
     "undo toast calls undoDeleteBranch; removed once the undo domain has a hook",
   "features/branch/components/BranchSidebar.tsx":
@@ -52,6 +50,9 @@ const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {
  */
 const CROSS_FEATURE_EXCEPTIONS: Record<string, string[]> = {
   "features/branch/components/BranchSidebar.tsx": ["tag", "stash"],
+  // This modal belongs to the checkout-branch flow but must stash first;
+  // removable once "stash then checkout" has a home of its own.
+  "features/branch/components/CheckoutConflictModal.tsx": ["stash"],
 };
 
 /**

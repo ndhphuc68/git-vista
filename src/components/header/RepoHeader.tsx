@@ -19,7 +19,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { qk } from "../../domain/queryKeys";
 import { RemoteProgressBanner } from "../common/RemoteProgressBanner";
 
-import { useRemoteTask } from "../../hooks/useRemoteTask";
+import { useRemoteTask } from "../../features/remote/api";
 
 interface RepoHeaderProps {
   onBackToWelcome?: () => void;
