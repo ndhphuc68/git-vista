@@ -40,6 +40,21 @@
     ],
     "typescript/no-explicit-any": "warn",
     "import/no-duplicates": "error",
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": ["**/ipc/*", "**/ipc"],
+            "message": "Component phải gọi qua features/*/api, không import ipc trực tiếp."
+          },
+          {
+            "group": ["**/features/*/components/*", "**/features/*/api/*", "**/features/*/model/*"],
+            "message": "Import qua features/<name>/index.ts, không chọc vào nội bộ feature."
+          }
+        ]
+      }
+    ],
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn",
     "react/only-export-components": ["warn", { "allowConstantExport": true }],
@@ -57,6 +72,28 @@
         "max-lines": "off",
         "max-lines-per-function": "off",
         "max-nested-callbacks": "off"
+      }
+    },
+    {
+      "files": ["src/features/*/api/**", "src/ipc/**"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": ["src/shared/ui/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["**/ipc/*", "**/ipc", "**/store/*", "**/i18n", "**/i18n/*"],
+                "message": "shared/ui phải thuần: nhận mọi thứ qua props."
+              }
+            ]
+          }
+        ]
       }
     }
   ]
