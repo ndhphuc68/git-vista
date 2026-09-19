@@ -26,8 +26,14 @@ const ALLOWED = [join("src", "domain", "queryKeys.ts"), join("src", "domain", "q
 /** Test được miễn: nhiều test cố tình dựng key thô để kiểm tra hành vi cache. */
 const isTestFile = (path) => path.includes(`${join("src", "test")}`) || /\.test\.tsx?$/.test(path);
 
-/** `queryKey:` theo sau là mảng mở đầu bằng chuỗi, ví dụ `queryKey: ["repo_status"`. */
-const LITERAL_KEY = /queryKey:\s*\[\s*["'`]/;
+/**
+ * `queryKey` theo sau là mảng mở đầu bằng chuỗi, ví dụ `queryKey: ["repo_status"`.
+ *
+ * `\s*` trước dấu hai chấm bắt cả `queryKey :`, và `\s` sau `[` bao gồm cả xuống
+ * dòng nên bắt được mảng viết nhiều dòng (Prettier hay ngắt dòng key dài).
+ * Vì vậy phải quét trên toàn bộ nội dung file chứ không quét từng dòng.
+ */
+const LITERAL_KEY = /queryKey\s*:\s*\[\s*["'`]/g;
 
 function collectFiles(dir) {
   const found = [];
@@ -48,12 +54,16 @@ for (const file of collectFiles(SRC)) {
   const rel = relative(ROOT, file);
   if (ALLOWED.includes(rel) || isTestFile(rel)) continue;
 
-  const lines = readFileSync(file, "utf8").split(/\r?\n/);
-  lines.forEach((line, index) => {
-    if (LITERAL_KEY.test(line)) {
-      violations.push({ file: rel, line: index + 1, text: line.trim() });
-    }
-  });
+  const content = readFileSync(file, "utf8");
+  LITERAL_KEY.lastIndex = 0;
+
+  let match;
+  while ((match = LITERAL_KEY.exec(content)) !== null) {
+    // Đếm số xuống dòng trước vị trí khớp để suy ra số dòng.
+    const line = content.slice(0, match.index).split(/\r?\n/).length;
+    const text = content.slice(match.index, match.index + 80).split(/\r?\n/)[0];
+    violations.push({ file: rel, line, text: text.trim() });
+  }
 }
 
 if (violations.length > 0) {

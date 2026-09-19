@@ -198,12 +198,11 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
         type: "success",
       });
 
-      queryClient.invalidateQueries({
-        predicate: (query) =>
-          query.queryKey.some(
-            (part) => typeof part === "string" && part.includes("github-pull-requests")
-          ),
-      });
+      // Trước đây dùng predicate tìm chuỗi "github-pull-requests" — chuỗi đó
+      // không tồn tại trong bất kỳ key nào, nên lời gọi này khớp rỗng và danh
+      // sách PR không bao giờ được làm mới sau khi tạo. Dùng tiền tố qk để
+      // làm mới mọi bộ lọc trạng thái, vì ở đây không biết người dùng đang lọc gì.
+      queryClient.invalidateQueries({ queryKey: qk.github.pullRequestsAll(repoPath) });
 
       handleClose();
     } catch (err: unknown) {

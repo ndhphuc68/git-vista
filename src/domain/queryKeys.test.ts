@@ -114,4 +114,18 @@ describe("queryKeys", () => {
       qk.compareFileDiff("/other/repo", "main", "dev", "a.ts", "twodot", false)
     );
   });
+
+  it("pullRequestsAll là tiền tố của mọi danh sách PR, bất kể bộ lọc trạng thái", () => {
+    const prefix = qk.github.pullRequestsAll(REPO);
+
+    for (const state of ["open", "closed", "all"]) {
+      const key = qk.github.pullRequests(REPO, state);
+      // React Query invalidate theo tiền tố, nên tiền tố phải khớp đầu key.
+      expect(key.slice(0, prefix.length)).toEqual([...prefix]);
+    }
+  });
+
+  it("pullRequestsAll phân biệt theo repo", () => {
+    expect(qk.github.pullRequestsAll("/a")).not.toEqual(qk.github.pullRequestsAll("/b"));
+  });
 });

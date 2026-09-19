@@ -26,8 +26,7 @@ export const qk = {
   fileDiff: (repo: string, commitId: string, filePath: string, ignoreWhitespace: boolean) =>
     ["repo", repo, "fileDiff", commitId, filePath, ignoreWhitespace] as const,
 
-  fileHistory: (repo: string, filePath: string) =>
-    ["repo", repo, "fileHistory", filePath] as const,
+  fileHistory: (repo: string, filePath: string) => ["repo", repo, "fileHistory", filePath] as const,
 
   fileBlame: (repo: string, filePath: string, commitId: string) =>
     ["repo", repo, "fileBlame", filePath, commitId] as const,
@@ -53,7 +52,16 @@ export const qk = {
     mode: string,
     ignoreWhitespace: boolean
   ) =>
-    ["repo", repo, "compareFileDiff", baseRev, targetRev, filePath, mode, ignoreWhitespace] as const,
+    [
+      "repo",
+      repo,
+      "compareFileDiff",
+      baseRev,
+      targetRev,
+      filePath,
+      mode,
+      ignoreWhitespace,
+    ] as const,
 
   /** Danh sách commit sẽ được rebase tương tác. */
   rebaseCommits: (repo: string, baseCommitId: string) =>
@@ -63,6 +71,12 @@ export const qk = {
     repoInfo: (repo: string) => ["repo", repo, "github", "repoInfo"] as const,
     pullRequests: (repo: string, state: string) =>
       ["repo", repo, "github", "pullRequests", state] as const,
+    /**
+     * Tiền tố của mọi danh sách pull request, không phân biệt bộ lọc trạng thái.
+     * Dùng khi cần làm mới danh sách mà nơi gọi không biết người dùng đang lọc
+     * theo trạng thái nào (ví dụ sau khi tạo PR mới).
+     */
+    pullRequestsAll: (repo: string) => ["repo", repo, "github", "pullRequests"] as const,
     pullRequestDetail: (repo: string, number: number) =>
       ["repo", repo, "github", "pullRequestDetail", number] as const,
   },
