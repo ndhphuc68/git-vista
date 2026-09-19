@@ -44,6 +44,8 @@ function featureNames(): string[] {
 describe("architecture boundaries", () => {
   it("no feature imports another feature", () => {
     const names = featureNames();
+    // Guard against the check silently passing because the scan found no feature directories.
+    expect(names.length).toBeGreaterThan(0);
     const violations: string[] = [];
 
     for (const name of names) {
@@ -65,14 +67,17 @@ describe("architecture boundaries", () => {
   });
 
   it("only features/*/api may import ipc/", () => {
+    const names = featureNames();
+    // Guard against the check silently passing because the scan found no feature directories.
+    expect(names.length).toBeGreaterThan(0);
     const violations: string[] = [];
 
-    for (const name of featureNames()) {
+    for (const name of names) {
       const files = collectSourceFiles(join(FEATURES, name));
       for (const file of files) {
         const rel = relative(SRC, file).replace(/\\/g, "/");
         if (rel.includes(`features/${name}/api/`)) continue;
-        if (rel.replace(/^features\//, "features/") in IPC_IMPORT_EXCEPTIONS) continue;
+        if (rel in IPC_IMPORT_EXCEPTIONS) continue;
         const source = readFileSync(file, "utf8");
         if (/from\s+["'][^"']*\/ipc\//.test(source)) {
           violations.push(`${rel} imports ipc/ outside of api/`);
