@@ -33,26 +33,51 @@ function collectSourceFiles(dir: string): string[] {
 const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {};
 
 /**
- * True when the source imports a VALUE from ipc/ — the thing the layer rule
- * forbids outside api/.
+ * True when the source pulls a VALUE out of ipc/ at runtime — the thing the
+ * layer rule forbids outside api/.
  *
  * Type-only imports are erased at compile time and create no runtime
- * dependency, so a model file may name an IPC type without calling one.
- * Both spellings are treated as type-only: `import type { X } from`, and
- * `import { type X, type Y } from` where every named binding is marked.
+ * dependency, so a model file may name an IPC type without calling one. Only
+ * these two spellings count as type-only:
+ *   `import type { X } from "…/ipc/…"`
+ *   `import { type X, type Y } from "…/ipc/…"`   (EVERY binding marked)
+ *
+ * Everything else is a runtime dependency, including the three forms that an
+ * earlier, narrower version of this check silently let through:
+ *   `import "…/ipc/…"`                       (side effect — runs the module)
+ *   `export { x } from "…/ipc/…"`            (re-export of a live binding)
+ *   `import d, { type X } from "…/ipc/…"`    (default specifier outside {})
  */
 function importsIpcAtRuntime(source: string): boolean {
-  const ipcImports = source.match(/import\s[\s\S]*?from\s+["'][^"']*\/ipc\/[^"']*["']/g);
-  if (!ipcImports) return false;
+  const IPC_PATH = String.raw`["'][^"']*\/ipc\/[^"']*["']`;
 
-  return ipcImports.some((statement) => {
+  // A side-effect import has no bindings at all but still executes the module.
+  if (new RegExp(String.raw`^\s*import\s+${IPC_PATH}`, "m").test(source)) return true;
+
+  // `export ... from "…/ipc/…"` re-exports a live binding unless it is
+  // `export type`, which is erased like a type-only import.
+  const reExports = source.match(new RegExp(String.raw`export\s[\s\S]*?from\s+${IPC_PATH}`, "g"));
+  if (reExports?.some((statement) => !/^export\s+type\b/.test(statement))) return true;
+
+  const imports = source.match(new RegExp(String.raw`import\s[\s\S]*?from\s+${IPC_PATH}`, "g"));
+  if (!imports) return false;
+
+  return imports.some((statement) => {
     if (/^import\s+type\b/.test(statement)) return false;
 
-    const named = statement.match(/\{([\s\S]*?)\}/);
-    // A default or namespace import (no braces) always pulls in a value.
-    if (!named) return true;
+    // Everything between `import` and `from` — default and namespace
+    // specifiers included, not just the brace group.
+    const clause = statement.replace(/^import\s+/, "").replace(/\s+from[\s\S]*$/, "").trim();
+    const braces = clause.match(/\{([\s\S]*)\}/);
 
-    const bindings = named[1]!
+    // No brace group means a bare default or namespace import: always a value.
+    if (!braces) return true;
+
+    // A default or namespace specifier sitting outside the braces is a value
+    // even when every named binding is type-only.
+    if (clause.slice(0, clause.indexOf("{")).replace(/,/g, "").trim() !== "") return true;
+
+    const bindings = braces[1]!
       .split(",")
       .map((binding) => binding.trim())
       .filter(Boolean);
@@ -140,5 +165,35 @@ describe("architecture boundaries", () => {
     expect(violations).toEqual([]);
     // Guard against the check silently passing because the glob found nothing.
     expect(files.length).toBeGreaterThan(0);
+  });
+});
+
+describe("importsIpcAtRuntime", () => {
+  const IPC = '"../../../ipc/client"';
+
+  it.each([
+    ["named value import", `import { invokeCommand } from ${IPC};`],
+    ["default import", `import client from ${IPC};`],
+    ["namespace import", `import * as ipc from ${IPC};`],
+    ["mixed type and value bindings", `import { type Tag, commands } from ${IPC};`],
+    ["default alongside type-only bindings", `import client, { type Tag } from ${IPC};`],
+    ["side-effect import", `import ${IPC};`],
+    ["re-export of a live binding", `export { invokeCommand } from ${IPC};`],
+    [
+      "multi-line value import",
+      `import {\n  invokeCommand,\n  other,\n} from ${IPC};`,
+    ],
+  ])("flags %s", (_label, source) => {
+    expect(importsIpcAtRuntime(source)).toBe(true);
+  });
+
+  it.each([
+    ["import type syntax", `import type { Tag } from ${IPC};`],
+    ["every binding marked type", `import { type Tag, type Branch } from ${IPC};`],
+    ["export type re-export", `export type { Tag } from ${IPC};`],
+    ["a path that merely starts with ipc", `import { helper } from "../ipcHelpers/util";`],
+    ["no ipc import at all", `import { useState } from "react";`],
+  ])("ignores %s", (_label, source) => {
+    expect(importsIpcAtRuntime(source)).toBe(false);
   });
 });
