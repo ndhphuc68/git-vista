@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Cloud,
   X,
@@ -15,12 +15,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
 import { useToastStore } from "../../store/useToastStore";
-import { Transition } from "../common/Transition";
+import { Modal, Button } from "../../shared/ui";
 import { AddEditRemoteModal } from "./AddEditRemoteModal";
 import { DeleteRemoteModal } from "./DeleteRemoteModal";
 import { PruneConfirmModal } from "./PruneConfirmModal";
 import type { RemoteItem } from "../../ipc/bindings";
 import { qk } from "../../domain/queryKeys";
+
+const TITLE_ID = "manage-remotes-title";
 
 export interface ManageRemotesModalProps {
   isOpen: boolean;
@@ -57,21 +59,9 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
     enabled: isOpen && Boolean(repoPath),
   });
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't close parent if sub-modal is open
-      if (addEditOpen || deleteOpen || pruneOpen) return;
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose, addEditOpen, deleteOpen, pruneOpen]);
+  // Escape is handled by Modal. The manual "don't close the parent while a
+  // sub-modal is open" guard that used to live here is no longer needed:
+  // useEscapeKey's registry only dispatches to the topmost open modal.
 
   const handleCopy = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
@@ -112,26 +102,12 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
 
   return (
     <>
-      <Transition
-        show={isOpen}
-        duration={150}
-        className="fixed inset-0 z-[9999]"
-        enterClass="animate-fade-in"
-        exitClass="opacity-0 transition-opacity duration-150 ease-macos pointer-events-none"
-        unmountOnExit={true}
-      >
-        <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
-          onClick={onClose}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="manage-remotes-title"
-        >
-          <div
-            className="relative w-full max-w-2xl bg-surface border border-border-subtle rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-scale-in"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
+      <Modal isOpen={isOpen} onClose={onClose} size="lg" labelledBy={TITLE_ID}>
+        <>
+            {/* Header. Kept custom rather than using Modal.Header: this one
+                carries a subtitle and an "add remote" action, and widening
+                Modal.Header with props for those is the boolean-prop creep
+                the compound component exists to avoid. */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle bg-surface-hover/20 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-lg bg-accent/10 text-accent">
@@ -139,7 +115,7 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
                 </div>
                 <div>
                   <h2
-                    id="manage-remotes-title"
+                    id={TITLE_ID}
                     className="text-base font-semibold text-primary m-0"
                   >
                     {t.modals.remotes.title}
@@ -320,19 +296,14 @@ export const ManageRemotesModal: React.FC<ManageRemotesModalProps> = ({
               )}
             </div>
 
-            {/* Footer */}
-            <div className="flex items-center justify-end px-6 py-3 border-t border-border-subtle bg-surface-hover/10 shrink-0">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-1.5 rounded-lg border border-border-subtle bg-transparent text-secondary hover:text-primary hover:bg-surface-hover text-xs font-medium cursor-pointer transition-colors"
-              >
-                {t.common.close}
-              </button>
-            </div>
-          </div>
-        </div>
-      </Transition>
+        </>
+
+        <Modal.Footer className="px-6 bg-surface-hover/10">
+          <Button variant="secondary" onClick={onClose}>
+            {t.common.close}
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* Embedded Sub-Modals */}
       <AddEditRemoteModal
