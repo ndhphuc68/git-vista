@@ -8,6 +8,32 @@
 
 **Tech Stack:** React 19, TanStack Query v5, Vitest + Testing Library, oxlint, Tauri v2 + tauri-specta.
 
+## Execution status — 2026-09-19
+
+All 9 tasks were implemented and verified again on branch
+`chore/complete-phase5-slice2-plan`: `pnpm lint`, `pnpm build`, `pnpm test`
+(101 files / 634 tests), `pnpm check-query-keys`, and
+`pnpm check-comment-language` all exit successfully.
+
+The checked boxes record completed implementation steps. The original red
+phases and deliberate-break experiments cannot be replayed from the final
+tree, so this follow-up verifies their resulting behavior rather than claiming
+fresh evidence of those historical intermediate states.
+
+Two plan expectations were corrected honestly in
+`docs/superpowers/REFACTOR_STATUS.md`, rather than treated as implementation
+failures: `CROSS_FEATURE_EXCEPTIONS` cannot be empty while Tasks 4 and 5
+intentionally make `branch` consume the `stash` API, and `BranchSidebar` is
+611 lines rather than the estimated 450–500. This follow-up also found that
+the four remote test files currently declare 46 tests, not the plan's stale
+estimate of 56. The remaining coupling is API-level only, and the boundary
+test records it explicitly.
+
+Task 8 also changed the planned stash-panel callback from `(stash, close)` to
+`(stash, handlers, close)`. The handlers preserve apply, pop, drop, and undo
+behavior after `Shell` takes ownership of rendering; this correction is
+documented in `REFACTOR_STATUS.md` §11.4(c).
+
 ## Global Constraints
 
 - Ngôn ngữ: code, comment, mô tả test, commit message viết **tiếng Anh**. Chuỗi người dùng đọc được (`src/i18n/*`, `aria-label`, `title`) giữ **tiếng Việt**. `pnpm check-comment-language` ép buộc.
@@ -108,7 +134,7 @@ Stash thay đổi ảnh hưởng **hai** thứ: danh sách stash, và trạng th
 - `saveStash` / `applyStash` / `popStash` → invalidate `qk.repo.all(repoPath)`. Lý do: stash lấy thay đổi ra khỏi (hoặc trả về) working tree, nên `qk.repo.status` phải làm mới. `qk.repo.all` phủ cả `qk.stashes` vì mọi key đều bắt đầu bằng `["repo", repoPath]`.
 - `dropStash` → **chỉ** invalidate `qk.stashes(repoPath)`. Lý do: xoá một stash entry không đụng tới working tree. Đây là **khác biệt có chủ đích** so với ba hook kia, và có test ghim.
 
-- [ ] **Step 1: Viết test thất bại**
+- [x] **Step 1: Viết test thất bại**
 
 Tạo `src/features/stash/api/useStashMutations.test.ts`:
 
@@ -211,12 +237,12 @@ describe("stash mutation hooks", () => {
 });
 ```
 
-- [ ] **Step 2: Chạy test, xác nhận thất bại**
+- [x] **Step 2: Chạy test, xác nhận thất bại**
 
 Run: `pnpm vitest run src/features/stash/api/useStashMutations.test.ts`
 Expected: FAIL — không resolve được `./index`.
 
-- [ ] **Step 3: Viết implementation**
+- [x] **Step 3: Viết implementation**
 
 `src/features/stash/api/useStashes.ts`:
 
@@ -318,18 +344,18 @@ export {
 } from "./useStashMutations";
 ```
 
-- [ ] **Step 4: Chạy test, xác nhận xanh**
+- [x] **Step 4: Chạy test, xác nhận xanh**
 
 Run: `pnpm vitest run src/features/stash/api/useStashMutations.test.ts`
 Expected: 7 test PASS (3 từ `it.each` + 4 test riêng).
 
-- [ ] **Step 5: Thí nghiệm phá**
+- [x] **Step 5: Thí nghiệm phá**
 
 Đổi `onSuccess` của `useDropStash` thành `invalidateRepoScope(queryClient, repoPath)`.
 Run lại. Expected: **FAIL** ở "useDropStash refreshes only the stash list".
 Hoàn nguyên, xác nhận xanh.
 
-- [ ] **Step 6: Xác minh và commit**
+- [x] **Step 6: Xác minh và commit**
 
 ```bash
 pnpm lint && pnpm build && pnpm test && pnpm check-query-keys && pnpm check-comment-language
@@ -369,7 +395,7 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 - Consumes: hook từ Task 1.
 - Produces: `features/stash` export `CreateStashModal`, `StashDiffView`, props type của cả hai, và `useStashes`. **Props giữ nguyên chữ ký cũ.**
 
-- [ ] **Step 1: Đọc hai file trước khi đụng vào**
+- [x] **Step 1: Đọc hai file trước khi đụng vào**
 
 ```bash
 cat src/components/stash/CreateStashModal.tsx
@@ -392,7 +418,7 @@ Ghi lại với mỗi file: gọi lệnh `invokeCommand` nào, có prop `onSucce
 
 **Cả hai props interface đều KHÔNG được export** (`interface StashDiffViewProps` và `interface CreateStashModalProps`, không có `export`). Quyết định: thêm `export` vào cả hai khi chuyển file, để barrel ở Step 4 export được type. Đây là thay đổi an toàn — thêm `export` không đổi hành vi.
 
-- [ ] **Step 2: Di chuyển file**
+- [x] **Step 2: Di chuyển file**
 
 ```bash
 mkdir -p src/features/stash/components
@@ -404,7 +430,7 @@ Trong cả hai, đường import lùi thêm một cấp: `../../i18n` → `../..
 
 Kiểm tra không còn file nào trong `src/components/stash/`; nếu rỗng thì thư mục tự biến mất khỏi git.
 
-- [ ] **Step 3: KHÔNG thay gì trong `CreateStashModal` — đã kiểm, nó vốn sạch**
+- [x] **Step 3: KHÔNG thay gì trong `CreateStashModal` — đã kiểm, nó vốn sạch**
 
 `CreateStashModal` **không gọi IPC**. Nó nhận `onSaveStash: (message: string, includeUntracked: boolean) => Promise<string>` qua props, và `src/components/changes/ChangesScreen.tsx:303` mới là chỗ gọi lệnh thật.
 
@@ -449,7 +475,7 @@ Thân hàm hiện tại (`ChangesScreen.tsx:303`) là:
 
 `ChangesScreen` nằm ở `src/components/`, không phải feature, nên import `features/stash/api` là **hợp lệ** — không cần ngoại lệ.
 
-- [ ] **Step 4: Viết `src/features/stash/index.ts`**
+- [x] **Step 4: Viết `src/features/stash/index.ts`**
 
 ```ts
 export { CreateStashModal, type CreateStashModalProps } from "./components/CreateStashModal";
@@ -459,7 +485,7 @@ export { useStashes } from "./api";
 
 Tên props type phải khớp đúng những gì file thật export — kiểm lại từ Step 1. Nếu một file **không** export props type, bỏ dòng type đó đi thay vì bịa ra.
 
-- [ ] **Step 5: Đổi import ở mọi call site**
+- [x] **Step 5: Đổi import ở mọi call site**
 
 ```bash
 grep -rn "components/stash" src e2e
@@ -484,7 +510,7 @@ Sửa từng chỗ:
 > ```
 > — vòng lặp đổi thành `if (CROSS_FEATURE_EXCEPTIONS[rel]?.includes(other)) continue;`, test staleness lặp qua từng phần tử của mảng.
 
-- [ ] **Step 6: Bọc provider cho test nếu cần**
+- [x] **Step 6: Bọc provider cho test nếu cần**
 
 `CreateStashModal` **không** đổi sang hook nên 16 test của nó nhiều khả năng chỉ cần đổi đường import. Nhưng `ChangesScreen` giờ gọi `useSaveStash` — chạy test của nó và bọc provider nếu thiếu. Tiền lệ ở `src/test/CreateTagModal.test.tsx`:
 
@@ -499,7 +525,7 @@ function renderWithClient(ui: React.ReactElement) {
 
 Đổi `render(` thành `renderWithClient(` ở các chỗ render modal. **Không đổi assertion.**
 
-- [ ] **Step 7: Xác minh**
+- [x] **Step 7: Xác minh**
 
 ```bash
 pnpm vitest run src/test/CreateStashModal.test.tsx src/test/StashUI.test.tsx src/test/ChangesScreen.test.tsx src/test/architectureBoundaries.test.ts
@@ -507,7 +533,7 @@ pnpm lint && pnpm build && pnpm test && pnpm check-query-keys && pnpm check-comm
 ```
 Expected: tất cả xanh, tổng số test **không giảm** (16 test của hai file stash phải còn nguyên).
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add -A
@@ -575,7 +601,7 @@ queryClient.invalidateQueries({ queryKey: qk.branches(repoPath) });
 
 > `ManageRemotesModal` hiện còn invalidate thêm `qk.github.repoInfo(repoPath)` sau khi sửa remote — thông tin GitHub suy ra từ URL remote. **Giữ lại** hành vi đó ở Task 6, không đưa vào hook chung: chỉ modal đó cần, và `github` là domain khác.
 
-- [ ] **Step 1: Viết test thất bại**
+- [x] **Step 1: Viết test thất bại**
 
 Tạo `src/features/remote/api/useRemoteMutations.test.ts`:
 
@@ -702,12 +728,12 @@ describe("remote mutation hooks", () => {
 
 > `PruneResult` là `{ remote: string; pruned_branches: string[]; message: string }` — đã kiểm tại `src/ipc/bindings.generated.ts:336`. Nếu kiểu đổi, sửa test cho khớp kiểu thật, đừng ép kiểu để test xanh.
 
-- [ ] **Step 2: Chạy test, xác nhận thất bại**
+- [x] **Step 2: Chạy test, xác nhận thất bại**
 
 Run: `pnpm vitest run src/features/remote/api/useRemoteMutations.test.ts`
 Expected: FAIL — không resolve được `./index`.
 
-- [ ] **Step 3: Viết implementation**
+- [x] **Step 3: Viết implementation**
 
 `src/features/remote/api/useRemotes.ts`:
 
@@ -834,18 +860,18 @@ export {
 } from "./useRemoteMutations";
 ```
 
-- [ ] **Step 4: Chạy test, xác nhận xanh**
+- [x] **Step 4: Chạy test, xác nhận xanh**
 
 Run: `pnpm vitest run src/features/remote/api/useRemoteMutations.test.ts`
 Expected: 9 test PASS (5 từ `it.each` + 4 test riêng).
 
-- [ ] **Step 5: Thí nghiệm phá**
+- [x] **Step 5: Thí nghiệm phá**
 
 Trong `invalidateRemoteScope`, xoá dòng `qk.branches`.
 Run lại. Expected: **FAIL** ở cả 5 case của `it.each`.
 Hoàn nguyên, xác nhận xanh.
 
-- [ ] **Step 6: Xác minh và commit**
+- [x] **Step 6: Xác minh và commit**
 
 ```bash
 pnpm lint && pnpm build && pnpm test && pnpm check-query-keys && pnpm check-comment-language
@@ -883,7 +909,7 @@ Task này gộp hai việc nhỏ vì cùng chạm một nhóm file và cùng là
 - Consumes: `useSaveStash` từ Task 1.
 - Produces: `features/remote` export `useRemoteTask` với **chữ ký không đổi**: `useRemoteTask(repoPath: string | undefined, hasUpstream: boolean)`.
 
-- [ ] **Step 1: Tìm mọi chỗ dùng**
+- [x] **Step 1: Tìm mọi chỗ dùng**
 
 ```bash
 grep -rn "useRemoteTask" src e2e
@@ -892,7 +918,7 @@ grep -c "it(" src/test/RemoteProgressBanner.test.tsx src/test/RepoHeader.remote.
 
 Ghi lại danh sách. Hai file test này là lưới an toàn — sau khi chuyển, chúng phải xanh **chỉ với thay đổi đường import**.
 
-- [ ] **Step 2: Di chuyển**
+- [x] **Step 2: Di chuyển**
 
 ```bash
 git mv src/hooks/useRemoteTask.ts src/features/remote/api/useRemoteTask.ts
@@ -907,14 +933,14 @@ Thêm vào `src/features/remote/api/index.ts`:
 export { useRemoteTask } from "./useRemoteTask";
 ```
 
-- [ ] **Step 3: Đổi import ở mọi call site**
+- [x] **Step 3: Đổi import ở mọi call site**
 
 Sửa từng chỗ tìm được ở Step 1 thành `from ".../features/remote"` (đường tương đối đúng với vị trí file gọi).
 
 Run: `pnpm vitest run src/test/RemoteProgressBanner.test.tsx src/test/RepoHeader.remote.test.tsx`
 Expected: xanh, **không sửa assertion nào**.
 
-- [ ] **Step 4: Gỡ `saveStash` khỏi `CheckoutConflictModal`**
+- [x] **Step 4: Gỡ `saveStash` khỏi `CheckoutConflictModal`**
 
 File: `src/features/branch/components/CheckoutConflictModal.tsx`
 
@@ -947,7 +973,7 @@ Trong `handleStashAndCheckout`, đổi lời gọi:
 
 **Giữ nguyên** `isStashing` là state riêng. Nó phủ **cả hai** lệnh nối tiếp; dùng `saveStash.isPending` thì nút vẫn bấm được trong lúc đang checkout.
 
-- [ ] **Step 5: Cập nhật ngoại lệ ranh giới**
+- [x] **Step 5: Cập nhật ngoại lệ ranh giới**
 
 Trong `src/test/architectureBoundaries.test.ts`:
 
@@ -962,7 +988,7 @@ Trong `src/test/architectureBoundaries.test.ts`:
   ```
   Kèm lý do trong comment: modal này thuộc luồng checkout nhánh nhưng phải stash trước; gỡ được khi luồng "stash rồi checkout" có chỗ ở riêng.
 
-- [ ] **Step 6: Xác minh và commit**
+- [x] **Step 6: Xác minh và commit**
 
 ```bash
 pnpm vitest run src/test/CheckoutConflictModal.test.tsx src/test/architectureBoundaries.test.ts
@@ -999,7 +1025,7 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 
 > `useStashCommands` ở lát 1 là chỗ trọ tạm, có ghi rõ "moves to features/stash in slice 2". Đây là lúc trả.
 
-- [ ] **Step 1: Đọc file sắp xoá**
+- [x] **Step 1: Đọc file sắp xoá**
 
 ```bash
 cat src/features/branch/model/useStashCommands.ts
@@ -1010,7 +1036,7 @@ Ghi lại **ba** thứ phải giữ nguyên, vì chúng là hành vi người d�
 2. `dropStash` dựng toast hoàn tác có `durationMs: 10000` và `undoAction` gọi `invokeCommand.undoDropStash(repoPath, receipt)`.
 3. `applyStash` / `popStash` báo lỗi bằng `alert(...)`; `dropStash` báo lỗi bằng `useToastStore.showError(mapGitError(err))`.
 
-- [ ] **Step 2: Thay bằng hook trong `BranchSidebar`**
+- [x] **Step 2: Thay bằng hook trong `BranchSidebar`**
 
 Xoá `import { useStashCommands } from "../model/useStashCommands";`, thêm:
 
@@ -1074,7 +1100,7 @@ Thay khối `useStashCommands(...)` bằng:
 
 Xoá file: `git rm src/features/branch/model/useStashCommands.ts`
 
-- [ ] **Step 3: Cập nhật ngoại lệ ranh giới**
+- [x] **Step 3: Cập nhật ngoại lệ ranh giới**
 
 Xoá khỏi `IPC_IMPORT_EXCEPTIONS`:
 ```ts
@@ -1084,7 +1110,7 @@ Xoá khỏi `IPC_IMPORT_EXCEPTIONS`:
 
 Test `every ipc-import exception still exists` sẽ **đỏ** nếu quên bước này — đó là đúng ý đồ của nó.
 
-- [ ] **Step 4: Chạy lưới an toàn — không sửa test**
+- [x] **Step 4: Chạy lưới an toàn — không sửa test**
 
 ```bash
 pnpm vitest run src/test/BranchSidebar.test.tsx src/test/BranchSidebarTags.test.tsx
@@ -1093,7 +1119,7 @@ Expected: 12 test PASS, **không sửa một chữ nào trong test**.
 
 Nếu một assertion đỏ, đó là **bug do thay hook**, không phải test sai — sửa code.
 
-- [ ] **Step 5: Xác minh và commit**
+- [x] **Step 5: Xác minh và commit**
 
 ```bash
 pnpm lint && pnpm build && pnpm test && pnpm check-query-keys && pnpm check-comment-language
@@ -1130,7 +1156,7 @@ Chia đôi việc chuyển 4 modal remote: task này làm 2 cái phức tạp h�
 - Consumes: `useRemotes`, `usePruneRemote` từ Task 3.
 - Produces: hai component với **props type và chữ ký không đổi** (`ManageRemotesModalProps`, `PruneConfirmModalProps`).
 
-- [ ] **Step 1: Đọc hai file trước khi đụng vào**
+- [x] **Step 1: Đọc hai file trước khi đụng vào**
 
 ```bash
 sed -n '1,60p' src/components/remote/ManageRemotesModal.tsx
@@ -1140,7 +1166,7 @@ cat src/components/remote/PruneConfirmModal.tsx
 
 Ghi lại: `ManageRemotesModal` có `useQuery` cho `qk.remotes`, 6 `useState` cho modal con, một hàm invalidate gồm **ba** key (`qk.remotes`, `qk.branches`, `qk.github.repoInfo`), và một `copiedKey` cho nút copy.
 
-- [ ] **Step 2: Di chuyển**
+- [x] **Step 2: Di chuyển**
 
 ```bash
 mkdir -p src/features/remote/components
@@ -1150,7 +1176,7 @@ git mv src/components/remote/PruneConfirmModal.tsx src/features/remote/component
 
 Đường import lùi một cấp. Import 3 modal con (`AddEditRemoteModal`, `DeleteRemoteModal`) tạm thời trỏ ngược về `../../../components/remote/...` — Task 7 sẽ sửa thành `./`.
 
-- [ ] **Step 3: `ManageRemotesModal` dùng `useRemotes`**
+- [x] **Step 3: `ManageRemotesModal` dùng `useRemotes`**
 
 Thay `useQuery` thủ công bằng:
 ```ts
@@ -1166,7 +1192,7 @@ Thay `useQuery` thủ công bằng:
   // remote changes. Only this modal needs it — the shared hook stays narrow.
 ```
 
-- [ ] **Step 4: `PruneConfirmModal` dùng `usePruneRemote`**
+- [x] **Step 4: `PruneConfirmModal` dùng `usePruneRemote`**
 
 Xoá import `invokeCommand`, thêm `import { usePruneRemote } from "../api";`.
 
@@ -1174,7 +1200,7 @@ Xoá import `invokeCommand`, thêm `import { usePruneRemote } from "../api";`.
 
 > Nếu modal hiện truyền `taskId` để theo dõi tiến trình, truyền tiếp qua vars: `{ remote: remoteName, taskId }`. Đọc từ Step 1.
 
-- [ ] **Step 5: Đổi import ở test, bọc provider nếu cần**
+- [x] **Step 5: Đổi import ở test, bọc provider nếu cần**
 
 ```bash
 grep -rn "components/remote/ManageRemotesModal\|components/remote/PruneConfirmModal" src e2e
@@ -1182,7 +1208,7 @@ grep -rn "components/remote/ManageRemotesModal\|components/remote/PruneConfirmMo
 
 Đổi sang `"../features/remote/components/ManageRemotesModal"` (chưa có barrel — Task 7 mới tạo). Chạy từng test, thiếu provider thì bọc như Task 2 Step 6. **Không đổi assertion.**
 
-- [ ] **Step 6: Xác minh và commit**
+- [x] **Step 6: Xác minh và commit**
 
 ```bash
 pnpm vitest run src/test/ManageRemotesModal.test.tsx src/test/PruneConfirmModal.test.tsx
@@ -1240,7 +1266,7 @@ Hệ quả cho việc migrate:
 - **Thứ tự phải giữ nguyên**: rename trước rồi mới setUrl, vì `setRemoteUrl` dùng **tên sau khi đổi**. Đảo lại là sửa URL cho một remote không còn tồn tại.
 - **`loading` phải phủ cả chuỗi**, không phải một mutation. Giữ `loading` là `useState` thật như hiện tại, hoặc dùng `mutationA.isPending || mutationB.isPending` — chọn cách nào cũng được, nhưng phải đảm bảo nút disabled suốt cả hai lệnh. Ghi lựa chọn vào comment.
 
-- [ ] **Step 1: Đọc hai file, ghi lại đúng nhánh điều kiện**
+- [x] **Step 1: Đọc hai file, ghi lại đúng nhánh điều kiện**
 
 ```bash
 sed -n '85,130p' src/components/remote/AddEditRemoteModal.tsx
@@ -1249,7 +1275,7 @@ cat src/components/remote/DeleteRemoteModal.tsx
 
 Chép lại **nguyên văn** logic nhánh (`trimmedName`, `effectivePush`, điều kiện `initialRemote`) ra giấy nháp trước khi sửa. Đây là chỗ dễ đổi hành vi nhất trong cả lát.
 
-- [ ] **Step 2: Di chuyển**
+- [x] **Step 2: Di chuyển**
 
 ```bash
 git mv src/components/remote/AddEditRemoteModal.tsx src/features/remote/components/AddEditRemoteModal.tsx
@@ -1259,7 +1285,7 @@ git rm src/components/remote/index.ts
 
 Sau bước này `src/components/remote/` phải rỗng.
 
-- [ ] **Step 3: `AddEditRemoteModal` dùng hook**
+- [x] **Step 3: `AddEditRemoteModal` dùng hook**
 
 Xoá import `invokeCommand`, thêm:
 ```ts
@@ -1304,11 +1330,11 @@ Thay thân handler, **giữ đúng thứ tự và đúng nhánh**:
 
 **Giữ nguyên** `setError`, toast, `onSuccess?.()`, `onClose()`.
 
-- [ ] **Step 4: `DeleteRemoteModal` dùng `useRemoveRemote`**
+- [x] **Step 4: `DeleteRemoteModal` dùng `useRemoveRemote`**
 
 Đổi lời gọi thành `await removeRemote.mutateAsync({ name: remote.name })`, `loading` = `removeRemote.isPending`. Giữ nguyên toast và `onSuccess`.
 
-- [ ] **Step 5: Viết `src/features/remote/index.ts`**
+- [x] **Step 5: Viết `src/features/remote/index.ts`**
 
 ```ts
 export { ManageRemotesModal, type ManageRemotesModalProps } from "./components/ManageRemotesModal";
@@ -1320,7 +1346,7 @@ export { useRemotes, useRemoteTask } from "./api";
 
 Trong `ManageRemotesModal`, sửa import 3 modal con thành `./AddEditRemoteModal`, `./DeleteRemoteModal`, `./PruneConfirmModal` — **không** qua `../index`, tránh vòng lặp (cùng lý do như `BranchSidebar` ở lát 1).
 
-- [ ] **Step 6: Đổi import ở mọi call site**
+- [x] **Step 6: Đổi import ở mọi call site**
 
 ```bash
 grep -rn "components/remote" src e2e
@@ -1333,7 +1359,7 @@ Sửa:
 
 > `BranchSidebar` import `features/remote` là cross-feature — thêm `"remote"` vào mảng ngoại lệ của nó. Task 8 gỡ.
 
-- [ ] **Step 7: Xác minh**
+- [x] **Step 7: Xác minh**
 
 ```bash
 pnpm vitest run src/test/AddEditRemoteModal.test.tsx src/test/DeleteRemoteModal.test.tsx src/test/ManageRemotesModal.test.tsx src/test/PruneConfirmModal.test.tsx
@@ -1342,7 +1368,7 @@ ls src/components/remote 2>&1   # phải báo không tồn tại
 ```
 Expected: tất cả xanh, **56 test** của bốn file remote còn nguyên (26 + 11 + 9 + 10, đo thật).
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add -A
@@ -1371,7 +1397,7 @@ Task cuối và khó nhất về mặt thiết kế. Làm sau cùng vì cần c�
 - Modify: `src/test/BranchSidebar.test.tsx`, `src/test/BranchSidebarTags.test.tsx`
 - Modify: `src/test/architectureBoundaries.test.ts`
 
-- [ ] **Step 1: Quyết định ranh giới trước khi sửa**
+- [x] **Step 1: Quyết định ranh giới trước khi sửa**
 
 `BranchSidebar` mở dialog cho 3 domain khác. Hai lựa chọn:
 
@@ -1384,7 +1410,7 @@ Task cuối và khó nhất về mặt thiết kế. Làm sau cùng vì cần c�
 
 > Nếu khi làm thấy (A) khiến `Shell` phải import `SidebarDialog` — **đó là chấp nhận được**: `Shell` không phải feature nên nó import `features/branch` là hợp lệ. Chiều bị cấm là feature → feature.
 
-- [ ] **Step 2: Thêm props vào `BranchSidebar`**
+- [x] **Step 2: Thêm props vào `BranchSidebar`**
 
 ```ts
 export interface BranchSidebarProps {
@@ -1413,13 +1439,13 @@ Xoá các import: `CreateTagModal`, `DeleteTagModal`, 4 modal remote, `StashDiff
 
 > `CompareModal`, `MergeBranchModal`, `RebaseBranchModal` **ở lại** — chúng vẫn nằm trong `src/components/`, không phải feature, nên không vi phạm.
 
-- [ ] **Step 3: `Shell` cung cấp các dialog đó**
+- [x] **Step 3: `Shell` cung cấp các dialog đó**
 
 Trong `src/components/Shell.tsx`, import 4 modal remote + 2 modal tag + `StashDiffView`, rồi truyền xuống. Viết đầy đủ từng nhánh `isDialog` cho các dialog ngoại lai (`createTag`, `deleteTag`, `manageRemotes`, `addRemote`, `editRemote`, `deleteRemote`, `pruneRemote`) — chép nguyên văn JSX từ `BranchSidebar` trước khi xoá, chỉ đổi nguồn `repoPath` sang giá trị `Shell` có sẵn.
 
 **Giữ nguyên** mọi `onSuccess` đang có. Nếu một modal đang gọi `invalidateRepo` của sidebar, thay bằng invalidate tương đương trong `Shell` — **đừng bỏ đi**.
 
-- [ ] **Step 4: Chạy lưới an toàn — đây là bước quyết định**
+- [x] **Step 4: Chạy lưới an toàn — đây là bước quyết định**
 
 ```bash
 pnpm vitest run src/test/BranchSidebar.test.tsx src/test/BranchSidebarTags.test.tsx
@@ -1429,7 +1455,7 @@ Hai test sẽ **đỏ** vì chúng render `<BranchSidebar />` trần, không có
 
 Sửa bằng cách cho test render đúng thứ nó đang kiểm: truyền `renderForeignDialog` thật vào. **Không** xoá hay nới assertion. Nếu một test chỉ kiểm phần branch (không chạm tag/remote), để nguyên không props.
 
-- [ ] **Step 5: Gỡ ngoại lệ**
+- [x] **Step 5: Gỡ ngoại lệ**
 
 Trong `src/test/architectureBoundaries.test.ts`:
 - Xoá `"features/branch/components/BranchSidebar.tsx"` khỏi `CROSS_FEATURE_EXCEPTIONS` (cả `tag`, `stash`, `remote`).
@@ -1437,7 +1463,7 @@ Trong `src/test/architectureBoundaries.test.ts`:
 
 > **Không** xoá entry ipc của `BranchSidebar` — nó vẫn vi phạm thật. Xoá là nói dối.
 
-- [ ] **Step 6: Kiểm số dòng**
+- [x] **Step 6: Kiểm số dòng**
 
 ```bash
 wc -l src/features/branch/components/BranchSidebar.tsx
@@ -1446,7 +1472,7 @@ pnpm lint 2>&1 | grep "BranchSidebar"
 
 Ghi lại con số. Mốc kế hoạch lát 1 là dưới 300 dòng; sau khi gỡ 7 khối modal, kỳ vọng còn **khoảng 450–500**. Nếu vẫn trên 300, **ghi vào status doc** chứ đừng cắt bừa cho đủ số.
 
-- [ ] **Step 7: Xác minh đầy đủ và commit**
+- [x] **Step 7: Xác minh đầy đủ và commit**
 
 ```bash
 pnpm lint && pnpm build && pnpm test && pnpm check-query-keys && pnpm check-comment-language
@@ -1476,7 +1502,7 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 **Files:**
 - Modify: `docs/superpowers/REFACTOR_STATUS.md`
 
-- [ ] **Step 1: Đo số liệu thật, không ước lượng**
+- [x] **Step 1: Đo số liệu thật, không ước lượng**
 
 ```bash
 pnpm test 2>&1 | grep -E "Test Files|Tests"
@@ -1486,7 +1512,7 @@ pnpm lint 2>&1 | grep -c "no-restricted-imports"
 ls src/components/remote src/components/stash 2>&1
 ```
 
-- [ ] **Step 2: Cập nhật status doc**
+- [x] **Step 2: Cập nhật status doc**
 
 - Header: `Tiến độ` → GĐ5 lát 2 xong; `Việc tiếp theo` → "GĐ5b hoặc GĐ6"
 - Mục 1: cập nhật số test trong khối lệnh kiểm chứng
@@ -1498,7 +1524,7 @@ ls src/components/remote src/components/stash 2>&1
   - **Ranh giới cross-feature gỡ bằng props, không bằng nới luật.** Feature giữ *quyết định khi nào mở*, chỗ không-phải-feature (`Shell`) cung cấp *cái gì để mở*.
   - **Chuỗi lệnh có điều kiện không gộp được thành một mutation.** `AddEditRemoteModal` (rename→setUrl) và `CheckoutConflictModal` (stash→checkout) đều phải giữ nhiều hook gọi tuần tự, và cờ `loading` phải phủ cả chuỗi chứ không phải một lệnh.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add docs/superpowers/REFACTOR_STATUS.md

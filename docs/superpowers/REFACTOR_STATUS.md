@@ -4,7 +4,7 @@
 
 **Cập nhật**: 2026-09-19
 **Nhánh làm việc**: `refactor/phase0-foundation` (chứa GĐ0–GĐ4 + GĐ5 lát 1 + GĐ5 lát 2, chưa merge vào `main`)
-**Tiến độ**: 5 / 8 giai đoạn xong, **GĐ5 lát 2 xong — 8/8 task**
+**Tiến độ**: 5 / 8 giai đoạn xong, **GĐ5 lát 2 xong — 8 task triển khai + 1 task handover**
 **Việc tiếp theo**: GĐ5b hoặc GĐ6. Xem mục 4 và mục 10/11.
 
 > **GĐ5 lát 2 đã xong.** Feature `remote` và `stash` đều đã migrate:
@@ -288,7 +288,7 @@ Chi tiết đầy đủ ở **mục 11**.
 | GĐ | Nội dung | Rủi ro | Ghi chú |
 | --- | --- | --- | --- |
 | **5 lát 1** | ✅ **Xong — 11/11 task.** Hạ tầng `features/` + `tag` + `branch` đã migrate | Thấp mỗi bước | Chi tiết ở **mục 10** |
-| **5 lát 2** | ✅ **Xong — 8/8 task.** `remote` + `stash` đã migrate | Thấp mỗi bước | Chi tiết ở **mục 11**. `changes` chưa làm, để lát sau |
+| **5 lát 2** | ✅ **Xong — 8 task triển khai + 1 task handover.** `remote` + `stash` đã migrate | Thấp mỗi bước | Chi tiết ở **mục 11**. `changes` chưa làm, để lát sau |
 | **5b** | Xẻ nhỏ file khổng lồ, gom state modal về union | Trung bình | `BranchSidebar` còn 611 dòng sau 2 lát; phần dư phụ thuộc `changes` + domain undo/tag/merge chưa có feature — xem **mục 11** |
 | **6** | Rust: `with_repo()` thay 58 chỗ lặp, gom `emit_repo_changed` (9 bản, 2 chữ ký) | Thấp | |
 | **7** | Nâng lint từ `warn` lên `error` | Không | Khoá kiến trúc lại vĩnh viễn |
@@ -572,20 +572,21 @@ Hệ quả cụ thể trong code: các modal đã migrate xoá `const [loading, 
 
 ---
 
-## 11. Giai đoạn 5 lát 2 — ĐÃ XONG (8/8 task)
+## 11. Giai đoạn 5 lát 2 — ĐÃ XONG (8 task triển khai + 1 task handover)
 
 ### 11.1 Trạng thái từng task
 
 | Task | Nội dung | Trạng thái |
 | --- | --- | --- |
-| T1 | `features/remote/api` — hook remote | ✅ `eb4b68c`→`0f2dac8` |
-| T2 | Chuyển modal remote vào feature | ✅ `8b9af10` |
-| T3 | `features/stash/api` — hook stash | ✅ `3dfe742` |
+| T1 | `features/stash/api` — hook stash | ✅ `0f2dac8` |
+| T2 | Chuyển component stash vào feature | ✅ `8b9af10` |
+| T3 | `features/remote/api` — hook remote | ✅ `3dfe742` |
 | T4 | Gỡ ngoại lệ `CheckoutConflictModal`, chuyển vào `features/branch` dùng hook stash | ✅ `8840164` |
 | T5 | Xoá hẳn `useStashCommands`, dùng thẳng hook stash thật | ✅ `3fa60a8` |
 | T6 | Chuyển `ManageRemotesModal` + `PruneConfirmModal` vào `features/remote` | ✅ `5c44254` |
 | T7 | Chuyển hai modal remote còn lại vào `features/remote` | ✅ `f01d58b` |
 | T8 | Giao các dialog liên-feature cho `Shell`, gỡ import chéo component | ✅ `7fa75f7` |
+| T9 | Cập nhật status handover | ✅ `267a215` |
 
 ### 11.2 Số liệu hiện tại (đo thật, không ước lượng)
 
