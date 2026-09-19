@@ -51,7 +51,7 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
   }, [isOpen, onClose]);
 
   const sanitizeBranchName = (val: string) => {
-    // Tự động chuyển dấu cách thành '-' và loại bỏ ký tự cấm của Git
+    // Turn spaces into '-' and strip characters Git does not allow in a ref name
     return val.replace(/\s+/g, "-").replace(/[~^:?*[\\@{}]/g, "");
   };
 

@@ -147,7 +147,7 @@ describe("Visual Git Client - M1 App Shell", () => {
   it("hỗ trợ đa tab: mở repo tạo tab mới, chuyển về Home và quay lại repo tab tức thì", async () => {
     render(<App />);
 
-    // Mở repo
+    // Open the repo
     await waitFor(() => {
       expect(screen.getByText("project-v3")).toBeInTheDocument();
     });
@@ -161,14 +161,14 @@ describe("Visual Git Client - M1 App Shell", () => {
       expect(screen.getByText("feat(m1): visual git viewer")).toBeInTheDocument();
     });
 
-    // Bấm về tab Home trên WindowTabBar
+    // Click back to the Home tab in WindowTabBar
     fireEvent.click(screen.getByTestId("tab-home"));
 
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "GitVista" })).toBeInTheDocument();
     });
 
-    // Tab repo vẫn còn trên WindowTabBar, bấm vào để quay lại
+    // The repo tab is still in WindowTabBar; click it to go back
     fireEvent.click(screen.getByTestId("tab-d:/project-v3"));
 
     await waitFor(() => {

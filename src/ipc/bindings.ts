@@ -1,6 +1,6 @@
 /**
- * Typesafe IPC bindings cho Visual Git Client
- * Tự động đồng bộ với Rust backend qua specta / tauri-specta.
+ * Typesafe IPC bindings for the Visual Git Client.
+ * Kept in sync with the Rust backend via specta / tauri-specta.
  */
 
 export interface SystemInfo {

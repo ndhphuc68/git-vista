@@ -326,7 +326,7 @@ export function resetMockCompareData() {
   };
 }
 
-// Helper kiểm tra môi trường chạy có phải trong Tauri runtime không
+// Checks whether we are running inside the Tauri runtime
 export const isTauri = (): boolean => {
   return (
     typeof window !== "undefined" &&

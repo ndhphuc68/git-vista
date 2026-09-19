@@ -125,7 +125,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
     document.documentElement.setAttribute("lang", savedLocale);
   }
 
-  // Lắng nghe sự thay đổi của OS theme nếu đang ở chế độ system
+  // Follow OS theme changes while the app is in system mode
   if (typeof window !== "undefined") {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     mediaQuery.addEventListener("change", () => {

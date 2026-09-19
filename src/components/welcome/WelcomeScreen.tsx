@@ -28,7 +28,7 @@ interface WelcomeScreenProps {
 }
 
 /**
- * Định dạng thời gian tương đối thân thiện theo ngôn ngữ hiện tại
+ * Formats a friendly relative time in the active language
  */
 function formatRelativeTime(
   timestampMs: number | undefined,
@@ -67,7 +67,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRepo }) =>
   const [isDragging, setIsDragging] = useState(false);
   const [copiedPath, setCopiedPath] = useState<string | null>(null);
 
-  // Lưu trữ các repo được ghim vào localStorage
+  // Pinned repos are persisted to localStorage
   const [pinnedPaths, setPinnedPaths] = useState<string[]>(() => {
     try {
       const saved =

@@ -1,9 +1,9 @@
 import "@testing-library/jest-dom/vitest";
 
-// jsdom báo offsetWidth/offsetHeight = 0 cho mọi phần tử vì không có layout
-// engine thật. @tanstack/react-virtual dùng offsetWidth/offsetHeight để đo
-// kích thước container khi mount, nên nếu không giả lập, virtual items luôn
-// rỗng trong test dù danh sách có dữ liệu.
+// jsdom reports offsetWidth/offsetHeight as 0 for every element because it has
+// no real layout engine. @tanstack/react-virtual measures the container with
+// those properties on mount, so without a stub the virtual list renders no items
+// in tests even when the underlying data is present.
 if (typeof HTMLElement !== "undefined" && !("__patchedForVirtualizer" in HTMLElement.prototype)) {
   Object.defineProperties(HTMLElement.prototype, {
     __patchedForVirtualizer: { value: true },

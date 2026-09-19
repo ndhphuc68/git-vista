@@ -15,13 +15,14 @@
     "format:check": "prettier . --check && cargo fmt --manifest-path src-tauri/Cargo.toml -- --check",
     "rust:lint": "cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings",
     "rust:test": "cargo test --manifest-path src-tauri/Cargo.toml",
-    "check": "pnpm format:check && pnpm lint && pnpm check-query-keys && pnpm build && pnpm test && pnpm rust:lint && pnpm rust:test",
+    "check": "pnpm format:check && pnpm lint && pnpm check-query-keys && pnpm check-comment-language && pnpm build && pnpm test && pnpm rust:lint && pnpm rust:test",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "check-contrast": "node scripts/check-contrast.mjs",
-    "check-query-keys": "node scripts/check-query-keys.mjs"
+    "check-query-keys": "node scripts/check-query-keys.mjs",
+    "check-comment-language": "node scripts/check-comment-language.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.67.2",
