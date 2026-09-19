@@ -28,7 +28,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { invokeCommand } from "../../ipc/client";
-import { type StashItem, type BranchItem, type TagItem, type RemoteItem } from "../../ipc/bindings.generated";
+import { type StashItem, type TagItem, type RemoteItem } from "../../ipc/bindings.generated";
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
 import { qk } from "../../domain/queryKeys";
@@ -49,74 +49,11 @@ import {
   PruneConfirmModal,
 } from "../remote";
 import { useTranslation } from "../../i18n";
-
-export interface BranchTreeNode {
-  isFolder: boolean;
-  name: string;
-  fullPath: string;
-  branch?: BranchItem;
-  children: BranchTreeNode[];
-}
-
-export function buildBranchTree(branches: BranchItem[]): BranchTreeNode[] {
-  const root: BranchTreeNode[] = [];
-
-  for (const b of branches) {
-    const parts = b.name.split("/");
-    if (parts.length === 1) {
-      root.push({
-        isFolder: false,
-        name: b.name,
-        fullPath: b.name,
-        branch: b,
-        children: [],
-      });
-      continue;
-    }
-
-    let currentLevel = root;
-    let currentPath = "";
-
-    for (let i = 0; i < parts.length; i++) {
-      const part = parts[i];
-      if (!part) continue;
-      currentPath = currentPath ? `${currentPath}/${part}` : part;
-      const isLast = i === parts.length - 1;
-
-      if (isLast) {
-        currentLevel.push({
-          isFolder: false,
-          name: part,
-          fullPath: b.name,
-          branch: b,
-          children: [],
-        });
-      } else {
-        let folderNode: BranchTreeNode | undefined = currentLevel.find(
-          (n) => n.isFolder && n.name === part
-        );
-        if (!folderNode) {
-          const newFolder: BranchTreeNode = {
-            isFolder: true,
-            name: part,
-            fullPath: currentPath,
-            children: [],
-          };
-          currentLevel.push(newFolder);
-          folderNode = newFolder;
-        }
-        currentLevel = folderNode.children;
-      }
-    }
-  }
-
-  return root;
-}
-
-export function countBranchesInNode(node: BranchTreeNode): number {
-  if (!node.isFolder) return 1;
-  return node.children.reduce((acc, child) => acc + countBranchesInNode(child), 0);
-}
+import {
+  buildBranchTree,
+  countBranchesInNode,
+  type BranchTreeNode,
+} from "../../features/branch/model/branchTree";
 
 export const BranchSidebar: React.FC = () => {
   const { t } = useTranslation();

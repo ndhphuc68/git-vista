@@ -32,6 +32,36 @@ function collectSourceFiles(dir: string): string[] {
  */
 const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {};
 
+/**
+ * True when the source imports a VALUE from ipc/ — the thing the layer rule
+ * forbids outside api/.
+ *
+ * Type-only imports are erased at compile time and create no runtime
+ * dependency, so a model file may name an IPC type without calling one.
+ * Both spellings are treated as type-only: `import type { X } from`, and
+ * `import { type X, type Y } from` where every named binding is marked.
+ */
+function importsIpcAtRuntime(source: string): boolean {
+  const ipcImports = source.match(/import\s[\s\S]*?from\s+["'][^"']*\/ipc\/[^"']*["']/g);
+  if (!ipcImports) return false;
+
+  return ipcImports.some((statement) => {
+    if (/^import\s+type\b/.test(statement)) return false;
+
+    const named = statement.match(/\{([\s\S]*?)\}/);
+    // A default or namespace import (no braces) always pulls in a value.
+    if (!named) return true;
+
+    const bindings = named[1]!
+      .split(",")
+      .map((binding) => binding.trim())
+      .filter(Boolean);
+    if (bindings.length === 0) return true;
+
+    return !bindings.every((binding) => /^type\s/.test(binding));
+  });
+}
+
 /** Names of the feature directories that currently exist. */
 function featureNames(): string[] {
   try {
@@ -79,7 +109,7 @@ describe("architecture boundaries", () => {
         if (rel.includes(`features/${name}/api/`)) continue;
         if (rel in IPC_IMPORT_EXCEPTIONS) continue;
         const source = readFileSync(file, "utf8");
-        if (/from\s+["'][^"']*\/ipc\//.test(source)) {
+        if (importsIpcAtRuntime(source)) {
           violations.push(`${rel} imports ipc/ outside of api/`);
         }
       }
