@@ -3,6 +3,7 @@ import { render, screen, fireEvent, act } from "@testing-library/react";
 import { Modal } from "./Modal";
 import { Button } from "./Button";
 import { Z_INDEX } from "../../domain/constants/zIndex";
+import { MODAL_SIZE } from "../../domain/constants/ui";
 
 function renderModal(props: Partial<React.ComponentProps<typeof Modal>> = {}) {
   const onClose = vi.fn();
@@ -41,6 +42,20 @@ describe("Modal", () => {
   it("links the title via aria-labelledby", () => {
     renderModal();
     expect(screen.getByRole("dialog")).toHaveAttribute("aria-labelledby", "test-title");
+  });
+
+  // For dialogs whose title lives inside a child component with no id to
+  // point at (the compare dialog), so labelledBy is not usable.
+  it("names the dialog with aria-label when given one instead of labelledBy", () => {
+    render(
+      <Modal isOpen onClose={vi.fn()} label="So sánh">
+        <Modal.Body>X</Modal.Body>
+      </Modal>
+    );
+
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toHaveAttribute("aria-label", "So sánh");
+    expect(dialog).not.toHaveAttribute("aria-labelledby");
   });
 
   it("calls onClose when Escape is pressed", () => {
@@ -111,6 +126,17 @@ describe("Modal", () => {
     const largePanel = screen.getByTestId("modal-panel").className;
 
     expect(smallPanel).not.toBe(largePanel);
+  });
+
+  // Added for the settings and compare dialogs, which are sized against the
+  // viewport rather than a content width. Without a tier for them they would
+  // be clamped by max-w-5xl and render narrower than they did before.
+  it("the full size tier is not clamped by a fixed max width", () => {
+    renderModal({ size: "full" });
+
+    const panel = screen.getByTestId("modal-panel");
+    expect(panel.className).toContain(MODAL_SIZE.full);
+    expect(panel.className).not.toMatch(/max-w-(sm|md|2xl|5xl)\b/);
   });
 
   it("defaults to the regular modal z-index layer", () => {

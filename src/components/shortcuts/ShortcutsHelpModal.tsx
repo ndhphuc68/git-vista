@@ -1,7 +1,9 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { X, Keyboard } from "lucide-react";
 import { useTranslation } from "../../i18n";
-import { Transition } from "../common/Transition";
+import { Modal } from "../../shared/ui";
+
+const TITLE_ID = "shortcuts-modal-title";
 
 export interface ShortcutsHelpModalProps {
   isOpen: boolean;
@@ -60,47 +62,18 @@ export const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({ isOpen, 
     [t]
   );
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
-
   return (
-    <Transition
-      show={isOpen}
-      className="fixed inset-0 z-[9999]"
-      enterClass="animate-fade-in"
-      exitClass="opacity-0 transition-opacity duration-180 ease-macos pointer-events-none"
-      unmountOnExit={true}
-    >
-      <div
-        className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-        onClick={onClose}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="shortcuts-modal-title"
-      >
-        <div
-          className="bg-surface border border-border-subtle rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh] animate-scale-in"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" labelledBy={TITLE_ID}>
+      <>
+          {/* Header. Kept custom rather than using Modal.Header: it carries a
+              subtitle alongside the title. */}
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle bg-surface-header/40">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
                 <Keyboard size={18} />
               </div>
               <div>
-                <h2 id="shortcuts-modal-title" className="text-sm font-semibold text-primary m-0">
+                <h2 id={TITLE_ID} className="text-sm font-semibold text-primary m-0">
                   {t.shortcuts.title}
                 </h2>
                 <p className="text-[11px] text-secondary m-0">{t.shortcuts.subtitle}</p>
@@ -167,8 +140,7 @@ export const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({ isOpen, 
             </span>
             <span className="text-[11px] text-secondary/70">{t.shortcuts.escToClose}</span>
           </div>
-        </div>
-      </div>
-    </Transition>
+      </>
+    </Modal>
   );
 };

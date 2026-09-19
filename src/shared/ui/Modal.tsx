@@ -15,6 +15,12 @@ export interface ModalProps {
   size?: ModalSize;
   /** id of the title element, wired to aria-labelledby. */
   labelledBy?: string;
+  /**
+   * Accessible name for dialogs whose title lives in a child component with
+   * no id to point at, so `labelledBy` is not an option. Use one or the
+   * other, not both — `labelledBy` is preferred where a title element exists.
+   */
+  label?: string;
   /** Prevent closing the modal while an operation is in progress. */
   closeOnBackdrop?: boolean;
   closeOnEscape?: boolean;
@@ -66,6 +72,7 @@ const ModalRoot: React.FC<ModalProps> & ModalComposition = ({
   children,
   size = "md",
   labelledBy,
+  label,
   closeOnBackdrop = true,
   closeOnEscape = true,
   stacked = false,
@@ -92,13 +99,17 @@ const ModalRoot: React.FC<ModalProps> & ModalComposition = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}
+        aria-label={label}
       >
         <div
           ref={panelRef}
           data-testid="modal-panel"
           className={clsx(
-            "w-full max-h-[90vh] bg-surface border border-border-subtle rounded-xl",
+            "max-h-[90vh] bg-surface border border-border-subtle rounded-xl",
             "shadow-2xl overflow-hidden flex flex-col animate-scale-in",
+            // The `full` tier sizes itself from its content, so it must not be
+            // stretched to the available width the way the fixed tiers are.
+            size === "full" ? "max-w-none" : "w-full",
             MODAL_SIZE[size]
           )}
           onClick={(e) => e.stopPropagation()}

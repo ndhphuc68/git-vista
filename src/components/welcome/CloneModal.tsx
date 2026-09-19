@@ -3,7 +3,9 @@ import { FolderOpen, X, Download, AlertCircle, Loader2 } from "lucide-react";
 import { invokeCommand, listenToTaskProgress } from "../../ipc/client";
 import { type RepoSummary } from "../../ipc/bindings";
 import { useTranslation } from "../../i18n";
-import { Transition } from "../common/Transition";
+import { Modal } from "../../shared/ui";
+
+const TITLE_ID = "clone-modal-title";
 
 export interface CloneModalProps {
   isOpen: boolean;
@@ -40,9 +42,6 @@ export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onClone
       setIsCloning(false);
       setProgressPercent(0);
       setStatusText("");
-      setTimeout(() => {
-        urlInputRef.current?.focus();
-      }, 50);
     }
   }, [isOpen]);
 
@@ -62,16 +61,6 @@ export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onClone
       if (unlisten) unlisten();
     };
   }, [isOpen]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen && !isCloning) {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, isCloning, onClose]);
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newUrl = e.target.value;
@@ -146,23 +135,22 @@ export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onClone
   };
 
   return (
-    <Transition
-      show={isOpen}
-      enterClass="animate-fade-in"
-      exitClass="opacity-0 transition-opacity duration-180 ease-macos pointer-events-none"
-      unmountOnExit={true}
+    <Modal
+      isOpen={isOpen}
+      // handleCancel, not onClose: while a clone is running this aborts the
+      // remote task rather than just dismissing the dialog, which is what the
+      // backdrop and the X button did before the migration.
+      onClose={handleCancel}
+      size="lg"
+      labelledBy={TITLE_ID}
+      // Escape was already ignored mid-clone; the backdrop instead routed to
+      // handleCancel, which aborts. Both paths are preserved as they were.
+      closeOnEscape={!isCloning}
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="clone-modal-title"
-        className="fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4"
-        onClick={handleCancel}
-      >
-        <div
-          className="relative w-full max-w-lg rounded-2xl border border-border-subtle bg-surface p-6 sm:p-7 shadow-2xl animate-scale-in"
-          onClick={(e) => e.stopPropagation()}
-        >
+      {/* This modal keeps its own single-panel layout rather than using
+          Modal.Header/Body/Footer: it has no header bar or footer row, just
+          one padded card with an absolutely positioned close button. */}
+      <div className="relative p-6 sm:p-7">
           {/* Close Button */}
           <button
             type="button"
@@ -180,7 +168,7 @@ export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onClone
               <Download size={22} />
             </div>
             <div>
-              <h2 id="clone-modal-title" className="text-lg font-bold text-primary">
+              <h2 id={TITLE_ID} className="text-lg font-bold text-primary">
                 {t.cloneModal.title}
               </h2>
               <p className="text-xs sm:text-sm text-secondary mt-0.5">{t.cloneModal.desc}</p>
@@ -210,6 +198,7 @@ export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onClone
               <input
                 ref={urlInputRef}
                 id="clone-url"
+                data-autofocus
                 type="text"
                 required
                 disabled={isCloning}
@@ -303,8 +292,7 @@ export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onClone
               </button>
             </div>
           </form>
-        </div>
       </div>
-    </Transition>
+    </Modal>
   );
 };

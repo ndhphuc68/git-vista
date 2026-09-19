@@ -14,7 +14,7 @@ import {
 import { useTranslation } from "../../i18n";
 import { useSettingsStore, type SettingsTab } from "../../store/useSettingsStore";
 import { useTabStore } from "../../store/useTabStore";
-import { Transition } from "../common/Transition";
+import { Modal } from "../../shared/ui";
 import { GitProfileTab } from "./tabs/GitProfileTab";
 import { AppearanceTab } from "./tabs/AppearanceTab";
 import { GitBehaviorTab } from "./tabs/GitBehaviorTab";
@@ -25,6 +25,8 @@ import { GitHubSettingsTab } from "./tabs/GitHubSettingsTab";
 interface SettingsModalProps {
   currentRepoPath: string | null;
 }
+
+const TITLE_ID = "settings-modal-title";
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath }) => {
   const { t } = useTranslation();
@@ -40,19 +42,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
 
   const [selectedRepoPath, setSelectedRepoPath] = useState<string>(currentRepoPath || "");
 
-  useEffect(() => {
-    if (!isSettingsOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        closeSettings();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isSettingsOpen, closeSettings]);
 
   useEffect(() => {
     if (!isSettingsOpen) return;
@@ -83,24 +72,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
   const effectiveRepoPath = effectiveScope === "repo" ? selectedRepoPath || currentRepoPath : null;
 
   return (
-    <Transition
-      show={isSettingsOpen}
-      className="fixed inset-0 z-[9999]"
-      enterClass="animate-fade-in"
-      exitClass="opacity-0 transition-opacity duration-180 ease-macos pointer-events-none"
-      unmountOnExit={true}
-    >
-      <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[9999]"
-        onClick={closeSettings}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="settings-modal-title"
-      >
-        <div
-          className="bg-surface border border-border-subtle rounded-2xl shadow-2xl w-[85vw] h-[85vh] overflow-hidden flex flex-col animate-scale-in"
-          onClick={(e) => e.stopPropagation()}
-        >
+    <Modal isOpen={isSettingsOpen} onClose={closeSettings} size="full" labelledBy={TITLE_ID}>
+      {/* Fixed 85vh, not just a max: the tab content below scrolls within a
+          flex column that needs a definite height, and Modal's panel only
+          caps height. The original was also 85vw wide, wider than any
+          MODAL_SIZE tier, so the width is set here too. */}
+      <div className="w-[85vw] max-w-[85vw] h-[85vh] flex flex-col min-h-0">
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-3.5 border-b border-border-subtle bg-surface-header/40 shrink-0 gap-4">
             <div className="flex items-center gap-3 shrink-0">
@@ -108,14 +85,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
                 <Settings size={20} />
               </div>
               <div>
-                <h2 id="settings-modal-title" className="text-base font-semibold text-primary m-0">
+                <h2 id={TITLE_ID} className="text-base font-semibold text-primary m-0">
                   {t.settings.title}
                 </h2>
                 <p className="text-xs text-secondary m-0 mt-0.5">{t.settings.description}</p>
               </div>
             </div>
 
-            {/* 2-Tier Scope Switcher (Chỉ hiển thị khi đang trong một repository) */}
+            {/* 2-tier scope switcher, shown only while a repository is open */}
             {currentRepoPath && (
               <div
                 data-testid="scope-switcher"
@@ -249,8 +226,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
               </div>
             </div>
           </div>
-        </div>
       </div>
-    </Transition>
+    </Modal>
   );
 };

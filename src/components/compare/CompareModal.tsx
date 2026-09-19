@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
 import { useRepoStore } from "../../store/useRepoStore";
+import { Modal } from "../../shared/ui";
 import { CompareHeader } from "./CompareHeader";
 import { CompareCommitList } from "./CompareCommitList";
 import { CompareFileList } from "./CompareFileList";
@@ -75,37 +76,32 @@ export const CompareModal: React.FC<CompareModalProps> = ({
     }
   }, [summary?.files]);
 
-  // Keyboard shortcut: ESC to close
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
-
   const handleSwap = () => {
     const temp = baseRev;
     setBaseRev(targetRev);
     setTargetRev(temp);
   };
 
-  if (!isOpen) return null;
-
   const commitsCount = summary?.commits.length ?? 0;
   const filesCount = summary?.files.length ?? 0;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={t.compare.title}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 sm:p-6"
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="full"
+      // The title lives inside CompareHeader with no id to point at, so this
+      // names the dialog directly rather than via aria-labelledby.
+      label={t.compare.title}
+      // The original had no backdrop click handler at all: this dialog is a
+      // working surface with unsaved revision inputs, so a stray click
+      // outside must not discard it. Only the header's close button and
+      // Escape dismiss it.
+      closeOnBackdrop={false}
     >
-      <div className="flex flex-col w-full max-w-6xl h-[88vh] bg-surface rounded-xl border border-border shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      {/* Fixed 88vh and 6xl wide, both outside the MODAL_SIZE tiers: the
+          two-pane diff body needs a definite height to scroll within. */}
+      <div className="flex flex-col w-[90vw] max-w-6xl h-[88vh]">
         {/* Header with Base/Target inputs & Swap button & Mode toggle */}
         <CompareHeader
           baseRev={baseRev}
@@ -186,6 +182,6 @@ export const CompareModal: React.FC<CompareModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };
