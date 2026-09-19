@@ -3,9 +3,11 @@
 > **Đọc file này trước khi làm tiếp.** Đây là điểm vào duy nhất cho công việc tái cấu trúc — nó cho biết đã làm gì, đang ở đâu, và làm gì tiếp theo.
 
 **Cập nhật**: 2026-09-19
-**Nhánh làm việc**: `refactor/phase0-foundation` (chứa cả GĐ0 và GĐ1, chưa merge vào `main`)
-**Tiến độ**: 3 / 8 giai đoạn xong
-**Việc tiếp theo**: Giai đoạn 3 — bật `tauri-specta`, bỏ `bindings.ts` viết tay
+**Nhánh làm việc**: `refactor/phase0-foundation` (chứa GĐ0–GĐ3, chưa merge vào `main`)
+**Tiến độ**: 4 / 8 giai đoạn xong
+**Việc tiếp theo**: Giai đoạn 4 — tách `ipc/client.ts` theo domain
+
+> **Còn một việc chưa xác minh của GĐ3:** chạy app Tauri thật để kiểm chứng đầu-cuối (Task 5 trong kế hoạch GĐ3). `pnpm build` xanh chứng minh kiểu khớp, **không** chứng minh dây IPC chạy đúng. Phiên làm GĐ3 không chạy được GUI nên bước này còn nợ. Xem mục 9.
 
 ---
 
@@ -19,12 +21,14 @@ pnpm install
 # Xác nhận mọi thứ xanh trước khi làm gì
 pnpm lint                     # phải exit 0
 pnpm build                    # phải exit 0
-pnpm test                     # phải 93 file / 569 test xanh
+pnpm test                     # phải 93 file / 570 test xanh
 pnpm check-query-keys         # "No query key literals found..."
 pnpm check-comment-language   # "All comments are in English."
+pnpm check-bindings           # "...is in sync with the Rust commands."
+cargo test --manifest-path src-tauri/Cargo.toml   # toàn bộ xanh
 ```
 
-Nếu một trong năm lệnh trên đỏ, **dừng lại và tìm nguyên nhân** trước khi viết code mới — chúng là mốc chuẩn của nhánh này.
+Nếu một trong các lệnh trên đỏ, **dừng lại và tìm nguyên nhân** trước khi viết code mới — chúng là mốc chuẩn của nhánh này.
 
 > **Ngôn ngữ:** code, comment, mô tả test và commit message đều viết **tiếng Anh**. Chỉ chuỗi người dùng đọc được (i18n, `aria-label`, `title`) giữ tiếng Việt. Xem `AGENTS.md` → Language. `pnpm check-comment-language` ép buộc điều này.
 
@@ -35,6 +39,7 @@ Nếu một trong năm lệnh trên đỏ, **dừng lại và tìm nguyên nhân
 | `docs/superpowers/specs/2026-09-18-frontend-architecture-refactor-design.md` | Thiết kế tổng thể, 8 giai đoạn, lý do từng quyết định |
 | `docs/superpowers/plans/2026-09-18-refactor-phase0-foundation.md` | Kế hoạch GĐ0 (đã xong) |
 | `docs/superpowers/plans/2026-09-18-refactor-phase1-querykeys.md` | Kế hoạch GĐ1 (đã xong) |
+| `docs/superpowers/plans/2026-09-19-refactor-phase3-tauri-specta.md` | Kế hoạch GĐ3 (đã xong, trừ Task 5) |
 | `docs/DESIGN_SYSTEM.md` | Design token — nguồn chuẩn cho màu, bo góc, khoảng cách |
 
 ---
@@ -159,11 +164,43 @@ Xoá được ~1.400 dòng: 22 overlay tự dựng, 22 Escape handler, ~44 nút 
 
 **Chưa migrate — 4 file có overlay nhưng không phải modal hộp thoại:** `FileInspectorDrawer`, `PullRequestDetailDrawer` (drawer trượt phải), `CommandPalette` (neo đỉnh), `SplashScreen` (không có backdrop/panel). Ép vào `Modal` sẽ phải thêm prop cho từng biến thể layout — đúng thứ compound component sinh ra để tránh. Hai drawer giống nhau gần hết, nếu cần thì tách primitive `Drawer` riêng.
 
+### Giai đoạn 3 — `tauri-specta`, bỏ `bindings.ts` viết tay ✅
+
+`src/ipc/bindings.ts` (486 dòng viết tay) đã bị xoá. Thay bằng `src/ipc/bindings.generated.ts` do `tauri-specta` sinh từ Rust, có check CI chặn drift.
+
+**Cách làm:** giữ `invokeCommand` làm adapter. Một helper `unwrap()` chuyển `{status}` của bindings sinh ra về hình dạng cũ (Promise resolve hoặc reject), ném lỗi **nguyên trạng** để `toErrorMessage` vẫn đọc được `message` của `AppError`. Kết quả: **0 / 291 call site** và **0 / 38 test file mock** phải sửa.
+
+**Cái bẫy lớn nhất — mất nhiều vòng thử mới ra:** xuất bindings cần một binary Rust *chạy được* (`.export()` là lệnh runtime, không phải macro). Mọi binary link `tauri_specta::Builder` phụ thuộc `comctl32.dll` v6, mà Tauri chỉ nhúng manifest Common-Controls v6 vào exe *ứng dụng*. Test binary thiếu manifest → thoát `0xc0000139 STATUS_ENTRYPOINT_NOT_FOUND`, **không in ra gì cả**. `tauri::test::MockRuntime` không cứu được (phụ thuộc đến từ khâu link). Sửa bằng `cargo:rustc-link-arg-tests` trong `build.rs`, đường dẫn manifest phải **tuyệt đối** (đường dẫn tương đối làm mọi crate phụ thuộc đi tìm file trong thư mục của chính nó → `getrandom` gãy khi link).
+
+**Hai lựa chọn xuất bắt buộc, đều có lý do:**
+
+- `dangerously_cast_bigints_to_number()` — specta chặn `i64`/`usize` để tránh mất chính xác, nhưng mọi field ở đây là timestamp/count/index, xa dưới 2^53.
+- `enable_lossless_floats()` — không bật thì mọi `f64` ra `number | null` (JSON không tải được NaN/Infinity). Null đó là nhiễu trên field không bao giờ NaN, **và nó che mất 4 field thật sự là `Option<...>`**.
+
+**Lỗi thật phát hiện được — đây chính là lý do giai đoạn này tồn tại:**
+
+| Lỗi | Hậu quả |
+| --- | --- |
+| **`get_compare_file_diff` nhận `ignore_ws`, client gửi `ignoreWhitespace`** | Tauri bỏ key lạ → backend rơi về `unwrap_or(false)` → **nút "bỏ qua khoảng trắng" ở màn Compare không làm gì cả**. Đã sửa, có test ghim (`d2c3710`) |
+| `CommitActionResult.new_commit_id` / `.undo_token` khai `?` nhưng Rust là `Option<String>` (luôn serialize key) | 7 fixture test đang mô phỏng response mà backend không thể gửi |
+| `TagItem.timestamp_sec` khai `number` nhưng Rust là `Option<f64>` | Chưa ai đọc field này nên không có hành vi phải sửa; kiểu giờ thành thật, ai dùng sau bị ép xử lý `null` |
+
+**Hai quyết định đáng ghi:**
+
+- Type của GitHub PR (`GitHubPullRequest`, `PullRequestDetail`...) chuyển sang `src/ipc/githubApi.ts`. Chúng mô tả payload REST của GitHub, **không có đối ứng trong Rust** — không có gì để sinh ra chúng.
+- Payload event đăng ký bằng `.typ::<T>()` chứ không phải `collect_events!`. `collect_events!` sẽ sinh thêm helper listen theo tên suy từ struct (`repo-changed-payload`) trong khi app emit `"repo-changed"` — helper đó sẽ nghe nhầm kênh.
+
+**Mock tách riêng** sang `src/ipc/mocks.ts` (commit riêng, revert được độc lập). `client.ts`: 1748 → **1347 dòng**.
+
+**Sửa thêm trước khi bắt đầu** (`591c23e`): `test_github_token_storage_lifecycle` đọc/ghi token GitHub **thật** của người dùng. Vì `get_github_token()` có fallback `gh auth token`, máy dev đã đăng nhập `gh` thì assertion `None` nhận token thật **và in nó ra log test**. CI không thấy vì runner không có `gh`. Đã trỏ `GITVISTA_TOKEN_PATH` vào tempdir và ẩn `PATH` trong lúc chạy.
+
 ### Số liệu hiện tại
 
 | Chỉ số | Khi bắt đầu | Bây giờ |
 | --- | --- | --- |
-| Test | 73 file / ~370 | **93 file / 569** |
+| Test | 73 file / ~370 | **93 file / 570** |
+| `src/ipc/bindings.ts` viết tay | 486 dòng | **0** (do máy sinh) |
+| `src/ipc/client.ts` | 1748 dòng | **1347** |
 | Query key literal | 75 | **0** |
 | `invalidateQueries()` trống | 23 | **1** (cố ý, có comment) |
 | Cặp key lệch | 3 | **0** |
@@ -175,12 +212,11 @@ Xoá được ~1.400 dòng: 22 overlay tự dựng, 22 Escape handler, ~44 nút 
 
 ---
 
-## 4. Còn lại: 5 giai đoạn
+## 4. Còn lại: 4 giai đoạn
 
 | GĐ | Nội dung | Rủi ro | Ghi chú |
 | --- | --- | --- | --- |
-| **3** | ← **Việc tiếp theo.** Bật `tauri-specta`, bỏ `bindings.ts` viết tay, tách mock khỏi `client.ts` | **Cao** | Giá trị lớn nhất cho bảo trì dài hạn. PR riêng. |
-| **4** | Tách `ipc/client.ts` (1748 dòng) theo domain | Trung bình | |
+| **4** | ← **Việc tiếp theo.** Tách `ipc/client.ts` (1347 dòng) theo domain | Trung bình | Mock đã tách sẵn ở GĐ3 |
 | **5** | Migrate sang `features/` từng cái: branch → tag → remote → changes | Thấp mỗi bước | |
 | **5b** | Xẻ nhỏ file khổng lồ, gom state modal về union | Trung bình | Làm cùng lúc với GĐ5 cho từng feature |
 | **6** | Rust: `with_repo()` thay 58 chỗ lặp, gom `emit_repo_changed` (9 bản, 2 chữ ký) | Thấp | |
@@ -222,7 +258,6 @@ Thêm `src/shared/hooks/useFocusTrap.ts` — `useFocusTrap(containerRef, enabled
 | `App.tsx:284` dùng `part.includes(repo_path)` thay vì so sánh bằng | Minor | Repo `/proj` cũng khớp `/proj-legacy` → thừa refetch, không sai dữ liệu. Giờ `qk` đặt path ở vị trí cố định nên sửa rất dễ. |
 | `qk.githubToken()` chưa ai invalidate | Minor | An toàn hiện tại (không có UI ghi token). Sẽ thành bẫy khi thêm màn hình cài đặt token. |
 | `qk.github.repoInfo` không được invalidate khi đổi remote URL | Minor | Đã giảm nhẹ ở GĐ1 (`refreshData()` giờ có invalidate), nhưng chưa phủ hết đường. |
-| `bindings.ts:270` comment thiếu `"renamed"` so với Rust trả về | Minor | Bằng chứng cho luận điểm bindings viết tay bị lệch. GĐ3 xoá bỏ hẳn. |
 | 175 warning lint độ phức tạp | Theo kế hoạch | Giảm dần qua GĐ5b, nâng lên `error` ở GĐ7. |
 | `useFocusTrap` coi phần tử là "nhìn thấy được" nếu không có `hidden`/`aria-hidden` | Minor | jsdom trả rect bằng 0 cho mọi thứ nên không dùng kích thước để xét được. Phần tử ẩn bằng CSS (`display:none`) vẫn lọt vào danh sách focus được. Chưa gặp trong thực tế vì modal ẩn nội dung bằng cách không render. |
 
@@ -266,6 +301,14 @@ Những nguyên tắc này rút ra từ GĐ0–1 và đã nhiều lần chứng 
 
 > Quy ước này thêm vào sau khi GĐ0–1 lỡ viết comment tiếng Việt. Đáng chú ý: khi bật guard lần đầu, nó phát hiện **13 comment tiếng Việt có sẵn từ trước refactor** — codebase không đồng nhất như tưởng. Đã dịch nốt.
 
+> `check-comment-language` **chỉ quét `.ts/.tsx/.mjs/.js`**. File `.rs` không bị kiểm — GĐ3 tìm thấy comment tiếng Việt trong `lib.rs` mà guard không hề báo.
+
+**10. Test không được chạm vào trạng thái thật của người dùng.** GĐ3 tìm thấy một test đọc/ghi token GitHub thật và in nó ra log. Điều làm nó nguy hiểm: **CI luôn xanh** vì runner không có `gh` đăng nhập — lỗi chỉ xuất hiện trên máy dev. Test nào chạm tới file cấu hình, biến môi trường hay credential thì phải trỏ vào tempdir, và phải chặn cả **đường fallback** (ở đây là `gh auth token`), không chỉ đường chính.
+
+**11. Bindings sinh ra nghiêm ngặt hơn viết tay — mỗi lỗi kiểu là một drift thật.** Khi `pnpm build` đỏ sau khi đổi sang kiểu sinh ra, đừng ép kiểu cho qua. GĐ3 có 4 lỗi kiểu, **cả 4 đều là chỗ code TS đang nói sai về dữ liệu Rust gửi về** — trong đó một cái là bug người dùng nhìn thấy được.
+
+**12. `pnpm build` xanh không chứng minh IPC chạy đúng.** Nó chứng minh kiểu khớp. Toàn bộ 570 test chạy mock, không test nào gọi Rust thật. Bug `ignoreWhitespace`/`ignoreWs` của GĐ3 tồn tại được lâu đúng vì thế: tên tham số sai chỉ lộ khi payload thật đi qua Tauri. Việc gì đổi tầng IPC thì phải chạy app thật mới coi là xong.
+
 ---
 
 ## 8. Nếu muốn merge nhánh này
@@ -277,3 +320,27 @@ pnpm check    # format + lint + query-keys + build + test + rust
 ```
 
 *(Lưu ý: `pnpm format:check` hiện đỏ do nợ định dạng có sẵn — `main` có 193 file chưa format, nhánh này 187. Nợ này có trước, refactor không gây ra và còn làm giảm đi một ít.)*
+
+---
+
+## 9. Việc còn nợ của Giai đoạn 3 — chạy app thật
+
+**Task 5 của kế hoạch GĐ3 chưa làm.** Phiên thực hiện GĐ3 không chạy được GUI nên không kiểm chứng được đầu-cuối.
+
+Vì sao vẫn quan trọng dù mọi thứ đang xanh: `pnpm build` chứng minh **kiểu khớp**, không chứng minh **dữ liệu chạy đúng qua dây IPC thật**. Toàn bộ 570 test chạy ở mock mode hoặc mock chính `invokeCommand` — không có test nào gọi Rust thật. Đúng loại lỗi vừa tìm thấy ở GĐ3 (`ignoreWhitespace` vs `ignoreWs`) là loại chỉ lộ ra khi payload thật đi qua Tauri.
+
+Cần làm khi có máy chạy được GUI:
+
+```bash
+pnpm tauri dev
+```
+
+Rồi xác nhận:
+
+- [ ] Mở một repo: danh sách branch, commit graph, màn Changes, danh sách tag đều hiện đúng
+- [ ] **Nút "bỏ qua khoảng trắng" ở màn Compare giờ có tác dụng thật** — đây là bug vừa sửa ở `d2c3710`, và nó chỉ kiểm chứng được qua dây IPC thật
+- [ ] Tag **nhẹ** (không có tagger) hiển thị được — đó là đường đi của `timestamp_sec: null`
+- [ ] Tạo/xoá tag, thêm/xoá remote, stash — các lệnh có ghi dữ liệu
+- [ ] `pnpm test:e2e` (`app.spec.ts`) xanh
+
+Nếu có gì sai, nghi ngờ trước hết ở `unwrap()` trong `client.ts` và ở các chỗ `?? null` — đó là hai điểm mà hình dạng dữ liệu bị đổi khi chuyển sang bindings sinh ra.
