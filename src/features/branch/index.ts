@@ -8,3 +8,4 @@ export {
 export { useBranches } from "./api";
 export { buildBranchTree, countBranchesInNode, type BranchTreeNode } from "./model/branchTree";
 export { NO_DIALOG, isDialog, type SidebarDialog } from "./model/sidebarDialog";
+export { BranchSidebar } from "./components/BranchSidebar";

@@ -1,6 +1,6 @@
 import React from "react";
 import clsx from "clsx";
-import { BranchSidebar } from "./sidebar/BranchSidebar";
+import { BranchSidebar } from "../features/branch";
 import { CommitGraph } from "./graph/CommitGraph";
 import { CommitDetailPanel } from "./diff/CommitDetailPanel";
 import { useLayoutStore } from "../store/useLayoutStore";
