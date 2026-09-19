@@ -1,4 +1,9 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitForElementToBeRemoved,
+} from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { StagingFileList } from "../components/changes/StagingFileList";
 
@@ -80,7 +85,7 @@ describe("StagingFileList & DiscardConfirmModal", () => {
     expect(mockProps.onStageAll).toHaveBeenCalled();
   });
 
-  it("opens DiscardConfirmModal and calls onDiscardFile on confirmation", () => {
+  it("opens DiscardConfirmModal and calls onDiscardFile on confirmation", async () => {
     render(<StagingFileList {...mockProps} />);
 
     const discardBtn = screen.getByTestId("discard-file-src/unstaged1.ts");
@@ -97,13 +102,17 @@ describe("StagingFileList & DiscardConfirmModal", () => {
     fireEvent.click(confirmBtn);
 
     expect(mockProps.onDiscardFile).toHaveBeenCalledWith("src/unstaged1.ts");
-    // Modal should close
-    expect(
-      screen.queryByText(/Các thay đổi trong file này sẽ bị huỷ vĩnh viễn/i)
-    ).not.toBeInTheDocument();
+    // Modal should close. The shared Modal fades out before unmounting, so
+    // this awaits removal rather than asserting it synchronously — it still
+    // fails if the modal never closes.
+    //
+    // This targets the dialog itself, not the warning text: the modal also
+    // hides when filePath goes null, so asserting on the text alone would
+    // still pass even if isOpen were stuck true.
+    await waitForElementToBeRemoved(() => screen.queryByRole("dialog"));
   });
 
-  it("cancels discard without calling onDiscardFile", () => {
+  it("cancels discard without calling onDiscardFile", async () => {
     render(<StagingFileList {...mockProps} />);
 
     const discardBtn = screen.getByTestId("discard-file-src/unstaged1.ts");
@@ -113,8 +122,6 @@ describe("StagingFileList & DiscardConfirmModal", () => {
     fireEvent.click(cancelBtn);
 
     expect(mockProps.onDiscardFile).not.toHaveBeenCalled();
-    expect(
-      screen.queryByText(/Các thay đổi trong file này sẽ bị huỷ vĩnh viễn/i)
-    ).not.toBeInTheDocument();
+    await waitForElementToBeRemoved(() => screen.queryByRole("dialog"));
   });
 });
