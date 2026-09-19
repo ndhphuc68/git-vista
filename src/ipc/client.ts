@@ -1621,7 +1621,7 @@ export const invokeCommand = {
       targetRev,
       filePath,
       mode,
-      ignoreWhitespace: ignoreWhitespace ?? false,
+      ignoreWs: ignoreWhitespace ?? false,
     });
   },
 

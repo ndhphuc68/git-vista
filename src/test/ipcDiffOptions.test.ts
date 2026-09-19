@@ -106,5 +106,37 @@ describe("IPC Diff Client with ignoreWhitespace", () => {
         ignoreWhitespace: false,
       });
     });
+
+    it("passes ignoreWhitespace to get_compare_file_diff invoke as ignoreWs", async () => {
+      const { invoke } = await import("@tauri-apps/api/core");
+      vi.mocked(invoke).mockResolvedValueOnce({
+        file_path: "test.ts",
+        status: "modified",
+        additions: 0,
+        deletions: 0,
+        hunks: [],
+      });
+
+      await invokeCommand.getCompareFileDiff(
+        "/repo",
+        "main",
+        "feature",
+        "test.ts",
+        "MergeBase",
+        true
+      );
+
+      // The Rust parameter is `ignore_ws`, so Tauri expects `ignoreWs`. Sending
+      // `ignoreWhitespace` drops the argument silently and the backend falls back
+      // to `unwrap_or(false)`, which left the Compare view's toggle doing nothing.
+      expect(invoke).toHaveBeenCalledWith("get_compare_file_diff", {
+        repoPath: "/repo",
+        baseRev: "main",
+        targetRev: "feature",
+        filePath: "test.ts",
+        mode: "MergeBase",
+        ignoreWs: true,
+      });
+    });
   });
 });
