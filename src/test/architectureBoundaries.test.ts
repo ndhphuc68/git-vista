@@ -33,7 +33,7 @@ const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {
   "features/branch/components/DeleteBranchModal.tsx":
     "undo toast calls undoDeleteBranch; removed once the undo domain has a hook",
   "features/branch/components/BranchSidebar.tsx":
-    "queries getRemotes/getRepoStatus/getTags directly and runs checkoutTag, pushTag, mergeBranch, rebaseBranch and undoDropStash; removed once the two remaining tag commands, merge/rebase and the undo domain each have a hook",
+    "queries getRemotes/getRepoStatus/getStashes/getTags directly and runs checkoutTag, pushTag, mergeBranch, rebaseBranch and undoDropStash; removed once the two remaining tag commands, merge/rebase and the undo domain each have a hook",
   "features/stash/components/StashDiffView.tsx":
     "reads commit details to render the stash diff; removed once the commit domain has a hook",
 };
