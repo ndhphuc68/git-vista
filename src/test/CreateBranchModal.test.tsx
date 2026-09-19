@@ -75,4 +75,84 @@ describe("CreateBranchModal", () => {
       );
     });
   });
+
+  // The existing tests above cover the business logic but nothing covered the
+  // shell — Escape, the backdrop and the close button — which is exactly what
+  // the migration onto the shared Modal replaces. These pin that behaviour
+  // before the swap (convention #5).
+  describe("closing", () => {
+    it("closes on Escape", () => {
+      const onClose = vi.fn();
+      render(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
+
+      fireEvent.keyDown(window, { key: "Escape" });
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not react to Escape while closed", () => {
+      const onClose = vi.fn();
+      render(<CreateBranchModal isOpen={false} onClose={onClose} repoPath="/test/repo" />);
+
+      fireEvent.keyDown(window, { key: "Escape" });
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it("closes on the header close button", () => {
+      const onClose = vi.fn();
+      render(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
+
+      fireEvent.click(screen.getByLabelText("Đóng"));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it("closes on cancel without creating anything", () => {
+      const onClose = vi.fn();
+      render(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
+
+      fireEvent.click(screen.getByRole("button", { name: /^Huỷ/i }));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(invokeCommand.createBranch).not.toHaveBeenCalled();
+    });
+  });
+
+  it("is labelled by its title for screen readers", () => {
+    render(<CreateBranchModal isOpen={true} onClose={vi.fn()} repoPath="/test/repo" />);
+    const dialog = screen.getByRole("dialog");
+
+    expect(dialog).toHaveAttribute("aria-modal", "true");
+    const labelledBy = dialog.getAttribute("aria-labelledby");
+    expect(labelledBy).toBeTruthy();
+    expect(document.getElementById(labelledBy!)).toHaveTextContent(/tạo nhánh mới/i);
+  });
+
+  it("shows the source commit when creating from one", () => {
+    render(
+      <CreateBranchModal
+        isOpen={true}
+        onClose={vi.fn()}
+        repoPath="/test/repo"
+        targetCommit="f1e2d3c4b5a6978"
+      />
+    );
+
+    expect(screen.getByText("f1e2d3c")).toBeInTheDocument();
+  });
+
+  it("surfaces the error and stays open when creating fails", async () => {
+    const onClose = vi.fn();
+    (invokeCommand.createBranch as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new Error("branch already exists")
+    );
+
+    render(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
+    fireEvent.change(screen.getByLabelText("Tên nhánh mới"), { target: { value: "dup" } });
+    fireEvent.click(screen.getByRole("button", { name: /tạo nhánh/i }));
+
+    expect(await screen.findByText(/branch already exists/i)).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+  });
 });

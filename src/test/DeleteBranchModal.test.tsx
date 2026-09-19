@@ -93,4 +93,54 @@ describe("DeleteBranchModal", () => {
       expect(onClose).toHaveBeenCalled();
     });
   });
+// Pinned before migrating onto the shared Modal: nothing covered the shell
+  // (Escape, the close button, cancel), which is exactly what the migration
+  // replaces (convention #5).
+  describe("closing", () => {
+    const props = {
+      isOpen: true,
+      repoPath: "/test/repo",
+      branchName: "feature/x",
+    };
+
+    it("closes on Escape", () => {
+      const onClose = vi.fn();
+      render(<DeleteBranchModal {...props} onClose={onClose} />);
+
+      fireEvent.keyDown(window, { key: "Escape" });
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not react to Escape while closed", () => {
+      const onClose = vi.fn();
+      render(<DeleteBranchModal {...props} isOpen={false} onClose={onClose} />);
+
+      fireEvent.keyDown(window, { key: "Escape" });
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it("closes on the header close button and on cancel, without deleting", () => {
+      const onClose = vi.fn();
+      render(<DeleteBranchModal {...props} onClose={onClose} />);
+
+      fireEvent.click(screen.getByLabelText("Đóng"));
+      expect(onClose).toHaveBeenCalledTimes(1);
+
+      fireEvent.click(screen.getByRole("button", { name: /^Huỷ/i }));
+      expect(onClose).toHaveBeenCalledTimes(2);
+      expect(invokeCommand.deleteBranch).not.toHaveBeenCalled();
+    });
+
+    it("is labelled by its title for screen readers", () => {
+      render(<DeleteBranchModal {...props} onClose={vi.fn()} />);
+      const dialog = screen.getByRole("dialog");
+
+      expect(dialog).toHaveAttribute("aria-modal", "true");
+      const labelledBy = dialog.getAttribute("aria-labelledby");
+      expect(labelledBy).toBeTruthy();
+      expect(document.getElementById(labelledBy!)).toHaveTextContent(/xoá nhánh/i);
+    });
+  });
 });

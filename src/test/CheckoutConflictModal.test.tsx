@@ -79,4 +79,57 @@ describe("CheckoutConflictModal", () => {
     saveStashSpy.mockRestore();
     checkoutBranchSpy.mockRestore();
   });
+// Pinned before migrating onto the shared Modal: nothing covered the shell
+  // (Escape, the close button), which is what the migration replaces.
+  describe("closing", () => {
+    const props = {
+      isOpen: true,
+      targetBranch: "feature/next",
+      errorMessage: "CHECKOUT_CONFLICT: file1.txt",
+      onNavigateToChanges: vi.fn(),
+    };
+
+    it("closes on Escape", () => {
+      const onClose = vi.fn();
+      render(<CheckoutConflictModal {...props} onClose={onClose} />);
+
+      fireEvent.keyDown(window, { key: "Escape" });
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not react to Escape while closed", () => {
+      const onClose = vi.fn();
+      render(<CheckoutConflictModal {...props} isOpen={false} onClose={onClose} />);
+
+      fireEvent.keyDown(window, { key: "Escape" });
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it("closes on the header close button", () => {
+      const onClose = vi.fn();
+      render(<CheckoutConflictModal {...props} onClose={onClose} />);
+
+      fireEvent.click(screen.getByLabelText("Đóng"));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it("is labelled by its title for screen readers", () => {
+      render(<CheckoutConflictModal {...props} onClose={vi.fn()} />);
+      const dialog = screen.getByRole("dialog");
+
+      expect(dialog).toHaveAttribute("aria-modal", "true");
+      const labelledBy = dialog.getAttribute("aria-labelledby");
+      expect(labelledBy).toBeTruthy();
+      expect(document.getElementById(labelledBy!)).toBeTruthy();
+    });
+
+    it("hides the stash action when no repo path is given", () => {
+      render(<CheckoutConflictModal {...props} onClose={vi.fn()} />);
+
+      expect(screen.queryByRole("button", { name: /stash/i })).not.toBeInTheDocument();
+    });
+  });
 });
