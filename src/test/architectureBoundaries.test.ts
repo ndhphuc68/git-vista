@@ -32,8 +32,6 @@ function collectSourceFiles(dir: string): string[] {
 const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {
   "features/branch/components/DeleteBranchModal.tsx":
     "undo toast calls undoDeleteBranch; removed once the undo domain has a hook",
-  "features/branch/components/BranchSidebar.tsx":
-    "queries getRemotes/getRepoStatus/getStashes/getTags directly and runs checkoutTag, pushTag, mergeBranch, rebaseBranch and undoDropStash; removed once the two remaining tag commands, merge/rebase and the undo domain each have a hook",
   "features/stash/components/StashDiffView.tsx":
     "reads commit details to render the stash diff; removed once the commit domain has a hook",
 };
@@ -44,20 +42,18 @@ const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {
  * file must still be a real import — the staleness check below fails once one
  * of them is gone.
  *
- * Both remaining entries are api-level only: features/branch consumes
- * features/stash's HOOKS, never its components. That is a far weaker coupling
- * than the component imports this list used to hold — BranchSidebar once
- * rendered features/tag's and features/remote's modals and features/stash's
- * diff panel, and Shell now supplies all of those instead.
+ * These entries consume owner hooks only, never another feature's components.
+ * Shell supplies the foreign dialogs and stash panel; the sidebar composes
+ * owner queries and owns interaction policy through its local hooks.
  *
- * Exit condition: these go away when the stash actions move behind a boundary
- * branch does not have to reach across — a shared action layer, or the stash
- * panel owning its own commands. Neither is in this slice.
+ * Exit condition: sidebar composition moves behind a shared query/action
+ * boundary, or the owning panels take over their queries and commands.
  */
 const CROSS_FEATURE_EXCEPTIONS: Record<string, string[]> = {
-  // Uses useApplyStash/usePopStash/useDropStash; the confirm prompt, the undo
-  // toast and undoDropStash stay here, so only the mutations are borrowed.
-  "features/branch/components/BranchSidebar.tsx": ["stash"],
+  // Compound sidebar actions borrow owner mutations and retain UI policy.
+  "features/branch/hooks/useSidebarActions.ts": ["stash", "tag", "merge", "undo"],
+  // Repository views share domain query ownership and cache keys.
+  "features/branch/hooks/useSidebarData.ts": ["remote", "stash", "tag", "history"],
   // This modal belongs to the checkout-branch flow but must stash first;
   // removable once "stash then checkout" has a home of its own.
   "features/branch/components/CheckoutConflictModal.tsx": ["stash"],
