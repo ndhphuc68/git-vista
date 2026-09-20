@@ -124,6 +124,44 @@ describe("sidebar actions", () => {
     expect(useToastStore.getState().toasts).toEqual([]);
   });
 
+  it("undoes a dropped stash in its original repository after switching repositories", async () => {
+    vi.spyOn(invokeCommand, "dropStash").mockResolvedValue("original-repo-receipt");
+    vi.spyOn(invokeCommand, "undoDropStash").mockResolvedValue(undefined);
+    const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+    const invalidate = vi.spyOn(client, "invalidateQueries");
+    const { result, rerender } = renderHook(
+      ({ repoPath }) =>
+        useSidebarActions({
+          repoPath,
+          stashes: [stash],
+          closeStashPanel: () => {},
+          closeMenu: () => {},
+        }),
+      {
+        initialProps: { repoPath: REPO },
+        wrapper: ({ children }) => (
+          <QueryClientProvider client={client}>{children}</QueryClientProvider>
+        ),
+      }
+    );
+
+    await act(async () => {
+      await result.current.dropStash(0);
+    });
+    const undoAction = useToastStore.getState().toasts[0]!.undoAction!;
+    rerender({ repoPath: "d:/another-repository" });
+    invalidate.mockClear();
+    await act(async () => {
+      await undoAction();
+    });
+
+    expect(invokeCommand.undoDropStash).toHaveBeenCalledExactlyOnceWith(
+      REPO,
+      "original-repo-receipt"
+    );
+    expect(invalidate.mock.calls).toEqual([[{ queryKey: qk.stashes(REPO) }]]);
+  });
+
   it.each(["applyStash", "popStash"] as const)(
     "%s preserves selection and alert text on failure",
     async (command) => {

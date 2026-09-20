@@ -60,7 +60,7 @@ export function useSidebarActions({
           message: `Đã xoá stash@{${index}}`,
           type: "success",
           durationMs: 10000,
-          undoAction: () => undoDrop.mutateAsync({ receipt }),
+          undoAction: undoDrop.createUndoAction(receipt),
         });
       }
     } catch (err: unknown) {

@@ -9,11 +9,18 @@ export interface UndoDropStashVars {
 /** Restores a dropped stash and refreshes the affected stash list after success. */
 export function useUndoDropStash(repoPath: string) {
   const queryClient = useQueryClient();
-
-  return useMutation<void, unknown, UndoDropStashVars>({
-    mutationFn: (vars) => invokeCommand.undoDropStash(repoPath, vars.receipt),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.stashes(repoPath) });
-    },
+  const restore = async ({ receipt }: UndoDropStashVars) => {
+    await invokeCommand.undoDropStash(repoPath, receipt);
+    queryClient.invalidateQueries({ queryKey: qk.stashes(repoPath) });
+  };
+  const mutation = useMutation<void, unknown, UndoDropStashVars>({
+    mutationFn: restore,
   });
+
+  return {
+    ...mutation,
+    // Toasts outlive repository selection; retain this render's owner instead
+    // of mutateAsync, whose observer reads the latest repository options.
+    createUndoAction: (receipt: string) => () => restore({ receipt }),
+  };
 }
