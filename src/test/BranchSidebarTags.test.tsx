@@ -10,9 +10,13 @@ import { qk } from "../domain/queryKeys";
 import { Shell } from "../components/Shell";
 import { useLayoutStore } from "../store/useLayoutStore";
 import { useToastStore } from "../store/useToastStore";
+import type * as HistoryFeature from "../features/history";
 
 // These panels are outside the sidebar/stash action seam under test.
-vi.mock("../components/graph/CommitGraph", () => ({ CommitGraph: () => null }));
+vi.mock("../features/history", async (importOriginal) => ({
+  ...(await importOriginal<typeof HistoryFeature>()),
+  CommitGraph: () => null,
+}));
 vi.mock("../components/diff/CommitDetailPanel", () => ({ CommitDetailPanel: () => null }));
 
 const mockTags: TagItem[] = [

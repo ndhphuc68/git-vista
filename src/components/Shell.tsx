@@ -1,7 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 import { useQueryClient } from "@tanstack/react-query";
-import { BranchSidebar, isDialog, useBranches } from "../features/branch";
+import { BranchSidebar, CreateBranchModal, isDialog, useBranches } from "../features/branch";
 import { CreateTagModal, DeleteTagModal } from "../features/tag";
 import {
   AddEditRemoteModal,
@@ -10,7 +10,7 @@ import {
   PruneConfirmModal,
 } from "../features/remote";
 import { StashDiffView } from "../features/stash";
-import { CommitGraph } from "./graph/CommitGraph";
+import { CommitGraph } from "../features/history";
 import { CommitDetailPanel } from "./diff/CommitDetailPanel";
 import { useLayoutStore } from "../store/useLayoutStore";
 import { useRepoStore } from "../store/useRepoStore";
@@ -200,7 +200,7 @@ export const Shell: React.FC = () => {
         data-testid="shell-graph-container"
         className="flex-1 min-w-0 h-full overflow-hidden flex flex-col"
       >
-        <CommitGraph />
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
       </div>
 
       {/* Right: Commit Detail 3/4 Slide-in Drawer with Backdrop */}
