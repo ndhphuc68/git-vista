@@ -23,7 +23,7 @@
     "test-results/**"
   ],
   "rules": {
-    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-console": ["error", { "allow": ["warn", "error"] }],
     "no-unused-vars": [
       "error",
       {
@@ -38,7 +38,7 @@
         "fixStyle": "inline-type-imports"
       }
     ],
-    "typescript/no-explicit-any": "warn",
+    "typescript/no-explicit-any": "error",
     "import/no-duplicates": "error",
     "no-restricted-imports": [
       "warn",
@@ -58,14 +58,14 @@
       }
     ],
     "react/rules-of-hooks": "error",
-    "react/exhaustive-deps": "warn",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }],
+    "react/exhaustive-deps": "error",
+    "react/only-export-components": ["error", { "allowConstantExport": true }],
     "max-lines": ["warn", { "max": 300, "skipBlankLines": true, "skipComments": true }],
     "max-lines-per-function": ["warn", { "max": 80, "skipBlankLines": true, "skipComments": true }],
     "complexity": ["warn", 15],
-    "max-depth": ["warn", 4],
-    "max-params": ["warn", 5],
-    "max-nested-callbacks": ["warn", 3]
+    "max-depth": ["error", 4],
+    "max-params": ["error", 5],
+    "max-nested-callbacks": ["error", 3]
   },
   "overrides": [
     {

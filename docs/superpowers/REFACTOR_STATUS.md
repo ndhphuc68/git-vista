@@ -4,8 +4,20 @@
 
 **Cập nhật**: 2026-09-28
 **Nhánh làm việc**: `refactor/phase0-foundation` (chứa GĐ0–GĐ4 + GĐ5 lát 1 + GĐ5 lát 2, chưa merge vào `main`). **GĐ5b sống trên nhánh riêng `refactor/phase5b-large-modules`**, rẽ nhánh từ `refactor/phase0-foundation` tại `2e01698` và đã hoà (merge) commit `4fe9bfb` (luật public-index + acyclicity guard) của `refactor/phase0-foundation` vào giữa chừng — xem **mục 12**.
-**Tiến độ**: 7 / 8 giai đoạn xong (GĐ0–GĐ6, kể cả GĐ5b)
-**Việc tiếp theo**: GĐ7 (nâng lint từ `warn` lên `error`). Xem mục 4.
+**Tiến độ**: 7 / 8 giai đoạn xong (GĐ0–GĐ6, kể cả GĐ5b). **GĐ7 chia thành 3 lát nhỏ (7a/7b/7c) — 7a đã xong.**
+**Việc tiếp theo**: GĐ7b (24 import runtime `ipc/` còn lại, đo bằng `no-restricted-imports`). Bảng lộ trình 7a/7b/7c ở mục 4.
+
+> **GĐ7a đã xong — nâng 7 luật lint đã dọn sạch lên `error`.** `no-console`,
+> `typescript/no-explicit-any`, `react/exhaustive-deps`,
+> `react/only-export-components`, `max-depth`, `max-params`,
+> `max-nested-callbacks` giờ chặn `pnpm lint` khi vi phạm — đã chứng minh
+> bằng một probe `any` cố ý (xem mục 3, "Giai đoạn 7a"). Bốn luật còn `warn`
+> để dành cho GĐ7b/GĐ7c: `no-restricted-imports`, `max-lines`,
+> `max-lines-per-function`, `complexity`. Phát hiện đáng chú ý nhất không
+> phải việc mới của lát này mà là một con số cũ bị hiểu sai: `allowTypeImports`
+> (thêm ở đầu GĐ7a) cho thấy oxlint đã đếm cả `import type` vào
+> `no-restricted-imports` từ trước tới giờ — mốc "70" ở mục 3/6 thổi phồng
+> phần việc còn lại tới **46** dòng; con số runtime thật là **24**.
 
 > **GĐ6 đã xong — có sai lệch có chủ đích so với spec.** 9 bản `emit_repo_changed`
 > gom về một hàm trong `src-tauri/src/events/mod.rs`; 3 `map_err(|e| e.to_string())`
@@ -321,6 +333,63 @@ Con người đã chọn bỏ. Nếu sau này cần một chỗ chung để mở
 
 **Kiểm chứng:** `cargo test` **144 passed / 0 failed** (140 + 4 mới); `cargo clippy --all-targets -- -D warnings` sạch; `cargo fmt --check` sạch; `pnpm build`/`pnpm lint` exit 0; frontend **111 file / 762 test** xanh.
 
+### Giai đoạn 7a — Dọn nhanh, nâng 7 luật lên `error` ✅
+
+**Kế hoạch**: `.superpowers/sdd/2026-09-28-refactor-phase7a-lint-quick-wins/` (task 1–7). GĐ7 gốc ("nâng lint từ `warn` lên `error`") bị chia thành ba lát vì hai luật `no-restricted-imports` (24 vi phạm runtime thật) và `max-lines-per-function`/`complexity`/`max-lines` (118 vi phạm) cần dọn code trước khi khoá — không thể nâng cả 11 luật cùng lúc mà không chặn merge nhiều ngày. 7a chỉ nâng bảy luật đã **sẵn 0 vi phạm**.
+
+**Việc đã làm, theo commit:**
+
+| Commit | Nội dung |
+| --- | --- |
+| `0820516` | Thêm `allowTypeImports` cho `no-restricted-imports`; loại trừ `no-console` cho `scripts/**`; loại trừ `max-lines` cho hai từ điển i18n |
+| `676fd6d` | Helper `messageOf` + gõ kiểu 11 `catch` clause — dọn `no-explicit-any` |
+| `ab25ad5` + `a082292` | Gõ kiểu payload REST của GitHub trong `githubService`; review bắt được `mapUserLink` thêm fallback `?? "unknown"` làm đổi dữ liệu hiển thị cho assignee/reviewer — sửa bằng kiểu raw bắt buộc field, không thêm fallback |
+| `b75f465` | Nốt `any` cuối cùng — đường dẫn file kéo-thả và fixture test |
+| `3089f28` | `qk.compareFileDiff` nhận một object option thay vì tham số rời; loại trừ `max-params` cho `src/ipc/**` |
+| `fc37a4f` | Sửa hook dependencies, `withoutToast`, `repoUrl.ts`, xoá `console.log` debug còn sót; `useWelcomeShortcuts` giờ gọi callback **mới nhất** thay vì đóng closure ở lần render đầu — có test ghim |
+| (commit của task này) | Nâng bảy luật đã 0 vi phạm lên `error`, cập nhật tài liệu này |
+
+**Số lượt vi phạm theo luật, trước → sau (baseline 241 warning):**
+
+| Luật | Trước | Sau | Mức mới |
+| --- | --- | --- | --- |
+| `no-restricted-imports` | 70 | **24** | `warn` (GĐ7b) |
+| `no-console` | 9 | **0** | `error` |
+| `max-lines` | 12 | **10** | `warn` (GĐ7c) |
+| `typescript/no-explicit-any` | 23 | **0** | `error` |
+| `react/exhaustive-deps` | 4 | **0** | `error` |
+| `max-params` | 3 | **0** | `error` |
+| `max-nested-callbacks` | 1 | **0** | `error` |
+| `react/only-export-components` | 1 | **0** | `error` |
+| `max-depth` | 0 | **0** | `error` |
+| `max-lines-per-function` | 90 | **90** | `warn` (GĐ7c) |
+| `complexity` | 28 | **28** | `warn` (GĐ7c) |
+| **Tổng** | **241** | **152** | |
+
+**Phát hiện quan trọng nhất không phải là dọn code mới, mà là một con số cũ bị đếm sai.** `no-restricted-imports` từng báo 70 — mốc này được mục 3/6 dùng làm thước đo tiến độ migrate `ipc/`. Thêm `allowTypeImports: true` vào hai pattern của luật (đã có từ commit `0820516`, đầu GĐ7a) làm con số rơi thẳng xuống **24**, không phải vì có 46 chỗ vừa migrate mà vì oxlint **vẫn luôn** tính cả `import type` là vi phạm — nó không phân biệt type-only như `architectureBoundaries.test.ts` (`importsIpcAtRuntime`) đã làm từ GĐ5. Xác nhận bằng ratchet probe (mục dưới): sau khi `allowTypeImports` có hiệu lực, một import kiểu thuần tuý từ `ipc/` không còn bị đếm, chỉ import giá trị mới bị đếm. Nói cách khác: **46 trong 70 dòng "còn phải migrate" trước đây chưa từng là nợ thật** — chỉ là oxlint đếm nhầm. 24 dòng còn lại mới là việc thật của GĐ7b.
+
+**Ba ngoại lệ thêm vào cấu hình, mỗi cái có lý do:**
+
+- `scripts/**` tắt `no-console` — script chạy bằng Node, in ra console là giao diện chính của nó, không phải debug sót.
+- `src/i18n/en.ts` / `src/i18n/vi.ts` tắt `max-lines` — từ điển dịch dài theo số lượng chuỗi UI, không phải theo độ phức tạp logic; xẻ nhỏ không có ý nghĩa kiến trúc.
+- `src/ipc/**` tắt `max-params` — facade IPC có nhiều hàm nhận tham số 1-1 với command Rust nhiều field; đã có 3 vi phạm hợp lệ trước khi thêm ngoại lệ, không sửa bằng cách gom object vì đó không phải chỗ mất giá trị.
+
+**Một thay đổi hành vi có chủ đích, có test ghim:** `useWelcomeShortcuts` — sửa dependency rỗng ở GĐ5b (mục 6/12.6 từng ghi là "verbatim từ code gốc, không phải regression") giờ khiến hook gọi **callback mới nhất** ở mỗi lần render thay vì đóng (closure) callback của lần render đầu tiên. Đây **là** thay đổi hành vi, không phải thay thế cơ học — được cho phép vì mục đích của GĐ7 là khoá kiến trúc lại, và một callback đóng sai là đúng loại lỗi mà `exhaustive-deps` sinh ra để bắt. Có test ghim hành vi mới.
+
+**Ratchet probe (Step 3, Task 7) — chứng minh luật `error` thật sự chặn:** thêm tạm `const _probe: any = 1; export { _probe };` vào `src/shared/utils/git.ts` → `pnpm lint` thoát mã **1**, dòng `src/shared/utils/git.ts:8:15: error typescript(no-explicit-any): Unexpected \`any\`.` xuất hiện. Xoá probe → `pnpm lint` thoát mã **0** trở lại. Xác nhận đã xoá sạch, `git status` chỉ còn `.oxlintrc.json` và tài liệu này trước khi commit.
+
+**Phát hiện phụ, ghi vào mục 6:** ba test file (`useBranchMutations.test.ts:51`, `useRemoteMutations.test.ts:53`, `useStashMutations.test.ts:44`) có comment `// eslint-disable-next-line @typescript-eslint/no-explicit-any` từ trước — tên luật đó là của ESLint, không phải tên luật oxlint dùng (`typescript/no-explicit-any`). Thử nghiệm: xoá comment ở một file, chạy lại `pnpm lint` → dòng `vars as any` bị báo `error typescript(no-explicit-any)` ngay đúng vị trí; phục hồi comment → hết báo lỗi. Vậy oxlint **có** hiểu tên luật dạng `@typescript-eslint/...` trong comment tắt và áp dụng đúng luật tương ứng của nó — comment không phải "chết", nó đang suppress `any` thật. Không sửa ba file này (đúng theo brief).
+
+**Kiểm chứng đầy đủ (đo tại task này, HEAD trước commit `fc37a4f`):**
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `pnpm lint` | exit 0 — **152 warning** (90 `max-lines-per-function`, 28 `complexity`, 24 `no-restricted-imports`, 10 `max-lines`); 0 vi phạm ở bảy luật vừa nâng |
+| `pnpm build` | exit 0 |
+| `pnpm test` | PASS — **113 file / 772 test** |
+| `pnpm check-comment-language` | PASS — "All comments are in English." |
+| `pnpm check-query-keys` | PASS — "No query key literals found outside src/domain/queryKeys.ts." |
+
 ### Số liệu hiện tại
 
 | Chỉ số | Khi bắt đầu | Bây giờ |
@@ -338,7 +407,7 @@ Con người đã chọn bỏ. Nếu sau này cần một chỗ chung để mở
 | Nút Cancel/Submit bespoke | 13 + ~20 | **0** (dùng `Button`) |
 | Component trong `src/components/` gọi thẳng `ipc/` | 36 / 60 file | **32 / 64 file** ¹ (đo cuối GĐ5 lát 2, chưa đo lại sau GĐ5b) |
 | `src/components/sidebar/BranchSidebar.tsx` → `src/features/branch/components/BranchSidebar.tsx` | 1327 dòng, 25 `useState` | **247 dòng** (sau GĐ5b, xem mục 12) |
-| `pnpm lint` | exit 1 | **exit 0, 241 warning** (70 là `no-restricted-imports`, đo sau GĐ5b — trước GĐ5b là 68) |
+| `pnpm lint` | exit 1 | **exit 0, 152 warning** (sau GĐ7a — trước GĐ7a là 241; 7 luật giờ `error`: `no-console`, `typescript/no-explicit-any`, `react/exhaustive-deps`, `react/only-export-components`, `max-depth`, `max-params`, `max-nested-callbacks`; 4 luật còn `warn` cho GĐ7b/7c: `no-restricted-imports` 24, `max-lines-per-function` 90, `complexity` 28, `max-lines` 10) |
 | `pnpm build` | exit 0 | exit 0 |
 | `CROSS_FEATURE_EXCEPTIONS` | chưa tồn tại | **đã xoá hẳn khỏi codebase** (Task 0', GĐ5b) — thay bằng luật public-index + acyclicity test |
 
@@ -354,7 +423,9 @@ Con người đã chọn bỏ. Nếu sau này cần một chỗ chung để mở
 | **5 lát 2** | ✅ **Xong — 8 task triển khai + 1 task handover.** `remote` + `stash` đã migrate | Thấp mỗi bước | Chi tiết ở **mục 11**. `changes` chưa làm, để lát sau |
 | **5b** | ✅ **Xong — 7 task triển khai (Task 1–4, Task 0', Task 5–7).** 5 module entry mục tiêu đều dưới 300 dòng đo được | Trung bình | Chi tiết ở **mục 12**. 4 file khác trong `features/**` vẫn trên 300 dòng — ghi trung thực, không xẻ trong phạm vi GĐ5b |
 | **6** | ✅ **Xong.** Gom `emit_repo_changed` (9 → 1), dọn `map_err` trong `undo.rs`. `with_repo()` **bỏ có chủ đích** | Thấp | Chi tiết ở GĐ6, mục 3 |
-| **7** | Nâng lint từ `warn` lên `error` | Không | Khoá kiến trúc lại vĩnh viễn |
+| **7a** | ✅ **Xong.** Nâng 7 luật đã sẵn 0 vi phạm lên `error` (`no-console`, `typescript/no-explicit-any`, `react/exhaustive-deps`, `react/only-export-components`, `max-depth`, `max-params`, `max-nested-callbacks`) | Không | Chi tiết ở mục 3, "Giai đoạn 7a" |
+| **7b** | Dọn 24 warning `no-restricted-imports` còn lại (import runtime `ipc/` trực tiếp), rồi nâng luật lên `error` | Trung bình | Việc tiếp theo |
+| **7c** | Dọn 90 `max-lines-per-function` + 28 `complexity` + 10 `max-lines`, rồi nâng cả ba lên `error` | Cao — nhiều file, nhiều lượt xẻ nhỏ | Sau 7b |
 
 ---
 
@@ -392,7 +463,7 @@ Thêm `src/shared/hooks/useFocusTrap.ts` — `useFocusTrap(containerRef, enabled
 | `App.tsx:284` dùng `part.includes(repo_path)` thay vì so sánh bằng | Minor | Repo `/proj` cũng khớp `/proj-legacy` → thừa refetch, không sai dữ liệu. Giờ `qk` đặt path ở vị trí cố định nên sửa rất dễ. |
 | `qk.githubToken()` chưa ai invalidate | Minor | An toàn hiện tại (không có UI ghi token). Sẽ thành bẫy khi thêm màn hình cài đặt token. |
 | `qk.github.repoInfo` không được invalidate khi đổi remote URL | Minor | Đã giảm nhẹ ở GĐ1 (`refreshData()` giờ có invalidate), nhưng chưa phủ hết đường. |
-| 241 warning lint độ phức tạp | Theo kế hoạch | `no-restricted-imports` chiếm **70** warning (đo sau GĐ5b, tăng từ 68), dùng để **đo tiến độ migrate** — mỗi cái là một chỗ còn gọi thẳng `ipc/`. Giảm dần qua các lát sau, nâng lên `error` ở GĐ7. |
+| 152 warning lint độ phức tạp (đo sau GĐ7a, trước là 241) | Theo kế hoạch | Bảy luật đã nâng lên `error` ở GĐ7a. Còn bốn luật ở `warn`: `no-restricted-imports` **24** (đo tiến độ migrate `ipc/`, giảm từ 70 — 46 trong số đó là `import type` bị đếm nhầm, xem mục 3 "Giai đoạn 7a"), `max-lines-per-function` **90**, `complexity` **28**, `max-lines` **10**. Nâng nốt bốn luật này ở GĐ7b/7c. |
 | `BranchSidebar.tsx` — **đã đạt mốc dưới 300 dòng sau GĐ5b** | Đã giải quyết | Đo được **247 dòng** sau Task 2 (GĐ5b), giảm từ 611 dòng cuối GĐ5 lát 2. Tách owner hook `useSidebarActions`/`useSidebarData` + `BranchSidebarSections`. Xem **mục 12.2**. |
 | 4 file trong `src/features/**` vượt 300 dòng | Theo kế hoạch, ngoài phạm vi GĐ5b | `ManageRemotesModal.tsx` (319), `BranchSidebarSections.tsx` (313), `RemoteTreeNode.tsx` (312), `CommitGraphRows.tsx` (301) — đo bằng `wc -l`/`git show \| wc -l`, xác nhận khớp nhau. Không phải 5 module entry mục tiêu của GĐ5b nên không xẻ trong task này; ghi lại trung thực để lát sau cân nhắc. Xem **mục 12.2**. |
 | `m2_watcher_test::test_watcher_debounce_consolidation` flaky | Minor, có từ trước | Test dựa vào thời gian (debounce 200ms, cửa sổ 350ms). Đỏ 1 lần khi chạy toàn bộ `cargo test` lúc máy đang tải nặng (app dev + rust-analyzer chạy song song). Chạy riêng thì 5/5 xanh, chạy lại toàn bộ cũng xanh. GĐ6 không chạm vào watcher. |
@@ -402,9 +473,8 @@ Thêm `src/shared/hooks/useFocusTrap.ts` — `useFocusTrap(containerRef, enabled
 | `resolveSpecifier` docblock — trường hợp null im lặng; regex trích import có thể khớp cả trong comment/string | Minor, hoãn lại | Phát hiện ở Task 0' (GĐ5b), chưa vá — guard vẫn đúng cho mọi trường hợp thực tế gặp phải, nhưng chưa chứng minh kín 100%. |
 | Component settings import `HelpTooltip`/`helpDiagrams` từ `src/components/settings` | Minor, hoãn lại | Feature `settings` (GĐ5b Task 5) vẫn "thò tay" vào `components/` cũ cho hai tiện ích UI dùng chung; chưa có chỗ chuẩn trong `shared/` cho chúng. |
 | `SettingsModal` vẫn truyền `onScopeChange` (không dùng) cho `GitBehaviorTab` | Minor, có từ trước | Đã tồn tại trước GĐ5b (component gốc cũng không đọc prop này); giữ nguyên vì "migrate là thay thế cơ học", không sửa hành vi cũ nhân tiện. |
-| `useWelcomeShortcuts` deps rỗng, đóng (closure) callback ở lần render đầu | Minor, verbatim từ code gốc | Phát hiện ở GĐ5b Task 6, controller xác nhận đúng là hành vi gốc trước khi migrate, không phải regression. |
 | `clearRecents`/`removeRecent` nuốt lỗi qua `console.warn` | Minor, có từ trước | Có từ code gốc `WelcomeScreen.tsx`, giữ nguyên theo quy ước "migrate là thay thế cơ học". |
-| oxlint `no-restricted-imports` báo warning trên import **kiểu** (`import type`) của `ipc/` trong feature | Minor, có từ trước | oxlint không phân biệt type-only; `architectureBoundaries.test.ts` (hàm `importsIpcAtRuntime`) mới là luật có thẩm quyền và đã phân biệt đúng. Mẫu lặp lại ở `branch`, `settings`, `welcome`. |
+| `CommitDetailPanel` lắng nghe Escape trực tiếp trên `window` | Minor, hoãn lại | Nên dùng `useEscapeKey` như mọi nơi khác, nhưng làm vậy đổi hành vi: Escape hiện đóng được panel này **ngay cả khi** có modal khác đang stack đè lên, vì listener không tham gia registry cấp module của `useEscapeKey`. Ghi lại, không sửa trong phạm vi GĐ7a. |
 
 ---
 
