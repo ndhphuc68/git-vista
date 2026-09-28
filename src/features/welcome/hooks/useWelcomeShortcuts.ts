@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export interface UseWelcomeShortcutsOptions {
   openFolder: () => void;
@@ -11,7 +11,8 @@ export interface UseWelcomeShortcutsOptions {
  * Global Ctrl/Cmd shortcuts local to the welcome screen (open folder, open
  * clone dialog, focus the search input), plus Escape-to-blur-and-clear
  * behaviour on the currently focused input/textarea. Moved intact from the
- * old `WelcomeScreen` component.
+ * old `WelcomeScreen` component. It always calls the latest callbacks; the
+ * original captured the first render's.
  */
 export function useWelcomeShortcuts({
   openFolder,
@@ -19,8 +20,16 @@ export function useWelcomeShortcuts({
   focusSearch,
   clearSearch,
 }: UseWelcomeShortcutsOptions): void {
+  // Read through a ref so the listener registers once but always calls the
+  // callbacks from the latest render.
+  const optionsRef = useRef({ openFolder, openClone, focusSearch, clearSearch });
+  useEffect(() => {
+    optionsRef.current = { openFolder, openClone, focusSearch, clearSearch };
+  });
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const { openFolder, openClone, focusSearch, clearSearch } = optionsRef.current;
       const target = e.target as HTMLElement;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
         if (e.key === "Escape") {

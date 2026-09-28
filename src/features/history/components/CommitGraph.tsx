@@ -73,7 +73,10 @@ export function CommitGraph(dialogComponents: GraphDialogComponents) {
   const modifiedCount = (repoStatus?.staged.length || 0) + (repoStatus?.unstaged.length || 0);
   const untrackedCount = repoStatus?.untracked.length || 0;
 
-  const commits = data ? data.pages.flatMap((page) => page.commits) : [];
+  const commits = useMemo(
+    () => (data ? data.pages.flatMap((page) => page.commits) : []),
+    [data]
+  );
 
   const maxCols = useMemo(() => getMaxGraphColumns(commits), [commits]);
 

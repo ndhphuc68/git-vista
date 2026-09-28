@@ -87,7 +87,7 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
       setCompareBranch("");
     }
     prevOpenRef.current = isOpen;
-  }, [isOpen]);
+  }, [isOpen, repoInfo?.default_branch, branchData?.current_branch]);
 
   // Set default branches when query data loads if user hasn't manually selected
   useEffect(() => {

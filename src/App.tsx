@@ -276,7 +276,6 @@ export const App: React.FC<AppProps> = ({
     let cancelled = false;
 
     listenToRepoChanged((payload) => {
-      console.log("🔔 [Event] repo-changed payload:", payload);
       // Selective invalidation: only refresh queries belonging to the repo that changed
       if (payload?.repo_path) {
         queryClient.invalidateQueries({

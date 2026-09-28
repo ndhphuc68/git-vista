@@ -5,6 +5,7 @@ import { type RepoSummary } from "../../ipc/bindings.generated";
 import { useTranslation } from "../../i18n";
 import { Modal } from "../../shared/ui";
 import { messageOf } from "../../shared/utils/toError";
+import { extractRepoNameFromUrl } from "./repoUrl";
 
 const TITLE_ID = "clone-modal-title";
 
@@ -13,14 +14,6 @@ export interface CloneModalProps {
   onClose: () => void;
   onCloneSuccess: (repo: RepoSummary) => void;
 }
-
-export const extractRepoNameFromUrl = (url: string): string => {
-  const cleanUrl = url.trim().replace(/\/+$/, "");
-  const withoutGit = cleanUrl.endsWith(".git") ? cleanUrl.slice(0, -4) : cleanUrl;
-  const parts = withoutGit.split(/[/:]/);
-  const lastPart = parts.pop();
-  return lastPart ? lastPart.trim() : "";
-};
 
 export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onCloneSuccess }) => {
   const { t } = useTranslation();

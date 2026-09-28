@@ -44,6 +44,10 @@ const safeFlushSync = (fn: () => void) => {
   }
 };
 
+function withoutToast(toasts: ToastItem[], id: string): ToastItem[] {
+  return toasts.filter((t) => t.id !== id);
+}
+
 export const useToastStore = create<ToastState>((set, get) => ({
   toasts: [],
   showToast: (options) => {
@@ -106,9 +110,7 @@ export const useToastStore = create<ToastState>((set, get) => ({
   },
   removeToast: (id) => {
     safeFlushSync(() => {
-      set((state) => ({
-        toasts: state.toasts.filter((t) => t.id !== id),
-      }));
+      set((state) => ({ toasts: withoutToast(state.toasts, id) }));
     });
   },
   clearToasts: () => {

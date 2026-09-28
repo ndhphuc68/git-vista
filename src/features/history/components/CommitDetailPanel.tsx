@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { GitCommit, Check, Copy, X } from "lucide-react";
 import { useRepoStore } from "../../../store/useRepoStore";
 import { useLayoutStore } from "../../../store/useLayoutStore";
@@ -35,14 +35,14 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
   const { data: details, isLoading } = useCommitDetails(currentRepo?.path, selectedCommitId);
   const navigation = useCommitFileNavigation(details?.files, selectedFilePath, setSelectedFile);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (onClose) {
       onClose();
     } else {
       setDetailPanelOpen(false);
       setSelectedCommit(null);
     }
-  };
+  }, [onClose, setDetailPanelOpen, setSelectedCommit]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -52,7 +52,7 @@ export const CommitDetailPanel: React.FC<CommitDetailPanelProps> = ({ onClose })
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  }, [handleClose]);
 
   const handleCopySha = (sha: string) => {
     navigator.clipboard.writeText(sha);
