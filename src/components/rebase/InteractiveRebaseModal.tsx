@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { X, RotateCcw, Play, Loader2, GitBranch, AlertTriangle, Info } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
 import { useToastStore } from "../../store/useToastStore";
 import { useRepoStore } from "../../store/useRepoStore";
@@ -16,7 +14,8 @@ import type {
   RebaseActionKind,
   InteractiveRebaseResult,
 } from "../../ipc/bindings.generated";
-import { qk } from "../../domain/queryKeys";
+import { useRebaseCommits, executeInteractiveRebase } from "../../features/merge";
+import { undoCommit } from "../../features/undo";
 
 const EMPTY_COMMITS: RebaseCommitItem[] = [];
 
@@ -51,11 +50,11 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   // Fetch commits between base and HEAD
-  const { data: fetchedCommits = EMPTY_COMMITS, isLoading } = useQuery({
-    queryKey: qk.rebaseCommits(repoPath, baseCommitId),
-    queryFn: () => invokeCommand.getRebaseCommits(repoPath, baseCommitId),
-    enabled: isOpen && Boolean(repoPath) && Boolean(baseCommitId),
-  });
+  const { data: fetchedCommits = EMPTY_COMMITS, isLoading } = useRebaseCommits(
+    repoPath,
+    baseCommitId,
+    isOpen
+  );
 
   // Initialize steps whenever new commits arrive
   useEffect(() => {
@@ -205,7 +204,7 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
 
     setSubmitting(true);
     try {
-      const result = await invokeCommand.executeInteractiveRebase(
+      const result = await executeInteractiveRebase(
         repoPath,
         baseCommitId,
         steps,
@@ -220,7 +219,7 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
             t.modals.interactiveRebase.successToast,
             async () => {
               try {
-                await invokeCommand.undoCommit(repoPath, undoToken);
+                await undoCommit(repoPath, undoToken);
                 useToastStore.getState().showSuccess(t.modals.interactiveRebase.undoSuccessToast);
               } catch (err: unknown) {
                 useToastStore.getState().showError(messageOf(err) || "Failed to undo rebase");
