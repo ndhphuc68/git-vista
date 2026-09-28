@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Shell } from "./components/Shell";
-import { WelcomeScreen } from "./components/welcome/WelcomeScreen";
+import { WelcomeScreen } from "./features/welcome";
 import { RepoHeader } from "./components/header/RepoHeader";
 import { WindowTabBar } from "./components/header/WindowTabBar";
 import { ChangesScreen } from "./components/changes/ChangesScreen";
