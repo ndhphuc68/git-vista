@@ -61,7 +61,7 @@ pnpm install
 # Xác nhận mọi thứ xanh trước khi làm gì
 pnpm lint                     # phải exit 0
 pnpm build                    # phải exit 0
-pnpm test                     # phải 111 file / 762 test xanh
+pnpm test                     # phải 113 file / 772 test xanh
 pnpm check-query-keys         # "No query key literals found..."
 pnpm check-comment-language   # "All comments are in English."
 pnpm check-bindings           # "...is in sync with the Rust commands."
@@ -335,7 +335,7 @@ Con người đã chọn bỏ. Nếu sau này cần một chỗ chung để mở
 
 ### Giai đoạn 7a — Dọn nhanh, nâng 7 luật lên `error` ✅
 
-**Kế hoạch**: `.superpowers/sdd/2026-09-28-refactor-phase7a-lint-quick-wins/` (task 1–7). GĐ7 gốc ("nâng lint từ `warn` lên `error`") bị chia thành ba lát vì hai luật `no-restricted-imports` (24 vi phạm runtime thật) và `max-lines-per-function`/`complexity`/`max-lines` (118 vi phạm) cần dọn code trước khi khoá — không thể nâng cả 11 luật cùng lúc mà không chặn merge nhiều ngày. 7a chỉ nâng bảy luật đã **sẵn 0 vi phạm**.
+**Kế hoạch**: `docs/superpowers/plans/2026-09-28-refactor-phase7a-lint-quick-wins.md` (task 1–7). GĐ7 gốc ("nâng lint từ `warn` lên `error`") bị chia thành ba lát vì hai luật `no-restricted-imports` (24 vi phạm runtime thật) và `max-lines-per-function`/`complexity`/`max-lines` (**128** vi phạm: 90 + 28 + 10) cần dọn code trước khi khoá — không thể nâng cả 11 luật cùng lúc mà không chặn merge nhiều ngày. 7a dọn 89 trong 241 warning baseline để đưa bảy luật còn lại về 0 vi phạm, rồi mới nâng chúng lên `error` — không phải bảy luật này vốn đã sẵn 0 vi phạm.
 
 **Việc đã làm, theo commit:**
 
@@ -347,7 +347,8 @@ Con người đã chọn bỏ. Nếu sau này cần một chỗ chung để mở
 | `b75f465` | Nốt `any` cuối cùng — đường dẫn file kéo-thả và fixture test |
 | `3089f28` | `qk.compareFileDiff` nhận một object option thay vì tham số rời; loại trừ `max-params` cho `src/ipc/**` |
 | `fc37a4f` | Sửa hook dependencies, `withoutToast`, `repoUrl.ts`, xoá `console.log` debug còn sót; `useWelcomeShortcuts` giờ gọi callback **mới nhất** thay vì đóng closure ở lần render đầu — có test ghim |
-| (commit của task này) | Nâng bảy luật đã 0 vi phạm lên `error`, cập nhật tài liệu này |
+| `09f1e69` | Nâng bảy luật đã 0 vi phạm lên `error`, cập nhật tài liệu này |
+| `36a18dc` | Ghi phát hiện eslint-disable vào bảng nợ kỹ thuật mục 6 |
 
 **Số lượt vi phạm theo luật, trước → sau (baseline 241 warning):**
 
@@ -376,11 +377,13 @@ Con người đã chọn bỏ. Nếu sau này cần một chỗ chung để mở
 
 **Một thay đổi hành vi có chủ đích, có test ghim:** `useWelcomeShortcuts` — sửa dependency rỗng ở GĐ5b (mục 6/12.6 từng ghi là "verbatim từ code gốc, không phải regression") giờ khiến hook gọi **callback mới nhất** ở mỗi lần render thay vì đóng (closure) callback của lần render đầu tiên. Đây **là** thay đổi hành vi, không phải thay thế cơ học — được cho phép vì mục đích của GĐ7 là khoá kiến trúc lại, và một callback đóng sai là đúng loại lỗi mà `exhaustive-deps` sinh ra để bắt. Có test ghim hành vi mới.
 
+**Một thay đổi hành vi nhỏ khác từ helper `messageOf` (commit `676fd6d`):** ở `GitHubSettingsTab.tsx` (3 chỗ), `PullRequestDetailDrawer.tsx` và `PullRequestsSection.tsx`, code cũ đọc thẳng `err.message` (không có `?.`) nên sẽ ném `TypeError` ngay trong khối `catch` nếu giá trị bị `throw` là `null`/`undefined`; `messageOf` dùng `?.` nên giờ hiển thị fallback tiếng Việt thay vì crash. Tương tự, một `message` không phải chuỗi nhưng truthy giờ cũng rơi về fallback thay vì hiển thị nguyên văn. Đây thuần tuý là cải thiện, và cả hai tình huống đều gần như không xảy ra trong thực tế.
+
 **Ratchet probe (Step 3, Task 7) — chứng minh luật `error` thật sự chặn:** thêm tạm `const _probe: any = 1; export { _probe };` vào `src/shared/utils/git.ts` → `pnpm lint` thoát mã **1**, dòng `src/shared/utils/git.ts:8:15: error typescript(no-explicit-any): Unexpected \`any\`.` xuất hiện. Xoá probe → `pnpm lint` thoát mã **0** trở lại. Xác nhận đã xoá sạch, `git status` chỉ còn `.oxlintrc.json` và tài liệu này trước khi commit.
 
 **Phát hiện phụ, ghi vào mục 6:** ba test file (`useBranchMutations.test.ts:51`, `useRemoteMutations.test.ts:53`, `useStashMutations.test.ts:44`) có comment tắt luật dạng tên ESLint đứng trước `vars as any` — kết quả đo và ý nghĩa ở mục 6. Không sửa ba file này (đúng theo brief).
 
-**Kiểm chứng đầy đủ (đo tại task này, HEAD trước commit `fc37a4f`):**
+**Kiểm chứng đầy đủ (đo tại task này, HEAD sau commit `fc37a4f`, tức cây `09f1e69`):**
 
 | Lệnh | Kết quả |
 | --- | --- |
@@ -394,7 +397,7 @@ Con người đã chọn bỏ. Nếu sau này cần một chỗ chung để mở
 
 | Chỉ số | Khi bắt đầu | Bây giờ |
 | --- | --- | --- |
-| Test | 73 file / ~370 | **111 file / 762** (frontend) + **144** Rust (sau GĐ6) |
+| Test | 73 file / ~370 | **113 file / 772** (frontend) + **144** Rust (sau GĐ6) |
 | Bản sao `emit_repo_changed` | 9 (2 chữ ký, 3 dạng payload) | **1** (`events::emit_repo_changed`) |
 | `src/ipc/bindings.ts` viết tay | 486 dòng | **0** (do máy sinh) |
 | `src/ipc/client.ts` | 1748 dòng | **124** (facade) |
@@ -411,7 +414,7 @@ Con người đã chọn bỏ. Nếu sau này cần một chỗ chung để mở
 | `pnpm build` | exit 0 | exit 0 |
 | `CROSS_FEATURE_EXCEPTIONS` | chưa tồn tại | **đã xoá hẳn khỏi codebase** (Task 0', GĐ5b) — thay bằng luật public-index + acyclicity test |
 
-> ¹ Mẫu số vẫn đang đổi vì migrate làm file **rời khỏi** `src/components/` sang `features/`, nên so hai con số tuyệt đối qua các lát không có nhiều ý nghĩa. Chỉ số theo dõi tiến độ đáng tin hơn là warning `no-restricted-imports` (**70** sau GĐ5b, tăng nhẹ từ **68** sau GĐ5 lát 2 — feature mới (`settings`, `welcome`, `history`) tạo thêm vài chỗ import kiểu bị oxlint đếm nhầm là runtime; xem mục 12) — nó đếm đúng số chỗ còn gọi thẳng `ipc/`, ở bất kỳ thư mục nào, không phụ thuộc file đó có còn nằm trong `components/` hay không.
+> ¹ Mẫu số vẫn đang đổi vì migrate làm file **rời khỏi** `src/components/` sang `features/`, nên so hai con số tuyệt đối qua các lát không có nhiều ý nghĩa. Chỉ số theo dõi tiến độ đáng tin hơn là warning `no-restricted-imports` — **70** sau GĐ5b (tăng nhẹ từ **68** sau GĐ5 lát 2 — feature mới (`settings`, `welcome`, `history`) tạo thêm vài chỗ import kiểu bị oxlint đếm nhầm là runtime; xem mục 12), nay **24** sau khi GĐ7a thêm `allowTypeImports` (xem mục 3, "Giai đoạn 7a") — 46 trong 70 dòng cũ chỉ là `import type` bị oxlint đếm nhầm, không phải nợ thật. Từ GĐ7a trở đi, con số này mới đếm đúng số chỗ còn gọi thẳng giá trị runtime từ `ipc/`, ở bất kỳ thư mục nào, không phụ thuộc file đó có còn nằm trong `components/` hay không.
 
 ---
 
@@ -476,6 +479,9 @@ Thêm `src/shared/hooks/useFocusTrap.ts` — `useFocusTrap(containerRef, enabled
 | `clearRecents`/`removeRecent` nuốt lỗi qua `console.warn` | Minor, có từ trước | Có từ code gốc `WelcomeScreen.tsx`, giữ nguyên theo quy ước "migrate là thay thế cơ học". |
 | `CommitDetailPanel` lắng nghe Escape trực tiếp trên `window` | Minor, hoãn lại | Nên dùng `useEscapeKey` như mọi nơi khác, nhưng làm vậy đổi hành vi: Escape hiện đóng được panel này **ngay cả khi** có modal khác đang stack đè lên, vì listener không tham gia registry cấp module của `useEscapeKey`. Ghi lại, không sửa trong phạm vi GĐ7a. |
 | Comment `// eslint-disable-next-line @typescript-eslint/no-explicit-any` ở `useBranchMutations.test.ts:51`, `useRemoteMutations.test.ts:53`, `useStashMutations.test.ts:44` | Minor, có từ trước | Không phải comment chết: oxlint hiểu tên luật dạng ESLint (`@typescript-eslint/no-explicit-any`) và áp đúng luật `typescript/no-explicit-any` của nó. Xác nhận bằng cách xoá comment ở một file — `pnpm lint` báo `error typescript(no-explicit-any)` đúng dòng `vars as any`; phục hồi comment thì hết lỗi. Vậy cả ba comment đang suppress `any` thật, thứ lẽ ra bị luật `error` mới chặn. Sửa gợi ý cho sau này: gõ kiểu cho ba mock đó rồi bỏ comment, thay vì tiếp tục suppress. |
+| Không có gì canh gác comment `eslint-disable`/`oxlint-disable` mới | Minor, hoãn lại | Một comment suppress mới thêm vào sẽ âm thầm vượt qua một luật đã `error` mà không ai nhận ra. Đề xuất: thêm `scripts/check-lint-suppressions.mjs` vào `pnpm check`/CI, báo lỗi nếu số lượng directive tăng quá mốc hiện tại (3, đúng 3 comment ở dòng trên) hoặc dùng allowlist; và/hoặc bật cờ oxlint `--report-unused-disable-directives`. Làm sớm ở đầu GĐ7b, cùng lúc dọn ba comment suppress đã ghi ở dòng trên. |
+| `res.json()` trong `src/services/githubService.ts` trả về `any`, nên annotation `RawCheckRun`/`RawPullRequestFile` không được kiểm tra | Minor, hoãn lại | Các luật type-aware `typescript/no-unsafe-assignment`/`no-unsafe-member-access` là ứng viên cho một lát bật `warn` trước khi lên kế hoạch GĐ7c. |
+| Ngoại lệ `max-params` cho `src/ipc/**` áp cho cả file viết tay trong tương lai | Minor, hoãn lại | Hiện chỉ có 3 vi phạm hợp lệ, nhưng ngoại lệ đang khai báo theo cả thư mục nên che luôn logic viết tay sẽ thêm sau này. Thu hẹp về từng file cụ thể nếu `ipc/` phình thêm logic. |
 
 ---
 
