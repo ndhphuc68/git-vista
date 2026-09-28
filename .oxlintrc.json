@@ -46,10 +46,12 @@
         "patterns": [
           {
             "group": ["**/ipc/*", "**/ipc"],
+            "allowTypeImports": true,
             "message": "Component phải gọi qua features/*/api, không import ipc trực tiếp."
           },
           {
             "group": ["**/features/*/components/*", "**/features/*/api/*", "**/features/*/model/*"],
+            "allowTypeImports": true,
             "message": "Import qua features/<name>/index.ts, không chọc vào nội bộ feature."
           }
         ]
@@ -95,6 +97,18 @@
             ]
           }
         ]
+      }
+    },
+    {
+      "files": ["scripts/**"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["src/i18n/en.ts", "src/i18n/vi.ts"],
+      "rules": {
+        "max-lines": "off"
       }
     }
   ]
