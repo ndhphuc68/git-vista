@@ -1,21 +1,10 @@
 use crate::error::AppError;
+use crate::events::emit_repo_changed;
 use crate::read::rebase::{
     get_rebase_commits as read_rebase_commits, InteractiveRebaseResult, RebaseCommitItem,
     RebasePlanStep,
 };
-use tauri::{AppHandle, Emitter};
-
-fn emit_repo_changed(app: &AppHandle, repo_path: String, reason: String) {
-    let payload = serde_json::json!({
-        "repo_path": repo_path,
-        "reason": reason,
-        "timestamp": std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_millis()
-    });
-    let _ = app.emit("repo-changed", payload);
-}
+use tauri::AppHandle;
 
 #[tauri::command]
 #[specta::specta]
@@ -42,6 +31,6 @@ pub fn execute_interactive_rebase(
         auto_stash.unwrap_or(false),
     )?;
 
-    emit_repo_changed(&app, repo_path, "execute_interactive_rebase".to_string());
+    emit_repo_changed(&app, &repo_path, "execute_interactive_rebase");
     Ok(res)
 }
