@@ -378,7 +378,7 @@ Con người đã chọn bỏ. Nếu sau này cần một chỗ chung để mở
 
 **Ratchet probe (Step 3, Task 7) — chứng minh luật `error` thật sự chặn:** thêm tạm `const _probe: any = 1; export { _probe };` vào `src/shared/utils/git.ts` → `pnpm lint` thoát mã **1**, dòng `src/shared/utils/git.ts:8:15: error typescript(no-explicit-any): Unexpected \`any\`.` xuất hiện. Xoá probe → `pnpm lint` thoát mã **0** trở lại. Xác nhận đã xoá sạch, `git status` chỉ còn `.oxlintrc.json` và tài liệu này trước khi commit.
 
-**Phát hiện phụ, ghi vào mục 6:** ba test file (`useBranchMutations.test.ts:51`, `useRemoteMutations.test.ts:53`, `useStashMutations.test.ts:44`) có comment `// eslint-disable-next-line @typescript-eslint/no-explicit-any` từ trước — tên luật đó là của ESLint, không phải tên luật oxlint dùng (`typescript/no-explicit-any`). Thử nghiệm: xoá comment ở một file, chạy lại `pnpm lint` → dòng `vars as any` bị báo `error typescript(no-explicit-any)` ngay đúng vị trí; phục hồi comment → hết báo lỗi. Vậy oxlint **có** hiểu tên luật dạng `@typescript-eslint/...` trong comment tắt và áp dụng đúng luật tương ứng của nó — comment không phải "chết", nó đang suppress `any` thật. Không sửa ba file này (đúng theo brief).
+**Phát hiện phụ, ghi vào mục 6:** ba test file (`useBranchMutations.test.ts:51`, `useRemoteMutations.test.ts:53`, `useStashMutations.test.ts:44`) có comment tắt luật dạng tên ESLint đứng trước `vars as any` — kết quả đo và ý nghĩa ở mục 6. Không sửa ba file này (đúng theo brief).
 
 **Kiểm chứng đầy đủ (đo tại task này, HEAD trước commit `fc37a4f`):**
 
@@ -475,6 +475,7 @@ Thêm `src/shared/hooks/useFocusTrap.ts` — `useFocusTrap(containerRef, enabled
 | `SettingsModal` vẫn truyền `onScopeChange` (không dùng) cho `GitBehaviorTab` | Minor, có từ trước | Đã tồn tại trước GĐ5b (component gốc cũng không đọc prop này); giữ nguyên vì "migrate là thay thế cơ học", không sửa hành vi cũ nhân tiện. |
 | `clearRecents`/`removeRecent` nuốt lỗi qua `console.warn` | Minor, có từ trước | Có từ code gốc `WelcomeScreen.tsx`, giữ nguyên theo quy ước "migrate là thay thế cơ học". |
 | `CommitDetailPanel` lắng nghe Escape trực tiếp trên `window` | Minor, hoãn lại | Nên dùng `useEscapeKey` như mọi nơi khác, nhưng làm vậy đổi hành vi: Escape hiện đóng được panel này **ngay cả khi** có modal khác đang stack đè lên, vì listener không tham gia registry cấp module của `useEscapeKey`. Ghi lại, không sửa trong phạm vi GĐ7a. |
+| Comment `// eslint-disable-next-line @typescript-eslint/no-explicit-any` ở `useBranchMutations.test.ts:51`, `useRemoteMutations.test.ts:53`, `useStashMutations.test.ts:44` | Minor, có từ trước | Không phải comment chết: oxlint hiểu tên luật dạng ESLint (`@typescript-eslint/no-explicit-any`) và áp đúng luật `typescript/no-explicit-any` của nó. Xác nhận bằng cách xoá comment ở một file — `pnpm lint` báo `error typescript(no-explicit-any)` đúng dòng `vars as any`; phục hồi comment thì hết lỗi. Vậy cả ba comment đang suppress `any` thật, thứ lẽ ra bị luật `error` mới chặn. Sửa gợi ý cho sau này: gõ kiểu cho ba mock đó rồi bỏ comment, thay vì tiếp tục suppress. |
 
 ---
 
