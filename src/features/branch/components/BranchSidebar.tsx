@@ -35,7 +35,7 @@ import { useTranslation } from "../../../i18n";
 import { buildBranchTree, type BranchTreeNode } from "../model/branchTree";
 import { NO_DIALOG, isDialog, type SidebarDialog } from "../model/sidebarDialog";
 import { useBranches, useCheckoutBranch } from "../api";
-import { useApplyStash, useDropStash, usePopStash } from "../../stash/api";
+import { useApplyStash, useDropStash, usePopStash } from "../../stash";
 
 export interface BranchSidebarProps {
   /**

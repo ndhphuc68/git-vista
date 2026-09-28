@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { AlertTriangle, ArrowRight, Archive } from "lucide-react";
-import { useSaveStash } from "../../stash/api";
+import { useSaveStash } from "../../stash";
 import { useCheckoutBranch } from "../api";
 import { useTranslation } from "../../../i18n";
 import { Modal, Button, Alert } from "../../../shared/ui";
