@@ -1,13 +1,19 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { Shell } from "./components/Shell";
 import { WelcomeScreen } from "./features/welcome";
 import { RepoHeader } from "./components/header/RepoHeader";
 import { WindowTabBar } from "./components/header/WindowTabBar";
 import { ChangesScreen } from "./components/changes/ChangesScreen";
 import { InProgressOperationBanner } from "./components/banner/InProgressOperationBanner";
-import { listenToRepoChanged, invokeCommand } from "./ipc/client";
+import { listenToRepoChanged } from "./ipc/client";
 import { type RepoSummary } from "./ipc/bindings.generated";
+import {
+  useRepoState,
+  abortInProgress,
+  continueInProgress,
+  resolveConflictFile,
+} from "./features/conflict";
 import { useRepoStore } from "./store/useRepoStore";
 import { useTabStore } from "./store/useTabStore";
 import { useViewStore } from "./store/useViewStore";
@@ -56,20 +62,16 @@ const RepoContent: React.FC<RepoContentProps> = ({
   const { activeScreen, setActiveScreen, activeConflictFile, closeConflictResolver } =
     useViewStore();
 
-  const { data: repoState } = useQuery({
-    queryKey: qk.repo.state(currentRepo.path),
-    queryFn: () => invokeCommand.getRepoState(currentRepo.path),
-    enabled: Boolean(currentRepo),
-  });
+  const { data: repoState } = useRepoState(currentRepo.path);
 
   const handleAbort = async (operation: string) => {
-    await invokeCommand.abortInProgress(currentRepo.path, operation);
+    await abortInProgress(currentRepo.path, operation);
     // Git operation on the current repo: only refresh this repo's cache
     queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleContinue = async (operation: string) => {
-    await invokeCommand.continueInProgress(currentRepo.path, operation);
+    await continueInProgress(currentRepo.path, operation);
     // Git operation on the current repo: only refresh this repo's cache
     queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
@@ -92,12 +94,7 @@ const RepoContent: React.FC<RepoContentProps> = ({
             repoPath={currentRepo.path}
             onBack={closeConflictResolver}
             onSaveAndStage={async (content) => {
-              await invokeCommand.resolveConflictFile(
-                currentRepo.path,
-                activeConflictFile,
-                content,
-                true
-              );
+              await resolveConflictFile(currentRepo.path, activeConflictFile, content, true);
               closeConflictResolver();
               // Git operation on the current repo: only refresh this repo's cache
               queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
