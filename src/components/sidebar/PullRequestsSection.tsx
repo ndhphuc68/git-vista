@@ -14,7 +14,7 @@ import {
 import clsx from "clsx";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "../../i18n";
-import { invokeCommand } from "../../ipc/client";
+import { useGitHubRepoInfo, useGitHubToken, checkoutPullRequest } from "../../features/github";
 import { fetchPullRequests } from "../../services/githubService";
 import { usePullRequestStore } from "../../store/usePullRequestStore";
 import { useToastStore } from "../../store/useToastStore";
@@ -38,16 +38,9 @@ export const PullRequestsSection: React.FC<PullRequestsSectionProps> = ({ repoPa
   const { openDrawer, openCreateModal } = usePullRequestStore();
   const { showToast, showSuccess, showError } = useToastStore();
 
-  const { data: repoInfo } = useQuery({
-    queryKey: qk.github.repoInfo(repoPath),
-    queryFn: () => invokeCommand.getGitHubRepoInfo(repoPath),
-    enabled: Boolean(repoPath),
-  });
+  const { data: repoInfo } = useGitHubRepoInfo(repoPath);
 
-  const { data: token } = useQuery({
-    queryKey: qk.githubToken(),
-    queryFn: () => invokeCommand.getGitHubToken(),
-  });
+  const { data: token } = useGitHubToken();
 
   const apiState = filterTab === "closed" ? "closed" : "open";
 
@@ -81,7 +74,7 @@ export const PullRequestsSection: React.FC<PullRequestsSectionProps> = ({ repoPa
     setActiveMenuPr(null);
     try {
       showToast({ message: t.pullRequests.checkingOut, type: "info" });
-      const res = await invokeCommand.checkoutPullRequest(repoPath, pr.number);
+      const res = await checkoutPullRequest(repoPath, pr.number);
       showSuccess(t.pullRequests.checkoutSuccess.replace("{branch}", res.branch_name));
       queryClient.invalidateQueries({ queryKey: qk.branches(repoPath) });
       queryClient.invalidateQueries({ queryKey: qk.commitGraph(repoPath) });

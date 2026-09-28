@@ -169,3 +169,28 @@ export function useRemoteTask(repoPath: string | undefined, hasUpstream: boolean
     },
   };
 }
+
+/**
+ * Pushes `branch` (current branch if omitted) to `remote` (default remote if
+ * omitted). `src/ipc/remote.ts` takes `force` and `taskId` as two trailing
+ * positional parameters; they are grouped into `options` here so this
+ * wrapper stays within the repo's `max-params: 5` lint rule (`src/ipc/**`
+ * is exempted from that rule, a feature's `api/` directory is not) while
+ * still forwarding both values unchanged.
+ */
+export function pushRepo(
+  repoPath: string,
+  remote?: string,
+  branch?: string,
+  setUpstream?: boolean,
+  options?: { force?: boolean; taskId?: string }
+): Promise<string> {
+  return invokeCommand.pushRepo(
+    repoPath,
+    remote,
+    branch,
+    setUpstream,
+    options?.force,
+    options?.taskId
+  );
+}

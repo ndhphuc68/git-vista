@@ -11,7 +11,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useTranslation } from "../../../i18n";
-import { invokeCommand } from "../../../ipc/client";
+import { getGitHubToken, saveGitHubToken, removeGitHubToken } from "../../../features/github";
 import { testGitHubToken } from "../../../services/githubService";
 import { type GitHubUserSummary } from "../../../ipc/githubApi";
 import { messageOf } from "../../../shared/utils/toError";
@@ -30,7 +30,7 @@ export const GitHubSettingsTab: React.FC = () => {
     let mounted = true;
     const loadToken = async () => {
       try {
-        const existing = await invokeCommand.getGitHubToken();
+        const existing = await getGitHubToken();
         if (!mounted) return;
         if (existing) {
           setToken(existing);
@@ -63,7 +63,7 @@ export const GitHubSettingsTab: React.FC = () => {
     setSuccessMessage(null);
     try {
       const user = await testGitHubToken(token.trim());
-      await invokeCommand.saveGitHubToken(token.trim());
+      await saveGitHubToken(token.trim());
       setConnectedUser(user);
       setSuccessMessage(t.settings.github.connectionSuccess);
     } catch (err: unknown) {
@@ -79,14 +79,14 @@ export const GitHubSettingsTab: React.FC = () => {
     setErrorMessage(null);
     setSuccessMessage(null);
     try {
-      const cliToken = await invokeCommand.getGitHubToken();
+      const cliToken = await getGitHubToken();
       if (!cliToken) {
         setErrorMessage("Không tìm thấy phiên đăng nhập GitHub CLI (gh auth token).");
         return;
       }
       setToken(cliToken);
       const user = await testGitHubToken(cliToken);
-      await invokeCommand.saveGitHubToken(cliToken);
+      await saveGitHubToken(cliToken);
       setConnectedUser(user);
       setSuccessMessage(t.settings.github.connectionSuccess);
     } catch (err: unknown) {
@@ -98,7 +98,7 @@ export const GitHubSettingsTab: React.FC = () => {
 
   const handleDisconnect = async () => {
     try {
-      await invokeCommand.removeGitHubToken();
+      await removeGitHubToken();
       setToken("");
       setConnectedUser(null);
       setSuccessMessage(t.settings.github.tokenRemoved);

@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "../../i18n";
-import { invokeCommand } from "../../ipc/client";
+import { useGitHubRepoInfo, useGitHubToken, checkoutPullRequest } from "../../features/github";
 import { fetchPullRequestDetail } from "../../services/githubService";
 import { usePullRequestStore } from "../../store/usePullRequestStore";
 import { useToastStore } from "../../store/useToastStore";
@@ -43,16 +43,9 @@ export const PullRequestDetailDrawer: React.FC<PullRequestDetailDrawerProps> = (
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isDrawerOpen, closeDrawer]);
 
-  const { data: repoInfo } = useQuery({
-    queryKey: qk.github.repoInfo(repoPath),
-    queryFn: () => invokeCommand.getGitHubRepoInfo(repoPath),
-    enabled: Boolean(repoPath),
-  });
+  const { data: repoInfo } = useGitHubRepoInfo(repoPath);
 
-  const { data: token } = useQuery({
-    queryKey: qk.githubToken(),
-    queryFn: () => invokeCommand.getGitHubToken(),
-  });
+  const { data: token } = useGitHubToken();
 
   // selectedPr?.number can be undefined before a PR is selected; `enabled` below
   // ensures the query only runs once there's a valid PR number, so ?? 0 is just a placeholder.
@@ -75,7 +68,7 @@ export const PullRequestDetailDrawer: React.FC<PullRequestDetailDrawerProps> = (
     setIsCheckingOut(true);
     try {
       showToast({ message: t.pullRequests.checkingOut, type: "info" });
-      const res = await invokeCommand.checkoutPullRequest(repoPath, pr.number);
+      const res = await checkoutPullRequest(repoPath, pr.number);
       showSuccess(t.pullRequests.checkoutSuccess.replace("{branch}", res.branch_name));
       queryClient.invalidateQueries({ queryKey: qk.branches(repoPath) });
       queryClient.invalidateQueries({ queryKey: qk.commitGraph(repoPath) });

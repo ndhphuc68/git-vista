@@ -8,8 +8,10 @@ import {
   AlertCircle,
   Loader2,
 } from "lucide-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { invokeCommand } from "../../ipc/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { useGitHubRepoInfo, getGitHubToken } from "../../features/github";
+import { useBranches } from "../../features/branch";
+import { pushRepo } from "../../features/remote";
 import { createPullRequest } from "../../services/githubService";
 import { usePullRequestStore } from "../../store/usePullRequestStore";
 import { useToastStore } from "../../store/useToastStore";
@@ -53,17 +55,10 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
   const userChangedCompareRef = useRef(false);
 
   // Fetch GitHub repo info (owner, repo, default_branch)
-  const { data: repoInfo } = useQuery({
-    queryKey: qk.github.repoInfo(repoPath),
-    queryFn: () => invokeCommand.getGitHubRepoInfo(repoPath),
-    enabled: isOpen,
-    staleTime: 60_000,
-  });
+  const { data: repoInfo } = useGitHubRepoInfo(repoPath, { enabled: isOpen, staleTime: 60_000 });
 
   // Fetch branches
-  const { data: branchData, refetch: refetchBranches } = useQuery({
-    queryKey: qk.branches(repoPath),
-    queryFn: () => invokeCommand.getBranches(repoPath),
+  const { data: branchData, refetch: refetchBranches } = useBranches(repoPath, {
     enabled: isOpen,
     staleTime: 30_000,
   });
@@ -127,7 +122,7 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
     setError(null);
     try {
       const hasUpstream = Boolean(currentCompareBranchItem?.upstream);
-      await invokeCommand.pushRepo(repoPath, undefined, compareBranch, !hasUpstream, false);
+      await pushRepo(repoPath, undefined, compareBranch, !hasUpstream, { force: false });
       await refetchBranches();
       useToastStore.getState().showToast({
         message: "Push thành công",
@@ -159,7 +154,7 @@ export const CreatePullRequestModal: React.FC<CreatePullRequestModalProps> = ({
     setError(null);
 
     try {
-      const token = await invokeCommand.getGitHubToken();
+      const token = await getGitHubToken();
       if (!token) {
         setError(t.pullRequests.needToken);
         setSubmitting(false);
