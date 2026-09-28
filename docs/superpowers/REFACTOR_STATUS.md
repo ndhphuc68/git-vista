@@ -275,7 +275,7 @@ Chi tiết đầy đủ ở **mục 11**.
 
 **Kế hoạch**: `docs/superpowers/plans/2026-09-20-refactor-phase5b-large-modules.md`, làm trên nhánh riêng `refactor/phase5b-large-modules` (rẽ từ `refactor/phase0-foundation` tại `2e01698`).
 
-Bảy task (Task 1–4, Task 0', Task 5–7) đưa cả 5 module entry mục tiêu xuống dưới 300 dòng đo được: `BranchSidebar.tsx` (247), `CommitGraph.tsx` (140), `CommitDetailPanel.tsx` (211), `GitBehaviorTab.tsx` (70), `WelcomeScreen.tsx` (202) — giảm từ 611/586/586/597/586 dòng lúc bắt đầu (branch/history/history/settings/welcome cộng gộp một entry gốc).
+Bảy task (Task 1–4, Task 0', Task 5–7) đưa cả 5 module entry mục tiêu xuống dưới 300 dòng đo được: `BranchSidebar.tsx` (247), `CommitGraph.tsx` (140), `CommitDetailPanel.tsx` (211), `GitBehaviorTab.tsx` (70), `WelcomeScreen.tsx` (202) — giảm từ 611/791/764/597/586 dòng lúc bắt đầu (branch/history/history/settings/welcome).
 
 **Quyết định giữa chừng quan trọng nhất — Task 0'.** Một phiên song song trên `refactor/phase0-foundation` đã làm xong luật "feature chỉ được import feature khác qua `index.ts` công khai của nó, cấm import sâu vào `api/`/`components/`/`model/`" (commit `4fe9bfb`), cùng một test bất-chu-kỳ (acyclicity) giữa các feature. Con người quyết định: nhánh GĐ5b phải hoà commit đó vào **giữa** kế hoạch (sau Task 4, trước Task 5) thay vì bỏ qua, vì Task 2 và Task 3 của chính GĐ5b đã **nới rộng** `CROSS_FEATURE_EXCEPTIONS` — vi phạm ràng buộc toàn cục ("Global Constraint") mà bản kế hoạch gốc đặt ra. Task 0' hoà nhánh, xử lý 2 xung đột (giữ code Task 1–4 của `BranchSidebar`, lấy toàn bộ máy phân loại `crossFeatureViolation` mới từ nhánh kia), rồi chuyển mọi import sâu còn sót (`useSidebarActions.ts`, `useSidebarData.ts`) sang import qua `index.ts`. Kết quả: `CROSS_FEATURE_EXCEPTIONS` **biến mất hoàn toàn** khỏi codebase — không còn cơ chế ngoại lệ cross-feature nào, thay bằng luật cứng ép bằng test.
 
@@ -694,8 +694,8 @@ Danh sách chỉ được **co lại**, không được phình ra — `architect
 
 | Task | Nội dung | Người làm | Commit |
 | --- | --- | --- | --- |
-| 1 | Owner hook cho hành động sidebar (`useSidebarActions`) | Phiên trước | `9894513 ✨ add owner hooks for sidebar actions` |
-| 2 | Tách trách nhiệm `BranchSidebar` (`useSidebarData` + `BranchSidebarSections`) | Phiên trước | `9b8d580 ♻️ split branch sidebar responsibilities`, `4224665 🐛 preserve repository ownership for stash undo` |
+| 1 | Owner hook cho hành động sidebar (`useCheckoutTag`, `usePushTag`, `useMergeBranch`, `useRebaseBranch`, `useUndoDropStash`) | Phiên trước | `9894513 ✨ add owner hooks for sidebar actions` |
+| 2 | Tách trách nhiệm `BranchSidebar` (`useSidebarActions` + `useSidebarData` + `BranchSidebarSections`) | Phiên trước | `9b8d580 ♻️ split branch sidebar responsibilities`, `4224665 🐛 preserve repository ownership for stash undo` |
 | 3 | Chuyển commit graph vào `features/history` | Phiên trước | `3cf7fe9 ♻️ move commit graph into history feature` |
 | 4 | Chuyển commit detail vào `features/history` | Phiên trước | `6c5d318 ♻️ move commit detail into history feature` (salvage một phiên bị ngắt quãng) |
 | 0' | Hoà luật public-index + acyclicity guard từ `refactor/phase0-foundation`, xoá `CROSS_FEATURE_EXCEPTIONS`, chuyển import sâu còn sót | Phiên này | `89b77bd 🔀 merge public-index boundary rule into phase 5b`, `2cc6af3 ♻️ route cross-feature imports through public indexes` (mang theo `4fe9bfb 🔒 allow cross-feature imports only through public index` từ nhánh kia) |
@@ -712,8 +712,8 @@ Tất cả các review độc lập trong ledger đều kết luận "clean" (kh
 | File | Trước GĐ5b | Sau GĐ5b |
 | --- | --- | --- |
 | `src/features/branch/components/BranchSidebar.tsx` | 611 dòng | **247 dòng** |
-| `src/features/history/components/CommitGraph.tsx` | 586 dòng (`src/components/history/CommitGraph.tsx` cũ) | **140 dòng** |
-| `src/features/history/components/CommitDetailPanel.tsx` | ~586 dòng (cũ, cộng gộp với CommitGraph trước khi tách) | **211 dòng** |
+| `src/features/history/components/CommitGraph.tsx` | 791 dòng (`src/components/graph/CommitGraph.tsx` cũ) | **140 dòng** |
+| `src/features/history/components/CommitDetailPanel.tsx` | 764 dòng (`src/components/diff/CommitDetailPanel.tsx` cũ) | **211 dòng** |
 | `src/features/settings/components/GitBehaviorTab.tsx` | 597 dòng (`src/components/settings/tabs/GitBehaviorTab.tsx` cũ) | **70 dòng** |
 | `src/features/welcome/components/WelcomeScreen.tsx` | 586 dòng (`src/components/welcome/WelcomeScreen.tsx` cũ) | **202 dòng** |
 
@@ -765,7 +765,9 @@ Các phát hiện nhỏ, không chặn merge, được controller xác nhận v�
 | 6 | `clearRecents`/`removeRecent` nuốt lỗi qua `console.warn` | Có từ code gốc, giữ nguyên. |
 | 6 | oxlint `no-restricted-imports` báo warning trên import kiểu (`import type`) của `ipc/` trong feature | Mẫu lặp lại có từ `branch`/`settings`; `architectureBoundaries.test.ts` mới là luật có thẩm quyền, đã phân biệt đúng type-only. |
 
-**Một regression thật đã được tìm và sửa trong lúc làm (không phải nợ hoãn lại):** Task 2, vòng review đầu tiên, tìm ra tại `useSidebarActions.ts:63` một callback toast hoàn tác (undo) bị giữ lại (retained) qua re-render nhưng trỏ tới mutation đã bị rebind sang repo **mới**, khiến hoàn tác xoá nhánh sau khi chuyển repo sẽ tác động sai repo. Implementer đã thêm test hồi quy thất bại trước, rồi sửa để giữ đúng danh tính repo gốc; review vòng hai chấp thuận không còn finding.
+**Sai lệch được con người duyệt (không phải nợ hoãn lại — đã chốt, không sửa code):** `useCheckoutTag`/`usePushTag` (`src/features/tag/api/useTagActions.ts`) invalidate `qk.repo.all(repoPath)` thay vì đúng năm khoá gốc (`branches`, `commitGraph`, `repo.status`, `repo.head`, `tags`). Kế hoạch Task 1 Bước 3 đã chủ động chọn phạm vi rộng này ("keep tag invalidation broad"), khác với spec ("retain their current invalidation rules"). Con người quyết định ngày 2026-09-28: **giữ nguyên** — nhất quán với `useCreateTag`/`useDeleteTag` (vốn đã invalidate `repo.all`), chỉ gây refetch thừa (kể cả `pushTag`, vốn không đổi state cục bộ nào), không bao giờ để cache cũ (stale). Xem review cuối GĐ5b, finding I2.
+
+**Một regression thật đã được tìm và sửa trong lúc làm (không phải nợ hoãn lại):** Task 2, vòng review đầu tiên, tìm ra tại `useSidebarActions.ts:63` một callback toast hoàn tác (undo) bị giữ lại (retained) qua re-render nhưng trỏ tới mutation đã bị rebind sang repo **mới**, khiến hoàn tác **xoá stash** (`useUndoDropStash`/`dropStash`) sau khi chuyển repo sẽ tác động sai repo. Implementer đã thêm test hồi quy thất bại trước, rồi sửa để giữ đúng danh tính repo gốc; review vòng hai chấp thuận không còn finding.
 
 ### 12.7 Xác minh đầy đủ (đo tại HEAD `1ffccaa`, trước commit của task này)
 
