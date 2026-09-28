@@ -1,1 +1,6 @@
-export { useUndoDropStash, type UndoDropStashVars } from "./api/useUndoActions";
+export {
+  useUndoDropStash,
+  type UndoDropStashVars,
+  undoDeleteBranch,
+  undoCommit,
+} from "./api/useUndoActions";

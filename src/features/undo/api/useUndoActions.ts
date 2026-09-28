@@ -24,3 +24,17 @@ export function useUndoDropStash(repoPath: string) {
     createUndoAction: (receipt: string) => () => restore({ receipt }),
   };
 }
+
+/** Restores a branch deleted with `backupRef` as its safety-net ref. */
+export function undoDeleteBranch(
+  repoPath: string,
+  branchName: string,
+  backupRef: string
+): Promise<void> {
+  return invokeCommand.undoDeleteBranch(repoPath, branchName, backupRef);
+}
+
+/** Reverts a commit undo, restoring the repository to its pre-commit state. */
+export function undoCommit(repoPath: string, undoToken: string): Promise<void> {
+  return invokeCommand.undoCommit(repoPath, undoToken);
+}

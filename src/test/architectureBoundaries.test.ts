@@ -29,12 +29,7 @@ function collectSourceFiles(dir: string): string[] {
  * Files allowed to import ipc/ outside api/, each with its reason and exit
  * condition. Every entry is temporary — shrink this list, never grow it.
  */
-const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {
-  "features/branch/components/DeleteBranchModal.tsx":
-    "undo toast calls undoDeleteBranch; removed once the undo domain has a hook",
-  "features/stash/components/StashDiffView.tsx":
-    "reads commit details to render the stash diff; removed once the commit domain has a hook",
-};
+const IPC_IMPORT_EXCEPTIONS: Record<string, string> = {};
 
 /**
  * Every import specifier a source file can use to create a static or dynamic

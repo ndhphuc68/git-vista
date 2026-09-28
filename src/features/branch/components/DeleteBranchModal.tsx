@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, AlertTriangle, ShieldCheck } from "lucide-react";
-// The undo toast calls undoDeleteBranch, which belongs to the undo domain and
-// has no feature hook yet. Until one exists this single call stays on
-// invokeCommand directly; the delete itself goes through useDeleteBranch.
-import { invokeCommand } from "../../../ipc/client";
+import { undoDeleteBranch } from "../../undo";
 import { useDeleteBranch } from "../api";
 import { useToastStore } from "../../../store/useToastStore";
 import { mapGitError } from "../../../utils/errorMapping";
@@ -50,7 +47,7 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
         type: "success",
         durationMs: 10000,
         undoAction: async () => {
-          await invokeCommand.undoDeleteBranch(repoPath, branchName, backupRef);
+          await undoDeleteBranch(repoPath, branchName, backupRef);
         },
       });
       if (onSuccess) onSuccess(backupRef);
