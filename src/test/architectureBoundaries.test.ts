@@ -185,6 +185,105 @@ function featureNames(): string[] {
   }
 }
 
+/**
+ * Every import specifier that survives to runtime: like
+ * `extractImportSpecifiers`, but a whole `import type ... from "…"` or
+ * `export type ... from "…"` statement is skipped, since it is erased at
+ * compile time and creates no module dependency. A module-cycle check cares
+ * about the dependency graph the bundler actually builds, not every named
+ * specifier, so (unlike the feature-boundary checks above) type-only imports
+ * are excluded here.
+ */
+function extractValueImportSpecifiers(source: string): string[] {
+  const specifiers: string[] = [];
+  for (const match of source.matchAll(
+    /\b(import|export)\s+(type\s+)?[^;]*?\bfrom\s+["']([^"']+)["']/g
+  )) {
+    if (match[2]) continue; // "import type" / "export type" - erased, no runtime edge
+    specifiers.push(match[3]!);
+  }
+  for (const match of source.matchAll(/\bimport\s+["']([^"']+)["']/g)) {
+    specifiers.push(match[1]!); // side-effect import: still runs the module
+  }
+  for (const match of source.matchAll(/\bimport\(\s*["']([^"']+)["']\s*\)/g)) {
+    specifiers.push(match[1]!); // dynamic import
+  }
+  return specifiers;
+}
+
+/**
+ * Resolves a relative `specifier` written inside `importingFileRel` to one of
+ * the actual source files in `fileSet` (paths relative to src/,
+ * forward-slashed), trying it as a direct match, `.ts`, `.tsx`, `/index.ts`,
+ * and `/index.tsx` in that order. Returns null for a non-relative specifier
+ * (an npm package, out of scope for an in-repo cycle) or one that resolves to
+ * no known file (e.g. a css import, a JSON asset).
+ */
+function resolveModuleFile(
+  importingFileRel: string,
+  specifier: string,
+  fileSet: Set<string>
+): string | null {
+  if (!specifier.startsWith(".")) return null;
+  const fromDir = posix.dirname(importingFileRel);
+  const joined = posix.normalize(posix.join(fromDir, specifier));
+  const candidates = [joined, `${joined}.ts`, `${joined}.tsx`, `${joined}/index.ts`, `${joined}/index.tsx`];
+  for (const candidate of candidates) {
+    if (fileSet.has(candidate)) return candidate;
+  }
+  return null;
+}
+
+/**
+ * Tarjan's algorithm: partitions `nodes` into strongly connected components
+ * given `edges`. Any component with more than one node, or a single node with
+ * a self-edge, is a cycle.
+ */
+function findStronglyConnectedComponents(
+  nodes: string[],
+  edges: Map<string, Set<string>>
+): string[][] {
+  let index = 0;
+  const stack: string[] = [];
+  const onStack = new Set<string>();
+  const indices = new Map<string, number>();
+  const lowlink = new Map<string, number>();
+  const components: string[][] = [];
+
+  function strongConnect(v: string) {
+    indices.set(v, index);
+    lowlink.set(v, index);
+    index++;
+    stack.push(v);
+    onStack.add(v);
+
+    for (const w of edges.get(v) ?? []) {
+      if (!indices.has(w)) {
+        strongConnect(w);
+        lowlink.set(v, Math.min(lowlink.get(v)!, lowlink.get(w)!));
+      } else if (onStack.has(w)) {
+        lowlink.set(v, Math.min(lowlink.get(v)!, indices.get(w)!));
+      }
+    }
+
+    if (lowlink.get(v) === indices.get(v)) {
+      const component: string[] = [];
+      let w: string;
+      do {
+        w = stack.pop()!;
+        onStack.delete(w);
+        component.push(w);
+      } while (w !== v);
+      components.push(component);
+    }
+  }
+
+  for (const v of nodes) {
+    if (!indices.has(v)) strongConnect(v);
+  }
+  return components;
+}
+
 describe("architecture boundaries", () => {
   it("features import other features only through their public index", () => {
     const names = featureNames();
@@ -318,6 +417,47 @@ describe("architecture boundaries", () => {
     }
   });
 
+  it("no module import cycle passes through a feature's public index.ts", () => {
+    // Whole-src module graph: every non-test .ts/.tsx file is a node, and a
+    // relative import that resolves to another file in the set is an edge.
+    // ES import cycles are legal in general (and one pre-existing cycle
+    // between src/ipc/history.ts and src/ipc/client.ts is left alone here),
+    // but a cycle that runs back through a feature's index.ts breaks the
+    // "features → shared → domain" direction the README promises: it means
+    // something the feature exports transitively depends on that same
+    // feature's public surface, so the module can deadlock at evaluation
+    // time depending on which side is imported first.
+    const files = collectSourceFiles(SRC);
+    expect(files.length).toBeGreaterThan(0);
+
+    const rels = files.map((file) => relative(SRC, file).replace(/\\/g, "/"));
+    const fileSet = new Set(rels);
+    const edges = new Map<string, Set<string>>();
+    for (const rel of rels) edges.set(rel, new Set());
+
+    for (const rel of rels) {
+      const source = readFileSync(join(SRC, rel), "utf8");
+      for (const specifier of extractValueImportSpecifiers(source)) {
+        const resolved = resolveModuleFile(rel, specifier, fileSet);
+        if (resolved && resolved !== rel) edges.get(rel)!.add(resolved);
+      }
+    }
+
+    const components = findStronglyConnectedComponents(rels, edges);
+    const isCycle = (component: string[]) =>
+      component.length > 1 || edges.get(component[0]!)!.has(component[0]!);
+    const isFeatureIndex = (rel: string) => /^features\/[^/]+\/index\.tsx?$/.test(rel);
+
+    const cyclesThroughFeatureIndex = components.filter(
+      (component) => isCycle(component) && component.some(isFeatureIndex)
+    );
+
+    const message = cyclesThroughFeatureIndex
+      .map((component) => `cycle: ${component.join(" -> ")}`)
+      .join("\n");
+    expect(cyclesThroughFeatureIndex, message).toEqual([]);
+  });
+
   it("shared/ui does not import ipc, store, or i18n", () => {
     const files = collectSourceFiles(join(SRC, "shared", "ui"));
     const violations: string[] = [];
@@ -396,6 +536,55 @@ describe("crossFeatureViolation", () => {
     const specifiers = extractImportSpecifiers(`const m = await import("../../stash");`);
     expect(specifiers).toEqual(["../../stash"]);
     expect(crossFeatureViolation(FILE, specifiers[0]!)).toBeNull();
+  });
+});
+
+describe("extractValueImportSpecifiers", () => {
+  it("includes a normal value import", () => {
+    expect(extractValueImportSpecifiers(`import { foo } from "./foo";`)).toEqual(["./foo"]);
+  });
+
+  it("excludes a whole import-type statement", () => {
+    expect(extractValueImportSpecifiers(`import type { Foo } from "./foo";`)).toEqual([]);
+  });
+
+  it("excludes a whole export-type-from statement", () => {
+    expect(extractValueImportSpecifiers(`export type { Foo } from "./foo";`)).toEqual([]);
+  });
+
+  it("includes a side-effect import", () => {
+    expect(extractValueImportSpecifiers(`import "./foo";`)).toEqual(["./foo"]);
+  });
+
+  it("includes a dynamic import", () => {
+    expect(extractValueImportSpecifiers(`const m = await import("./foo");`)).toEqual(["./foo"]);
+  });
+});
+
+describe("resolveModuleFile", () => {
+  const fileSet = new Set([
+    "features/history/index.ts",
+    "features/history/components/CommitGraph.tsx",
+  ]);
+
+  it("resolves a bare directory specifier to its index.ts", () => {
+    expect(
+      resolveModuleFile("features/history/components/CommitGraph.tsx", "..", fileSet)
+    ).toBe("features/history/index.ts");
+  });
+
+  it("resolves a specifier missing its .tsx extension", () => {
+    expect(
+      resolveModuleFile("features/history/index.ts", "./components/CommitGraph", fileSet)
+    ).toBe("features/history/components/CommitGraph.tsx");
+  });
+
+  it("returns null for a package import", () => {
+    expect(resolveModuleFile("features/history/index.ts", "react", fileSet)).toBeNull();
+  });
+
+  it("returns null when nothing in the set matches", () => {
+    expect(resolveModuleFile("features/history/index.ts", "./nope", fileSet)).toBeNull();
   });
 });
 
