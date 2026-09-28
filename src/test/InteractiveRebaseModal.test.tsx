@@ -59,7 +59,13 @@ describe("InteractiveRebaseModal", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useRepoStore.setState({
-      currentRepo: { path: "/mock/repo", name: "mock-repo" } as any,
+      currentRepo: {
+        path: "/mock/repo",
+        name: "mock-repo",
+        is_bare: false,
+        head_branch: "main",
+        head_commit_id: null,
+      },
     });
     vi.mocked(invokeCommand.getRebaseCommits).mockResolvedValue(mockCommits);
     vi.mocked(invokeCommand.executeInteractiveRebase).mockResolvedValue({

@@ -66,7 +66,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRepo }) =>
     if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
       if (file) {
-        const droppedPath = (file as any).path || file.name;
+        // Tauri's webview adds a non-standard absolute `path` to dropped files.
+        const droppedPath = (file as File & { path?: string }).path || file.name;
         if (droppedPath) {
           openRecent(droppedPath);
         }

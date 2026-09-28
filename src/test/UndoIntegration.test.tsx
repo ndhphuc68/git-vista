@@ -16,7 +16,15 @@ describe("Undo & Toast Integration", () => {
     vi.spyOn(invokeCommand, "createCommit").mockResolvedValue({
       id: "oid123",
       undo_token: "receipt-123",
-    } as any);
+      full_message: "Add feature",
+      author_name: "Test User",
+      author_email: "test@example.com",
+      author_timestamp_sec: 0,
+      parent_ids: [],
+      files: [],
+      total_additions: 0,
+      total_deletions: 0,
+    });
     const undoSpy = vi.spyOn(invokeCommand, "undoCommit").mockResolvedValue(undefined);
 
     render(<CommitBox repoPath="/test/repo" stagedCount={2} onSuccess={vi.fn()} />);
