@@ -4,8 +4,14 @@
 
 **Cập nhật**: 2026-09-28
 **Nhánh làm việc**: `refactor/phase0-foundation` (chứa GĐ0–GĐ4 + GĐ5 lát 1 + GĐ5 lát 2, chưa merge vào `main`). **GĐ5b sống trên nhánh riêng `refactor/phase5b-large-modules`**, rẽ nhánh từ `refactor/phase0-foundation` tại `2e01698` và đã hoà (merge) commit `4fe9bfb` (luật public-index + acyclicity guard) của `refactor/phase0-foundation` vào giữa chừng — xem **mục 12**.
-**Tiến độ**: 6 / 8 giai đoạn xong, **GĐ5b xong — 7 task triển khai (kể cả Task 0')**
-**Việc tiếp theo**: GĐ6 (Rust: `with_repo()`, gom `emit_repo_changed`). Xem mục 4 và mục 12.
+**Tiến độ**: 7 / 8 giai đoạn xong (GĐ0–GĐ6, kể cả GĐ5b)
+**Việc tiếp theo**: GĐ7 (nâng lint từ `warn` lên `error`). Xem mục 4.
+
+> **GĐ6 đã xong — có sai lệch có chủ đích so với spec.** 9 bản `emit_repo_changed`
+> gom về một hàm trong `src-tauri/src/events/mod.rs`; 3 `map_err(|e| e.to_string())`
+> trong `commands/undo.rs` đã bỏ. **`with_repo()` không làm** — con người quyết định
+> bỏ sau khảo sát (lý do ở mục 3, GĐ6). Gom emitter lộ ra **hai lệnh undo gửi sai
+> payload**, khiến frontend xoá sạch cache mọi repo sau mỗi lần hoàn tác.
 
 > **GĐ5b đã xong.** Năm module entry mục tiêu của kế hoạch GĐ5b đều đã dưới
 > mốc 300 dòng đo được: `BranchSidebar.tsx` **247**, `CommitGraph.tsx` **140**,
@@ -43,7 +49,7 @@ pnpm install
 # Xác nhận mọi thứ xanh trước khi làm gì
 pnpm lint                     # phải exit 0
 pnpm build                    # phải exit 0
-pnpm test                     # phải 101 file / 634 test xanh
+pnpm test                     # phải 111 file / 762 test xanh
 pnpm check-query-keys         # "No query key literals found..."
 pnpm check-comment-language   # "All comments are in English."
 pnpm check-bindings           # "...is in sync with the Rust commands."
@@ -289,11 +295,38 @@ Bảy task (Task 1–4, Task 0', Task 5–7) đưa cả 5 module entry mục ti�
 
 Chi tiết đầy đủ — bảng task/commit, số liệu đo từng bước, danh sách nợ hoãn lại — ở **mục 12**.
 
+### Giai đoạn 6 — Rust: gom `emit_repo_changed`, dọn `map_err` ✅
+
+**Đã làm:**
+
+- **`emit_repo_changed` từ 9 bản sao còn 1 hàm**: `events::emit_repo_changed(&AppHandle, &str, &str)`, cộng thêm `repo_changed_payload()` và hằng `REPO_CHANGED_EVENT`. Trước đó 9 bản đã chia thành 2 chữ ký (`&str` ở 6 file, `String` ở 3 file), và có 3 dạng payload khác nhau.
+- **`commands/undo.rs`**: 3 lệnh undo trả `Result<(), AppError>` thay cho `Result<(), String>`, giống 74 lệnh còn lại. Bindings sinh lại, chỉ đổi đúng 3 dòng (`typedError<null, string>` → `typedError<null, AppError>`). Mọi chỗ gọi đã đọc lỗi qua `err.message`/`toErrorMessage` nên không phải sửa. `InteractiveRebaseModal` giờ hiện lỗi thật thay cho câu fallback, vì trước đây lỗi là chuỗi thô, không có `.message`.
+- `simulate_repo_change` dùng chung payload builder, nhưng **vẫn tự emit và trả lỗi** thay vì nuốt: lệnh này sinh ra để kiểm tra kênh event.
+
+**Lỗi thật lộ ra khi gom — cùng kiểu với bug cache của GĐ1:**
+
+| Chỗ | Payload cũ | Hậu quả |
+| --- | --- | --- |
+| `undo_delete_branch`, `undo_drop_stash` | `{ "path": ... }` — thiếu `repo_path`, thiếu `reason` | `App.tsx` không thấy `payload.repo_path` nên rơi vào nhánh `invalidateQueries()` trống → **mỗi lần hoàn tác xoá nhánh hoặc stash là xoá cache của mọi repo ở mọi tab** rồi fetch lại hết. Dữ liệu không sai, chỉ lãng phí. |
+| `execute_interactive_rebase` | `serde_json::json!` tự dựng, key `timestamp` thay vì `timestamp_ms` | Không ai đọc timestamp nên chưa có hành vi sai. `ControlsBar` khai kiểu `RepoChangedPayload`, nên kiểu đang nói dối về dữ liệu. |
+
+**Chống tái phát:** `src-tauri/tests/events_test.rs`, 4 test. Test ghim đúng 3 key payload (`reason`, `repo_path`, `timestamp_ms`) và tên kênh. Có một test quét `src/commands/` sẽ đỏ nếu file nào lại chứa `"repo-changed"` hoặc `fn emit_repo_changed` riêng. Thí nghiệm phá (quy ước 3): đổi tên field thành `timestamp` và thêm literal `"repo-changed"` vào `undo.rs` → đúng 2 test tương ứng đỏ.
+
+**Sai lệch có chủ đích so với spec — bỏ `with_repo()`.** Spec (mục 4.8) muốn thay ~60 chỗ `let repo = Repository::open(path)?;` bằng `with_repo(path, |repo| {...})`. Khảo sát cho thấy làm việc này không được gì:
+
+- Mỗi chỗ vốn chỉ có 1 dòng. `?` đã tự chuyển `git2::Error` sang `AppError` (qua `From`), nên helper không gom được logic nào. Bọc closure chỉ thêm một tầng thụt lề cho khoảng 60 hàm.
+- Chữ ký của spec (`&Repository`) không dùng được ở 6 chỗ trong `write/stash.rs` cần `&mut`. Nó cũng không hợp với 3 chỗ trong `exec/` mở lại repo giữa chừng (`fresh_repo` sau khi chạy git CLI), và với các chỗ dùng `if let Ok(...)`.
+
+Con người đã chọn bỏ. Nếu sau này cần một chỗ chung để mở repo (ví dụ chuyển sang `Repository::open_ext` với flag), khi đó mới tạo helper `open_repo()` trả `Result<Repository, AppError>`, không dùng closure.
+
+**Kiểm chứng:** `cargo test` **144 passed / 0 failed** (140 + 4 mới); `cargo clippy --all-targets -- -D warnings` sạch; `cargo fmt --check` sạch; `pnpm build`/`pnpm lint` exit 0; frontend **111 file / 762 test** xanh.
+
 ### Số liệu hiện tại
 
 | Chỉ số | Khi bắt đầu | Bây giờ |
 | --- | --- | --- |
-| Test | 73 file / ~370 | **110 file / 760** (sau GĐ5b, `--pool=threads`) |
+| Test | 73 file / ~370 | **111 file / 762** (frontend) + **144** Rust (sau GĐ6) |
+| Bản sao `emit_repo_changed` | 9 (2 chữ ký, 3 dạng payload) | **1** (`events::emit_repo_changed`) |
 | `src/ipc/bindings.ts` viết tay | 486 dòng | **0** (do máy sinh) |
 | `src/ipc/client.ts` | 1748 dòng | **124** (facade) |
 | File IPC viết tay quá 300 dòng | 1 | **0** |
@@ -320,7 +353,7 @@ Chi tiết đầy đủ — bảng task/commit, số liệu đo từng bước, 
 | **5 lát 1** | ✅ **Xong — 11/11 task.** Hạ tầng `features/` + `tag` + `branch` đã migrate | Thấp mỗi bước | Chi tiết ở **mục 10** |
 | **5 lát 2** | ✅ **Xong — 8 task triển khai + 1 task handover.** `remote` + `stash` đã migrate | Thấp mỗi bước | Chi tiết ở **mục 11**. `changes` chưa làm, để lát sau |
 | **5b** | ✅ **Xong — 7 task triển khai (Task 1–4, Task 0', Task 5–7).** 5 module entry mục tiêu đều dưới 300 dòng đo được | Trung bình | Chi tiết ở **mục 12**. 4 file khác trong `features/**` vẫn trên 300 dòng — ghi trung thực, không xẻ trong phạm vi GĐ5b |
-| **6** | Rust: `with_repo()` thay 58 chỗ lặp, gom `emit_repo_changed` (9 bản, 2 chữ ký) | Thấp | |
+| **6** | ✅ **Xong.** Gom `emit_repo_changed` (9 → 1), dọn `map_err` trong `undo.rs`. `with_repo()` **bỏ có chủ đích** | Thấp | Chi tiết ở GĐ6, mục 3 |
 | **7** | Nâng lint từ `warn` lên `error` | Không | Khoá kiến trúc lại vĩnh viễn |
 
 ---
@@ -362,6 +395,8 @@ Thêm `src/shared/hooks/useFocusTrap.ts` — `useFocusTrap(containerRef, enabled
 | 241 warning lint độ phức tạp | Theo kế hoạch | `no-restricted-imports` chiếm **70** warning (đo sau GĐ5b, tăng từ 68), dùng để **đo tiến độ migrate** — mỗi cái là một chỗ còn gọi thẳng `ipc/`. Giảm dần qua các lát sau, nâng lên `error` ở GĐ7. |
 | `BranchSidebar.tsx` — **đã đạt mốc dưới 300 dòng sau GĐ5b** | Đã giải quyết | Đo được **247 dòng** sau Task 2 (GĐ5b), giảm từ 611 dòng cuối GĐ5 lát 2. Tách owner hook `useSidebarActions`/`useSidebarData` + `BranchSidebarSections`. Xem **mục 12.2**. |
 | 4 file trong `src/features/**` vượt 300 dòng | Theo kế hoạch, ngoài phạm vi GĐ5b | `ManageRemotesModal.tsx` (319), `BranchSidebarSections.tsx` (313), `RemoteTreeNode.tsx` (312), `CommitGraphRows.tsx` (301) — đo bằng `wc -l`/`git show \| wc -l`, xác nhận khớp nhau. Không phải 5 module entry mục tiêu của GĐ5b nên không xẻ trong task này; ghi lại trung thực để lát sau cân nhắc. Xem **mục 12.2**. |
+| `m2_watcher_test::test_watcher_debounce_consolidation` flaky | Minor, có từ trước | Test dựa vào thời gian (debounce 200ms, cửa sổ 350ms). Đỏ 1 lần khi chạy toàn bộ `cargo test` lúc máy đang tải nặng (app dev + rust-analyzer chạy song song). Chạy riêng thì 5/5 xanh, chạy lại toàn bộ cũng xanh. GĐ6 không chạm vào watcher. |
+| Thư mục sót `.worktrees/phase5b-large-modules/` | Minor, dọn tay | `git worktree list` không còn liệt kê nó, nhưng thư mục vẫn trên đĩa. Nó không bị `vitest.config.ts` loại trừ, nên `pnpm test` ở máy này đếm **gấp đôi** (222 file / 1524 test). Xoá thư mục, hoặc thêm `.worktrees/**` vào `exclude`. |
 | `useFocusTrap` coi phần tử là "nhìn thấy được" nếu không có `hidden`/`aria-hidden` | Minor | jsdom trả rect bằng 0 cho mọi thứ nên không dùng kích thước để xét được. Phần tử ẩn bằng CSS (`display:none`) vẫn lọt vào danh sách focus được. Chưa gặp trong thực tế vì modal ẩn nội dung bằng cách không render. |
 | `useSidebarActions.ts:63`-adjacent: toast hoàn tác retained callback | Đã sửa trong GĐ5b | Task 2 tìm và sửa một regression thật (repo-switch undo dùng nhầm mutation của repo mới) trước khi commit; xem **mục 12.4**. |
 | `resolveSpecifier` docblock — trường hợp null im lặng; regex trích import có thể khớp cả trong comment/string | Minor, hoãn lại | Phát hiện ở Task 0' (GĐ5b), chưa vá — guard vẫn đúng cho mọi trường hợp thực tế gặp phải, nhưng chưa chứng minh kín 100%. |
