@@ -26,7 +26,11 @@ export function useGitHubRepoInfo(
     queryKey: qk.github.repoInfo(repoPath),
     queryFn: () => invokeCommand.getGitHubRepoInfo(repoPath),
     enabled: options?.enabled ?? Boolean(repoPath),
-    staleTime: options?.staleTime,
+    // An explicit `staleTime: undefined` would still override the app
+    // QueryClient's global default (see App.tsx), dropping effective
+    // staleTime to 0 for every caller that omits `options`. Only include
+    // the key when the caller actually supplied a value.
+    ...(options?.staleTime !== undefined ? { staleTime: options.staleTime } : {}),
   });
 }
 
