@@ -2,10 +2,19 @@
 
 > **Đọc file này trước khi làm tiếp.** Đây là điểm vào duy nhất cho công việc tái cấu trúc — nó cho biết đã làm gì, đang ở đâu, và làm gì tiếp theo.
 
-**Cập nhật**: 2026-09-19
-**Nhánh làm việc**: `refactor/phase0-foundation` (chứa GĐ0–GĐ4 + GĐ5 lát 1 + GĐ5 lát 2, chưa merge vào `main`)
-**Tiến độ**: 5 / 8 giai đoạn xong, **GĐ5 lát 2 xong — 8 task triển khai + 1 task handover**
-**Việc tiếp theo**: GĐ5b hoặc GĐ6. Xem mục 4 và mục 10/11.
+**Cập nhật**: 2026-09-28
+**Nhánh làm việc**: `refactor/phase0-foundation` (chứa GĐ0–GĐ4 + GĐ5 lát 1 + GĐ5 lát 2, chưa merge vào `main`). **GĐ5b sống trên nhánh riêng `refactor/phase5b-large-modules`**, rẽ nhánh từ `refactor/phase0-foundation` tại `2e01698` và đã hoà (merge) commit `4fe9bfb` (luật public-index + acyclicity guard) của `refactor/phase0-foundation` vào giữa chừng — xem **mục 12**.
+**Tiến độ**: 6 / 8 giai đoạn xong, **GĐ5b xong — 7 task triển khai (kể cả Task 0')**
+**Việc tiếp theo**: GĐ6 (Rust: `with_repo()`, gom `emit_repo_changed`). Xem mục 4 và mục 12.
+
+> **GĐ5b đã xong.** Năm module entry mục tiêu của kế hoạch GĐ5b đều đã dưới
+> mốc 300 dòng đo được: `BranchSidebar.tsx` **247**, `CommitGraph.tsx` **140**,
+> `CommitDetailPanel.tsx` **211**, `GitBehaviorTab.tsx` **70**,
+> `WelcomeScreen.tsx` **202**. Quyết định của con người giữa chừng: ranh giới
+> cross-feature co lại thành "chỉ được import qua `index.ts` công khai của
+> feature khác" (không còn `CROSS_FEATURE_EXCEPTIONS`). Bốn file khác trong
+> `src/features/**` hiện vượt 300 dòng — ghi trung thực ở **mục 12**, không
+> xẻ tiếp trong phạm vi task này. Chi tiết đầy đủ ở **mục 12**.
 
 > **GĐ5 lát 2 đã xong.** Feature `remote` và `stash` đều đã migrate:
 > `src/components/remote/` và `src/components/stash/` **xoá hẳn**.
@@ -55,6 +64,8 @@ Nếu một trong các lệnh trên đỏ, **dừng lại và tìm nguyên nhân
 | `docs/superpowers/plans/2026-09-19-refactor-phase3-tauri-specta.md` | Kế hoạch GĐ3 (đã xong, trừ Task 5) |
 | `docs/superpowers/plans/2026-09-19-refactor-phase4-split-ipc-client.md` | Kế hoạch GĐ4 (đã xong) |
 | `docs/superpowers/plans/2026-09-19-refactor-phase5-features-tag-branch.md` | **Kế hoạch GĐ5 lát 1 (đã xong, 11/11 task)** |
+| `docs/superpowers/specs/2026-09-20-refactor-phase5b-large-modules-design.md` | Thiết kế GĐ5b — xẻ nhỏ 5 module entry khổng lồ |
+| `docs/superpowers/plans/2026-09-20-refactor-phase5b-large-modules.md` | **Kế hoạch GĐ5b (đã xong, 7/7 task kể cả Task 0')** |
 | `docs/DESIGN_SYSTEM.md` | Design token — nguồn chuẩn cho màu, bo góc, khoảng cách |
 
 ---
@@ -260,11 +271,29 @@ Việc thay Shell cung cấp "cái gì để mở" thay cho import chéo compone
 
 Chi tiết đầy đủ ở **mục 11**.
 
+### Giai đoạn 5b — Xẻ nhỏ 5 module entry khổng lồ ✅
+
+**Kế hoạch**: `docs/superpowers/plans/2026-09-20-refactor-phase5b-large-modules.md`, làm trên nhánh riêng `refactor/phase5b-large-modules` (rẽ từ `refactor/phase0-foundation` tại `2e01698`).
+
+Bảy task (Task 1–4, Task 0', Task 5–7) đưa cả 5 module entry mục tiêu xuống dưới 300 dòng đo được: `BranchSidebar.tsx` (247), `CommitGraph.tsx` (140), `CommitDetailPanel.tsx` (211), `GitBehaviorTab.tsx` (70), `WelcomeScreen.tsx` (202) — giảm từ 611/586/586/597/586 dòng lúc bắt đầu (branch/history/history/settings/welcome cộng gộp một entry gốc).
+
+**Quyết định giữa chừng quan trọng nhất — Task 0'.** Một phiên song song trên `refactor/phase0-foundation` đã làm xong luật "feature chỉ được import feature khác qua `index.ts` công khai của nó, cấm import sâu vào `api/`/`components/`/`model/`" (commit `4fe9bfb`), cùng một test bất-chu-kỳ (acyclicity) giữa các feature. Con người quyết định: nhánh GĐ5b phải hoà commit đó vào **giữa** kế hoạch (sau Task 4, trước Task 5) thay vì bỏ qua, vì Task 2 và Task 3 của chính GĐ5b đã **nới rộng** `CROSS_FEATURE_EXCEPTIONS` — vi phạm ràng buộc toàn cục ("Global Constraint") mà bản kế hoạch gốc đặt ra. Task 0' hoà nhánh, xử lý 2 xung đột (giữ code Task 1–4 của `BranchSidebar`, lấy toàn bộ máy phân loại `crossFeatureViolation` mới từ nhánh kia), rồi chuyển mọi import sâu còn sót (`useSidebarActions.ts`, `useSidebarData.ts`) sang import qua `index.ts`. Kết quả: `CROSS_FEATURE_EXCEPTIONS` **biến mất hoàn toàn** khỏi codebase — không còn cơ chế ngoại lệ cross-feature nào, thay bằng luật cứng ép bằng test.
+
+**Ba quyết định của controller (người điều phối) áp dụng xuyên suốt GĐ5b:**
+
+- **IPC chỉ được gọi trong `api/`** cho `settings` và `welcome` — kể cả khi brief chỉ liệt kê `hooks/` không có `api/` (Task 5, Task 6), controller vẫn yêu cầu thêm lớp `api/` mỏng bọc `invokeCommand` để tuân thủ luật `only features/*/api may import ipc/` mà không cần thêm ngoại lệ `IPC_IMPORT_EXCEPTIONS`.
+- **Dialog của commit graph do `Shell` cung cấp renderer cụ thể** — theo đúng tiền lệ quy ước 19 (mục 7): feature giữ quyết định *khi nào* mở dialog, `Shell` cung cấp *cái gì* để render, tránh việc `history` phải import chéo component của feature khác.
+- **Hook trạng thái repo (`useRepoStatus`) đặt trong `history`**, không phải một feature mới — vì Task 2 cần nó để gỡ import IPC trực tiếp trong `branch`, và `history` đã là chủ sở hữu tự nhiên của dữ liệu trạng thái repo trong luồng UI hiện có.
+
+**Ghi chú môi trường:** pool mặc định (`forks`) của Vitest bị treo (hang) trong worktree Windows liên kết (linked worktree) này trước khi worker nào kịp khởi tạo — không rõ nguyên nhân gốc, không phải lỗi sản phẩm. Toàn bộ xác minh trong worktree này phải dùng `pnpm vitest run --pool=threads`; không sửa `vitest.config.ts`. CI/máy khác chạy `pnpm test` bình thường.
+
+Chi tiết đầy đủ — bảng task/commit, số liệu đo từng bước, danh sách nợ hoãn lại — ở **mục 12**.
+
 ### Số liệu hiện tại
 
 | Chỉ số | Khi bắt đầu | Bây giờ |
 | --- | --- | --- |
-| Test | 73 file / ~370 | **101 file / 634** |
+| Test | 73 file / ~370 | **110 file / 760** (sau GĐ5b, `--pool=threads`) |
 | `src/ipc/bindings.ts` viết tay | 486 dòng | **0** (do máy sinh) |
 | `src/ipc/client.ts` | 1748 dòng | **124** (facade) |
 | File IPC viết tay quá 300 dòng | 1 | **0** |
@@ -274,12 +303,13 @@ Chi tiết đầy đủ ở **mục 11**.
 | Modal tự dựng overlay | 26 | **4** (drawer/palette/splash, cố ý) |
 | Escape handler lặp | ~30 | **1** (`useEscapeKey`) |
 | Nút Cancel/Submit bespoke | 13 + ~20 | **0** (dùng `Button`) |
-| Component trong `src/components/` gọi thẳng `ipc/` | 36 / 60 file | **32 / 64 file** ¹ |
-| `src/components/sidebar/BranchSidebar.tsx` → `src/features/branch/components/BranchSidebar.tsx` | 1327 dòng, 25 `useState` | **611 dòng, 10 `useState`** |
-| `pnpm lint` | exit 1 | **exit 0, 240 warning** (68 là `no-restricted-imports`) |
+| Component trong `src/components/` gọi thẳng `ipc/` | 36 / 60 file | **32 / 64 file** ¹ (đo cuối GĐ5 lát 2, chưa đo lại sau GĐ5b) |
+| `src/components/sidebar/BranchSidebar.tsx` → `src/features/branch/components/BranchSidebar.tsx` | 1327 dòng, 25 `useState` | **247 dòng** (sau GĐ5b, xem mục 12) |
+| `pnpm lint` | exit 1 | **exit 0, 241 warning** (70 là `no-restricted-imports`, đo sau GĐ5b — trước GĐ5b là 68) |
 | `pnpm build` | exit 0 | exit 0 |
+| `CROSS_FEATURE_EXCEPTIONS` | chưa tồn tại | **đã xoá hẳn khỏi codebase** (Task 0', GĐ5b) — thay bằng luật public-index + acyclicity test |
 
-> ¹ Mẫu số vẫn đang đổi vì migrate làm file **rời khỏi** `src/components/` sang `features/`, nên so hai con số tuyệt đối qua các lát không có nhiều ý nghĩa. Chỉ số theo dõi tiến độ đáng tin hơn là warning `no-restricted-imports` (**68**, sau GĐ5 lát 2) — nó đếm đúng số chỗ còn gọi thẳng `ipc/`, ở bất kỳ thư mục nào, không phụ thuộc file đó có còn nằm trong `components/` hay không.
+> ¹ Mẫu số vẫn đang đổi vì migrate làm file **rời khỏi** `src/components/` sang `features/`, nên so hai con số tuyệt đối qua các lát không có nhiều ý nghĩa. Chỉ số theo dõi tiến độ đáng tin hơn là warning `no-restricted-imports` (**70** sau GĐ5b, tăng nhẹ từ **68** sau GĐ5 lát 2 — feature mới (`settings`, `welcome`, `history`) tạo thêm vài chỗ import kiểu bị oxlint đếm nhầm là runtime; xem mục 12) — nó đếm đúng số chỗ còn gọi thẳng `ipc/`, ở bất kỳ thư mục nào, không phụ thuộc file đó có còn nằm trong `components/` hay không.
 
 ---
 
@@ -289,7 +319,7 @@ Chi tiết đầy đủ ở **mục 11**.
 | --- | --- | --- | --- |
 | **5 lát 1** | ✅ **Xong — 11/11 task.** Hạ tầng `features/` + `tag` + `branch` đã migrate | Thấp mỗi bước | Chi tiết ở **mục 10** |
 | **5 lát 2** | ✅ **Xong — 8 task triển khai + 1 task handover.** `remote` + `stash` đã migrate | Thấp mỗi bước | Chi tiết ở **mục 11**. `changes` chưa làm, để lát sau |
-| **5b** | Xẻ nhỏ file khổng lồ, gom state modal về union | Trung bình | `BranchSidebar` còn 611 dòng sau 2 lát; phần dư phụ thuộc `changes` + domain undo/tag/merge chưa có feature — xem **mục 11** |
+| **5b** | ✅ **Xong — 7 task triển khai (Task 1–4, Task 0', Task 5–7).** 5 module entry mục tiêu đều dưới 300 dòng đo được | Trung bình | Chi tiết ở **mục 12**. 4 file khác trong `features/**` vẫn trên 300 dòng — ghi trung thực, không xẻ trong phạm vi GĐ5b |
 | **6** | Rust: `with_repo()` thay 58 chỗ lặp, gom `emit_repo_changed` (9 bản, 2 chữ ký) | Thấp | |
 | **7** | Nâng lint từ `warn` lên `error` | Không | Khoá kiến trúc lại vĩnh viễn |
 
@@ -329,9 +359,17 @@ Thêm `src/shared/hooks/useFocusTrap.ts` — `useFocusTrap(containerRef, enabled
 | `App.tsx:284` dùng `part.includes(repo_path)` thay vì so sánh bằng | Minor | Repo `/proj` cũng khớp `/proj-legacy` → thừa refetch, không sai dữ liệu. Giờ `qk` đặt path ở vị trí cố định nên sửa rất dễ. |
 | `qk.githubToken()` chưa ai invalidate | Minor | An toàn hiện tại (không có UI ghi token). Sẽ thành bẫy khi thêm màn hình cài đặt token. |
 | `qk.github.repoInfo` không được invalidate khi đổi remote URL | Minor | Đã giảm nhẹ ở GĐ1 (`refreshData()` giờ có invalidate), nhưng chưa phủ hết đường. |
-| 240 warning lint độ phức tạp | Theo kế hoạch | `no-restricted-imports` chiếm **68** warning, dùng để **đo tiến độ migrate** — mỗi cái là một chỗ còn gọi thẳng `ipc/`. Giảm dần qua các lát sau, nâng lên `error` ở GĐ7. |
-| `BranchSidebar.tsx` còn 611 dòng, mốc kế hoạch là dưới 300 | Theo kế hoạch | Sau 2 lát (619 → 611) gần như không nhích — gỡ 7 khối modal bị bù lại bởi interface prop mới. Phần dư là logic của domain chưa có feature (`changes`, 2 lệnh tag, merge/rebase, undo). Tách thêm bây giờ chỉ là cắt cho đủ số dòng. Xem **mục 11.2**. |
+| 241 warning lint độ phức tạp | Theo kế hoạch | `no-restricted-imports` chiếm **70** warning (đo sau GĐ5b, tăng từ 68), dùng để **đo tiến độ migrate** — mỗi cái là một chỗ còn gọi thẳng `ipc/`. Giảm dần qua các lát sau, nâng lên `error` ở GĐ7. |
+| `BranchSidebar.tsx` — **đã đạt mốc dưới 300 dòng sau GĐ5b** | Đã giải quyết | Đo được **247 dòng** sau Task 2 (GĐ5b), giảm từ 611 dòng cuối GĐ5 lát 2. Tách owner hook `useSidebarActions`/`useSidebarData` + `BranchSidebarSections`. Xem **mục 12.2**. |
+| 4 file trong `src/features/**` vượt 300 dòng | Theo kế hoạch, ngoài phạm vi GĐ5b | `ManageRemotesModal.tsx` (319), `BranchSidebarSections.tsx` (313), `RemoteTreeNode.tsx` (312), `CommitGraphRows.tsx` (301) — đo bằng `wc -l`/`git show \| wc -l`, xác nhận khớp nhau. Không phải 5 module entry mục tiêu của GĐ5b nên không xẻ trong task này; ghi lại trung thực để lát sau cân nhắc. Xem **mục 12.2**. |
 | `useFocusTrap` coi phần tử là "nhìn thấy được" nếu không có `hidden`/`aria-hidden` | Minor | jsdom trả rect bằng 0 cho mọi thứ nên không dùng kích thước để xét được. Phần tử ẩn bằng CSS (`display:none`) vẫn lọt vào danh sách focus được. Chưa gặp trong thực tế vì modal ẩn nội dung bằng cách không render. |
+| `useSidebarActions.ts:63`-adjacent: toast hoàn tác retained callback | Đã sửa trong GĐ5b | Task 2 tìm và sửa một regression thật (repo-switch undo dùng nhầm mutation của repo mới) trước khi commit; xem **mục 12.4**. |
+| `resolveSpecifier` docblock — trường hợp null im lặng; regex trích import có thể khớp cả trong comment/string | Minor, hoãn lại | Phát hiện ở Task 0' (GĐ5b), chưa vá — guard vẫn đúng cho mọi trường hợp thực tế gặp phải, nhưng chưa chứng minh kín 100%. |
+| Component settings import `HelpTooltip`/`helpDiagrams` từ `src/components/settings` | Minor, hoãn lại | Feature `settings` (GĐ5b Task 5) vẫn "thò tay" vào `components/` cũ cho hai tiện ích UI dùng chung; chưa có chỗ chuẩn trong `shared/` cho chúng. |
+| `SettingsModal` vẫn truyền `onScopeChange` (không dùng) cho `GitBehaviorTab` | Minor, có từ trước | Đã tồn tại trước GĐ5b (component gốc cũng không đọc prop này); giữ nguyên vì "migrate là thay thế cơ học", không sửa hành vi cũ nhân tiện. |
+| `useWelcomeShortcuts` deps rỗng, đóng (closure) callback ở lần render đầu | Minor, verbatim từ code gốc | Phát hiện ở GĐ5b Task 6, controller xác nhận đúng là hành vi gốc trước khi migrate, không phải regression. |
+| `clearRecents`/`removeRecent` nuốt lỗi qua `console.warn` | Minor, có từ trước | Có từ code gốc `WelcomeScreen.tsx`, giữ nguyên theo quy ước "migrate là thay thế cơ học". |
+| oxlint `no-restricted-imports` báo warning trên import **kiểu** (`import type`) của `ipc/` trong feature | Minor, có từ trước | oxlint không phân biệt type-only; `architectureBoundaries.test.ts` (hàm `importsIpcAtRuntime`) mới là luật có thẩm quyền và đã phân biệt đúng. Mẫu lặp lại ở `branch`, `settings`, `welcome`. |
 
 ---
 
@@ -642,3 +680,115 @@ src/features/stash/
 | `CheckoutConflictModal.tsx` (cross-feature) | stash rồi checkout | tương tự trên |
 
 Danh sách chỉ được **co lại**, không được phình ra — `architectureBoundaries.test.ts` có test đỏ nếu một ngoại lệ còn nằm đó sau khi import tương ứng đã biến mất.
+
+---
+
+## 12. Giai đoạn 5b — Xẻ nhỏ 5 module entry khổng lồ — ĐÃ XONG (7 task, gồm Task 0')
+
+**Kế hoạch**: `docs/superpowers/plans/2026-09-20-refactor-phase5b-large-modules.md`
+**Thiết kế**: `docs/superpowers/specs/2026-09-20-refactor-phase5b-large-modules-design.md`
+**Nhánh**: `refactor/phase5b-large-modules`, rẽ từ `refactor/phase0-foundation` tại `2e01698`, sau đó hoà (merge) commit `4fe9bfb` của `refactor/phase0-foundation` vào giữa chừng (Task 0').
+**Ledger đầy đủ**: `.superpowers/sdd/2026-09-20-refactor-phase5b-large-modules/progress.md` (không nằm trong `docs/`, không đi theo nhánh khi merge — chỉ tồn tại trong worktree làm việc).
+
+### 12.1 Trạng thái từng task và commit
+
+| Task | Nội dung | Người làm | Commit |
+| --- | --- | --- | --- |
+| 1 | Owner hook cho hành động sidebar (`useSidebarActions`) | Phiên trước | `9894513 ✨ add owner hooks for sidebar actions` |
+| 2 | Tách trách nhiệm `BranchSidebar` (`useSidebarData` + `BranchSidebarSections`) | Phiên trước | `9b8d580 ♻️ split branch sidebar responsibilities`, `4224665 🐛 preserve repository ownership for stash undo` |
+| 3 | Chuyển commit graph vào `features/history` | Phiên trước | `3cf7fe9 ♻️ move commit graph into history feature` |
+| 4 | Chuyển commit detail vào `features/history` | Phiên trước | `6c5d318 ♻️ move commit detail into history feature` (salvage một phiên bị ngắt quãng) |
+| 0' | Hoà luật public-index + acyclicity guard từ `refactor/phase0-foundation`, xoá `CROSS_FEATURE_EXCEPTIONS`, chuyển import sâu còn sót | Phiên này | `89b77bd 🔀 merge public-index boundary rule into phase 5b`, `2cc6af3 ♻️ route cross-feature imports through public indexes` (mang theo `4fe9bfb 🔒 allow cross-feature imports only through public index` từ nhánh kia) |
+| 5 | Chuyển tab git-behavior settings vào `features/settings` | Phiên này | `d6bc089 ♻️ move git behavior settings into feature` |
+| 6 | Chuyển luồng welcome/mở-repo vào `features/welcome` | Phiên này | `1ffccaa ♻️ move welcome flow into feature` |
+| 7 | Đóng giai đoạn, xác minh toàn bộ, ghi status handover | Phiên này | (commit này) |
+
+Tất cả các review độc lập trong ledger đều kết luận "clean" (không có finding nào còn mở khi task đóng), ngoại trừ Task 2 có 1 vòng sửa (Important: xem mục 12.4).
+
+### 12.2 Số liệu đo được (Task 7 — `wc -l` / `git show <rev>:<path> | wc -l`, hai cách khớp nhau)
+
+**Năm module entry mục tiêu — tất cả dưới 300 dòng:**
+
+| File | Trước GĐ5b | Sau GĐ5b |
+| --- | --- | --- |
+| `src/features/branch/components/BranchSidebar.tsx` | 611 dòng | **247 dòng** |
+| `src/features/history/components/CommitGraph.tsx` | 586 dòng (`src/components/history/CommitGraph.tsx` cũ) | **140 dòng** |
+| `src/features/history/components/CommitDetailPanel.tsx` | ~586 dòng (cũ, cộng gộp với CommitGraph trước khi tách) | **211 dòng** |
+| `src/features/settings/components/GitBehaviorTab.tsx` | 597 dòng (`src/components/settings/tabs/GitBehaviorTab.tsx` cũ) | **70 dòng** |
+| `src/features/welcome/components/WelcomeScreen.tsx` | 586 dòng (`src/components/welcome/WelcomeScreen.tsx` cũ) | **202 dòng** |
+
+**Bốn file khác trong `src/features/**` hiện vượt 300 dòng — ghi trung thực, không xẻ trong phạm vi task này** (không phải entry mục tiêu của kế hoạch GĐ5b; brief Task 7 yêu cầu chỉ *ghi lại*, không tách):
+
+| File | Dòng đo được |
+| --- | --- |
+| `src/features/remote/components/ManageRemotesModal.tsx` | 319 |
+| `src/features/branch/components/BranchSidebarSections.tsx` | 313 |
+| `src/features/branch/components/RemoteTreeNode.tsx` | 312 |
+| `src/features/history/components/CommitGraphRows.tsx` | 301 |
+
+> Ghi chú phương pháp đo: `Get-Content <file> | Measure-Object -Line` của PowerShell cho ra số **thấp hơn thực tế khoảng 10-15 dòng** trên các file này trong môi trường này (ví dụ báo 302 dòng cho `BranchSidebarSections.tsx` thay vì 313). Đối chiếu chéo bằng `wc -l` (đếm ký tự newline) và `git show HEAD:<path> | wc -l` (đọc thẳng từ object Git, không qua encoding của shell) cho kết quả **khớp nhau tuyệt đối** ở cả 9 file đo trong task này, nên các con số trong bảng trên dùng `wc -l`/`git show` làm chuẩn, không dùng `Measure-Object -Line`.
+
+### 12.3 Quyết định ranh giới public-index (Task 0')
+
+**Bối cảnh sai lệch bị bắt giữa chừng.** Task 2 và Task 3 của GĐ5b (làm trước khi phát hiện) đã **nới rộng** `CROSS_FEATURE_EXCEPTIONS` để `useSidebarActions.ts`/`useSidebarData.ts` import sâu vào `../../tag/api`, `../../stash/api`, `../../remote/api` — đúng cách làm của GĐ5 lát 1/2, nhưng **vi phạm ràng buộc toàn cục** ("Global Constraint") mà bản kế hoạch GĐ5b gốc đặt ra: không được nới danh sách ngoại lệ cross-feature thêm nữa.
+
+Đồng thời, một phiên khác trên `refactor/phase0-foundation` đã độc lập làm xong đúng luật cần: "feature `a` chỉ được import feature `b` qua `index.ts` công khai của `b` — cấm import sâu vào `api/`, `components/`, `model/`, và cấm cả dạng `/index` tường minh" (commit `4fe9bfb`), kèm một test bất-chu-kỳ (`feature -> feature public imports form no cycle`) chạy DFS ba màu trên đồ thị cạnh feature→feature suy ra từ các import public.
+
+**Quyết định của con người:** hoà commit `4fe9bfb` vào nhánh GĐ5b ngay (Task 0'), không đợi đến khi merge cuối cùng. Lý do: nếu để `CROSS_FEATURE_EXCEPTIONS` tiếp tục phình ra qua Task 5/6, việc hoà nhánh sau này sẽ phải viết lại nhiều hơn, và bản thân việc phình ra đã là vi phạm ràng buộc đang có hiệu lực.
+
+**Cách hoà:** `git merge refactor/phase0-foundation --no-commit --no-ff`, xử lý đúng 2 xung đột — giữ nguyên code Task 1-2 của `BranchSidebar.tsx` (đã tách khỏi import sâu), lấy toàn bộ máy phân loại `crossFeatureViolation`/`extractImportSpecifiers`/`resolveSpecifier` mới từ nhánh kia cho `architectureBoundaries.test.ts` (xoá hẳn `CROSS_FEATURE_EXCEPTIONS` và test độ mới của nó). Sau merge, chạy lại test ranh giới lộ ra đúng 5 vi phạm — toàn bộ nằm trong `useSidebarActions.ts` và `useSidebarData.ts` — chuyển hết sang import qua `index.ts` công khai (không cần thêm export mới, mọi hook cần dùng đã có sẵn trong `index.ts` của feature nguồn). Xác nhận không có chu trình (cycle) nào phát sinh dù `branch` giờ có cạnh public-import tới `tag`, `stash`, `remote`, `merge`, `undo`, `history`. Có thí nghiệm phá: đổi tạm một import về dạng sâu, xác nhận test đỏ đúng thông điệp, rồi phục hồi.
+
+**Kết quả:** `CROSS_FEATURE_EXCEPTIONS` không còn tồn tại ở bất kỳ đâu trong codebase (`grep -rn "CROSS_FEATURE_EXCEPTIONS" src/` rỗng). Toàn bộ ranh giới cross-feature giờ chỉ do hai luật ép bằng test: import chỉ qua `index.ts` công khai, và đồ thị import đó không được có chu trình.
+
+### 12.4 Ba ruling của controller xuyên suốt GĐ5b
+
+1. **IPC chỉ được gọi trong `api/`, kể cả khi brief không liệt kê `api/`.** Task 5 (settings) và Task 6 (welcome) có brief chỉ liệt kê `hooks/` gọi thẳng `ipc/`. Controller ra ruling: vẫn phải thêm lớp `api/` mỏng (`gitBehaviorApi.ts`, `welcome/api/index.ts`) bọc `invokeCommand`, để tuân thủ luật có sẵn "chỉ `features/*/api` được chạm `ipc/`" mà **không** cần thêm entry mới vào `IPC_IMPORT_EXCEPTIONS` — giữ đúng tinh thần "danh sách ngoại lệ chỉ co lại".
+2. **Dialog liên-feature của commit graph: `Shell` cung cấp renderer cụ thể.** Nối tiếp quy ước 19 đã dùng ở GĐ5 lát 2 (Task 8): `history` giữ quyết định *khi nào* mở dialog tạo tag/tạo nhánh từ đồ thị commit (state/điều kiện nằm trong feature), còn `Shell` — không phải một feature — cung cấp *cái gì* để render (component thật của `tag`/`branch`, nhận state qua props). Nhờ vậy `history` không phải import chéo component của `tag`/`branch`.
+3. **Hook trạng thái repo (`useRepoStatus`) đặt trong `features/history`, không phải feature mới.** Task 2 cần gỡ import IPC trực tiếp cho trạng thái repo trong `branch`, nhưng bản thân trạng thái repo chưa có feature riêng. Thay vì tạo một feature `repo-status` chỉ để chứa một hook, ruling đặt `useRepoStatus` vào `history` (đã là chủ sở hữu tự nhiên của luồng dữ liệu này trong UI hiện có) và để `branch` import qua `index.ts` công khai của `history`.
+
+### 12.5 Ghi chú môi trường — `--pool=threads`
+
+Pool mặc định của Vitest (`forks`, cấu hình trong `vitest.config.ts`) **treo hoàn toàn** trước khi bất kỳ worker nào được tạo, trong worktree Windows liên kết (linked worktree, tạo bằng `git worktree add`) này. Nguyên nhân gốc chưa xác định (nghi vấn: cách `forks` pool tạo tiến trình con tương tác xấu với worktree liên kết trên Windows), nhưng đây là vấn đề môi trường, không phải lỗi sản phẩm — `pnpm vitest run --pool=threads` chạy bình thường và xanh toàn bộ 110 file / 760 test. Mọi lệnh xác minh trong worktree này (Task 0' đến Task 7) đều dùng cờ `--pool=threads`; **không** sửa `vitest.config.ts` để đổi pool mặc định, vì máy CI và checkout thường không có vấn đề này. Người làm việc trên nhánh này ở một worktree/máy khác nên thử `pnpm test` (mặc định) trước; chỉ cần `--pool=threads` nếu gặp treo tương tự.
+
+### 12.6 Danh sách nợ hoãn lại (deferred minors) từ ledger
+
+Các phát hiện nhỏ, không chặn merge, được controller xác nhận và cố ý hoãn lại trong quá trình GĐ5b:
+
+| Task | Nợ | Ghi chú |
+| --- | --- | --- |
+| 4 | `Shell.tsx` gộp hai import `history` thành một | Dọn dẹp ngoài yêu cầu (unrequested cleanup), không phải regression. |
+| 4 | Thêm `CommitFileDiff.tsx` ngoài danh sách file của brief | Cần thiết để giữ entry dưới 300 dòng. |
+| 0' | `resolveSpecifier` — docblock có trường hợp trả về `null` âm thầm; regex trích import có thể khớp nhầm bên trong comment/string | Guard vẫn đúng cho mọi trường hợp thực tế gặp phải trong codebase hiện tại, chưa chứng minh kín 100%. |
+| 5 | Component settings import `HelpTooltip`/`helpDiagrams` từ `src/components/settings` cũ | Feature "thò tay" vào `components/`; chưa có vị trí chuẩn trong `shared/` cho hai tiện ích này. |
+| 5 | `SettingsModal` vẫn truyền `onScopeChange` không dùng cho `GitBehaviorTab` | Có từ trước GĐ5b (component gốc cũng không đọc prop này) — giữ nguyên theo quy ước "migrate là thay thế cơ học". |
+| 6 | `useWelcomeShortcuts` deps rỗng, đóng callback từ lần render đầu | Verbatim từ `useEffect` gốc, controller xác nhận không phải regression. |
+| 6 | `clearRecents`/`removeRecent` nuốt lỗi qua `console.warn` | Có từ code gốc, giữ nguyên. |
+| 6 | oxlint `no-restricted-imports` báo warning trên import kiểu (`import type`) của `ipc/` trong feature | Mẫu lặp lại có từ `branch`/`settings`; `architectureBoundaries.test.ts` mới là luật có thẩm quyền, đã phân biệt đúng type-only. |
+
+**Một regression thật đã được tìm và sửa trong lúc làm (không phải nợ hoãn lại):** Task 2, vòng review đầu tiên, tìm ra tại `useSidebarActions.ts:63` một callback toast hoàn tác (undo) bị giữ lại (retained) qua re-render nhưng trỏ tới mutation đã bị rebind sang repo **mới**, khiến hoàn tác xoá nhánh sau khi chuyển repo sẽ tác động sai repo. Implementer đã thêm test hồi quy thất bại trước, rồi sửa để giữ đúng danh tính repo gốc; review vòng hai chấp thuận không còn finding.
+
+### 12.7 Xác minh đầy đủ (đo tại HEAD `1ffccaa`, trước commit của task này)
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `pnpm vitest run --pool=threads src/test/architectureBoundaries.test.ts` | PASS — 1 file / 35 test |
+| `pnpm check-query-keys` | PASS — "No query key literals found outside src/domain/queryKeys.ts." |
+| `pnpm check-comment-language` | PASS — "All comments are in English." |
+| `pnpm lint` | exit 0 — 241 warning (0 error thật; các dòng chứa chữ "error" chỉ là văn bản trợ giúp của rule `no-console`), **70** warning là `no-restricted-imports` |
+| `pnpm build` | exit 0 — `tsc && vite build`, 2103 module, 1 cảnh báo chunk > 500kB (có từ trước, không liên quan) |
+| `pnpm vitest run --pool=threads` (toàn bộ) | PASS — **110 file / 760 test**, ~223s |
+| `cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings` | exit 0 — biên dịch sạch, 0 warning (build "dev" 5m33s, phần lớn thời gian là biên dịch lại dependency) |
+| `cargo test --manifest-path src-tauri/Cargo.toml` | exit 0 — **140 test passed, 0 failed** trên toàn bộ binary test |
+
+Không có lệnh nào đỏ; không cần sửa code sản phẩm ở Task 7.
+
+### 12.8 Đối chiếu guard kiến trúc (Step 2 của Task 7)
+
+- `CROSS_FEATURE_EXCEPTIONS`: xác nhận **không tồn tại** ở bất kỳ đâu trong `src/` (grep rỗng) — đúng như Task 0' để lại, không có cơ chế ngoại lệ cross-feature nào tái xuất hiện.
+- `IPC_IMPORT_EXCEPTIONS` còn đúng 2 mục, cả hai đã kiểm tra lại và còn hợp lệ:
+  - `features/branch/components/DeleteBranchModal.tsx` — gọi `invokeCommand.undoDeleteBranch(...)` thật (dòng 53), lý do "undo toast calls undoDeleteBranch", điều kiện gỡ "removed once the undo domain has a hook".
+  - `features/stash/components/StashDiffView.tsx` — import giá trị `invokeCommand` từ `../../../ipc/client` (dòng 4) và dùng để đọc `CommitDetails`, lý do "reads commit details to render the stash diff", điều kiện gỡ "removed once the commit domain has a hook".
+- Test `every ipc-import exception still exists` (kiểm tra file còn tồn tại trên đĩa) và `only features/*/api may import ipc/` đều PASS, xác nhận cả hai mục trên không phải ngoại lệ "chết" (stale).
+- Không tìm thấy cơ chế ngoại lệ cross-feature nào khác (không có `EXCEPTIONS`, `ALLOWLIST`, hay danh sách tương tự nào ngoài `IPC_IMPORT_EXCEPTIONS`) khi quét `src/test/architectureBoundaries.test.ts` toàn văn.
+
+---
