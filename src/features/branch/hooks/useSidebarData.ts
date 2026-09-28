@@ -1,7 +1,7 @@
 import { useBranches } from "../api";
-import { useRemotes } from "../../remote/api";
-import { useStashes } from "../../stash/api";
-import { useTags } from "../../tag/api";
+import { useRemotes } from "../../remote";
+import { useStashes } from "../../stash";
+import { useTags } from "../../tag";
 import { useRepoStatus } from "../../history";
 
 /** Composes owner queries without taking ownership of their cache policy. */

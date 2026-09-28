@@ -4,8 +4,8 @@ import { useTranslation } from "../../../i18n";
 import { qk } from "../../../domain/queryKeys";
 import { useToastStore } from "../../../store/useToastStore";
 import { mapGitError } from "../../../utils/errorMapping";
-import { useCheckoutTag, usePushTag } from "../../tag/api";
-import { useApplyStash, usePopStash, useDropStash } from "../../stash/api";
+import { useCheckoutTag, usePushTag } from "../../tag";
+import { useApplyStash, usePopStash, useDropStash } from "../../stash";
 import { useMergeBranch, useRebaseBranch } from "../../merge";
 import { useUndoDropStash } from "../../undo";
 
