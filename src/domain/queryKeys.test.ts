@@ -98,21 +98,85 @@ describe("queryKeys", () => {
   });
 
   it("compareFileDiff varies with each parameter, including the ignore-whitespace option", () => {
-    const base = qk.compareFileDiff(REPO, "main", "dev", "a.ts", "twodot", false);
+    const base = qk.compareFileDiff(REPO, {
+      baseRev: "main",
+      targetRev: "dev",
+      filePath: "a.ts",
+      mode: "twodot",
+      ignoreWhitespace: false,
+    });
     // Varies with baseRev
-    expect(base).not.toEqual(qk.compareFileDiff(REPO, "master", "dev", "a.ts", "twodot", false));
+    expect(base).not.toEqual(
+      qk.compareFileDiff(REPO, {
+        baseRev: "master",
+        targetRev: "dev",
+        filePath: "a.ts",
+        mode: "twodot",
+        ignoreWhitespace: false,
+      })
+    );
     // Varies with targetRev
-    expect(base).not.toEqual(qk.compareFileDiff(REPO, "main", "other", "a.ts", "twodot", false));
+    expect(base).not.toEqual(
+      qk.compareFileDiff(REPO, {
+        baseRev: "main",
+        targetRev: "other",
+        filePath: "a.ts",
+        mode: "twodot",
+        ignoreWhitespace: false,
+      })
+    );
     // Varies with filePath
-    expect(base).not.toEqual(qk.compareFileDiff(REPO, "main", "dev", "b.ts", "twodot", false));
+    expect(base).not.toEqual(
+      qk.compareFileDiff(REPO, {
+        baseRev: "main",
+        targetRev: "dev",
+        filePath: "b.ts",
+        mode: "twodot",
+        ignoreWhitespace: false,
+      })
+    );
     // Varies with mode
-    expect(base).not.toEqual(qk.compareFileDiff(REPO, "main", "dev", "a.ts", "threedot", false));
+    expect(base).not.toEqual(
+      qk.compareFileDiff(REPO, {
+        baseRev: "main",
+        targetRev: "dev",
+        filePath: "a.ts",
+        mode: "threedot",
+        ignoreWhitespace: false,
+      })
+    );
     // Varies with ignoreWhitespace
-    expect(base).not.toEqual(qk.compareFileDiff(REPO, "main", "dev", "a.ts", "twodot", true));
+    expect(base).not.toEqual(
+      qk.compareFileDiff(REPO, {
+        baseRev: "main",
+        targetRev: "dev",
+        filePath: "a.ts",
+        mode: "twodot",
+        ignoreWhitespace: true,
+      })
+    );
     // Varies with repo
     expect(base).not.toEqual(
-      qk.compareFileDiff("/other/repo", "main", "dev", "a.ts", "twodot", false)
+      qk.compareFileDiff("/other/repo", {
+        baseRev: "main",
+        targetRev: "dev",
+        filePath: "a.ts",
+        mode: "twodot",
+        ignoreWhitespace: false,
+      })
     );
+  });
+
+  it("keeps the compareFileDiff key layout stable", () => {
+    expect(
+      qk.compareFileDiff(REPO, {
+        baseRev: "main",
+        targetRev: "dev",
+        filePath: "a.ts",
+        mode: "twodot",
+        ignoreWhitespace: true,
+      })
+    ).toEqual(["repo", REPO, "compareFileDiff", "main", "dev", "a.ts", "twodot", true]);
   });
 
   it("pullRequestsAll is a prefix of every PR list, regardless of state filter", () => {

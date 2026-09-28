@@ -104,7 +104,13 @@ export const CompareDiffViewer: React.FC<CompareDiffViewerProps> = ({
   const filePath = file?.path ?? "";
 
   const { data: diff, isLoading } = useQuery({
-    queryKey: qk.compareFileDiff(repoPath, baseRev, targetRev, filePath, mode, diffIgnoreWhitespace),
+    queryKey: qk.compareFileDiff(repoPath, {
+      baseRev,
+      targetRev,
+      filePath,
+      mode,
+      ignoreWhitespace: diffIgnoreWhitespace,
+    }),
     queryFn: () =>
       invokeCommand.getCompareFileDiff(
         repoPath,

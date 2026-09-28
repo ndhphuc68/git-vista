@@ -110,6 +110,12 @@
       "rules": {
         "max-lines": "off"
       }
+    },
+    {
+      "files": ["src/ipc/**"],
+      "rules": {
+        "max-params": "off"
+      }
     }
   ]
 }

@@ -53,11 +53,19 @@ export const qk = {
    */
   compareFileDiff: (
     repo: string,
-    baseRev: string,
-    targetRev: string,
-    filePath: string,
-    mode: string,
-    ignoreWhitespace: boolean
+    {
+      baseRev,
+      targetRev,
+      filePath,
+      mode,
+      ignoreWhitespace,
+    }: {
+      baseRev: string;
+      targetRev: string;
+      filePath: string;
+      mode: string;
+      ignoreWhitespace: boolean;
+    }
   ) =>
     [
       "repo",
