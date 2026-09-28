@@ -10,8 +10,7 @@ import {
   PruneConfirmModal,
 } from "../features/remote";
 import { StashDiffView } from "../features/stash";
-import { CommitGraph } from "../features/history";
-import { CommitDetailPanel } from "./diff/CommitDetailPanel";
+import { CommitGraph, CommitDetailPanel } from "../features/history";
 import { useLayoutStore } from "../store/useLayoutStore";
 import { useRepoStore } from "../store/useRepoStore";
 import { useWindowDimensions } from "../hooks/useWindowDimensions";

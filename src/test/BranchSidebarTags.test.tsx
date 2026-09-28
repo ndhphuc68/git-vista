@@ -16,8 +16,8 @@ import type * as HistoryFeature from "../features/history";
 vi.mock("../features/history", async (importOriginal) => ({
   ...(await importOriginal<typeof HistoryFeature>()),
   CommitGraph: () => null,
+  CommitDetailPanel: () => null,
 }));
-vi.mock("../components/diff/CommitDetailPanel", () => ({ CommitDetailPanel: () => null }));
 
 const mockTags: TagItem[] = [
   {

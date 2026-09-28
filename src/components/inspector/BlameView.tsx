@@ -11,7 +11,7 @@ import {
   getAuthorInitials,
   formatRelativeTime,
   formatExactDateTime,
-} from "../diff/CommitDetailPanel";
+} from "../../features/history";
 import { qk } from "../../domain/queryKeys";
 
 interface BlameViewProps {

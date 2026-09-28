@@ -9,7 +9,7 @@ import {
   getAuthorAvatarStyle,
   getAuthorInitials,
   formatRelativeTime,
-} from "../diff/CommitDetailPanel";
+} from "../../features/history";
 import { qk } from "../../domain/queryKeys";
 
 interface FileHistoryViewProps {
