@@ -1,3 +1,8 @@
+/**
+ * Hooks and thin wrappers over the undo IPC commands. This is the only
+ * module in `features/undo` allowed to import `ipc/`; other modules compose
+ * these functions instead of calling `invokeCommand` directly.
+ */
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { invokeCommand } from "../../../ipc/client";
 import { qk } from "../../../domain/queryKeys";
