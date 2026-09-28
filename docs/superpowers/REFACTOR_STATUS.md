@@ -68,7 +68,7 @@ pnpm install
 # Xác nhận mọi thứ xanh trước khi làm gì
 pnpm lint                     # phải exit 0
 pnpm build                    # phải exit 0
-pnpm test                     # phải 122 file / 786 test xanh
+pnpm test                     # phải 122 file / 796 test xanh
 pnpm check-query-keys         # "No query key literals found..."
 pnpm check-comment-language   # "All comments are in English."
 pnpm check-bindings           # "...is in sync with the Rust commands."
@@ -402,14 +402,14 @@ Con người đã chọn bỏ. Nếu sau này cần một chỗ chung để mở
 
 ### Giai đoạn 7b — Chuyển 24 import runtime `ipc/` còn lại vào `features/*/api`, nâng `no-restricted-imports` lên `error` ✅
 
-**Kế hoạch**: `docs/superpowers/sdd/2026-09-29-refactor-phase7b-ipc-imports/` (10 task). Mỗi task chuyển một nhóm call site sang gọi qua `features/*/api` thay vì `ipc/client` trực tiếp; Task 10 khoá luật lại và mở rộng bài kiểm tra ranh giới ra toàn bộ `src/`.
+**Kế hoạch**: `docs/superpowers/plans/2026-09-29-refactor-phase7b-ipc-imports.md` (10 task). Mỗi task chuyển một nhóm call site sang gọi qua `features/*/api` thay vì `ipc/client` trực tiếp; Task 10 khoá luật lại và mở rộng bài kiểm tra ranh giới ra toàn bộ `src/`.
 
 **Việc đã làm, theo commit:**
 
 | Commit | Nội dung |
 | --- | --- |
 | `d89d8e0` | Kế hoạch |
-| `e542b93`, `74477fd` (Task 1) | Feature mới `undo`, `history`; đóng lại lỗ hổng coverage §11.4 (StashDiffView apply/pop/drop) |
+| `e542b93`, `74477fd` (Task 1) | Feature có sẵn `undo`, `history` mở rộng; đóng lại lỗ hổng coverage §11.4 (StashDiffView apply/pop/drop) |
 | `3ba2036` (Task 2) | `history` mở rộng: `FileDiffViewer`, `BlameView`, `FileHistoryView`, `CherryPickModal`, `RevertModal` |
 | `6df6fa8` (Task 3) | Feature mới `compare` — `CompareModal`, `CompareDiffViewer` |
 | `689b1a9` (Task 4) | `merge` mở rộng — `InteractiveRebaseModal` |
@@ -418,7 +418,9 @@ Con người đã chọn bỏ. Nếu sau này cần một chỗ chung để mở
 | `c80f1e6` (Task 7) | Feature mới `repo` — `useTabStore`, `RepoHeader`, `ControlsBar`, nửa `App.tsx` xử lý event |
 | `8d5eb7c`, `c390832` (Task 8) | Feature mới `github` — `PullRequestDetailDrawer`, `CreatePullRequestModal`, `PullRequestsSection`, `GitHubSettingsTab`. Fix round: `staleTime: options?.staleTime` (`useBranches`, `useGitHubRepoInfo`) âm thầm ghi đè `staleTime` mặc định 60s của `QueryClient` toàn cục bằng `undefined` khi caller không truyền option — TanStack spread options nên field vắng mặt vẫn thắng field mặc định. Bắt được lúc kiểm chứng bởi controller, sửa kèm test |
 | `07fa06e` (Task 9) | `settings` + `welcome` mở rộng — `GitProfileTab`, `CloneModal`. `CloneModal` (+ test) dọn hẳn vào `features/welcome/components/` để tránh chu trình import ES |
-| (task 10, xem git log) | Nâng `no-restricted-imports` lên `error`; mở rộng `architectureBoundaries.test.ts` ra toàn `src/`; cập nhật tài liệu |
+| `2e82ad2` (Task 10) | Nâng `no-restricted-imports` lên `error`; mở rộng `architectureBoundaries.test.ts` ra toàn `src/`; cập nhật tài liệu |
+| `bc5506e` | Tài liệu hoá việc hoàn thành GĐ7b |
+| (final-review fix wave, xem mục dưới) | Sửa 2 chu trình import ES qua `features/history/index.ts`, dọn export không dùng ở `welcome`/`github`, thêm bài kiểm tra chống chu trình toàn `src/` |
 
 **Bài kiểm tra ranh giới mở rộng ra toàn `src/`:** trước Task 10, `"only features/*/api may import ipc/"` chỉ quét `src/features/**`, nên một file ngoài `features/` (ví dụ `src/store/` hay `src/components/`) gọi thẳng `ipc/` sẽ không bị bắt bởi test, chỉ bị `no-restricted-imports` (khi đó còn `warn`) cảnh báo. Test mới `"outside ipc/ and features/*/api, nothing imports ipc/ at runtime"` quét mọi file `.ts`/`.tsx` không phải test dưới `src/`, loại trừ `src/ipc/**` và `src/features/*/api/**`, dùng lại `collectSourceFiles`/`importsIpcAtRuntime` đã có.
 
@@ -445,13 +447,13 @@ Xoá import → `pnpm lint` thoát mã **0** trở lại, 0 dòng `no-restricted
 | --- | --- |
 | `pnpm lint` | exit 0 — **127 warning** (90 `max-lines-per-function`, 27 `complexity`, 10 `max-lines`); **0** `no-restricted-imports` (luật giờ `error`) |
 | `pnpm build` | exit 0 |
-| `pnpm test` | PASS — **122 file / 786 test** (baseline đầu 7b: 113 file / 772 test) |
+| `pnpm test` | PASS — **122 file / 796 test** sau fix wave cuối cùng (baseline cuối Task 10: 122 file / 786 test; baseline đầu 7b: 113 file / 772 test) |
 | `pnpm check-comment-language` | PASS — "All comments are in English." |
 | `pnpm check-query-keys` | PASS — "No query key literals found outside src/domain/queryKeys.ts." |
 
 Con số `complexity` giảm nhẹ từ 28 xuống 27 (chưa được lát này chủ đích dọn) — hệ quả phụ của việc hook chuyển ra khỏi component gốc làm hàm gốc ngắn/đơn giản đi đôi chút; không phải việc của GĐ7c bị lấn trước.
 
-**Đặc tả hoá (characterization test) thêm trong GĐ7b:** `StashDiffView`, `FileDiffViewer`, `BlameView`, `FileHistoryView`, `CompareDiffViewer`, `ControlsBar`, `GitProfileTab`, và test checkout của PR sidebar (`src/test/PullRequestsSidebar.test.tsx`).
+**Đặc tả hoá (characterization test) thêm trong GĐ7b:** `StashDiffView`, `FileDiffViewer`, `BlameView`, `FileHistoryView`, `CompareDiffViewer`, `ControlsBar`, `GitProfileTab`, test checkout của PR sidebar (`src/test/PullRequestsSidebar.test.tsx`), và hai test hồi quy chốt fix `staleTime` (Task 8) — `src/features/branch/api/useBranches.test.ts`, `src/features/github/api/githubApi.test.ts`.
 
 **Sai lệch có chủ đích so với plan (không phải lỗi):**
 
@@ -464,11 +466,13 @@ Con số `complexity` giảm nhẹ từ 28 xuống 27 (chưa được lát này 
 - Một số file `api/` có từ trước GĐ7b thiếu docblock chuẩn (ví dụ `features/merge/api/useMergeMutations.ts`).
 - Invalidation vẫn nằm trong vài component thay vì `api/` — theo kế hoạch để GĐ7c.
 
+**Fix wave sau final review (sau `bc5506e`):** review cuối GĐ7b phát hiện Task 2 (`3ba2036`) đã để lại hai chu trình import ES chạy vòng qua `features/history/index.ts` — `CommitGraph → CommitGraphDialogs → CherryPickModal`/`RevertModal` (ở `src/components/modals/`) quay lại `import ... from "../../features/history"`, và `CommitDetailPanel → CommitFileDiff → FileDiffViewer` (ở `src/components/diff/`) cũng vậy. Sửa theo đúng khuôn Task 9 đã làm với `CloneModal`: chuyển cả ba component (`CherryPickModal.tsx`, `RevertModal.tsx`, `FileDiffViewer.tsx`, cùng test đi kèm) vào `src/features/history/components/`, đổi sang import `../api` (sibling), không còn tự import index của chính feature mình. `FileDiffViewer` được thêm vào export public của `features/history` vì `FileHistoryView.tsx` (ngoài feature) vẫn cần dùng nó. Đồng thời dọn 2 export thừa: `openRepository`/`selectRepoFolder`/`cloneRepo`/`cancelRemoteTask`/`listenToTaskProgress` khỏi `features/welcome/index.ts` (chỉ dùng nội bộ feature) và `type GitHubRepoInfo` khỏi `features/github/index.ts` (không ai dùng ngoài feature); và một docblock lạc hậu ở `features/welcome/api/index.ts`. Thêm bài kiểm tra mới trong `architectureBoundaries.test.ts`: dựng đồ thị import toàn `src/` (loại `import type`/`export type` vì bị xoá lúc biên dịch), tìm thành phần liên thông mạnh (Tarjan), và chặn mọi chu trình đi qua `features/*/index.ts`. Test chỉ vướng đúng một chu trình có sẵn không liên quan tới feature — `ipc/history.ts` ↔ `ipc/client.ts` — thực chất là false positive của bộ trích xuất import dựa trên regex (nó khớp nhầm các chuỗi nội dung file giả lập git kiểu `"import React from 'react';"` nằm trong dữ liệu fallback dev của `history.ts`, không phải import thật); vì chu trình này không đi qua `features/*/index.ts` nên test vẫn xanh mà không cần loại trừ thủ công. Break experiment: tạm thêm lại `import { cherryPickCommit } from "../../../features/history";` vào `CherryPickModal.tsx` đã chuyển — test cụ thể FAIL, đúng như dự kiến; xoá dòng đó, xanh trở lại.
+
 ### Số liệu hiện tại
 
 | Chỉ số | Khi bắt đầu | Bây giờ |
 | --- | --- | --- |
-| Test | 73 file / ~370 | **122 file / 786** (frontend) + **144** Rust (sau GĐ6) |
+| Test | 73 file / ~370 | **122 file / 796** (frontend, sau fix wave) + **144** Rust (sau GĐ6) |
 | Bản sao `emit_repo_changed` | 9 (2 chữ ký, 3 dạng payload) | **1** (`events::emit_repo_changed`) |
 | `src/ipc/bindings.ts` viết tay | 486 dòng | **0** (do máy sinh) |
 | `src/ipc/client.ts` | 1748 dòng | **124** (facade) |
