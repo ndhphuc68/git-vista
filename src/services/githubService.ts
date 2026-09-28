@@ -20,6 +20,15 @@ interface RawGitHubUser {
   html_url?: string;
 }
 
+// GitHub always sends these three fields for assignees and requested
+// reviewers, so this raw shape matches `GitHubUserSummary` (required strings)
+// directly instead of the all-optional `RawGitHubUser` used for `p.user`.
+interface RawGitHubUserLink {
+  login: string;
+  avatar_url: string;
+  html_url: string;
+}
+
 interface RawGitHubLabel {
   id: number;
   name: string;
@@ -58,8 +67,8 @@ interface RawPullRequest {
   html_url: string;
   body?: string | null;
   mergeable?: boolean | null;
-  assignees?: RawGitHubUser[];
-  requested_reviewers?: RawGitHubUser[];
+  assignees?: RawGitHubUserLink[];
+  requested_reviewers?: RawGitHubUserLink[];
   commits?: number;
 }
 
@@ -67,12 +76,8 @@ function mapLabel(l: RawGitHubLabel): GitHubLabel {
   return { id: l.id, name: l.name, color: l.color, description: l.description };
 }
 
-function mapUserLink(u: RawGitHubUser): GitHubUserSummary {
-  return {
-    login: u.login ?? "unknown",
-    avatar_url: u.avatar_url ?? "",
-    html_url: u.html_url ?? "",
-  };
+function mapUserLink(u: RawGitHubUserLink): GitHubUserSummary {
+  return { login: u.login, avatar_url: u.avatar_url, html_url: u.html_url };
 }
 
 function getHeaders(token?: string | null): Record<string, string> {
