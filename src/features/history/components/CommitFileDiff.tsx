@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { Check, Copy, ChevronLeft, ChevronRight, FileText, Folder, History } from "lucide-react";
-import { FileDiffViewer } from "../../../components/diff/FileDiffViewer";
+import { FileDiffViewer } from "./FileDiffViewer";
 import { useTranslation } from "../../../i18n";
 import { useInspectorStore } from "../../../store/useInspectorStore";
 import type { CommitFile } from "../api/useCommitDetails";

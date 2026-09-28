@@ -2,16 +2,16 @@ import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FileDiffViewer } from "./FileDiffViewer";
-import { useSettingsStore } from "../../store/useSettingsStore";
-import type { FileDiffResult } from "../../ipc/bindings.generated";
+import { useSettingsStore } from "../../../store/useSettingsStore";
+import type { FileDiffResult } from "../../../ipc/bindings.generated";
 
-vi.mock("../../ipc/client", () => ({
+vi.mock("../../../ipc/client", () => ({
   invokeCommand: {
     getCommitFileDiff: vi.fn(),
   },
 }));
 
-import { invokeCommand } from "../../ipc/client";
+import { invokeCommand } from "../../../ipc/client";
 
 const diff: FileDiffResult = {
   file_path: "src/example.ts",

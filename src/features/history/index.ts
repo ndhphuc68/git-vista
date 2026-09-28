@@ -6,6 +6,7 @@ export { cherryPickCommit, revertCommit } from "./api/commitActionsApi";
 export { CommitGraph } from "./components/CommitGraph";
 export type { GraphDialogComponents } from "./components/CommitGraphDialogs";
 export { CommitDetailPanel } from "./components/CommitDetailPanel";
+export { FileDiffViewer } from "./components/FileDiffViewer";
 export {
   getAuthorAvatarStyle,
   getAuthorInitials,

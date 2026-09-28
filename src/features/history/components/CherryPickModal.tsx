@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { RotateCcw, AlertTriangle } from "lucide-react";
-import type { CommitActionResult } from "../../ipc/bindings.generated";
-import { useTranslation } from "../../i18n";
-import { useToastStore } from "../../store/useToastStore";
-import { mapGitError } from "../../utils/errorMapping";
-import { Modal, Button, Alert } from "../../shared/ui";
-import { revertCommit } from "../../features/history";
+import { GitPullRequest, GitBranch } from "lucide-react";
+import type { CommitActionResult } from "../../../ipc/bindings.generated";
+import { useTranslation } from "../../../i18n";
+import { useToastStore } from "../../../store/useToastStore";
+import { mapGitError } from "../../../utils/errorMapping";
+import { Modal, Button, Alert } from "../../../shared/ui";
+import { cherryPickCommit } from "../api/commitActionsApi";
 
-const TITLE_ID = "revert-modal-title";
+const TITLE_ID = "cherry-pick-title";
 
-export interface RevertModalProps {
+export interface CherryPickModalProps {
   isOpen: boolean;
   onClose: () => void;
   repoPath: string;
@@ -20,14 +20,16 @@ export interface RevertModalProps {
     author: string;
     time?: string;
   };
+  currentBranch?: string;
   onSuccess?: (result: CommitActionResult) => void;
 }
 
-export const RevertModal: React.FC<RevertModalProps> = ({
+export const CherryPickModal: React.FC<CherryPickModalProps> = ({
   isOpen,
   onClose,
   repoPath,
   targetCommit,
+  currentBranch,
   onSuccess,
 }) => {
   const { t } = useTranslation();
@@ -49,13 +51,14 @@ export const RevertModal: React.FC<RevertModalProps> = ({
     setError(null);
 
     try {
-      const res = await revertCommit(repoPath, targetCommit.id, autoCommit);
+      const res = await cherryPickCommit(repoPath, targetCommit.id, autoCommit);
 
       if (res.success || res.status === "Conflict") {
         if (onSuccess) onSuccess(res);
         onClose();
       } else {
-        const errorMsg = res.output || t.modals.revert.genericError.replace("{msg}", res.status);
+        const errorMsg =
+          res.output || t.modals.cherryPick.genericError.replace("{msg}", res.status);
         setError(errorMsg);
       }
     } catch (err: unknown) {
@@ -66,30 +69,25 @@ export const RevertModal: React.FC<RevertModalProps> = ({
       setLoading(false);
     }
   };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} labelledBy={TITLE_ID}>
       <Modal.Header
-        title={t.modals.revert.title}
+        title={t.modals.cherryPick.title}
         onClose={onClose}
         titleId={TITLE_ID}
-        icon={RotateCcw}
+        icon={GitPullRequest}
       />
 
       {/* The form wraps Body and Footer so Enter and the submit button both
           still submit across the two sections. */}
       <form onSubmit={handleSubmit} className="contents">
         <Modal.Body>
-          {/* Warning description banner */}
-          <div className="flex items-start gap-2 p-2.5 bg-window border border-border-subtle rounded-md text-xs text-secondary">
-            <AlertTriangle size={15} className="text-amber-500 shrink-0 mt-0.5" />
-            <span>{t.modals.revert.desc}</span>
-          </div>
-
           {/* Target commit info card */}
           <div className="bg-window px-3 py-2.5 rounded-md border border-border-subtle flex flex-col gap-1.5 text-xs">
             <div className="flex items-center justify-between">
               <span className="text-secondary text-[11px] font-medium">
-                {t.modals.revert.targetCommit}
+                {t.modals.cherryPick.targetCommit}
               </span>
               <span className="font-mono text-primary font-semibold text-[11px] bg-surface px-1.5 py-0.5 rounded border border-border-subtle">
                 {targetCommit.short_id || targetCommit.id.substring(0, 7)}
@@ -104,6 +102,19 @@ export const RevertModal: React.FC<RevertModalProps> = ({
             </div>
           </div>
 
+          {/* Destination Branch */}
+          {currentBranch && (
+            <div className="flex items-center justify-between text-xs bg-window px-3 py-2 rounded-md border border-border-subtle">
+              <span className="text-secondary text-[11px]">
+                {t.modals.cherryPick.destinationBranch}
+              </span>
+              <span className="flex items-center gap-1 font-semibold text-primary">
+                <GitBranch size={13} className="text-accent" />
+                {currentBranch}
+              </span>
+            </div>
+          )}
+
           {/* Auto-commit checkbox */}
           <div className="flex flex-col gap-1 mt-1">
             <label className="flex items-center gap-2 cursor-pointer text-xs text-primary select-none">
@@ -112,13 +123,13 @@ export const RevertModal: React.FC<RevertModalProps> = ({
                 checked={autoCommit}
                 onChange={(e) => setAutoCommit(e.target.checked)}
                 disabled={loading}
-                aria-label={t.modals.revert.autoCommitLabel}
+                aria-label={t.modals.cherryPick.autoCommitLabel}
                 className="accent-accent cursor-pointer rounded-sm"
               />
-              <span className="font-medium">{t.modals.revert.autoCommitLabel}</span>
+              <span className="font-medium">{t.modals.cherryPick.autoCommitLabel}</span>
             </label>
             <span className="text-[11px] text-secondary pl-6">
-              {t.modals.revert.autoCommitDesc}
+              {t.modals.cherryPick.autoCommitDesc}
             </span>
           </div>
 
@@ -127,10 +138,10 @@ export const RevertModal: React.FC<RevertModalProps> = ({
 
         <Modal.Footer>
           <Button variant="secondary" onClick={onClose} disabled={loading}>
-            {t.modals.revert.cancel}
+            {t.modals.cherryPick.cancel}
           </Button>
           <Button type="submit" loading={loading}>
-            {loading ? t.modals.revert.submitting : t.modals.revert.submit}
+            {loading ? t.modals.cherryPick.submitting : t.modals.cherryPick.submit}
           </Button>
         </Modal.Footer>
       </form>

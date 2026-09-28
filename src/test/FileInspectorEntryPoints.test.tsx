@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useInspectorStore } from "../store/useInspectorStore";
-import { FileDiffViewer } from "../components/diff/FileDiffViewer";
+import { FileDiffViewer } from "../features/history";
 
 function renderWithClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({

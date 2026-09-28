@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import clsx from "clsx";
 import { Space, Type, FileText, History } from "lucide-react";
-import { useTranslation } from "../../i18n";
-import { useSettingsStore } from "../../store/useSettingsStore";
-import { useInspectorStore } from "../../store/useInspectorStore";
-import { pairHunkLines } from "../../utils/wordDiff";
-import { type DiffHunk } from "../../ipc/bindings.generated";
-import { DiffLineContent } from "./DiffLineContent";
-import { useCommitFileDiff } from "../../features/history";
+import { useTranslation } from "../../../i18n";
+import { useSettingsStore } from "../../../store/useSettingsStore";
+import { useInspectorStore } from "../../../store/useInspectorStore";
+import { pairHunkLines } from "../../../utils/wordDiff";
+import { type DiffHunk } from "../../../ipc/bindings.generated";
+import { DiffLineContent } from "../../../components/diff/DiffLineContent";
+import { useCommitFileDiff } from "../api/useFileInspection";
 
 interface FileDiffViewerProps {
   repoPath: string;

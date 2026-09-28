@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { FileDiffViewer } from "../components/diff/FileDiffViewer";
+import { FileDiffViewer } from "../features/history";
 import { InteractiveDiffViewer } from "../components/changes/InteractiveDiffViewer";
 import { invokeCommand } from "../ipc/client";
 import { useSettingsStore } from "../store/useSettingsStore";

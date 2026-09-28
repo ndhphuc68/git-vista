@@ -1,21 +1,21 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { CherryPickModal } from "../components/modals/CherryPickModal";
-import { invokeCommand } from "../ipc/client";
+import { RevertModal } from "./RevertModal";
+import { invokeCommand } from "../../../ipc/client";
 
-vi.mock("../ipc/client", () => ({
+vi.mock("../../../ipc/client", () => ({
   invokeCommand: {
-    cherryPickCommit: vi.fn(),
+    revertCommit: vi.fn(),
   },
 }));
 
-describe("CherryPickModal", () => {
+describe("RevertModal", () => {
   const dummyCommit = {
-    id: "a1b2c3d4e5f6789012345678901234567890abcd",
-    short_id: "a1b2c3d",
-    summary: "feat: add user authentication",
-    author: "Alice Smith",
-    time: "2 hours ago",
+    id: "f1e2d3c4b5a6789012345678901234567890fedc",
+    short_id: "f1e2d3c",
+    summary: "fix: broken layout on mobile",
+    author: "Bob Jones",
+    time: "Yesterday",
   };
 
   beforeEach(() => {
@@ -24,44 +24,42 @@ describe("CherryPickModal", () => {
 
   it("does not render dialog when isOpen is false", () => {
     render(
-      <CherryPickModal
+      <RevertModal
         isOpen={false}
         onClose={vi.fn()}
         repoPath="/test/repo"
         targetCommit={dummyCommit}
-        currentBranch="main"
       />
     );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("renders target commit details and current destination branch", () => {
+  it("renders target commit details and description warning banner", () => {
     render(
-      <CherryPickModal
+      <RevertModal
         isOpen={true}
         onClose={vi.fn()}
         repoPath="/test/repo"
         targetCommit={dummyCommit}
-        currentBranch="feature/payments"
       />
     );
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByText("a1b2c3d")).toBeInTheDocument();
-    expect(screen.getByText("feat: add user authentication")).toBeInTheDocument();
-    expect(screen.getByText("Alice Smith")).toBeInTheDocument();
-    expect(screen.getByText("2 hours ago")).toBeInTheDocument();
-    expect(screen.getByText("feature/payments")).toBeInTheDocument();
+    expect(screen.getByText("f1e2d3c")).toBeInTheDocument();
+    expect(screen.getByText("fix: broken layout on mobile")).toBeInTheDocument();
+    expect(screen.getByText("Bob Jones")).toBeInTheDocument();
+    expect(screen.getByText("Yesterday")).toBeInTheDocument();
+    // Warning banner description text
+    expect(screen.getByText(/Thao tác này sẽ tạo một commit mới/i)).toBeInTheDocument();
   });
 
   it("has auto-commit checkbox checked by default", () => {
     render(
-      <CherryPickModal
+      <RevertModal
         isOpen={true}
         onClose={vi.fn()}
         repoPath="/test/repo"
         targetCommit={dummyCommit}
-        currentBranch="main"
       />
     );
 
@@ -76,31 +74,30 @@ describe("CherryPickModal", () => {
     const mockResult = {
       success: true,
       status: "Committed",
-      new_commit_id: "998877665544",
-      undo_token: "refs/gitui-backup/undo-123",
-      output: "Finished cherry-pick",
+      new_commit_id: "112233445566",
+      undo_token: "refs/gitui-backup/undo-revert",
+      output: "Revert completed",
     };
 
-    (invokeCommand.cherryPickCommit as ReturnType<typeof vi.fn>).mockResolvedValue(mockResult);
+    (invokeCommand.revertCommit as ReturnType<typeof vi.fn>).mockResolvedValue(mockResult);
 
     render(
-      <CherryPickModal
+      <RevertModal
         isOpen={true}
         onClose={onClose}
         onSuccess={onSuccess}
         repoPath="/test/repo"
         targetCommit={dummyCommit}
-        currentBranch="main"
       />
     );
 
-    const submitBtn = screen.getByRole("button", { name: /^cherry-pick$/i });
+    const submitBtn = screen.getByRole("button", { name: /hoàn tác commit/i });
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(invokeCommand.cherryPickCommit).toHaveBeenCalledWith(
+      expect(invokeCommand.revertCommit).toHaveBeenCalledWith(
         "/test/repo",
-        "a1b2c3d4e5f6789012345678901234567890abcd",
+        "f1e2d3c4b5a6789012345678901234567890fedc",
         true
       );
       expect(onSuccess).toHaveBeenCalledWith(mockResult);
@@ -116,32 +113,31 @@ describe("CherryPickModal", () => {
       status: "Staged",
       new_commit_id: null,
       undo_token: null,
-      output: "Changes staged",
+      output: "Revert changes staged",
     };
 
-    (invokeCommand.cherryPickCommit as ReturnType<typeof vi.fn>).mockResolvedValue(mockResult);
+    (invokeCommand.revertCommit as ReturnType<typeof vi.fn>).mockResolvedValue(mockResult);
 
     render(
-      <CherryPickModal
+      <RevertModal
         isOpen={true}
         onClose={onClose}
         onSuccess={onSuccess}
         repoPath="/test/repo"
         targetCommit={dummyCommit}
-        currentBranch="main"
       />
     );
 
     const checkbox = screen.getByRole("checkbox");
     fireEvent.click(checkbox);
 
-    const submitBtn = screen.getByRole("button", { name: /^cherry-pick$/i });
+    const submitBtn = screen.getByRole("button", { name: /hoàn tác commit/i });
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(invokeCommand.cherryPickCommit).toHaveBeenCalledWith(
+      expect(invokeCommand.revertCommit).toHaveBeenCalledWith(
         "/test/repo",
-        "a1b2c3d4e5f6789012345678901234567890abcd",
+        "f1e2d3c4b5a6789012345678901234567890fedc",
         false
       );
       expect(onSuccess).toHaveBeenCalledWith(mockResult);
@@ -157,13 +153,13 @@ describe("CherryPickModal", () => {
       status: "Conflict",
       new_commit_id: null,
       undo_token: null,
-      output: "CONFLICT (content): Merge conflict in file.txt",
+      output: "CONFLICT (content): Merge conflict in layout.tsx",
     };
 
-    (invokeCommand.cherryPickCommit as ReturnType<typeof vi.fn>).mockResolvedValue(mockResult);
+    (invokeCommand.revertCommit as ReturnType<typeof vi.fn>).mockResolvedValue(mockResult);
 
     render(
-      <CherryPickModal
+      <RevertModal
         isOpen={true}
         onClose={onClose}
         onSuccess={onSuccess}
@@ -172,11 +168,11 @@ describe("CherryPickModal", () => {
       />
     );
 
-    const submitBtn = screen.getByRole("button", { name: /^cherry-pick$/i });
+    const submitBtn = screen.getByRole("button", { name: /hoàn tác commit/i });
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(invokeCommand.cherryPickCommit).toHaveBeenCalled();
+      expect(invokeCommand.revertCommit).toHaveBeenCalled();
       expect(onSuccess).toHaveBeenCalledWith(mockResult);
       expect(onClose).toHaveBeenCalled();
     });
@@ -190,13 +186,13 @@ describe("CherryPickModal", () => {
       status: "Error",
       new_commit_id: null,
       undo_token: null,
-      output: "Repository is dirty. Please clean working tree first.",
+      output: "Unfinished rebase in progress.",
     };
 
-    (invokeCommand.cherryPickCommit as ReturnType<typeof vi.fn>).mockResolvedValue(mockResult);
+    (invokeCommand.revertCommit as ReturnType<typeof vi.fn>).mockResolvedValue(mockResult);
 
     render(
-      <CherryPickModal
+      <RevertModal
         isOpen={true}
         onClose={onClose}
         onSuccess={onSuccess}
@@ -205,13 +201,11 @@ describe("CherryPickModal", () => {
       />
     );
 
-    const submitBtn = screen.getByRole("button", { name: /^cherry-pick$/i });
+    const submitBtn = screen.getByRole("button", { name: /hoàn tác commit/i });
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Repository is dirty. Please clean working tree first.")
-      ).toBeInTheDocument();
+      expect(screen.getByText("Unfinished rebase in progress.")).toBeInTheDocument();
       expect(onSuccess).not.toHaveBeenCalled();
       expect(onClose).not.toHaveBeenCalled();
     });
@@ -220,7 +214,7 @@ describe("CherryPickModal", () => {
   it("closes when cancel button is clicked or Escape key pressed", () => {
     const onClose = vi.fn();
     render(
-      <CherryPickModal
+      <RevertModal
         isOpen={true}
         onClose={onClose}
         repoPath="/test/repo"

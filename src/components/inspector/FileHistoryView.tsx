@@ -2,12 +2,12 @@ import React, { useState, useMemo, useEffect } from "react";
 import clsx from "clsx";
 import { Search, X } from "lucide-react";
 import { useTranslation } from "../../i18n";
-import { FileDiffViewer } from "../diff/FileDiffViewer";
 import {
   getAuthorAvatarStyle,
   getAuthorInitials,
   formatRelativeTime,
   useFileHistory,
+  FileDiffViewer,
 } from "../../features/history";
 
 interface FileHistoryViewProps {
