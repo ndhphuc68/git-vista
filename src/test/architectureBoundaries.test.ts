@@ -293,6 +293,23 @@ describe("architecture boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("outside ipc/ and features/*/api, nothing imports ipc/ at runtime", () => {
+    const files = collectSourceFiles(SRC);
+    expect(files.length).toBeGreaterThan(0);
+    const violations: string[] = [];
+
+    for (const file of files) {
+      const rel = relative(SRC, file).replace(/\\/g, "/");
+      if (rel.startsWith("ipc/")) continue;
+      if (/^features\/[^/]+\/api\//.test(rel)) continue;
+      if (rel.startsWith("test/")) continue;
+      if (rel in IPC_IMPORT_EXCEPTIONS) continue;
+      if (importsIpcAtRuntime(readFileSync(file, "utf8"))) violations.push(rel);
+    }
+
+    expect(violations).toEqual([]);
+  });
+
   it("every ipc-import exception still exists", () => {
     // An exception left behind after its file moved or was cleaned up would
     // silently widen the rule. Each entry must name a real file.

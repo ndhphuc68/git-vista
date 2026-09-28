@@ -41,7 +41,7 @@
     "typescript/no-explicit-any": "error",
     "import/no-duplicates": "error",
     "no-restricted-imports": [
-      "warn",
+      "error",
       {
         "patterns": [
           {
