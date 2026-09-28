@@ -4,6 +4,7 @@ import { invokeCommand, listenToTaskProgress } from "../../ipc/client";
 import { type RepoSummary } from "../../ipc/bindings.generated";
 import { useTranslation } from "../../i18n";
 import { Modal } from "../../shared/ui";
+import { messageOf } from "../../shared/utils/toError";
 
 const TITLE_ID = "clone-modal-title";
 
@@ -94,7 +95,7 @@ export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onClone
           setTargetDir(selected);
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.warn("Folder picker error:", err);
     }
   };
@@ -126,8 +127,8 @@ export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onClone
       const summary = await invokeCommand.openRepository(targetDir.trim());
       onCloneSuccess(summary);
       onClose();
-    } catch (err: any) {
-      setError(typeof err === "string" ? err : err?.message || t.cloneModal.defaultError);
+    } catch (err: unknown) {
+      setError(typeof err === "string" ? err : messageOf(err) || t.cloneModal.defaultError);
     } finally {
       setIsCloning(false);
       activeTaskIdRef.current = null;

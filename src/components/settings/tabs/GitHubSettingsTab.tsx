@@ -14,6 +14,7 @@ import { useTranslation } from "../../../i18n";
 import { invokeCommand } from "../../../ipc/client";
 import { testGitHubToken } from "../../../services/githubService";
 import { type GitHubUserSummary } from "../../../ipc/githubApi";
+import { messageOf } from "../../../shared/utils/toError";
 
 export const GitHubSettingsTab: React.FC = () => {
   const { t } = useTranslation();
@@ -65,8 +66,8 @@ export const GitHubSettingsTab: React.FC = () => {
       await invokeCommand.saveGitHubToken(token.trim());
       setConnectedUser(user);
       setSuccessMessage(t.settings.github.connectionSuccess);
-    } catch (err: any) {
-      setErrorMessage(err.message || "Không thể xác thực token với GitHub.");
+    } catch (err: unknown) {
+      setErrorMessage(messageOf(err) || "Không thể xác thực token với GitHub.");
       setConnectedUser(null);
     } finally {
       setIsTesting(false);
@@ -88,8 +89,8 @@ export const GitHubSettingsTab: React.FC = () => {
       await invokeCommand.saveGitHubToken(cliToken);
       setConnectedUser(user);
       setSuccessMessage(t.settings.github.connectionSuccess);
-    } catch (err: any) {
-      setErrorMessage(err.message || "Không thể lấy token từ GitHub CLI.");
+    } catch (err: unknown) {
+      setErrorMessage(messageOf(err) || "Không thể lấy token từ GitHub CLI.");
     } finally {
       setIsTesting(false);
     }
@@ -102,8 +103,8 @@ export const GitHubSettingsTab: React.FC = () => {
       setConnectedUser(null);
       setSuccessMessage(t.settings.github.tokenRemoved);
       setErrorMessage(null);
-    } catch (err: any) {
-      setErrorMessage(err.message || "Lỗi khi gỡ bỏ token.");
+    } catch (err: unknown) {
+      setErrorMessage(messageOf(err) || "Lỗi khi gỡ bỏ token.");
     }
   };
 

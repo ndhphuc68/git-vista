@@ -9,6 +9,7 @@ import { useViewStore } from "../../store/useViewStore";
 import { Modal } from "../../shared/ui";
 import { RebaseCommitRow } from "./RebaseCommitRow";
 import { RebaseLivePreview } from "./RebaseLivePreview";
+import { messageOf } from "../../shared/utils/toError";
 import type {
   RebaseCommitItem,
   RebasePlanStep,
@@ -221,8 +222,8 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
               try {
                 await invokeCommand.undoCommit(repoPath, undoToken);
                 useToastStore.getState().showSuccess(t.modals.interactiveRebase.undoSuccessToast);
-              } catch (err: any) {
-                useToastStore.getState().showError(err?.message || "Failed to undo rebase");
+              } catch (err: unknown) {
+                useToastStore.getState().showError(messageOf(err) || "Failed to undo rebase");
               }
             },
             t.toast.undo
@@ -244,8 +245,8 @@ export const InteractiveRebaseModal: React.FC<InteractiveRebaseModalProps> = ({
           result.output || t.modals.interactiveRebase.errorToast.replace("{msg}", result.status)
         );
       }
-    } catch (err: any) {
-      setError(err?.message || t.modals.interactiveRebase.errorToast.replace("{msg}", String(err)));
+    } catch (err: unknown) {
+      setError(messageOf(err) || t.modals.interactiveRebase.errorToast.replace("{msg}", String(err)));
     } finally {
       setSubmitting(false);
     }

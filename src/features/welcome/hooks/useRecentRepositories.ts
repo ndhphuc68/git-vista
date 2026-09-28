@@ -11,6 +11,7 @@ import {
   selectRepoFolder,
 } from "../api";
 import { sortRecentRepositories } from "../model/recentRepositories";
+import { messageOf } from "../../../shared/utils/toError";
 
 const PINNED_REPOS_STORAGE_KEY = "gitvista_pinned_repos";
 
@@ -57,8 +58,8 @@ export function useRecentRepositories(onSelectRepo: (repo: RepoSummary) => void)
         const summary = await openRepository(path);
         onSelectRepo(summary);
       }
-    } catch (err: any) {
-      setError(err?.message || t.welcome.errorOpen);
+    } catch (err: unknown) {
+      setError(messageOf(err) || t.welcome.errorOpen);
     }
   };
 
@@ -67,8 +68,8 @@ export function useRecentRepositories(onSelectRepo: (repo: RepoSummary) => void)
       setError(null);
       const summary = await openRepository(path);
       onSelectRepo(summary);
-    } catch (err: any) {
-      setError(err?.message || `${t.welcome.errorRecent}${path}`);
+    } catch (err: unknown) {
+      setError(messageOf(err) || `${t.welcome.errorRecent}${path}`);
     }
   };
 

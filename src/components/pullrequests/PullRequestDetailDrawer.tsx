@@ -19,6 +19,7 @@ import { fetchPullRequestDetail } from "../../services/githubService";
 import { usePullRequestStore } from "../../store/usePullRequestStore";
 import { useToastStore } from "../../store/useToastStore";
 import { qk } from "../../domain/queryKeys";
+import { messageOf } from "../../shared/utils/toError";
 
 interface PullRequestDetailDrawerProps {
   repoPath: string;
@@ -78,8 +79,8 @@ export const PullRequestDetailDrawer: React.FC<PullRequestDetailDrawerProps> = (
       showSuccess(t.pullRequests.checkoutSuccess.replace("{branch}", res.branch_name));
       queryClient.invalidateQueries({ queryKey: qk.branches(repoPath) });
       queryClient.invalidateQueries({ queryKey: qk.commitGraph(repoPath) });
-    } catch (err: any) {
-      showError(err.message || "Lỗi khi checkout nhánh PR");
+    } catch (err: unknown) {
+      showError(messageOf(err) || "Lỗi khi checkout nhánh PR");
     } finally {
       setIsCheckingOut(false);
     }
