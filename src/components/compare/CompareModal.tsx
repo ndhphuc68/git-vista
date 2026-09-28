@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import clsx from "clsx";
-import { useQuery } from "@tanstack/react-query";
-import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
 import { useRepoStore } from "../../store/useRepoStore";
 import { Modal } from "../../shared/ui";
@@ -10,7 +8,7 @@ import { CompareCommitList } from "./CompareCommitList";
 import { CompareFileList } from "./CompareFileList";
 import { CompareDiffViewer } from "./CompareDiffViewer";
 import type { CompareMode, CompareCommitItem, CompareFileItem } from "../../ipc/bindings.generated";
-import { qk } from "../../domain/queryKeys";
+import { useCompareSummary } from "../../features/compare";
 
 const EMPTY_COMMITS: CompareCommitItem[] = [];
 const EMPTY_FILES: CompareFileItem[] = [];
@@ -57,11 +55,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
   }, [isOpen, initialBaseRev, initialTargetRev, initialMode]);
 
   // Query comparison summary
-  const { data: summary, isLoading } = useQuery({
-    queryKey: qk.compareSummary(repoPath, baseRev, targetRev, mode),
-    queryFn: () => invokeCommand.compareCommits(repoPath, baseRev, targetRev, mode),
-    enabled: isOpen && Boolean(repoPath) && Boolean(baseRev) && Boolean(targetRev),
-  });
+  const { data: summary, isLoading } = useCompareSummary(repoPath, baseRev, targetRev, mode, isOpen);
 
   // Sync selected file when files change
   useEffect(() => {

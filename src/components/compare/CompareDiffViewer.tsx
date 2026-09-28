@@ -1,15 +1,13 @@
 import React, { useState } from "react";
 import clsx from "clsx";
-import { useQuery } from "@tanstack/react-query";
 import { Space, Type, FileText, History, FileCode } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { useInspectorStore } from "../../store/useInspectorStore";
 import { pairHunkLines } from "../../utils/wordDiff";
 import { type DiffHunk, type CompareMode, type CompareFileItem } from "../../ipc/bindings.generated";
 import { DiffLineContent } from "../diff/DiffLineContent";
-import { qk } from "../../domain/queryKeys";
+import { useCompareFileDiff } from "../../features/compare";
 
 export interface CompareDiffViewerProps {
   repoPath: string;
@@ -103,24 +101,12 @@ export const CompareDiffViewer: React.FC<CompareDiffViewerProps> = ({
 
   const filePath = file?.path ?? "";
 
-  const { data: diff, isLoading } = useQuery({
-    queryKey: qk.compareFileDiff(repoPath, {
-      baseRev,
-      targetRev,
-      filePath,
-      mode,
-      ignoreWhitespace: diffIgnoreWhitespace,
-    }),
-    queryFn: () =>
-      invokeCommand.getCompareFileDiff(
-        repoPath,
-        baseRev,
-        targetRev,
-        filePath,
-        mode,
-        diffIgnoreWhitespace
-      ),
-    enabled: Boolean(repoPath && baseRev && targetRev && filePath),
+  const { data: diff, isLoading } = useCompareFileDiff(repoPath, {
+    baseRev,
+    targetRev,
+    filePath,
+    mode,
+    ignoreWhitespace: diffIgnoreWhitespace,
   });
 
   if (!file) {
