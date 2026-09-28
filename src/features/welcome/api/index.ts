@@ -1,8 +1,8 @@
 /**
  * Thin wrappers over the recent-repository IPC commands used by the welcome
  * flow. This is the only module in `features/welcome` allowed to import
- * `ipc/`; `hooks/useRecentRepositories` composes these functions instead of
- * calling `invokeCommand` directly.
+ * `ipc/`; `hooks/useRecentRepositories` and `components/CloneModal` compose
+ * these functions instead of calling `invokeCommand` directly.
  */
 import {
   invokeCommand,

@@ -5,5 +5,4 @@ export {
   saveGitHubToken,
   removeGitHubToken,
   checkoutPullRequest,
-  type GitHubRepoInfo,
 } from "./api/githubApi";

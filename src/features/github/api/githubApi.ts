@@ -7,7 +7,7 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { invokeCommand } from "../../../ipc/client";
-import { type CheckoutPrResult, type GitHubRepoInfo } from "../../../ipc/bindings.generated";
+import { type CheckoutPrResult } from "../../../ipc/bindings.generated";
 import { qk } from "../../../domain/queryKeys";
 
 /**
@@ -64,5 +64,3 @@ export function checkoutPullRequest(
 ): Promise<CheckoutPrResult> {
   return invokeCommand.checkoutPullRequest(repoPath, prNumber);
 }
-
-export type { GitHubRepoInfo };
