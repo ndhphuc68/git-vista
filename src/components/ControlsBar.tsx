@@ -15,7 +15,8 @@ import {
 import { useSettingsStore, type Theme, type Locale } from "../store/useSettingsStore";
 import { useLayoutStore } from "../store/useLayoutStore";
 import { useTranslation } from "../i18n";
-import { invokeCommand, type RepoChangedPayload, type SystemInfo } from "../ipc/client";
+import { type RepoChangedPayload, type SystemInfo } from "../ipc/client";
+import { ping, getSystemInfo, simulateRepoChange } from "../features/repo";
 
 interface ControlsBarProps {
   lastEvent: RepoChangedPayload | null;
@@ -35,10 +36,10 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
   const handleTestIpc = async () => {
     setLoading(true);
     try {
-      const pingRes = await invokeCommand.ping("Chào Rust backend từ React!");
+      const pingRes = await ping("Chào Rust backend từ React!");
       setPingResult(pingRes);
 
-      const info = await invokeCommand.getSystemInfo();
+      const info = await getSystemInfo();
       setSysInfo(info);
     } catch (err) {
       console.warn("IPC Error or Browser Fallback:", err);
@@ -50,7 +51,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
 
   const handleSimulateRepoChange = async () => {
     try {
-      await invokeCommand.simulateRepoChange("d:/project-v3");
+      await simulateRepoChange("d:/project-v3");
     } catch (err) {
       console.warn("Event simulate error:", err);
     }

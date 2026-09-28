@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { type RepoSummary } from "../ipc/bindings.generated";
 import { type TabItem, type TabSessionData } from "../types/tab";
-import { invokeCommand } from "../ipc/client";
+import { closeRepository, openRepository } from "../features/repo";
 import { useRepoStore } from "./useRepoStore";
 import { useViewStore } from "./useViewStore";
 
@@ -134,7 +134,7 @@ export const useTabStore = create<TabStoreState>((set, get) => ({
     saveSessionToStorage(remainingTabs, nextActiveId);
 
     // Call backend to release file watcher and memory
-    invokeCommand.closeRepository(tabId).catch((err) => {
+    closeRepository(tabId).catch((err) => {
       console.warn("Failed to close repository in backend:", err);
     });
   },
@@ -190,7 +190,7 @@ export const useTabStore = create<TabStoreState>((set, get) => ({
 
       for (const path of session.openRepoPaths) {
         try {
-          const repo = await invokeCommand.openRepository(path);
+          const repo = await openRepository(path);
           get().openRepoTab(repo);
         } catch (err) {
           console.warn(`Failed to restore repo tab for ${path}:`, err);

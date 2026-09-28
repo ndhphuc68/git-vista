@@ -14,12 +14,13 @@ import { useViewStore } from "../../store/useViewStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { useTranslation } from "../../i18n";
-import { invokeCommand } from "../../ipc/client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { qk } from "../../domain/queryKeys";
 import { RemoteProgressBanner } from "../common/RemoteProgressBanner";
 
 import { useRemoteTask } from "../../features/remote/api";
+import { useRepoStatus } from "../../features/history";
+import { useRepoHeadInfo } from "../../features/repo";
 
 interface RepoHeaderProps {
   onBackToWelcome?: () => void;
@@ -33,17 +34,9 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
   const { t, actions } = useTranslation();
   const queryClient = useQueryClient();
 
-  const { data: repoStatus } = useQuery({
-    queryKey: qk.repo.status(currentRepo?.path ?? ""),
-    queryFn: () => invokeCommand.getRepoStatus(currentRepo!.path),
-    enabled: Boolean(currentRepo?.path),
-  });
+  const { data: repoStatus } = useRepoStatus(currentRepo?.path ?? "");
 
-  const { data: headInfo } = useQuery({
-    queryKey: qk.repo.head(currentRepo?.path ?? ""),
-    queryFn: () => invokeCommand.getRepoHeadInfo(currentRepo!.path),
-    enabled: Boolean(currentRepo?.path),
-  });
+  const { data: headInfo } = useRepoHeadInfo(currentRepo?.path);
 
   const remote = useRemoteTask(currentRepo?.path, Boolean(headInfo?.upstream));
   const activeRemoteTask = remote.task;

@@ -6,7 +6,7 @@ import { RepoHeader } from "./components/header/RepoHeader";
 import { WindowTabBar } from "./components/header/WindowTabBar";
 import { ChangesScreen } from "./components/changes/ChangesScreen";
 import { InProgressOperationBanner } from "./components/banner/InProgressOperationBanner";
-import { listenToRepoChanged } from "./ipc/client";
+import { listenToRepoChanged } from "./features/repo";
 import { type RepoSummary } from "./ipc/bindings.generated";
 import {
   useRepoState,
