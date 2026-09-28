@@ -17,7 +17,7 @@ import { useTabStore } from "../../store/useTabStore";
 import { Modal } from "../../shared/ui";
 import { GitProfileTab } from "./tabs/GitProfileTab";
 import { AppearanceTab } from "./tabs/AppearanceTab";
-import { GitBehaviorTab } from "./tabs/GitBehaviorTab";
+import { GitBehaviorTab } from "../../features/settings";
 import { DiffViewerTab } from "./tabs/DiffViewerTab";
 import { ExternalToolsTab } from "./tabs/ExternalToolsTab";
 import { GitHubSettingsTab } from "./tabs/GitHubSettingsTab";
