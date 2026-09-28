@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { GitPullRequest, GitBranch } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
 import type { CommitActionResult } from "../../ipc/bindings.generated";
 import { useTranslation } from "../../i18n";
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
 import { Modal, Button, Alert } from "../../shared/ui";
+import { cherryPickCommit } from "../../features/history";
 
 const TITLE_ID = "cherry-pick-title";
 
@@ -51,7 +51,7 @@ export const CherryPickModal: React.FC<CherryPickModalProps> = ({
     setError(null);
 
     try {
-      const res = await invokeCommand.cherryPickCommit(repoPath, targetCommit.id, autoCommit);
+      const res = await cherryPickCommit(repoPath, targetCommit.id, autoCommit);
 
       if (res.success || res.status === "Conflict") {
         if (onSuccess) onSuccess(res);

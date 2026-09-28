@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import clsx from "clsx";
-import { useQuery } from "@tanstack/react-query";
 import { Copy, Check, ExternalLink } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useToastStore } from "../../store/useToastStore";
@@ -11,8 +9,8 @@ import {
   getAuthorInitials,
   formatRelativeTime,
   formatExactDateTime,
+  useFileBlame,
 } from "../../features/history";
-import { qk } from "../../domain/queryKeys";
 
 interface BlameViewProps {
   repoPath: string;
@@ -31,14 +29,7 @@ export const BlameView: React.FC<BlameViewProps> = ({
   const { setSelectedCommit } = useRepoStore();
   const [copiedSha, setCopiedSha] = useState<string | null>(null);
 
-  const {
-    data: blame,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: qk.fileBlame(repoPath, filePath, commitId ?? ""),
-    queryFn: () => invokeCommand.getFileBlame(repoPath, filePath, commitId),
-  });
+  const { data: blame, isLoading, error } = useFileBlame(repoPath, filePath, commitId);
 
   const handleCopySha = async (sha: string, e: React.MouseEvent) => {
     e.stopPropagation();

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { RotateCcw, AlertTriangle } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
 import type { CommitActionResult } from "../../ipc/bindings.generated";
 import { useTranslation } from "../../i18n";
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
 import { Modal, Button, Alert } from "../../shared/ui";
+import { revertCommit } from "../../features/history";
 
 const TITLE_ID = "revert-modal-title";
 
@@ -49,7 +49,7 @@ export const RevertModal: React.FC<RevertModalProps> = ({
     setError(null);
 
     try {
-      const res = await invokeCommand.revertCommit(repoPath, targetCommit.id, autoCommit);
+      const res = await revertCommit(repoPath, targetCommit.id, autoCommit);
 
       if (res.success || res.status === "Conflict") {
         if (onSuccess) onSuccess(res);

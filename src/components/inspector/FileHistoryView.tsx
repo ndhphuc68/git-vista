@@ -1,16 +1,14 @@
 import React, { useState, useMemo, useEffect } from "react";
 import clsx from "clsx";
-import { useQuery } from "@tanstack/react-query";
 import { Search, X } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
 import { FileDiffViewer } from "../diff/FileDiffViewer";
 import {
   getAuthorAvatarStyle,
   getAuthorInitials,
   formatRelativeTime,
+  useFileHistory,
 } from "../../features/history";
-import { qk } from "../../domain/queryKeys";
 
 interface FileHistoryViewProps {
   repoPath: string;
@@ -22,14 +20,7 @@ export const FileHistoryView: React.FC<FileHistoryViewProps> = ({ repoPath, file
   const [filterText, setFilterText] = useState("");
   const [selectedCommitId, setSelectedCommitId] = useState<string | null>(null);
 
-  const {
-    data: history,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: qk.fileHistory(repoPath, filePath),
-    queryFn: () => invokeCommand.getFileHistory(repoPath, filePath, 0, 100),
-  });
+  const { data: history, isLoading, error } = useFileHistory(repoPath, filePath);
 
   // Set default selected commit to the latest commit
   useEffect(() => {

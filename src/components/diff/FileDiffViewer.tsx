@@ -1,15 +1,13 @@
 import React, { useState } from "react";
 import clsx from "clsx";
-import { useQuery } from "@tanstack/react-query";
 import { Space, Type, FileText, History } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
 import { useTranslation } from "../../i18n";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { useInspectorStore } from "../../store/useInspectorStore";
 import { pairHunkLines } from "../../utils/wordDiff";
 import { type DiffHunk } from "../../ipc/bindings.generated";
 import { DiffLineContent } from "./DiffLineContent";
-import { qk } from "../../domain/queryKeys";
+import { useCommitFileDiff } from "../../features/history";
 
 interface FileDiffViewerProps {
   repoPath: string;
@@ -93,11 +91,12 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
   const { diffIgnoreWhitespace, setDiffIgnoreWhitespace } = useSettingsStore();
   const { openInspector } = useInspectorStore();
 
-  const { data: diff, isLoading } = useQuery({
-    queryKey: qk.fileDiff(repoPath, commitId, filePath, diffIgnoreWhitespace),
-    queryFn: () =>
-      invokeCommand.getCommitFileDiff(repoPath, commitId, filePath, diffIgnoreWhitespace),
-  });
+  const { data: diff, isLoading } = useCommitFileDiff(
+    repoPath,
+    commitId,
+    filePath,
+    diffIgnoreWhitespace
+  );
 
   if (isLoading) {
     return (
