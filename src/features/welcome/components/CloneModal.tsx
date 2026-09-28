@@ -1,11 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FolderOpen, X, Download, AlertCircle, Loader2 } from "lucide-react";
-import { invokeCommand, listenToTaskProgress } from "../../ipc/client";
-import { type RepoSummary } from "../../ipc/bindings.generated";
-import { useTranslation } from "../../i18n";
-import { Modal } from "../../shared/ui";
-import { messageOf } from "../../shared/utils/toError";
-import { extractRepoNameFromUrl } from "./repoUrl";
+import { type RepoSummary } from "../../../ipc/bindings.generated";
+import { useTranslation } from "../../../i18n";
+import { Modal } from "../../../shared/ui";
+import { messageOf } from "../../../shared/utils/toError";
+import { extractRepoNameFromUrl } from "../../../components/welcome/repoUrl";
+import {
+  selectRepoFolder,
+  cloneRepo,
+  cancelRemoteTask,
+  openRepository,
+  listenToTaskProgress,
+} from "../api";
 
 const TITLE_ID = "clone-modal-title";
 
@@ -77,7 +83,7 @@ export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onClone
 
   const handleSelectFolder = async () => {
     try {
-      const selected = await invokeCommand.selectRepoFolder();
+      const selected = await selectRepoFolder();
       if (selected) {
         setBaseDir(selected);
         const repoName = extractRepoNameFromUrl(url);
@@ -95,7 +101,7 @@ export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onClone
 
   const handleCancel = async () => {
     if (isCloning && activeTaskIdRef.current) {
-      await invokeCommand.cancelRemoteTask(activeTaskIdRef.current);
+      await cancelRemoteTask(activeTaskIdRef.current);
       setIsCloning(false);
       setError(t.cloneModal.cancelError);
     } else {
@@ -116,8 +122,8 @@ export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onClone
     activeTaskIdRef.current = taskId;
 
     try {
-      await invokeCommand.cloneRepo(url.trim(), targetDir.trim(), taskId);
-      const summary = await invokeCommand.openRepository(targetDir.trim());
+      await cloneRepo(url.trim(), targetDir.trim(), taskId);
+      const summary = await openRepository(targetDir.trim());
       onCloneSuccess(summary);
       onClose();
     } catch (err: unknown) {

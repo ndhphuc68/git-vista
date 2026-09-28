@@ -4,7 +4,11 @@
  * `ipc/`; `hooks/useRecentRepositories` composes these functions instead of
  * calling `invokeCommand` directly.
  */
-import { invokeCommand } from "../../../ipc/client";
+import {
+  invokeCommand,
+  listenToTaskProgress as listenToTaskProgressIpc,
+  type TaskProgressPayload,
+} from "../../../ipc/client";
 import { type RecentRepoEntry, type RepoSummary } from "../../../ipc/bindings.generated";
 
 /** List of repositories the user opened recently, most recent first. */
@@ -30,4 +34,21 @@ export function clearRecentRepos(): Promise<void> {
 /** Removes a single entry from the recent-repositories list. */
 export function removeRecentRepo(path: string): Promise<void> {
   return invokeCommand.removeRecentRepo(path);
+}
+
+/** Clones `url` into `targetDir`, reporting progress under `taskId`. */
+export function cloneRepo(url: string, targetDir: string, taskId?: string): Promise<string> {
+  return invokeCommand.cloneRepo(url, targetDir, taskId);
+}
+
+/** Cancels the in-progress remote task identified by `taskId`. */
+export function cancelRemoteTask(taskId: string): Promise<void> {
+  return invokeCommand.cancelRemoteTask(taskId);
+}
+
+/** Subscribes to the backend's task-progress event; resolves to an unsubscribe function. */
+export function listenToTaskProgress(
+  handler: (payload: TaskProgressPayload) => void
+): Promise<() => void> {
+  return listenToTaskProgressIpc(handler);
 }

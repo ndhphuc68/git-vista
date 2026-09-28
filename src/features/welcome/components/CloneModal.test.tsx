@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { CloneModal } from "../components/welcome/CloneModal";
-import { invokeCommand } from "../ipc/client";
+import { CloneModal } from "./CloneModal";
+import { invokeCommand } from "../../../ipc/client";
 
 describe("CloneModal", () => {
   const mockOnClose = vi.fn();

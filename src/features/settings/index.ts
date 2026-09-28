@@ -4,3 +4,4 @@ export {
   type UseGitBehaviorSettingsOptions,
   type UseGitBehaviorSettingsResult,
 } from "./hooks/useGitBehaviorSettings";
+export { getGitConfig, setGitConfig } from "./api";

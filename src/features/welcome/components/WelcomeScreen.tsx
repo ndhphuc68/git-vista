@@ -3,7 +3,7 @@ import { AlertCircle, Settings } from "lucide-react";
 import { type RepoSummary } from "../../../ipc/bindings.generated";
 import { useTranslation } from "../../../i18n";
 import { useSettingsStore } from "../../../store/useSettingsStore";
-import { CloneModal } from "../../../components/welcome/CloneModal";
+import { CloneModal } from "./CloneModal";
 import { useRecentRepositories } from "../hooks/useRecentRepositories";
 import { useWelcomeShortcuts } from "../hooks/useWelcomeShortcuts";
 import { WelcomeActions } from "./WelcomeActions";

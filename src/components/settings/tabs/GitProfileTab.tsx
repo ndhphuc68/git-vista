@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Globe, FolderGit2, Check, ShieldCheck, Key, FileText } from "lucide-react";
 import { useTranslation } from "../../../i18n";
-import { invokeCommand, type GitConfigDto } from "../../../ipc/client";
+import type { GitConfigDto } from "../../../ipc/client";
+import { getGitConfig, setGitConfig } from "../../../features/settings";
 import { useToastStore } from "../../../store/useToastStore";
 import { useSettingsStore, type CommitMessageLimit } from "../../../store/useSettingsStore";
 import { HelpTooltip } from "../HelpTooltip";
@@ -40,13 +41,13 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
     const load = async () => {
       setLoading(true);
       try {
-        const globalCfg = await invokeCommand.getGitConfig(null);
+        const globalCfg = await getGitConfig(null);
         if (!isMounted) return;
         setGlobalConfig(globalCfg);
 
         let localCfg: GitConfigDto | null = null;
         if (currentRepoPath) {
-          localCfg = await invokeCommand.getGitConfig(currentRepoPath);
+          localCfg = await getGitConfig(currentRepoPath);
           if (!isMounted) return;
           setLocalConfig(localCfg);
         }
@@ -85,20 +86,20 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
     try {
       if (activeScope === "repo" && currentRepoPath) {
         if (isOverride) {
-          await invokeCommand.setGitConfig(currentRepoPath, "local", "user.name", userName.trim());
-          await invokeCommand.setGitConfig(
+          await setGitConfig(currentRepoPath, "local", "user.name", userName.trim());
+          await setGitConfig(
             currentRepoPath,
             "local",
             "user.email",
             userEmail.trim()
           );
-          await invokeCommand.setGitConfig(
+          await setGitConfig(
             currentRepoPath,
             "local",
             "commit.gpgsign",
             String(gpgSign)
           );
-          await invokeCommand.setGitConfig(
+          await setGitConfig(
             currentRepoPath,
             "local",
             "user.signingkey",
@@ -106,31 +107,31 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
           );
         } else {
           // Clear local override to inherit
-          await invokeCommand.setGitConfig(currentRepoPath, "local", "user.name", "");
-          await invokeCommand.setGitConfig(currentRepoPath, "local", "user.email", "");
-          await invokeCommand.setGitConfig(currentRepoPath, "local", "commit.gpgsign", "");
-          await invokeCommand.setGitConfig(currentRepoPath, "local", "user.signingkey", "");
+          await setGitConfig(currentRepoPath, "local", "user.name", "");
+          await setGitConfig(currentRepoPath, "local", "user.email", "");
+          await setGitConfig(currentRepoPath, "local", "commit.gpgsign", "");
+          await setGitConfig(currentRepoPath, "local", "user.signingkey", "");
         }
       } else {
-        await invokeCommand.setGitConfig(null, "global", "user.name", userName.trim());
-        await invokeCommand.setGitConfig(null, "global", "user.email", userEmail.trim());
-        await invokeCommand.setGitConfig(
+        await setGitConfig(null, "global", "user.name", userName.trim());
+        await setGitConfig(null, "global", "user.email", userEmail.trim());
+        await setGitConfig(
           null,
           "global",
           "init.defaultBranch",
           defaultBranch.trim() || "main"
         );
-        await invokeCommand.setGitConfig(null, "global", "commit.gpgsign", String(gpgSign));
-        await invokeCommand.setGitConfig(null, "global", "user.signingkey", gpgKey.trim());
+        await setGitConfig(null, "global", "commit.gpgsign", String(gpgSign));
+        await setGitConfig(null, "global", "user.signingkey", gpgKey.trim());
       }
 
       showSuccess(t.settings.profile.savedSuccess);
 
       // Reload config
-      const updatedGlobal = await invokeCommand.getGitConfig(null);
+      const updatedGlobal = await getGitConfig(null);
       setGlobalConfig(updatedGlobal);
       if (currentRepoPath) {
-        const updatedLocal = await invokeCommand.getGitConfig(currentRepoPath);
+        const updatedLocal = await getGitConfig(currentRepoPath);
         setLocalConfig(updatedLocal);
       }
     } catch (err) {
@@ -145,12 +146,12 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
     if (!currentRepoPath) return;
     setSaving(true);
     try {
-      await invokeCommand.setGitConfig(currentRepoPath, "local", "user.name", "");
-      await invokeCommand.setGitConfig(currentRepoPath, "local", "user.email", "");
-      await invokeCommand.setGitConfig(currentRepoPath, "local", "commit.gpgsign", "");
-      await invokeCommand.setGitConfig(currentRepoPath, "local", "user.signingkey", "");
+      await setGitConfig(currentRepoPath, "local", "user.name", "");
+      await setGitConfig(currentRepoPath, "local", "user.email", "");
+      await setGitConfig(currentRepoPath, "local", "commit.gpgsign", "");
+      await setGitConfig(currentRepoPath, "local", "user.signingkey", "");
 
-      const updatedLocal = await invokeCommand.getGitConfig(currentRepoPath);
+      const updatedLocal = await getGitConfig(currentRepoPath);
       setLocalConfig(updatedLocal);
       setIsOverride(false);
       if (globalConfig) {
