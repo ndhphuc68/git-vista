@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import clsx from "clsx";
 import { GitCommit, AlertCircle, RefreshCw } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
 import type { CommitDetails } from "../../ipc/bindings.generated";
 import { useToastStore } from "../../store/useToastStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { mapGitError } from "../../utils/errorMapping";
+import { createCommit } from "../../features/changes";
+import { undoCommit } from "../../features/undo";
 import { useTranslation } from "../../i18n";
 
 export interface CommitBoxProps {
@@ -71,7 +72,7 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
           isAmend
         );
       } else {
-        result = await invokeCommand.createCommit(
+        result = await createCommit(
           repoPath,
           summary.trim(),
           description.trim() ? description.trim() : undefined,
@@ -85,7 +86,7 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
         durationMs: 10000,
         undoAction: result?.undo_token
           ? async () => {
-              await invokeCommand.undoCommit(repoPath, result.undo_token!);
+              await undoCommit(repoPath, result.undo_token!);
               if (onSuccess) onSuccess();
             }
           : undefined,

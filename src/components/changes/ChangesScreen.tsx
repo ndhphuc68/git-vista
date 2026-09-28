@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import clsx from "clsx";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { FileText, Archive } from "lucide-react";
 import { qk } from "../../domain/queryKeys";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
 import { useViewStore } from "../../store/useViewStore";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
-import { invokeCommand } from "../../ipc/client";
 import { useToastStore } from "../../store/useToastStore";
 import { mapGitError } from "../../utils/errorMapping";
 import { StagingFileList, type SelectedWorkingFile } from "./StagingFileList";
@@ -15,6 +14,18 @@ import { CommitBox } from "./CommitBox";
 import { InteractiveDiffViewer } from "./InteractiveDiffViewer";
 import { CreateStashModal } from "../../features/stash";
 import { useSaveStash } from "../../features/stash/api";
+import { useRepoStatus } from "../../features/history";
+import {
+  stageFile,
+  unstageFile,
+  stageAll,
+  unstageAll,
+  discardFileChanges,
+  restoreDiscard,
+  stageHunk,
+  stageLines,
+  createCommit,
+} from "../../features/changes";
 import { useTranslation } from "../../i18n";
 
 export const ChangesScreen: React.FC = () => {
@@ -28,11 +39,7 @@ export const ChangesScreen: React.FC = () => {
   const [showCreateStash, setShowCreateStash] = useState(false);
   const saveStash = useSaveStash(currentRepo?.path ?? "");
 
-  const { data: status } = useQuery({
-    queryKey: qk.repo.status(currentRepo?.path ?? ""),
-    queryFn: () => invokeCommand.getRepoStatus(currentRepo!.path),
-    enabled: Boolean(currentRepo?.path),
-  });
+  const { data: status } = useRepoStatus(currentRepo?.path ?? "");
 
   // Auto-select first available file if none is selected or previous file disappeared
   useEffect(() => {
@@ -78,38 +85,38 @@ export const ChangesScreen: React.FC = () => {
   };
 
   const handleStageFile = async (filePath: string) => {
-    await invokeCommand.stageFile(currentRepo.path, filePath);
+    await stageFile(currentRepo.path, filePath);
     setSelectedFile({ path: filePath, is_staged: true });
     // Only refresh the current repo's cache, don't wipe other repos' caches
     await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleUnstageFile = async (filePath: string) => {
-    await invokeCommand.unstageFile(currentRepo.path, filePath);
+    await unstageFile(currentRepo.path, filePath);
     setSelectedFile({ path: filePath, is_staged: false });
     await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleStageAll = async () => {
-    await invokeCommand.stageAll(currentRepo.path);
+    await stageAll(currentRepo.path);
     await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleUnstageAll = async () => {
-    await invokeCommand.unstageAll(currentRepo.path);
+    await unstageAll(currentRepo.path);
     await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleDiscardFile = async (filePath: string) => {
     try {
       const repoPath = currentRepo.path;
-      const token = await invokeCommand.discardFileChanges(repoPath, filePath);
+      const token = await discardFileChanges(repoPath, filePath);
       useToastStore.getState().showToast({
         type: "success",
         message: t.discard.success.replace("{path}", filePath),
         durationMs: 10000,
         undoAction: async () => {
-          await invokeCommand.restoreDiscard(repoPath, token);
+          await restoreDiscard(repoPath, token);
           await queryClient.invalidateQueries({ queryKey: qk.repo.all(repoPath) });
         },
       });
@@ -121,42 +128,30 @@ export const ChangesScreen: React.FC = () => {
 
   const handleStageHunk = async (hunkIndex: number) => {
     if (!selectedFile) return;
-    await invokeCommand.stageHunk(currentRepo.path, selectedFile.path, hunkIndex, false);
+    await stageHunk(currentRepo.path, selectedFile.path, hunkIndex, false);
     await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleUnstageHunk = async (hunkIndex: number) => {
     if (!selectedFile) return;
-    await invokeCommand.stageHunk(currentRepo.path, selectedFile.path, hunkIndex, true);
+    await stageHunk(currentRepo.path, selectedFile.path, hunkIndex, true);
     await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleStageLines = async (hunkIndex: number, lineIndices: number[]) => {
     if (!selectedFile) return;
-    await invokeCommand.stageLines(
-      currentRepo.path,
-      selectedFile.path,
-      hunkIndex,
-      lineIndices,
-      false
-    );
+    await stageLines(currentRepo.path, selectedFile.path, hunkIndex, lineIndices, false);
     await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleUnstageLines = async (hunkIndex: number, lineIndices: number[]) => {
     if (!selectedFile) return;
-    await invokeCommand.stageLines(
-      currentRepo.path,
-      selectedFile.path,
-      hunkIndex,
-      lineIndices,
-      true
-    );
+    await stageLines(currentRepo.path, selectedFile.path, hunkIndex, lineIndices, true);
     await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
   };
 
   const handleCommit = async (summary: string, description?: string, amend?: boolean) => {
-    const result = await invokeCommand.createCommit(currentRepo.path, summary, description, amend);
+    const result = await createCommit(currentRepo.path, summary, description, amend);
     await queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
     return result;
   };

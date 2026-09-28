@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import clsx from "clsx";
-import { useQuery } from "@tanstack/react-query";
 import { Plus, Minus, FileCode, AlertTriangle, Layers, Space, Type } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
-import { qk } from "../../domain/queryKeys";
 import { useTranslation } from "../../i18n";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { pairHunkLines } from "../../utils/wordDiff";
 import { type DiffHunk } from "../../ipc/bindings.generated";
 import { DiffLineContent } from "../diff/DiffLineContent";
+import { useWorkingFileDiff } from "../../features/changes";
 
 export interface InteractiveDiffViewerProps {
   repoPath: string;
@@ -198,12 +196,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
     data: diff,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: qk.workingFileDiff(repoPath, filePath, isStaged, diffIgnoreWhitespace),
-    queryFn: () =>
-      invokeCommand.getWorkingFileDiff(repoPath, filePath, isStaged, diffIgnoreWhitespace),
-    enabled: Boolean(repoPath && filePath),
-  });
+  } = useWorkingFileDiff(repoPath, filePath, isStaged, diffIgnoreWhitespace);
 
   if (isLoading) {
     return (
