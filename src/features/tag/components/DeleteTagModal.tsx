@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Trash2, AlertTriangle, Tag } from "lucide-react";
 import { useTranslation } from "../../../i18n";
-import { useToastStore } from "../../../store/useToastStore";
-import { mapGitError } from "../../../utils/errorMapping";
 import { Modal, Button, Alert } from "../../../shared/ui";
-import { useDeleteTag } from "../api";
+import { useDeleteTagAction } from "../hooks/useDeleteTagAction";
 
 const TITLE_ID = "delete-tag-title";
 
@@ -28,34 +26,13 @@ export const DeleteTagModal: React.FC<DeleteTagModalProps> = ({
   onSuccess,
 }) => {
   const { t } = useTranslation();
-  const deleteTag = useDeleteTag(repoPath);
-  const [deleteRemote, setDeleteRemote] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      setDeleteRemote(false);
-      setError(null);
-    }
-  }, [isOpen, tagName]);
-
-  const handleDelete = async () => {
-    setError(null);
-
-    try {
-      await deleteTag.mutateAsync({ name: tagName, deleteRemote });
-      useToastStore.getState().showToast({
-        message: t.modals.deleteTag.successToast.replace("{name}", tagName),
-        type: "success",
-      });
-      if (onSuccess) onSuccess();
-      onClose();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(t.modals.deleteTag.errorGeneric.replace("{msg}", msg));
-      useToastStore.getState().showError(mapGitError(err));
-    }
-  };
+  const { deleteTag, deleteRemote, setDeleteRemote, error, handleDelete } = useDeleteTagAction({
+    isOpen,
+    repoPath,
+    tagName,
+    onSuccess,
+    onClose,
+  });
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} labelledBy={TITLE_ID}>
