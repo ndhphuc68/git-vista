@@ -6,6 +6,8 @@ import { useToastStore } from "../../../store/useToastStore";
 import { mapGitError } from "../../../utils/errorMapping";
 import { Modal, Button, Alert } from "../../../shared/ui";
 import { revertCommit } from "../api/commitActionsApi";
+import { CommitActionTargetCard } from "./CommitActionTargetCard";
+import { AutoCommitCheckbox } from "./AutoCommitCheckbox";
 
 const TITLE_ID = "revert-modal-title";
 
@@ -85,42 +87,15 @@ export const RevertModal: React.FC<RevertModalProps> = ({
             <span>{t.modals.revert.desc}</span>
           </div>
 
-          {/* Target commit info card */}
-          <div className="bg-window px-3 py-2.5 rounded-md border border-border-subtle flex flex-col gap-1.5 text-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-secondary text-[11px] font-medium">
-                {t.modals.revert.targetCommit}
-              </span>
-              <span className="font-mono text-primary font-semibold text-[11px] bg-surface px-1.5 py-0.5 rounded border border-border-subtle">
-                {targetCommit.short_id || targetCommit.id.substring(0, 7)}
-              </span>
-            </div>
-            <div className="font-medium text-primary line-clamp-2" title={targetCommit.summary}>
-              {targetCommit.summary}
-            </div>
-            <div className="flex items-center justify-between text-[11px] text-tertiary">
-              <span>{targetCommit.author}</span>
-              {targetCommit.time && <span>{targetCommit.time}</span>}
-            </div>
-          </div>
+          <CommitActionTargetCard label={t.modals.revert.targetCommit} targetCommit={targetCommit} />
 
-          {/* Auto-commit checkbox */}
-          <div className="flex flex-col gap-1 mt-1">
-            <label className="flex items-center gap-2 cursor-pointer text-xs text-primary select-none">
-              <input
-                type="checkbox"
-                checked={autoCommit}
-                onChange={(e) => setAutoCommit(e.target.checked)}
-                disabled={loading}
-                aria-label={t.modals.revert.autoCommitLabel}
-                className="accent-accent cursor-pointer rounded-sm"
-              />
-              <span className="font-medium">{t.modals.revert.autoCommitLabel}</span>
-            </label>
-            <span className="text-[11px] text-secondary pl-6">
-              {t.modals.revert.autoCommitDesc}
-            </span>
-          </div>
+          <AutoCommitCheckbox
+            checked={autoCommit}
+            onChange={setAutoCommit}
+            disabled={loading}
+            label={t.modals.revert.autoCommitLabel}
+            description={t.modals.revert.autoCommitDesc}
+          />
 
           {error && <Alert variant="error">{error}</Alert>}
         </Modal.Body>
