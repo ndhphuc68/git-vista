@@ -86,12 +86,14 @@ function applyThemeAttributes(theme: "light" | "dark", colorblind: boolean) {
   root.setAttribute("data-colorblind", colorblind ? "true" : "false");
 }
 
-export const useSettingsStore = create<SettingsState>((set, get) => {
-  const getStorage = (key: string, fallback: string) => {
-    if (typeof localStorage === "undefined") return fallback;
-    return localStorage.getItem(key) ?? fallback;
-  };
+function getStorage(key: string, fallback: string) {
+  if (typeof localStorage === "undefined") return fallback;
+  return localStorage.getItem(key) ?? fallback;
+}
 
+// Reads every persisted setting, applies the resolved theme/locale to the
+// document, and returns the store's initial state slice.
+function loadInitialSettingsState() {
   const savedTheme = getStorage("theme", "system") as Theme;
   const savedColorblind = getStorage("colorblind", "false") === "true";
   const savedLocale = getStorage("locale", "vi") as Locale;
@@ -125,19 +127,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
     document.documentElement.setAttribute("lang", savedLocale);
   }
 
-  // Follow OS theme changes while the app is in system mode
-  if (typeof window !== "undefined") {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    mediaQuery.addEventListener("change", () => {
-      const state = get();
-      if (state.theme === "system") {
-        const newResolved = getSystemTheme();
-        set({ resolvedTheme: newResolved });
-        applyThemeAttributes(newResolved, state.colorblind);
-      }
-    });
-  }
-
   return {
     theme: savedTheme,
     colorblind: savedColorblind,
@@ -159,6 +148,44 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
     defaultEditor: savedDefaultEditor,
     customEditorCommand: savedCustomEditorCommand,
     defaultTerminal: savedDefaultTerminal,
+  };
+}
+
+// Keeps `resolvedTheme` in sync with the OS while the app is in system mode.
+function subscribeToSystemThemeChanges(
+  get: () => SettingsState,
+  set: (partial: Partial<SettingsState>) => void
+) {
+  if (typeof window === "undefined") return;
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  mediaQuery.addEventListener("change", () => {
+    const state = get();
+    if (state.theme === "system") {
+      const newResolved = getSystemTheme();
+      set({ resolvedTheme: newResolved });
+      applyThemeAttributes(newResolved, state.colorblind);
+    }
+  });
+}
+
+// Factory for the many settings whose setter is just "persist then set" —
+// the only difference between them is the storage key and the state field.
+function makePersistedSetter<K extends keyof SettingsState>(
+  set: (partial: Partial<SettingsState>) => void,
+  storageKey: string,
+  stateKey: K
+) {
+  return (value: SettingsState[K]) => {
+    if (typeof localStorage !== "undefined") localStorage.setItem(storageKey, String(value));
+    set({ [stateKey]: value } as Partial<SettingsState>);
+  };
+}
+
+export const useSettingsStore = create<SettingsState>((set, get) => {
+  subscribeToSystemThemeChanges(get, set);
+
+  return {
+    ...loadInitialSettingsState(),
 
     setTheme: (theme: Theme) => {
       const resolved = theme === "system" ? getSystemTheme() : theme;
@@ -191,88 +218,43 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
     closeSettings: () => set({ isSettingsOpen: false }),
     setActiveTab: (tab: SettingsTab) => set({ activeTab: tab }),
 
-    setDateFormat: (dateFormat: DateFormat) => {
-      if (typeof localStorage !== "undefined")
-        localStorage.setItem("gitvista_date_format", dateFormat);
-      set({ dateFormat });
-    },
-
-    setAvatarStyle: (avatarStyle: AvatarStyle) => {
-      if (typeof localStorage !== "undefined")
-        localStorage.setItem("gitvista_avatar_style", avatarStyle);
-      set({ avatarStyle });
-    },
-
-    setDiffViewMode: (diffViewMode: DiffViewMode) => {
-      if (typeof localStorage !== "undefined")
-        localStorage.setItem("gitvista_diff_view_mode", diffViewMode);
-      set({ diffViewMode });
-    },
-
-    setDiffFontSize: (diffFontSize: DiffFontSize) => {
-      if (typeof localStorage !== "undefined")
-        localStorage.setItem("gitvista_diff_font_size", String(diffFontSize));
-      set({ diffFontSize });
-    },
-
-    setDiffIgnoreWhitespace: (diffIgnoreWhitespace: boolean) => {
-      if (typeof localStorage !== "undefined")
-        localStorage.setItem("gitvista_diff_ignore_whitespace", String(diffIgnoreWhitespace));
-      set({ diffIgnoreWhitespace });
-    },
-
-    setDiffTabSize: (diffTabSize: DiffTabSize) => {
-      if (typeof localStorage !== "undefined")
-        localStorage.setItem("gitvista_diff_tab_size", String(diffTabSize));
-      set({ diffTabSize });
-    },
-
-    setDiffShowLineNumbers: (diffShowLineNumbers: boolean) => {
-      if (typeof localStorage !== "undefined")
-        localStorage.setItem("gitvista_diff_show_line_numbers", String(diffShowLineNumbers));
-      set({ diffShowLineNumbers });
-    },
-
-    setConfirmDiscard: (confirmDiscard: boolean) => {
-      if (typeof localStorage !== "undefined")
-        localStorage.setItem("gitvista_confirm_discard", String(confirmDiscard));
-      set({ confirmDiscard });
-    },
-
-    setConfirmDeleteBranch: (confirmDeleteBranch: boolean) => {
-      if (typeof localStorage !== "undefined")
-        localStorage.setItem("gitvista_confirm_delete_branch", String(confirmDeleteBranch));
-      set({ confirmDeleteBranch });
-    },
-
-    setConfirmForcePush: (confirmForcePush: boolean) => {
-      if (typeof localStorage !== "undefined")
-        localStorage.setItem("gitvista_confirm_force_push", String(confirmForcePush));
-      set({ confirmForcePush });
-    },
-
-    setCommitMessageLimit: (commitMessageLimit: number) => {
-      if (typeof localStorage !== "undefined")
-        localStorage.setItem("gitvista_commit_message_limit", String(commitMessageLimit));
-      set({ commitMessageLimit });
-    },
-
-    setDefaultEditor: (defaultEditor: ExternalEditor) => {
-      if (typeof localStorage !== "undefined")
-        localStorage.setItem("gitvista_default_editor", defaultEditor);
-      set({ defaultEditor });
-    },
-
-    setCustomEditorCommand: (customEditorCommand: string) => {
-      if (typeof localStorage !== "undefined")
-        localStorage.setItem("gitvista_custom_editor_command", customEditorCommand);
-      set({ customEditorCommand });
-    },
-
-    setDefaultTerminal: (defaultTerminal: ExternalTerminal) => {
-      if (typeof localStorage !== "undefined")
-        localStorage.setItem("gitvista_default_terminal", defaultTerminal);
-      set({ defaultTerminal });
-    },
+    setDateFormat: makePersistedSetter(set, "gitvista_date_format", "dateFormat"),
+    setAvatarStyle: makePersistedSetter(set, "gitvista_avatar_style", "avatarStyle"),
+    setDiffViewMode: makePersistedSetter(set, "gitvista_diff_view_mode", "diffViewMode"),
+    setDiffFontSize: makePersistedSetter(set, "gitvista_diff_font_size", "diffFontSize"),
+    setDiffIgnoreWhitespace: makePersistedSetter(
+      set,
+      "gitvista_diff_ignore_whitespace",
+      "diffIgnoreWhitespace"
+    ),
+    setDiffTabSize: makePersistedSetter(set, "gitvista_diff_tab_size", "diffTabSize"),
+    setDiffShowLineNumbers: makePersistedSetter(
+      set,
+      "gitvista_diff_show_line_numbers",
+      "diffShowLineNumbers"
+    ),
+    setConfirmDiscard: makePersistedSetter(set, "gitvista_confirm_discard", "confirmDiscard"),
+    setConfirmDeleteBranch: makePersistedSetter(
+      set,
+      "gitvista_confirm_delete_branch",
+      "confirmDeleteBranch"
+    ),
+    setConfirmForcePush: makePersistedSetter(
+      set,
+      "gitvista_confirm_force_push",
+      "confirmForcePush"
+    ),
+    setCommitMessageLimit: makePersistedSetter(
+      set,
+      "gitvista_commit_message_limit",
+      "commitMessageLimit"
+    ),
+    setDefaultEditor: makePersistedSetter(set, "gitvista_default_editor", "defaultEditor"),
+    setCustomEditorCommand: makePersistedSetter(
+      set,
+      "gitvista_custom_editor_command",
+      "customEditorCommand"
+    ),
+    setDefaultTerminal: makePersistedSetter(set, "gitvista_default_terminal", "defaultTerminal"),
   };
 });
