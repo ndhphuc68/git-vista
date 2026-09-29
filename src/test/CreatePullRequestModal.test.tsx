@@ -7,6 +7,43 @@ import { invokeCommand } from "../ipc/client";
 import { usePullRequestStore } from "../store/usePullRequestStore";
 import { useToastStore } from "../store/useToastStore";
 import { vi as viTranslations } from "../i18n/vi";
+import { qk } from "../domain/queryKeys";
+
+type BranchListResponse = Awaited<ReturnType<typeof invokeCommand.getBranches>>;
+
+const RESOLVED_BRANCHES: BranchListResponse = {
+  current_branch: "feature/login-page",
+  is_detached: false,
+  local: [
+    {
+      name: "main",
+      is_head: false,
+      target_commit_id: "c1",
+      upstream: "origin/main",
+      ahead: 0,
+      behind: 0,
+    },
+    {
+      name: "feature/login-page",
+      is_head: true,
+      target_commit_id: "c2",
+      upstream: "origin/feature/login-page",
+      ahead: 0,
+      behind: 0,
+    },
+  ],
+  remote: [
+    {
+      name: "origin/main",
+      is_head: false,
+      target_commit_id: "c1",
+      upstream: null,
+      ahead: 0,
+      behind: 0,
+    },
+  ],
+  tags: [],
+};
 
 const t = viTranslations;
 
@@ -219,5 +256,116 @@ describe("CreatePullRequestModal", () => {
     fireEvent.click(submitBtn);
 
     expect(await screen.findByText(t.pullRequests.needToken)).toBeInTheDocument();
+  });
+
+  // Characterization tests for the branch-selection defaults, pinning the
+  // observable <select> values rather than just their presence. These were
+  // verified to pass against both the split hooks (HEAD) and the original,
+  // pre-split component (commit 537d5e0) — see the phase 7c task-4 fix report.
+  it("pins default branch selections on first open: base = repo default branch, compare = current branch", async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <CreatePullRequestModal repoPath="/mock/repo" />
+      </QueryClientProvider>
+    );
+
+    await screen.findByText(t.pullRequests.createModalTitle);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(t.pullRequests.baseBranch)).toHaveValue("main");
+      expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue(
+        "feature/login-page"
+      );
+    });
+  });
+
+  it("resets the compare branch back to the default after closing and reopening, discarding a user change", async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <CreatePullRequestModal repoPath="/mock/repo" />
+      </QueryClientProvider>
+    );
+
+    await screen.findByText(t.pullRequests.createModalTitle);
+    await waitFor(() => {
+      expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue(
+        "feature/login-page"
+      );
+    });
+
+    fireEvent.change(screen.getByLabelText(t.pullRequests.compareBranch), {
+      target: { value: "main" },
+    });
+    expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue("main");
+
+    // Close the modal and let it fully unmount (it animates out).
+    usePullRequestStore.getState().closeCreateModal();
+    await waitFor(() => {
+      expect(screen.queryByText(t.pullRequests.createModalTitle)).not.toBeInTheDocument();
+    });
+
+    // Reopen: the compare branch must come back as the default, not the
+    // user's earlier choice of "main".
+    usePullRequestStore.getState().openCreateModal();
+    await screen.findByText(t.pullRequests.createModalTitle);
+    await waitFor(() => {
+      expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue(
+        "feature/login-page"
+      );
+    });
+  });
+
+  it("applies the resolved current branch as the default compare branch once branch data arrives after opening", async () => {
+    let resolveBranches!: (value: BranchListResponse) => void;
+    vi.mocked(invokeCommand.getBranches).mockReturnValue(
+      new Promise((resolve) => {
+        resolveBranches = resolve;
+      })
+    );
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <CreatePullRequestModal repoPath="/mock/repo" />
+      </QueryClientProvider>
+    );
+
+    await screen.findByText(t.pullRequests.createModalTitle);
+
+    // Branch data hasn't resolved yet: the compare branch falls back to "main".
+    expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue("main");
+
+    resolveBranches(RESOLVED_BRANCHES);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue(
+        "feature/login-page"
+      );
+    });
+  });
+
+  it("does not overwrite a user-selected compare branch when branch data is refetched after opening", async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <CreatePullRequestModal repoPath="/mock/repo" />
+      </QueryClientProvider>
+    );
+
+    await screen.findByText(t.pullRequests.createModalTitle);
+    await waitFor(() => {
+      expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue(
+        "feature/login-page"
+      );
+    });
+
+    fireEvent.change(screen.getByLabelText(t.pullRequests.compareBranch), {
+      target: { value: "main" },
+    });
+    expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue("main");
+
+    // Simulate branch data arriving again (e.g. a refetch) with the same
+    // resolved current branch; the user's manual selection must survive it.
+    await queryClient.refetchQueries({ queryKey: qk.branches("/mock/repo") });
+
+    expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue("main");
   });
 });
