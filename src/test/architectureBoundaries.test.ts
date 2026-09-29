@@ -420,13 +420,16 @@ describe("architecture boundaries", () => {
   it("no module import cycle passes through a feature's public index.ts", () => {
     // Whole-src module graph: every non-test .ts/.tsx file is a node, and a
     // relative import that resolves to another file in the set is an edge.
-    // ES import cycles are legal in general (and one pre-existing cycle
-    // between src/ipc/history.ts and src/ipc/client.ts is left alone here),
-    // but a cycle that runs back through a feature's index.ts breaks the
-    // "features → shared → domain" direction the README promises: it means
-    // something the feature exports transitively depends on that same
-    // feature's public surface, so the module can deadlock at evaluation
-    // time depending on which side is imported first.
+    // ES import cycles are legal in general (and one apparent cycle between
+    // src/ipc/history.ts and src/ipc/client.ts is left alone here — it is a
+    // false positive from the regex-based extractor matching string literals
+    // inside history.ts's dev-mode mock fallback data, e.g. a fake git log
+    // entry containing the text "import React from 'react';", not a real
+    // import statement), but a cycle that runs back through a feature's
+    // index.ts breaks the "features → shared → domain" direction the README
+    // promises: it means something the feature exports transitively depends
+    // on that same feature's public surface, so the module can deadlock at
+    // evaluation time depending on which side is imported first.
     const files = collectSourceFiles(SRC);
     expect(files.length).toBeGreaterThan(0);
 
