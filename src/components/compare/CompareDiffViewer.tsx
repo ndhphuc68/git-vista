@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import clsx from "clsx";
-import { Space, Type, FileText, History, FileCode } from "lucide-react";
+import { FileCode } from "lucide-react";
 import { useTranslation } from "../../i18n";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { useInspectorStore } from "../../store/useInspectorStore";
@@ -8,6 +8,7 @@ import { pairHunkLines } from "../../utils/wordDiff";
 import { type DiffHunk, type CompareMode, type CompareFileItem } from "../../ipc/bindings.generated";
 import { DiffLineContent } from "../diff/DiffLineContent";
 import { useCompareFileDiff } from "../../features/compare";
+import { CompareDiffToolbar } from "./CompareDiffToolbar";
 
 export interface CompareDiffViewerProps {
   repoPath: string;
@@ -136,81 +137,23 @@ export const CompareDiffViewer: React.FC<CompareDiffViewerProps> = ({
     );
   }
 
-  const renderToolbar = () => (
-    <div className="flex items-center justify-between px-3 py-2 bg-window border-b border-border-subtle gap-2 shrink-0 select-none">
-      <div className="flex items-center gap-2 min-w-0 flex-1">
-        <span
-          className="font-mono text-xs font-semibold text-primary overflow-hidden text-ellipsis whitespace-nowrap"
-          title={file.path}
-        >
-          {file.path}
-        </span>
-        {diff && (
-          <div className="flex items-center gap-1 font-mono text-xs shrink-0">
-            <span className="text-diff-add-text font-semibold">+{diff.additions}</span>
-            <span className="text-diff-remove-text font-semibold">-{diff.deletions}</span>
-          </div>
-        )}
-      </div>
-      <div className="flex items-center gap-1.5 shrink-0">
-        <button
-          type="button"
-          title={diffIgnoreWhitespace ? t.diff.ignoreWhitespaceActive : t.diff.ignoreWhitespace}
-          aria-label={t.diff.ignoreWhitespace}
-          onClick={() => setDiffIgnoreWhitespace(!diffIgnoreWhitespace)}
-          className={clsx(
-            "p-1.5 rounded text-xs flex items-center justify-center transition-colors cursor-pointer",
-            diffIgnoreWhitespace
-              ? "bg-accent/15 text-accent border border-accent/40"
-              : "bg-surface text-secondary border border-border-subtle hover:bg-surface-hover hover:text-primary"
-          )}
-        >
-          <Space size={13} />
-        </button>
-        <button
-          type="button"
-          title={showWordDiff ? t.diff.wordDiffActive : t.diff.wordDiff}
-          aria-label={t.diff.wordDiff}
-          onClick={() => setShowWordDiff(!showWordDiff)}
-          className={clsx(
-            "p-1.5 rounded text-xs flex items-center justify-center transition-colors cursor-pointer",
-            showWordDiff
-              ? "bg-accent/15 text-accent border border-accent/40"
-              : "bg-surface text-secondary border border-border-subtle hover:bg-surface-hover hover:text-primary"
-          )}
-        >
-          <Type size={13} />
-        </button>
-
-        <div className="w-[1px] h-3.5 bg-border-subtle mx-0.5" />
-
-        <button
-          type="button"
-          title={t.inspector.viewBlame}
-          aria-label={t.inspector.viewBlame}
-          onClick={() => openInspector(file.path, "blame")}
-          className="p-1.5 rounded text-xs flex items-center justify-center transition-colors cursor-pointer bg-surface text-secondary border border-border-subtle hover:bg-surface-hover hover:text-primary"
-        >
-          <FileText size={13} />
-        </button>
-
-        <button
-          type="button"
-          title={t.inspector.viewHistory}
-          aria-label={t.inspector.viewHistory}
-          onClick={() => openInspector(file.path, "history")}
-          className="p-1.5 rounded text-xs flex items-center justify-center transition-colors cursor-pointer bg-surface text-secondary border border-border-subtle hover:bg-surface-hover hover:text-primary"
-        >
-          <History size={13} />
-        </button>
-      </div>
-    </div>
+  const toolbar = (
+    <CompareDiffToolbar
+      file={file}
+      diff={diff}
+      diffIgnoreWhitespace={diffIgnoreWhitespace}
+      onToggleIgnoreWhitespace={() => setDiffIgnoreWhitespace(!diffIgnoreWhitespace)}
+      showWordDiff={showWordDiff}
+      onToggleWordDiff={() => setShowWordDiff(!showWordDiff)}
+      onViewBlame={() => openInspector(file.path, "blame")}
+      onViewHistory={() => openInspector(file.path, "history")}
+    />
   );
 
   if (!diff || diff.hunks.length === 0) {
     return (
       <div className="flex flex-col h-full font-mono text-xs overflow-hidden bg-surface">
-        {renderToolbar()}
+        {toolbar}
         <div className="flex-1 flex items-center justify-center p-8 text-tertiary text-xs text-center">
           {t.diff.noTextChanges}
         </div>
@@ -220,7 +163,7 @@ export const CompareDiffViewer: React.FC<CompareDiffViewerProps> = ({
 
   return (
     <div className="flex flex-col h-full font-mono text-xs overflow-hidden bg-surface">
-      {renderToolbar()}
+      {toolbar}
       <div className="flex-1 overflow-y-auto">
         {diff.hunks.map((hunk, hIdx) => (
           <FileDiffHunk key={hIdx} hunk={hunk} showWordDiff={showWordDiff} />
