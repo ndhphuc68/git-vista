@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import clsx from "clsx";
 import { useTranslation } from "../../i18n";
+import { useSplashExit } from "./useSplashExit";
 
 export interface SplashScreenProps {
   onFinish: () => void;
@@ -14,35 +15,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
   skipSplash = false,
 }) => {
   const { t } = useTranslation();
-  const [isExiting, setIsExiting] = useState(false);
-
-  useEffect(() => {
-    if (skipSplash) {
-      onFinish();
-      return;
-    }
-
-    // Check if user has prefers-reduced-motion
-    const prefersReducedMotion =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    const introTime = prefersReducedMotion ? 200 : duration;
-    const exitTime = prefersReducedMotion ? 50 : 300;
-
-    const timer1 = setTimeout(() => {
-      setIsExiting(true);
-    }, introTime);
-
-    const timer2 = setTimeout(() => {
-      onFinish();
-    }, introTime + exitTime);
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, [duration, skipSplash, onFinish]);
+  const isExiting = useSplashExit(onFinish, duration, skipSplash);
 
   if (skipSplash) return null;
 
