@@ -123,37 +123,61 @@ export function splitFilePath(fullPath: string): { dir: string; fileName: string
   };
 }
 
-export function getFileStatusMeta(
-  status: string,
-  dict?: { added: string; deleted: string; renamed: string; modified: string }
-) {
-  const s = (status || "").toUpperCase();
-  if (s.startsWith("A") || s === "ADDED") {
-    return {
-      code: "A",
-      label: dict?.added ?? "Thêm mới",
-      badgeClass: "bg-diff-add-bg text-diff-add-text border-diff-add-border font-bold",
-    };
-  }
-  if (s.startsWith("D") || s === "DELETED") {
-    return {
-      code: "D",
-      label: dict?.deleted ?? "Đã xoá",
-      badgeClass: "bg-diff-remove-bg text-diff-remove-text border-diff-remove-border font-bold",
-    };
-  }
-  if (s.startsWith("R") || s === "RENAMED") {
-    return {
-      code: "R",
-      label: dict?.renamed ?? "Đổi tên",
-      badgeClass:
-        "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 border-purple-300 dark:border-purple-800 font-bold",
-    };
-  }
-  return {
-    code: "M",
-    label: dict?.modified ?? "Sửa đổi",
+export interface FileStatusDict {
+  added: string;
+  deleted: string;
+  renamed: string;
+  modified: string;
+}
+
+interface FileStatusEntry {
+  test: (s: string) => boolean;
+  code: string;
+  labelKey: keyof FileStatusDict;
+  fallbackLabel: string;
+  badgeClass: string;
+}
+
+const FILE_STATUS_TABLE: FileStatusEntry[] = [
+  {
+    test: (s) => s.startsWith("A") || s === "ADDED",
+    code: "A",
+    labelKey: "added",
+    fallbackLabel: "Thêm mới",
+    badgeClass: "bg-diff-add-bg text-diff-add-text border-diff-add-border font-bold",
+  },
+  {
+    test: (s) => s.startsWith("D") || s === "DELETED",
+    code: "D",
+    labelKey: "deleted",
+    fallbackLabel: "Đã xoá",
+    badgeClass: "bg-diff-remove-bg text-diff-remove-text border-diff-remove-border font-bold",
+  },
+  {
+    test: (s) => s.startsWith("R") || s === "RENAMED",
+    code: "R",
+    labelKey: "renamed",
+    fallbackLabel: "Đổi tên",
     badgeClass:
-      "bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border-amber-300 dark:border-amber-800 font-bold",
+      "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 border-purple-300 dark:border-purple-800 font-bold",
+  },
+];
+
+const DEFAULT_FILE_STATUS: FileStatusEntry = {
+  test: () => true,
+  code: "M",
+  labelKey: "modified",
+  fallbackLabel: "Sửa đổi",
+  badgeClass:
+    "bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border-amber-300 dark:border-amber-800 font-bold",
+};
+
+export function getFileStatusMeta(status: string, dict?: FileStatusDict) {
+  const s = (status || "").toUpperCase();
+  const entry = FILE_STATUS_TABLE.find((candidate) => candidate.test(s)) ?? DEFAULT_FILE_STATUS;
+  return {
+    code: entry.code,
+    label: dict?.[entry.labelKey] ?? entry.fallbackLabel,
+    badgeClass: entry.badgeClass,
   };
 }
