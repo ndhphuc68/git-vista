@@ -4,3 +4,13 @@ import { SHORT_SHA_LENGTH } from "../../domain/constants/ui";
 export function shortSha(sha: string): string {
   return sha.slice(0, SHORT_SHA_LENGTH);
 }
+
+/**
+ * Sanitizes a user-typed ref name (branch or tag) as it is typed: runs of
+ * whitespace become a single "-" and the characters Git disallows in a ref
+ * name are stripped. Shared by the branch and tag create/rename forms so
+ * both behave identically.
+ */
+export function sanitizeRefName(value: string): string {
+  return value.replace(/\s+/g, "-").replace(/[~^:?*[\\@{}]/g, "");
+}
