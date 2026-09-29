@@ -1,0 +1,103 @@
+import type { FormEvent } from "react";
+import { useTranslation } from "../../../i18n";
+import type { GitConfigDto } from "../../../ipc/client";
+import { useToastStore } from "../../../store/useToastStore";
+import { useGitProfileFormFields } from "./useGitProfileFormFields";
+import { useGitProfileFormStatus } from "./useGitProfileFormStatus";
+import { useGitProfileFormLoadEffect } from "./useGitProfileFormLoadEffect";
+import {
+  createSaveHandler,
+  createResetToGlobalHandler,
+  createSelectInheritHandler,
+} from "./useGitProfileForm.actions";
+
+export interface UseGitProfileFormOptions {
+  currentRepoPath: string | null;
+  activeScope: "global" | "repo";
+}
+
+export interface UseGitProfileFormResult {
+  userName: string;
+  setUserName: (value: string) => void;
+  userEmail: string;
+  setUserEmail: (value: string) => void;
+  defaultBranch: string;
+  setDefaultBranch: (value: string) => void;
+  gpgSign: boolean;
+  setGpgSign: (value: boolean) => void;
+  gpgKey: string;
+  setGpgKey: (value: string) => void;
+  globalConfig: GitConfigDto | null;
+  localConfig: GitConfigDto | null;
+  isOverride: boolean;
+  setIsOverride: (value: boolean) => void;
+  loading: boolean;
+  saving: boolean;
+  hasLocalOverride: boolean;
+  handleSave: (e: FormEvent) => Promise<void>;
+  handleResetToGlobal: () => Promise<void>;
+  handleSelectInherit: () => void;
+  handleSelectOverride: () => void;
+}
+
+/** Loads, edits, and saves the git profile (identity, GPG signing) form state. */
+export function useGitProfileForm({
+  currentRepoPath,
+  activeScope,
+}: UseGitProfileFormOptions): UseGitProfileFormResult {
+  const { t } = useTranslation();
+  const { showSuccess, showError } = useToastStore();
+  const fields = useGitProfileFormFields();
+  const status = useGitProfileFormStatus();
+
+  useGitProfileFormLoadEffect({
+    currentRepoPath,
+    activeScope,
+    setGlobalConfig: status.setGlobalConfig,
+    setLocalConfig: status.setLocalConfig,
+    setIsOverride: status.setIsOverride,
+    setUserName: fields.setUserName,
+    setUserEmail: fields.setUserEmail,
+    setDefaultBranch: fields.setDefaultBranch,
+    setGpgSign: fields.setGpgSign,
+    setGpgKey: fields.setGpgKey,
+    setLoading: status.setLoading,
+  });
+
+  const actionsContext = {
+    activeScope,
+    currentRepoPath,
+    isOverride: status.isOverride,
+    userName: fields.userName,
+    userEmail: fields.userEmail,
+    defaultBranch: fields.defaultBranch,
+    gpgSign: fields.gpgSign,
+    gpgKey: fields.gpgKey,
+    globalConfig: status.globalConfig,
+    t,
+    setSaving: status.setSaving,
+    setGlobalConfig: status.setGlobalConfig,
+    setLocalConfig: status.setLocalConfig,
+    setIsOverride: status.setIsOverride,
+    setUserName: fields.setUserName,
+    setUserEmail: fields.setUserEmail,
+    setGpgSign: fields.setGpgSign,
+    setGpgKey: fields.setGpgKey,
+    showSuccess,
+    showError,
+  };
+
+  const hasLocalOverride =
+    activeScope === "repo" &&
+    Boolean(status.localConfig?.userNameSource === "local" && status.localConfig?.userName);
+
+  return {
+    ...fields,
+    ...status,
+    hasLocalOverride,
+    handleSave: createSaveHandler(actionsContext),
+    handleResetToGlobal: createResetToGlobalHandler(actionsContext),
+    handleSelectInherit: createSelectInheritHandler(actionsContext),
+    handleSelectOverride: () => status.setIsOverride(true),
+  };
+}
