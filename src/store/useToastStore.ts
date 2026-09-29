@@ -48,14 +48,16 @@ function withoutToast(toasts: ToastItem[], id: string): ToastItem[] {
   return toasts.filter((t) => t.id !== id);
 }
 
-type ErrorToastOptions = {
+// Exported for unit testing only; not part of this module's public API surface.
+export type ErrorToastOptions = {
   title?: string;
   message?: string;
   rawError?: string;
   friendlyError?: FriendlyError;
 };
 
-function extractFriendlyError(errorOrOptions: FriendlyError | ErrorToastOptions) {
+// Exported for unit testing only; not part of this module's public API surface.
+export function extractFriendlyError(errorOrOptions: FriendlyError | ErrorToastOptions) {
   if ("friendlyError" in errorOrOptions && errorOrOptions.friendlyError) {
     return errorOrOptions.friendlyError;
   }
@@ -65,7 +67,8 @@ function extractFriendlyError(errorOrOptions: FriendlyError | ErrorToastOptions)
   return undefined;
 }
 
-function resolveErrorToastFields(errorOrOptions: FriendlyError | ErrorToastOptions) {
+// Exported for unit testing only; not part of this module's public API surface.
+export function resolveErrorToastFields(errorOrOptions: FriendlyError | ErrorToastOptions) {
   const friendlyError = extractFriendlyError(errorOrOptions);
   const title = "title" in errorOrOptions ? errorOrOptions.title : undefined;
   const message = "message" in errorOrOptions ? errorOrOptions.message : undefined;

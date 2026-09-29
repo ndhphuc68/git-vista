@@ -33,7 +33,8 @@ const LOCAL_STRING_KEYS: Record<string, StringConfigField> = {
 };
 const LOCAL_BOOLEAN_KEYS: Record<string, BooleanConfigField> = GLOBAL_BOOLEAN_KEYS;
 
-function setMockGlobalConfig(key: string, value: string) {
+// Exported for unit testing only; not part of this module's public API surface.
+export function setMockGlobalConfig(key: string, value: string) {
   const stringField = GLOBAL_STRING_KEYS[key];
   if (stringField) {
     mockState.globalConfig[stringField] = value;
@@ -45,7 +46,8 @@ function setMockGlobalConfig(key: string, value: string) {
   }
 }
 
-function deleteMockLocalConfig(local: Partial<GitConfigDto>, key: string) {
+// Exported for unit testing only; not part of this module's public API surface.
+export function deleteMockLocalConfig(local: Partial<GitConfigDto>, key: string) {
   const stringField = LOCAL_STRING_KEYS[key];
   if (stringField) {
     delete local[stringField];
@@ -57,7 +59,8 @@ function deleteMockLocalConfig(local: Partial<GitConfigDto>, key: string) {
   }
 }
 
-function setMockLocalConfig(local: Partial<GitConfigDto>, key: string, value: string) {
+// Exported for unit testing only; not part of this module's public API surface.
+export function setMockLocalConfig(local: Partial<GitConfigDto>, key: string, value: string) {
   const stringField = LOCAL_STRING_KEYS[key];
   if (stringField) {
     local[stringField] = value;

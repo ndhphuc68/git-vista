@@ -80,7 +80,8 @@ function mapUserLink(u: RawGitHubUserLink): GitHubUserSummary {
   return { login: u.login, avatar_url: u.avatar_url, html_url: u.html_url };
 }
 
-function mapPullRequestUser(u?: RawGitHubUser): GitHubUserSummary {
+// Exported for unit testing only; not part of this module's public API surface.
+export function mapPullRequestUser(u?: RawGitHubUser): GitHubUserSummary {
   return {
     login: u?.login ?? "unknown",
     avatar_url: u?.avatar_url ?? "",
@@ -88,12 +89,14 @@ function mapPullRequestUser(u?: RawGitHubUser): GitHubUserSummary {
   };
 }
 
-function mapRefPoint(point?: { ref?: string; sha?: string }): { ref: string; sha: string } {
+// Exported for unit testing only; not part of this module's public API surface.
+export function mapRefPoint(point?: { ref?: string; sha?: string }): { ref: string; sha: string } {
   return { ref: point?.ref ?? "", sha: point?.sha ?? "" };
 }
 
 // The shared shape every PR-returning endpoint (list, detail, create) sends back.
-function mapRawPullRequest(p: RawPullRequest): GitHubPullRequest {
+// Exported for unit testing only; not part of this module's public API surface.
+export function mapRawPullRequest(p: RawPullRequest): GitHubPullRequest {
   return {
     number: p.number,
     title: p.title,
@@ -111,7 +114,8 @@ function mapRawPullRequest(p: RawPullRequest): GitHubPullRequest {
   };
 }
 
-function mapCheckRunStatus(status?: string, conclusion?: string | null): CheckStatus {
+// Exported for unit testing only; not part of this module's public API surface.
+export function mapCheckRunStatus(status?: string, conclusion?: string | null): CheckStatus {
   if (status === "completed") return conclusion === "success" ? "success" : "failure";
   if (status === "in_progress") return "in_progress";
   if (status === "queued") return "queued";
@@ -126,7 +130,8 @@ function mapCheckRun(c: RawCheckRun): CheckRunItem {
   };
 }
 
-function mapPullRequestFile(f: RawPullRequestFile): PullRequestFileItem {
+// Exported for unit testing only; not part of this module's public API surface.
+export function mapPullRequestFile(f: RawPullRequestFile): PullRequestFileItem {
   return {
     filename: f.filename,
     status: f.status as PullRequestFileItem["status"],
@@ -247,12 +252,7 @@ export async function fetchPullRequestDetail(
     : [];
 
   // Fetch files
-  const files: PullRequestFileItem[] = await fetchPullRequestFilesList(
-    owner,
-    repo,
-    number,
-    token
-  );
+  const files: PullRequestFileItem[] = await fetchPullRequestFilesList(owner, repo, number, token);
 
   return {
     pr,
