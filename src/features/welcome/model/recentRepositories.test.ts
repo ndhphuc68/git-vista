@@ -1,6 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { type RecentRepoEntry } from "../../../ipc/bindings.generated";
-import { sortRecentRepositories } from "./recentRepositories";
+import { formatRelativeTime, sortRecentRepositories } from "./recentRepositories";
+
+const relativeTimeStrings = {
+  justNow: "just now",
+  minutesAgo: "{m}m ago",
+  hoursAgo: "{h}h ago",
+  daysAgo: "{d}d ago",
+};
 
 function makeEntry(overrides: Partial<RecentRepoEntry>): RecentRepoEntry {
   return {
@@ -68,5 +75,31 @@ describe("sortRecentRepositories", () => {
     sortRecentRepositories(repos, [], "");
 
     expect(repos).toEqual(original);
+  });
+});
+
+describe("formatRelativeTime", () => {
+  it("returns an empty string for a missing timestamp", () => {
+    expect(formatRelativeTime(undefined, relativeTimeStrings)).toBe("");
+  });
+
+  it("returns an empty string for an invalid timestamp", () => {
+    expect(formatRelativeTime(NaN, relativeTimeStrings)).toBe("");
+  });
+
+  it("reports just now for under a minute", () => {
+    expect(formatRelativeTime(Date.now() - 5_000, relativeTimeStrings)).toBe("just now");
+  });
+
+  it("reports minutes ago for under an hour", () => {
+    expect(formatRelativeTime(Date.now() - 5 * 60_000, relativeTimeStrings)).toBe("5m ago");
+  });
+
+  it("reports hours ago for under a day", () => {
+    expect(formatRelativeTime(Date.now() - 3 * 3_600_000, relativeTimeStrings)).toBe("3h ago");
+  });
+
+  it("reports days ago for a day or more", () => {
+    expect(formatRelativeTime(Date.now() - 2 * 86_400_000, relativeTimeStrings)).toBe("2d ago");
   });
 });
