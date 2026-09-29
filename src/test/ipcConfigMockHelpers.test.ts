@@ -36,6 +36,13 @@ describe("ipc/config mock lookup-table helpers", () => {
       setMockGlobalConfig("some.unknown.key", "value");
       expect(mockState.globalConfig).toEqual(before);
     });
+
+    it("ignores a prototype key such as 'toString'", () => {
+      resetMockGitConfig();
+      const before = { ...mockState.globalConfig };
+      setMockGlobalConfig("toString", "value");
+      expect(mockState.globalConfig).toEqual(before);
+    });
   });
 
   describe("setMockLocalConfig / deleteMockLocalConfig", () => {
@@ -63,6 +70,12 @@ describe("ipc/config mock lookup-table helpers", () => {
       expect(local).toEqual({ userName: "Bob" });
     });
 
+    it("ignores a prototype key such as 'toString'", () => {
+      const local: Partial<GitConfigDto> = { userName: "Bob" };
+      setMockLocalConfig(local, "toString", "value");
+      expect(local).toEqual({ userName: "Bob" });
+    });
+
     it("deletes a previously set string field", () => {
       const local: Partial<GitConfigDto> = { userName: "Bob" };
       deleteMockLocalConfig(local, "user.name");
@@ -78,6 +91,12 @@ describe("ipc/config mock lookup-table helpers", () => {
     it("deleting an unknown key is a no-op", () => {
       const local: Partial<GitConfigDto> = { userName: "Bob" };
       deleteMockLocalConfig(local, "some.unknown.key");
+      expect(local).toEqual({ userName: "Bob" });
+    });
+
+    it("deleting a prototype key such as 'toString' is a no-op", () => {
+      const local: Partial<GitConfigDto> = { userName: "Bob" };
+      deleteMockLocalConfig(local, "toString");
       expect(local).toEqual({ userName: "Bob" });
     });
   });

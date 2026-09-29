@@ -56,9 +56,6 @@ export function useCompareModalState({
     setTargetRev(temp);
   };
 
-  const commitsCount = summary?.commits.length ?? 0;
-  const filesCount = summary?.files.length ?? 0;
-
   return {
     baseRev,
     setBaseRev,
@@ -75,7 +72,5 @@ export function useCompareModalState({
     handleSwap,
     summary,
     isLoading,
-    commitsCount,
-    filesCount,
   };
 }

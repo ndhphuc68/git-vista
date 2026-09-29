@@ -33,14 +33,25 @@ const LOCAL_STRING_KEYS: Record<string, StringConfigField> = {
 };
 const LOCAL_BOOLEAN_KEYS: Record<string, BooleanConfigField> = GLOBAL_BOOLEAN_KEYS;
 
+/**
+ * Looks up `key` in `table`, but only among the table's own keys — a plain
+ * `table[key]` lookup would also resolve inherited `Object.prototype`
+ * members (e.g. `"toString"`), silently treating an unknown config key as a
+ * mapped one. `Object.hasOwn` keeps an unknown key falling through exactly
+ * like any other unmapped key.
+ */
+function getMappedField<T>(table: Record<string, T>, key: string): T | undefined {
+  return Object.hasOwn(table, key) ? table[key] : undefined;
+}
+
 // Exported for unit testing only; not part of this module's public API surface.
 export function setMockGlobalConfig(key: string, value: string) {
-  const stringField = GLOBAL_STRING_KEYS[key];
+  const stringField = getMappedField(GLOBAL_STRING_KEYS, key);
   if (stringField) {
     mockState.globalConfig[stringField] = value;
     return;
   }
-  const boolField = GLOBAL_BOOLEAN_KEYS[key];
+  const boolField = getMappedField(GLOBAL_BOOLEAN_KEYS, key);
   if (boolField) {
     mockState.globalConfig[boolField] = value === "true";
   }
@@ -48,12 +59,12 @@ export function setMockGlobalConfig(key: string, value: string) {
 
 // Exported for unit testing only; not part of this module's public API surface.
 export function deleteMockLocalConfig(local: Partial<GitConfigDto>, key: string) {
-  const stringField = LOCAL_STRING_KEYS[key];
+  const stringField = getMappedField(LOCAL_STRING_KEYS, key);
   if (stringField) {
     delete local[stringField];
     return;
   }
-  const boolField = LOCAL_BOOLEAN_KEYS[key];
+  const boolField = getMappedField(LOCAL_BOOLEAN_KEYS, key);
   if (boolField) {
     delete local[boolField];
   }
@@ -61,12 +72,12 @@ export function deleteMockLocalConfig(local: Partial<GitConfigDto>, key: string)
 
 // Exported for unit testing only; not part of this module's public API surface.
 export function setMockLocalConfig(local: Partial<GitConfigDto>, key: string, value: string) {
-  const stringField = LOCAL_STRING_KEYS[key];
+  const stringField = getMappedField(LOCAL_STRING_KEYS, key);
   if (stringField) {
     local[stringField] = value;
     return;
   }
-  const boolField = LOCAL_BOOLEAN_KEYS[key];
+  const boolField = getMappedField(LOCAL_BOOLEAN_KEYS, key);
   if (boolField) {
     local[boolField] = value === "true";
   }
