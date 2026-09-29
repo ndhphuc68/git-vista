@@ -1,5 +1,8 @@
 import type { GraphCommitNode, RepoStatusResult } from "../../../ipc/bindings.generated";
 
+/** Height in px of one virtualized commit row in the graph. */
+export const GRAPH_ROW_HEIGHT = 32;
+
 const BRANCH_PALETTES = [
   {
     bg: "bg-blue-50/95 dark:bg-blue-950/50",

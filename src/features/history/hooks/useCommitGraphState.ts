@@ -7,9 +7,12 @@ import { useToastStore } from "../../../store/useToastStore";
 import { useTranslation } from "../../../i18n";
 import { useCommitGraph } from "../api/useCommitGraph";
 import { useRepoStatus } from "../api/useRepoStatus";
-import { getMaxGraphColumns, getUncommittedSummary } from "../model/graphPresentation";
+import {
+  getMaxGraphColumns,
+  getUncommittedSummary,
+  GRAPH_ROW_HEIGHT,
+} from "../model/graphPresentation";
 import type { GraphContextMenu, GraphDialog } from "../model/graphDialog";
-import { GRAPH_ROW_HEIGHT } from "../components/CommitGraphRows";
 
 /** All state, effects and derived values CommitGraph's JSX reads. */
 export function useCommitGraphState() {
