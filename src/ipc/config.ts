@@ -8,6 +8,67 @@ import { commands, type ConfigScope, type GitConfigDto } from "./bindings.genera
 import { isTauri, unwrap } from "./core";
 import { mockState } from "./mocks";
 
+type StringConfigField = "userName" | "userEmail" | "defaultBranch" | "gpgKey";
+type BooleanConfigField = "pullRebase" | "gpgSign" | "fetchPrune" | "rebaseAutostash";
+
+// Global config accepts every mapped key, including the branch-only default.
+const GLOBAL_STRING_KEYS: Record<string, StringConfigField> = {
+  "user.name": "userName",
+  "user.email": "userEmail",
+  "init.defaultBranch": "defaultBranch",
+  "user.signingkey": "gpgKey",
+};
+const GLOBAL_BOOLEAN_KEYS: Record<string, BooleanConfigField> = {
+  "pull.rebase": "pullRebase",
+  "commit.gpgsign": "gpgSign",
+  "fetch.prune": "fetchPrune",
+  "rebase.autoStash": "rebaseAutostash",
+};
+
+// Local (per-repo) config has no default-branch override, unlike global.
+const LOCAL_STRING_KEYS: Record<string, StringConfigField> = {
+  "user.name": "userName",
+  "user.email": "userEmail",
+  "user.signingkey": "gpgKey",
+};
+const LOCAL_BOOLEAN_KEYS: Record<string, BooleanConfigField> = GLOBAL_BOOLEAN_KEYS;
+
+function setMockGlobalConfig(key: string, value: string) {
+  const stringField = GLOBAL_STRING_KEYS[key];
+  if (stringField) {
+    mockState.globalConfig[stringField] = value;
+    return;
+  }
+  const boolField = GLOBAL_BOOLEAN_KEYS[key];
+  if (boolField) {
+    mockState.globalConfig[boolField] = value === "true";
+  }
+}
+
+function deleteMockLocalConfig(local: Partial<GitConfigDto>, key: string) {
+  const stringField = LOCAL_STRING_KEYS[key];
+  if (stringField) {
+    delete local[stringField];
+    return;
+  }
+  const boolField = LOCAL_BOOLEAN_KEYS[key];
+  if (boolField) {
+    delete local[boolField];
+  }
+}
+
+function setMockLocalConfig(local: Partial<GitConfigDto>, key: string, value: string) {
+  const stringField = LOCAL_STRING_KEYS[key];
+  if (stringField) {
+    local[stringField] = value;
+    return;
+  }
+  const boolField = LOCAL_BOOLEAN_KEYS[key];
+  if (boolField) {
+    local[boolField] = value === "true";
+  }
+}
+
 export const configCommands = {
   getGitConfig: async (repoPath?: string | null): Promise<GitConfigDto> => {
     if (!isTauri()) {
@@ -39,33 +100,14 @@ export const configCommands = {
   ): Promise<void> => {
     if (!isTauri()) {
       if (scope === "global") {
-        if (key === "user.name") mockState.globalConfig.userName = value;
-        if (key === "user.email") mockState.globalConfig.userEmail = value;
-        if (key === "init.defaultBranch") mockState.globalConfig.defaultBranch = value;
-        if (key === "pull.rebase") mockState.globalConfig.pullRebase = value === "true";
-        if (key === "commit.gpgsign") mockState.globalConfig.gpgSign = value === "true";
-        if (key === "user.signingkey") mockState.globalConfig.gpgKey = value;
-        if (key === "fetch.prune") mockState.globalConfig.fetchPrune = value === "true";
-        if (key === "rebase.autoStash") mockState.globalConfig.rebaseAutostash = value === "true";
+        setMockGlobalConfig(key, value);
       } else if (scope === "local" && repoPath) {
         if (!mockState.localConfigs[repoPath]) mockState.localConfigs[repoPath] = {};
+        const local = mockState.localConfigs[repoPath];
         if (value.trim() === "") {
-          if (key === "user.name") delete mockState.localConfigs[repoPath].userName;
-          if (key === "user.email") delete mockState.localConfigs[repoPath].userEmail;
-          if (key === "pull.rebase") delete mockState.localConfigs[repoPath].pullRebase;
-          if (key === "commit.gpgsign") delete mockState.localConfigs[repoPath].gpgSign;
-          if (key === "user.signingkey") delete mockState.localConfigs[repoPath].gpgKey;
-          if (key === "fetch.prune") delete mockState.localConfigs[repoPath].fetchPrune;
-          if (key === "rebase.autoStash") delete mockState.localConfigs[repoPath].rebaseAutostash;
+          deleteMockLocalConfig(local, key);
         } else {
-          if (key === "user.name") mockState.localConfigs[repoPath].userName = value;
-          if (key === "user.email") mockState.localConfigs[repoPath].userEmail = value;
-          if (key === "pull.rebase") mockState.localConfigs[repoPath].pullRebase = value === "true";
-          if (key === "commit.gpgsign") mockState.localConfigs[repoPath].gpgSign = value === "true";
-          if (key === "user.signingkey") mockState.localConfigs[repoPath].gpgKey = value;
-          if (key === "fetch.prune") mockState.localConfigs[repoPath].fetchPrune = value === "true";
-          if (key === "rebase.autoStash")
-            mockState.localConfigs[repoPath].rebaseAutostash = value === "true";
+          setMockLocalConfig(local, key, value);
         }
       }
       return;
