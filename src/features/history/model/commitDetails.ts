@@ -67,6 +67,13 @@ export function formatExactDateTime(timestampSec: number): string {
   return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
 }
 
+/** Compact `dd/mm/yyyy hh:mm` form for dense lists such as the commit graph. */
+export function formatShortDateTime(timestampSec: number): string {
+  const date = new Date(timestampSec * 1000);
+  const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 export function parseCommitMessage(message: string) {
   const lines = (message || "").split("\n");
   const subject = lines[0] || "";

@@ -7,7 +7,8 @@ export function CommitGraphHeader() {
       <span className="w-80 shrink-0 pl-2">{t.graph.columns.branchTag}</span>
       <span className="w-32 shrink-0 pl-2">{t.graph.columns.graph}</span>
       <span className="flex-1 pl-2">{t.graph.columns.commitMessage}</span>
-      <span className="w-36 text-right pr-2">{t.graph.columns.author}</span>
+      <span className="w-64 shrink-0 pl-3">{t.graph.columns.author}</span>
+      <span className="w-32 shrink-0 pl-2">{t.graph.columns.date}</span>
       <span className="w-24 text-right pr-3">{t.graph.columns.sha}</span>
     </div>
   );

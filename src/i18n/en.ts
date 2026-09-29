@@ -390,6 +390,7 @@ export const en: Translations = {
       graph: "GRAPH",
       commitMessage: "COMMIT MESSAGE",
       author: "AUTHOR",
+      date: "DATE",
       sha: "SHA",
     },
     wipChanges: "Working directory has uncommitted changes",

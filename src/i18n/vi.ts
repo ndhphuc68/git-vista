@@ -386,6 +386,7 @@ export const vi = {
       graph: "ĐỒ THỊ",
       commitMessage: "THÔNG ĐIỆP COMMIT",
       author: "TÁC GIẢ",
+      date: "NGÀY",
       sha: "SHA",
     },
     wipChanges: "Thư mục làm việc đang có thay đổi chưa lưu",
