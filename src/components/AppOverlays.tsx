@@ -1,6 +1,7 @@
 import React from "react";
 import { type RepoSummary } from "../ipc/bindings.generated";
 import { ToastContainer } from "./toast/ToastContainer";
+import { GlobalLoadingIndicator } from "./common/GlobalLoadingIndicator";
 import { CommandPalette } from "./palette/CommandPalette";
 import { ShortcutsHelpModal } from "./shortcuts/ShortcutsHelpModal";
 import { SettingsModal } from "./settings/SettingsModal";
@@ -27,7 +28,7 @@ interface AppOverlaysProps {
 }
 
 /**
- * The app's global overlay layer: toasts, command palette, shortcuts help,
+ * The app's global overlay layer: loading indicator, toasts, command palette, shortcuts help,
  * settings, and the repo-scoped manage-remotes/rebase/compare modals.
  */
 export const AppOverlays: React.FC<AppOverlaysProps> = ({
@@ -47,6 +48,7 @@ export const AppOverlays: React.FC<AppOverlaysProps> = ({
 }) => {
   return (
     <>
+      <GlobalLoadingIndicator />
       <ToastContainer />
       <CommandPalette context={commandContext} />
       <ShortcutsHelpModal isOpen={isShortcutsHelpOpen} onClose={onCloseShortcutsHelp} />

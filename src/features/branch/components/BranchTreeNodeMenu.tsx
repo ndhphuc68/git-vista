@@ -6,6 +6,7 @@
 import React from "react";
 import { Edit3, Trash2 } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { useKeepInView } from "../../../shared/hooks/useKeepInView";
 import { type BranchItem } from "../../../ipc/bindings.generated";
 import { BranchTreeNodeMenuSwitchActions } from "./BranchTreeNodeMenuSwitchActions";
 
@@ -35,11 +36,12 @@ export const BranchTreeNodeMenu: React.FC<BranchTreeNodeMenuProps> = ({
   onDelete,
 }) => {
   const { t } = useTranslation();
+  useKeepInView(menuRef);
 
   return (
     <div
       ref={menuRef}
-      className="absolute right-0 top-full mt-1 min-w-56 w-max bg-surface border border-border-subtle rounded-lg shadow-2xl py-1.5 z-50 text-xs flex flex-col animate-fade-in"
+      className="absolute right-0 top-full mt-1 min-w-56 w-max max-w-72 bg-surface border border-border-subtle rounded-lg shadow-2xl py-1.5 z-50 text-xs flex flex-col animate-fade-in"
       onClick={(e) => e.stopPropagation()}
     >
       {!branch.is_head && (

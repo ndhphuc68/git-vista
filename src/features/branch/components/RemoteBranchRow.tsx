@@ -40,7 +40,11 @@ export const RemoteBranchRow: React.FC<RemoteBranchRowProps> = ({
   return (
     <div
       key={branchName}
-      className="group relative flex items-center justify-between rounded-sm"
+      className={clsx(
+        "group relative flex items-center justify-between rounded-sm",
+        // Marks the row a right-click or "..." menu is acting on.
+        isMenuOpen && "bg-surface-hover"
+      )}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();

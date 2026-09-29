@@ -3,6 +3,7 @@ import { getTranslation } from "../../../i18n";
 import {
   formatExactDateTime,
   formatRelativeTime,
+  formatShortDateTime,
   getAuthorAvatarStyle,
   getAuthorInitials,
   getFileStatusMeta,
@@ -140,6 +141,12 @@ describe("commit detail models", () => {
   it("formats exact local date and time with zero padding", () => {
     expect(formatExactDateTime(new Date(2026, 0, 2, 3, 4, 5).getTime() / 1000)).toBe(
       "02/01/2026, 03:04:05"
+    );
+  });
+
+  it("formats a compact local date and time without seconds", () => {
+    expect(formatShortDateTime(new Date(2026, 0, 2, 3, 4, 5).getTime() / 1000)).toBe(
+      "02/01/2026 03:04"
     );
   });
 });

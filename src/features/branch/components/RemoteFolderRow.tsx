@@ -4,6 +4,7 @@
  * rendered children are passed in by the caller.
  */
 import React from "react";
+import clsx from "clsx";
 import { Cloud, ChevronDown, ChevronRight, Folder } from "lucide-react";
 import { type RemoteItem } from "../../../ipc/bindings.generated";
 import { type SidebarDialog } from "../model/sidebarDialog";
@@ -50,7 +51,13 @@ export const RemoteFolderRow: React.FC<RemoteFolderRowProps> = ({
         }
       }}
     >
-      <div className="flex items-center justify-between rounded-sm hover:bg-surface-hover group transition-colors pr-1">
+      <div
+        className={clsx(
+          "flex items-center justify-between rounded-sm hover:bg-surface-hover group transition-colors pr-1",
+          // Marks the remote a right-click or "..." menu is acting on.
+          isRemoteMenuOpen && "bg-surface-hover"
+        )}
+      >
         <button
           type="button"
           onClick={onToggle}

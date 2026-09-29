@@ -75,7 +75,8 @@ export function CommitGraphWipRow({
         </div>
       </div>
 
-      <div className="w-36 text-right pr-2 shrink-0 text-secondary font-mono text-[11px]">
+      <div className="w-64 shrink-0"></div>
+      <div className="w-32 shrink-0 pl-2 text-secondary font-mono text-[11px]">
         <span className="px-1.5 py-0.5 rounded bg-window text-secondary font-medium">
           {t.graph.justNow}
         </span>

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CommitGraph } from "../features/history";
 import { CreateTagModal } from "../features/tag";
@@ -106,6 +106,22 @@ describe("CommitGraphRows (via CommitGraph)", () => {
 
     fireEvent.click(wipRow);
     expect(useViewStore.getState().activeScreen).toBe("changes");
+  });
+
+  it("shows the author email after the name and a commit date column", async () => {
+    renderGraph();
+    const row = (await screen.findByText("third commit")).closest('[role="button"]') as HTMLElement;
+
+    expect(screen.getByText("DATE")).toBeInTheDocument();
+    expect(within(row).getByText("Author Three")).toBeInTheDocument();
+    expect(within(row).getByText("three@example.com")).toBeInTheDocument();
+    const d = new Date(3000 * 1000);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    expect(
+      within(row).getByText(
+        `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+      )
+    ).toBeInTheDocument();
   });
 
   it("selects the next/previous commit with ArrowDown/ArrowUp", async () => {

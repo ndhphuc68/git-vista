@@ -4,10 +4,12 @@
  * The commands themselves live in the domain modules beside this file, split to
  * match `src-tauri/src/commands/`. This assembles them into the single
  * `invokeCommand` object the app has always called, and owns the two event
- * listeners, which are subscriptions rather than commands.
+ * listeners, which are subscriptions rather than commands. Commands that change
+ * something also drive the global loading indicator (see `globalLoading.ts`).
  */
 import { type RepoChangedPayload, type TaskProgressPayload } from "./bindings.generated";
 import { isTauri } from "./core";
+import { withGlobalLoading } from "./globalLoading";
 
 import { appCommands } from "./app";
 import { branchCommands } from "./branch";
@@ -36,7 +38,7 @@ export {
   resetMockCompareData,
 } from "./mocks";
 
-export const invokeCommand = {
+export const invokeCommand = withGlobalLoading({
   ...appCommands,
   ...repoCommands,
   ...historyCommands,
@@ -53,7 +55,7 @@ export const invokeCommand = {
   ...configCommands,
   ...githubCommands,
   ...undoCommands,
-};
+});
 
 export async function listenToRepoChanged(
   handler: (payload: RepoChangedPayload) => void
