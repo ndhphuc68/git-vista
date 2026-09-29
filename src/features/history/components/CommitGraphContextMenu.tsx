@@ -1,15 +1,9 @@
 import type { RefObject } from "react";
-import {
-  GitBranch,
-  Tag,
-  Copy,
-  GitPullRequest,
-  RotateCcw,
-  GitMerge,
-  GitCompare,
-} from "lucide-react";
+import { GitBranch, Tag, Copy, GitPullRequest, RotateCcw, GitMerge, GitCompare } from "lucide-react";
 import { useTranslation } from "../../../i18n";
 import type { GraphContextMenu, GraphDialog } from "../model/graphDialog";
+import { buildCompareDialogFromContextMenu } from "../model/graphDialog";
+import { CommitGraphContextMenuItem } from "./CommitGraphContextMenuItem";
 
 interface CommitGraphContextMenuProps {
   contextMenu: GraphContextMenu;
@@ -29,6 +23,33 @@ export function CommitGraphContextMenu({
   onCopySha,
 }: CommitGraphContextMenuProps) {
   const { t } = useTranslation();
+  const { commit } = contextMenu;
+
+  const actions = [
+    { icon: Tag, label: t.graph.createTagHere, dialog: { type: "createTag", commit } as const },
+    {
+      icon: GitBranch,
+      label: t.graph.createBranchHere,
+      dialog: { type: "createBranch", commit } as const,
+    },
+    {
+      icon: GitPullRequest,
+      label: t.graph.cherryPickHere,
+      dialog: { type: "cherryPick", commit } as const,
+    },
+    { icon: RotateCcw, label: t.graph.revertHere, dialog: { type: "revert", commit } as const },
+    {
+      icon: GitMerge,
+      label: t.graph.interactiveRebaseHere,
+      dialog: { type: "interactiveRebase", commit } as const,
+    },
+    {
+      icon: GitCompare,
+      label: t.graph.compareWith,
+      dialog: buildCompareDialogFromContextMenu(contextMenu, selectedCommitId),
+    },
+  ];
+
   return (
     <div
       ref={menuRef}
@@ -42,101 +63,24 @@ export function CommitGraphContextMenu({
       className="min-w-56 w-max bg-surface border border-border-subtle rounded-lg shadow-2xl py-1.5 text-xs flex flex-col animate-fade-in"
       onClick={(e) => e.stopPropagation()}
     >
-      <button
-        type="button"
-        role="menuitem"
-        onClick={() => {
-          onOpenDialog({ type: "createTag", commit: contextMenu.commit });
-          onClose();
-        }}
-        className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors"
-      >
-        <Tag size={14} className="shrink-0 text-secondary" />
-        <span>{t.graph.createTagHere}</span>
-      </button>
+      {actions.map((action) => (
+        <CommitGraphContextMenuItem
+          key={action.dialog.type}
+          icon={action.icon}
+          label={action.label}
+          onClick={() => {
+            onOpenDialog(action.dialog);
+            onClose();
+          }}
+        />
+      ))}
 
-      <button
-        type="button"
-        role="menuitem"
-        onClick={() => {
-          onOpenDialog({ type: "createBranch", commit: contextMenu.commit });
-          onClose();
-        }}
-        className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors"
-      >
-        <GitBranch size={14} className="shrink-0 text-secondary" />
-        <span>{t.graph.createBranchHere}</span>
-      </button>
-
-      <button
-        type="button"
-        role="menuitem"
-        onClick={() => {
-          onOpenDialog({ type: "cherryPick", commit: contextMenu.commit });
-          onClose();
-        }}
-        className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors"
-      >
-        <GitPullRequest size={14} className="shrink-0 text-secondary" />
-        <span>{t.graph.cherryPickHere}</span>
-      </button>
-
-      <button
-        type="button"
-        role="menuitem"
-        onClick={() => {
-          onOpenDialog({ type: "revert", commit: contextMenu.commit });
-          onClose();
-        }}
-        className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors"
-      >
-        <RotateCcw size={14} className="shrink-0 text-secondary" />
-        <span>{t.graph.revertHere}</span>
-      </button>
-
-      <button
-        type="button"
-        role="menuitem"
-        onClick={() => {
-          onOpenDialog({ type: "interactiveRebase", commit: contextMenu.commit });
-          onClose();
-        }}
-        className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors"
-      >
-        <GitMerge size={14} className="shrink-0 text-secondary" />
-        <span>{t.graph.interactiveRebaseHere}</span>
-      </button>
-
-      <button
-        type="button"
-        role="menuitem"
-        onClick={() => {
-          const base =
-            selectedCommitId && selectedCommitId !== contextMenu.commit.id
-              ? selectedCommitId
-              : contextMenu.commit.id;
-          const target =
-            selectedCommitId && selectedCommitId !== contextMenu.commit.id
-              ? contextMenu.commit.id
-              : "HEAD";
-          onOpenDialog({ type: "compare", baseRev: base, targetRev: target });
-          onClose();
-        }}
-        className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors"
-      >
-        <GitCompare size={14} className="shrink-0 text-secondary" />
-        <span>{t.graph.compareWith}</span>
-      </button>
-
-      <button
-        type="button"
-        role="menuitem"
-        onClick={() => onCopySha(contextMenu.commit.id)}
-        className="flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors border-t border-border-subtle/50 mt-1 pt-2"
-      >
-        <Copy size={14} className="shrink-0 text-secondary" />
-        <span>{t.graph.copySha}</span>
-      </button>
+      <CommitGraphContextMenuItem
+        icon={Copy}
+        label={t.graph.copySha}
+        onClick={() => onCopySha(commit.id)}
+        className="border-t border-border-subtle/50 mt-1 pt-2"
+      />
     </div>
   );
 }
