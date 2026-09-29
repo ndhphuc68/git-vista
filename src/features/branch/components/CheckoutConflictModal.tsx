@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { AlertTriangle, ArrowRight, Archive } from "lucide-react";
-import { useSaveStash } from "../../stash/api";
-import { useCheckoutBranch } from "../api";
-import { useTranslation } from "../../../i18n";
 import { Modal, Button, Alert } from "../../../shared/ui";
+import { useCheckoutConflictForm } from "../hooks/useCheckoutConflictForm";
 
 const TITLE_ID = "checkout-conflict-title";
 
@@ -26,40 +24,13 @@ export const CheckoutConflictModal: React.FC<CheckoutConflictModalProps> = ({
   repoPath,
   onSuccess,
 }) => {
-  const { t } = useTranslation();
-  // repoPath is optional on this modal: the stash-and-checkout button only
-  // renders when it is set, so an empty path never reaches the mutation.
-  const checkoutBranch = useCheckoutBranch(repoPath ?? "");
-  const saveStash = useSaveStash(repoPath ?? "");
-  const [actionError, setActionError] = useState<string | null>(null);
-  const [isStashing, setIsStashing] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      setIsStashing(false);
-      setActionError(null);
-    }
-  }, [isOpen]);
-
-  const handleStashAndCheckout = async () => {
-    if (!repoPath) return;
-    setIsStashing(true);
-    setActionError(null);
-    try {
-      await saveStash.mutateAsync({
-        message: t.modals.checkoutConflict.autoStashMessage.replace("{target}", targetBranch),
-        includeUntracked: true,
-      });
-      await checkoutBranch.mutateAsync({ name: targetBranch });
-      onClose();
-      onSuccess?.();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setActionError(t.modals.checkoutConflict.stashError.replace("{msg}", msg));
-    } finally {
-      setIsStashing(false);
-    }
-  };
+  const { t, actionError, isStashing, handleStashAndCheckout } = useCheckoutConflictForm({
+    isOpen,
+    targetBranch,
+    repoPath,
+    onClose,
+    onSuccess,
+  });
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} labelledBy={TITLE_ID}>

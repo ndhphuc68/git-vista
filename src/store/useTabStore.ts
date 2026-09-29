@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { type RepoSummary } from "../ipc/bindings.generated";
 import { type TabItem, type TabSessionData } from "../types/tab";
-import { invokeCommand } from "../ipc/client";
+import { closeRepository, openRepository } from "../features/repo";
 import { useRepoStore } from "./useRepoStore";
 import { useViewStore } from "./useViewStore";
 
@@ -57,40 +57,137 @@ interface TabStoreState {
   reset: () => void;
 }
 
+type TabStoreSet = (partial: Partial<TabStoreState>) => void;
+type TabStoreGet = () => TabStoreState;
+
+function openRepoTabAction(set: TabStoreSet, get: TabStoreGet, repo: RepoSummary) {
+  const { tabs } = get();
+  const existingIndex = tabs.findIndex((t) => t.id === repo.path);
+
+  // Sync RepoStore immediately
+  useRepoStore.getState().setRepo(repo);
+
+  if (existingIndex >= 0) {
+    // Tab already open, just switch to it and update repo summary if needed
+    const tab = tabs[existingIndex];
+    if (tab) {
+      useViewStore.getState().setActiveScreen(tab.activeScreen || "history");
+      const updatedTabs = [...tabs];
+      updatedTabs[existingIndex] = {
+        ...tab,
+        repo,
+        selectedBranch: tab.selectedBranch || repo.head_branch,
+      };
+      set({ tabs: updatedTabs, activeTabId: repo.path });
+      saveSessionToStorage(updatedTabs, repo.path);
+    }
+  } else {
+    useViewStore.getState().setActiveScreen("history");
+    const newTab = createRepoTab(repo);
+    const updatedTabs = [...tabs, newTab];
+    set({ tabs: updatedTabs, activeTabId: repo.path });
+    saveSessionToStorage(updatedTabs, repo.path);
+  }
+}
+
+function closeTabAction(set: TabStoreSet, get: TabStoreGet, tabId: string) {
+  if (tabId === "home") return; // Home tab cannot be closed
+
+  const { tabs, activeTabId } = get();
+  const index = tabs.findIndex((t) => t.id === tabId);
+  if (index === -1) return;
+
+  const remainingTabs = tabs.filter((t) => t.id !== tabId);
+  let nextActiveId = activeTabId;
+
+  if (activeTabId === tabId) {
+    // Select the adjacent tab: previous tab if available, otherwise next, fallback to home
+    const prevTab = index > 0 ? tabs[index - 1] : undefined;
+    const firstRemaining = remainingTabs[0];
+
+    if (prevTab) {
+      nextActiveId = prevTab.id;
+    } else if (firstRemaining) {
+      nextActiveId = firstRemaining.id;
+    } else {
+      nextActiveId = "home";
+    }
+
+    // Sync active repo state
+    const nextTab = remainingTabs.find((t) => t.id === nextActiveId);
+    if (nextTab && nextTab.type === "repo" && nextTab.repo) {
+      useRepoStore.getState().setRepo(nextTab.repo);
+    } else {
+      useRepoStore.getState().clearRepo();
+    }
+  }
+
+  set({ tabs: remainingTabs, activeTabId: nextActiveId });
+  saveSessionToStorage(remainingTabs, nextActiveId);
+
+  // Call backend to release file watcher and memory
+  closeRepository(tabId).catch((err) => {
+    console.warn("Failed to close repository in backend:", err);
+  });
+}
+
+function setActiveTabAction(set: TabStoreSet, get: TabStoreGet, tabId: string) {
+  const { tabs } = get();
+  const targetTab = tabs.find((t) => t.id === tabId);
+  if (!targetTab) return;
+
+  if (targetTab.type === "repo" && targetTab.repo) {
+    useRepoStore.getState().setRepo(targetTab.repo);
+    if (targetTab.selectedBranch) {
+      useRepoStore.getState().setSelectedBranch(targetTab.selectedBranch);
+    }
+    if (targetTab.activeScreen) {
+      useViewStore.getState().setActiveScreen(targetTab.activeScreen);
+    }
+  } else if (tabId === "home") {
+    useRepoStore.getState().clearRepo();
+  }
+
+  set({ activeTabId: tabId });
+  saveSessionToStorage(tabs, tabId);
+}
+
+async function restoreSessionAction(set: TabStoreSet, get: TabStoreGet) {
+  if (typeof localStorage === "undefined") return;
+  set({ isRestoringSession: true });
+
+  try {
+    const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (!raw) return;
+
+    const session: TabSessionData = JSON.parse(raw);
+    if (!session.openRepoPaths || !Array.isArray(session.openRepoPaths)) return;
+
+    for (const path of session.openRepoPaths) {
+      try {
+        const repo = await openRepository(path);
+        get().openRepoTab(repo);
+      } catch (err) {
+        console.warn(`Failed to restore repo tab for ${path}:`, err);
+      }
+    }
+
+    if (session.activeTabId && get().tabs.some((t) => t.id === session.activeTabId)) {
+      set({ activeTabId: session.activeTabId });
+    }
+  } catch (err) {
+    console.warn("Error parsing or restoring session tabs:", err);
+  } finally {
+    set({ isRestoringSession: false });
+  }
+}
+
 export const useTabStore = create<TabStoreState>((set, get) => ({
   tabs: [createHomeTab()],
   activeTabId: "home",
   isRestoringSession: false,
 
-  openRepoTab: (repo: RepoSummary) => {
-    const { tabs } = get();
-    const existingIndex = tabs.findIndex((t) => t.id === repo.path);
-
-    // Sync RepoStore immediately
-    useRepoStore.getState().setRepo(repo);
-
-    if (existingIndex >= 0) {
-      // Tab already open, just switch to it and update repo summary if needed
-      const tab = tabs[existingIndex];
-      if (tab) {
-        useViewStore.getState().setActiveScreen(tab.activeScreen || "history");
-        const updatedTabs = [...tabs];
-        updatedTabs[existingIndex] = {
-          ...tab,
-          repo,
-          selectedBranch: tab.selectedBranch || repo.head_branch,
-        };
-        set({ tabs: updatedTabs, activeTabId: repo.path });
-        saveSessionToStorage(updatedTabs, repo.path);
-      }
-    } else {
-      useViewStore.getState().setActiveScreen("history");
-      const newTab = createRepoTab(repo);
-      const updatedTabs = [...tabs, newTab];
-      set({ tabs: updatedTabs, activeTabId: repo.path });
-      saveSessionToStorage(updatedTabs, repo.path);
-    }
-  },
+  openRepoTab: (repo: RepoSummary) => openRepoTabAction(set, get, repo),
 
   openHomeTab: () => {
     useRepoStore.getState().clearRepo();
@@ -98,67 +195,9 @@ export const useTabStore = create<TabStoreState>((set, get) => ({
     saveSessionToStorage(get().tabs, "home");
   },
 
-  closeTab: (tabId: string) => {
-    if (tabId === "home") return; // Home tab cannot be closed
+  closeTab: (tabId: string) => closeTabAction(set, get, tabId),
 
-    const { tabs, activeTabId } = get();
-    const index = tabs.findIndex((t) => t.id === tabId);
-    if (index === -1) return;
-
-    const remainingTabs = tabs.filter((t) => t.id !== tabId);
-    let nextActiveId = activeTabId;
-
-    if (activeTabId === tabId) {
-      // Select the adjacent tab: previous tab if available, otherwise next, fallback to home
-      const prevTab = index > 0 ? tabs[index - 1] : undefined;
-      const firstRemaining = remainingTabs[0];
-
-      if (prevTab) {
-        nextActiveId = prevTab.id;
-      } else if (firstRemaining) {
-        nextActiveId = firstRemaining.id;
-      } else {
-        nextActiveId = "home";
-      }
-
-      // Sync active repo state
-      const nextTab = remainingTabs.find((t) => t.id === nextActiveId);
-      if (nextTab && nextTab.type === "repo" && nextTab.repo) {
-        useRepoStore.getState().setRepo(nextTab.repo);
-      } else {
-        useRepoStore.getState().clearRepo();
-      }
-    }
-
-    set({ tabs: remainingTabs, activeTabId: nextActiveId });
-    saveSessionToStorage(remainingTabs, nextActiveId);
-
-    // Call backend to release file watcher and memory
-    invokeCommand.closeRepository(tabId).catch((err) => {
-      console.warn("Failed to close repository in backend:", err);
-    });
-  },
-
-  setActiveTab: (tabId: string) => {
-    const { tabs } = get();
-    const targetTab = tabs.find((t) => t.id === tabId);
-    if (targetTab) {
-      if (targetTab.type === "repo" && targetTab.repo) {
-        useRepoStore.getState().setRepo(targetTab.repo);
-        if (targetTab.selectedBranch) {
-          useRepoStore.getState().setSelectedBranch(targetTab.selectedBranch);
-        }
-        if (targetTab.activeScreen) {
-          useViewStore.getState().setActiveScreen(targetTab.activeScreen);
-        }
-      } else if (tabId === "home") {
-        useRepoStore.getState().clearRepo();
-      }
-
-      set({ activeTabId: tabId });
-      saveSessionToStorage(tabs, tabId);
-    }
-  },
+  setActiveTab: (tabId: string) => setActiveTabAction(set, get, tabId),
 
   updateTabState: (tabId: string, partial: Partial<TabItem>) => {
     set((state) => ({
@@ -177,35 +216,7 @@ export const useTabStore = create<TabStoreState>((set, get) => ({
     return tabs.find((t) => t.id === activeTabId);
   },
 
-  restoreSession: async () => {
-    if (typeof localStorage === "undefined") return;
-    set({ isRestoringSession: true });
-
-    try {
-      const raw = localStorage.getItem(SESSION_STORAGE_KEY);
-      if (!raw) return;
-
-      const session: TabSessionData = JSON.parse(raw);
-      if (!session.openRepoPaths || !Array.isArray(session.openRepoPaths)) return;
-
-      for (const path of session.openRepoPaths) {
-        try {
-          const repo = await invokeCommand.openRepository(path);
-          get().openRepoTab(repo);
-        } catch (err) {
-          console.warn(`Failed to restore repo tab for ${path}:`, err);
-        }
-      }
-
-      if (session.activeTabId && get().tabs.some((t) => t.id === session.activeTabId)) {
-        set({ activeTabId: session.activeTabId });
-      }
-    } catch (err) {
-      console.warn("Error parsing or restoring session tabs:", err);
-    } finally {
-      set({ isRestoringSession: false });
-    }
-  },
+  restoreSession: () => restoreSessionAction(set, get),
 
   reset: () => {
     set({

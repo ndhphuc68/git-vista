@@ -23,7 +23,7 @@
     "test-results/**"
   ],
   "rules": {
-    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-console": ["error", { "allow": ["warn", "error"] }],
     "no-unused-vars": [
       "error",
       {
@@ -38,32 +38,34 @@
         "fixStyle": "inline-type-imports"
       }
     ],
-    "typescript/no-explicit-any": "warn",
+    "typescript/no-explicit-any": "error",
     "import/no-duplicates": "error",
     "no-restricted-imports": [
-      "warn",
+      "error",
       {
         "patterns": [
           {
             "group": ["**/ipc/*", "**/ipc"],
+            "allowTypeImports": true,
             "message": "Component phải gọi qua features/*/api, không import ipc trực tiếp."
           },
           {
             "group": ["**/features/*/components/*", "**/features/*/api/*", "**/features/*/model/*"],
+            "allowTypeImports": true,
             "message": "Import qua features/<name>/index.ts, không chọc vào nội bộ feature."
           }
         ]
       }
     ],
     "react/rules-of-hooks": "error",
-    "react/exhaustive-deps": "warn",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }],
-    "max-lines": ["warn", { "max": 300, "skipBlankLines": true, "skipComments": true }],
-    "max-lines-per-function": ["warn", { "max": 80, "skipBlankLines": true, "skipComments": true }],
-    "complexity": ["warn", 15],
-    "max-depth": ["warn", 4],
-    "max-params": ["warn", 5],
-    "max-nested-callbacks": ["warn", 3]
+    "react/exhaustive-deps": "error",
+    "react/only-export-components": ["error", { "allowConstantExport": true }],
+    "max-lines": ["error", { "max": 300, "skipBlankLines": true, "skipComments": true }],
+    "max-lines-per-function": ["error", { "max": 80, "skipBlankLines": true, "skipComments": true }],
+    "complexity": ["error", 15],
+    "max-depth": ["error", 4],
+    "max-params": ["error", 5],
+    "max-nested-callbacks": ["error", 3]
   },
   "overrides": [
     {
@@ -95,6 +97,24 @@
             ]
           }
         ]
+      }
+    },
+    {
+      "files": ["scripts/**"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["src/i18n/en.ts", "src/i18n/vi.ts"],
+      "rules": {
+        "max-lines": "off"
+      }
+    },
+    {
+      "files": ["src/ipc/**"],
+      "rules": {
+        "max-params": "off"
       }
     }
   ]

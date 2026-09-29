@@ -1,10 +1,9 @@
 use crate::error::AppError;
-use crate::events::RepoChangedPayload;
+use crate::events::{repo_changed_payload, REPO_CHANGED_EVENT};
 use crate::exec::get_git_cli_version;
 use crate::read::{get_head_info, RepoHeadInfo};
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use std::time::{SystemTime, UNIX_EPOCH};
 use tauri::Emitter;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -46,18 +45,11 @@ pub fn get_repo_head_info(repo_path: String) -> Result<RepoHeadInfo, AppError> {
 #[tauri::command]
 #[specta::specta]
 pub fn simulate_repo_change(app: tauri::AppHandle, repo_path: String) -> Result<(), AppError> {
-    let now = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_millis() as f64;
+    let payload = repo_changed_payload(&repo_path, "Simulated trigger for M0 verification");
 
-    let payload = RepoChangedPayload {
-        repo_path,
-        reason: "Simulated trigger for M0 verification".to_string(),
-        timestamp_ms: now,
-    };
-
-    app.emit("repo-changed", payload)
+    // Unlike emit_repo_changed, this surfaces emit failures: it exists to verify the
+    // event channel, so a silent drop would defeat its purpose.
+    app.emit(REPO_CHANGED_EVENT, payload)
         .map_err(|e| AppError::InvalidOperation(e.to_string()))?;
 
     Ok(())

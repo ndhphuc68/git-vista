@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { GitBranch } from "lucide-react";
-import { useCreateBranch } from "../api";
-import { useTranslation } from "../../../i18n";
 import { Modal, Button, Alert } from "../../../shared/ui";
+import { useCreateBranchForm } from "../hooks/useCreateBranchForm";
 
 const TITLE_ID = "create-branch-title";
 
@@ -21,55 +20,8 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
   targetCommit,
   onSuccess,
 }) => {
-  const { t } = useTranslation();
-  const createBranch = useCreateBranch(repoPath);
-  const [branchName, setBranchName] = useState("");
-  const [checkout, setCheckout] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const loading = createBranch.isPending;
-
-  useEffect(() => {
-    if (isOpen) {
-      setBranchName("");
-      setCheckout(true);
-      setError(null);
-    }
-  }, [isOpen]);
-
-  const sanitizeBranchName = (val: string) => {
-    // Turn spaces into '-' and strip characters Git does not allow in a ref name
-    return val.replace(/\s+/g, "-").replace(/[~^:?*[\\@{}]/g, "");
-  };
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const sanitized = sanitizeBranchName(e.target.value);
-    setBranchName(sanitized);
-    if (error) setError(null);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = branchName.trim();
-    if (!trimmed) {
-      setError(t.modals.createBranch.errorEmpty);
-      return;
-    }
-
-    setError(null);
-
-    try {
-      await createBranch.mutateAsync({
-        name: trimmed,
-        targetCommit: targetCommit ?? undefined,
-        checkout,
-      });
-      if (onSuccess) onSuccess();
-      onClose();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(msg || t.common.error);
-    }
-  };
+  const { t, branchName, checkout, setCheckout, error, loading, handleNameChange, handleSubmit } =
+    useCreateBranchForm({ isOpen, repoPath, targetCommit, onClose, onSuccess });
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} labelledBy={TITLE_ID}>

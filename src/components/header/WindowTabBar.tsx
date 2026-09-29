@@ -1,9 +1,9 @@
 import React from "react";
-import { Plus, X, Settings, GitBranch, Home, FolderGit2 } from "lucide-react";
-import { clsx } from "clsx";
+import { Plus, Settings } from "lucide-react";
 import { useTabStore } from "../../store/useTabStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { useTranslation } from "../../i18n";
+import { WindowTab } from "./WindowTab";
 
 interface WindowTabBarProps {
   onNewTab?: () => void;
@@ -33,98 +33,17 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
           const isActive = tab.id === activeTabId;
           const nextTab = tabs[idx + 1];
           const isNextActive = nextTab && nextTab.id === activeTabId;
-
-          if (tab.type === "home") {
-            return (
-              <React.Fragment key="home">
-                <div
-                  data-testid="tab-home"
-                  onClick={() => setActiveTab("home")}
-                  className={clsx(
-                    "group relative flex items-center gap-2 px-3.5 h-[34px] rounded-t-lg text-[13px] cursor-pointer transition-colors shrink-0 select-none min-w-[140px] max-w-[200px] outline-none focus:outline-none focus-visible:outline-none ring-0",
-                    isActive
-                      ? "bg-surface text-primary font-medium after:absolute after:-bottom-[1px] after:left-0 after:right-0 after:h-[2px] after:bg-surface"
-                      : "text-secondary hover:text-primary hover:bg-surface/50 dark:hover:bg-white/[0.04] font-normal"
-                  )}
-                  title="Home (Welcome)"
-                >
-                  <Home
-                    size={14}
-                    className={clsx(
-                      "shrink-0",
-                      isActive ? "text-accent" : "text-secondary group-hover:text-primary"
-                    )}
-                  />
-                  <span className="truncate">Home</span>
-                </div>
-                {!isActive && !isNextActive && idx < tabs.length - 1 && (
-                  <div className="h-4 w-[1px] bg-border-subtle/80 dark:bg-slate-700/60 my-auto shrink-0 mx-0.5" />
-                )}
-              </React.Fragment>
-            );
-          }
-
-          const repoName = tab.alias || tab.repo?.name || tab.id.split("/").pop() || "repository";
-          const branchName = tab.selectedBranch || tab.repo?.head_branch;
+          const showSeparator = !isActive && !isNextActive && idx < tabs.length - 1;
 
           return (
-            <React.Fragment key={tab.id}>
-              <div
-                data-testid={`tab-${tab.id}`}
-                onClick={() => setActiveTab(tab.id)}
-                className={clsx(
-                  "group relative flex items-center gap-2 px-3 h-[34px] rounded-t-lg text-[13px] cursor-pointer transition-colors shrink-0 min-w-[150px] max-w-[240px] select-none outline-none focus:outline-none focus-visible:outline-none ring-0",
-                  isActive
-                    ? "bg-surface text-primary font-medium after:absolute after:-bottom-[1px] after:left-0 after:right-0 after:h-[2px] after:bg-surface"
-                    : "text-secondary hover:text-primary hover:bg-surface/50 dark:hover:bg-white/[0.04] font-normal"
-                )}
-                title={`${repoName} - ${tab.id}`}
-              >
-                <FolderGit2
-                  size={15}
-                  className={clsx(
-                    "shrink-0",
-                    isActive ? "text-accent" : "text-secondary group-hover:text-primary"
-                  )}
-                />
-                <span className="truncate">{repoName}</span>
-
-                {branchName && (
-                  <span
-                    className={clsx(
-                      "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono shrink-0 max-w-[85px] truncate border",
-                      isActive
-                        ? "bg-accent-subtle text-accent border-accent/25 font-semibold"
-                        : "bg-surface-header/40 text-secondary border-border-subtle/50"
-                    )}
-                    title={`Branch: ${branchName}`}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                    <GitBranch
-                      size={9}
-                      className="shrink-0 text-emerald-600 dark:text-emerald-400"
-                    />
-                    <span className="truncate">{branchName}</span>
-                  </span>
-                )}
-
-                <button
-                  type="button"
-                  data-testid={`close-tab-${tab.id}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    closeTab(tab.id);
-                  }}
-                  className="ml-auto flex items-center justify-center w-5 h-5 rounded hover:bg-surface-hover dark:hover:bg-white/10 text-secondary hover:text-primary transition-colors shrink-0 outline-none focus:outline-none"
-                  aria-label={`Close tab ${repoName}`}
-                >
-                  <X size={12} strokeWidth={1.75} />
-                </button>
-              </div>
-              {!isActive && !isNextActive && idx < tabs.length - 1 && (
-                <div className="h-4 w-[1px] bg-border-subtle/80 dark:bg-slate-700/60 my-auto shrink-0 mx-0.5" />
-              )}
-            </React.Fragment>
+            <WindowTab
+              key={tab.id}
+              tab={tab}
+              isActive={isActive}
+              showSeparator={Boolean(showSeparator)}
+              onSelect={() => setActiveTab(tab.id)}
+              onClose={() => closeTab(tab.id)}
+            />
           );
         })}
 

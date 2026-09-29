@@ -1,8 +1,7 @@
 use crate::error::AppError;
+use crate::events::emit_repo_changed;
 use crate::repo::{RecentRepoEntry, RepoManager, RepoSummary};
 use std::sync::Mutex;
-use std::time::{SystemTime, UNIX_EPOCH};
-use tauri::Emitter;
 
 static REPO_MANAGER: Mutex<Option<RepoManager>> = Mutex::new(None);
 
@@ -19,19 +18,6 @@ where
         *lock = Some(RepoManager::new());
     }
     f(lock.as_mut().unwrap())
-}
-
-fn emit_repo_changed(app: &tauri::AppHandle, repo_path: String, reason: String) {
-    let now = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_millis() as f64;
-    let payload = crate::events::RepoChangedPayload {
-        repo_path,
-        reason,
-        timestamp_ms: now,
-    };
-    let _ = app.emit("repo-changed", payload);
 }
 
 pub fn open_repository_internal(path: String) -> Result<RepoSummary, AppError> {
@@ -60,7 +46,7 @@ pub fn open_repository(app: tauri::AppHandle, path: String) -> Result<RepoSummar
         let app_clone = app.clone();
         let repo_path = summary.path.clone();
         let _ = m.start_watcher_for(&summary.path, move |reason| {
-            emit_repo_changed(&app_clone, repo_path.clone(), reason);
+            emit_repo_changed(&app_clone, &repo_path, &reason);
         });
         Ok(summary)
     })
@@ -191,7 +177,7 @@ pub fn stage_file(
     file_path: String,
 ) -> Result<(), AppError> {
     crate::write::staging::stage_file(&repo_path, &file_path)?;
-    emit_repo_changed(&app, repo_path, "stage_file".to_string());
+    emit_repo_changed(&app, &repo_path, "stage_file");
     Ok(())
 }
 
@@ -203,7 +189,7 @@ pub fn unstage_file(
     file_path: String,
 ) -> Result<(), AppError> {
     crate::write::staging::unstage_file(&repo_path, &file_path)?;
-    emit_repo_changed(&app, repo_path, "unstage_file".to_string());
+    emit_repo_changed(&app, &repo_path, "unstage_file");
     Ok(())
 }
 
@@ -211,7 +197,7 @@ pub fn unstage_file(
 #[specta::specta]
 pub fn stage_all(app: tauri::AppHandle, repo_path: String) -> Result<(), AppError> {
     crate::write::staging::stage_all(&repo_path)?;
-    emit_repo_changed(&app, repo_path, "stage_all".to_string());
+    emit_repo_changed(&app, &repo_path, "stage_all");
     Ok(())
 }
 
@@ -219,7 +205,7 @@ pub fn stage_all(app: tauri::AppHandle, repo_path: String) -> Result<(), AppErro
 #[specta::specta]
 pub fn unstage_all(app: tauri::AppHandle, repo_path: String) -> Result<(), AppError> {
     crate::write::staging::unstage_all(&repo_path)?;
-    emit_repo_changed(&app, repo_path, "unstage_all".to_string());
+    emit_repo_changed(&app, &repo_path, "unstage_all");
     Ok(())
 }
 
@@ -231,7 +217,7 @@ pub fn discard_file_changes(
     file_path: String,
 ) -> Result<String, AppError> {
     let token = crate::write::discard::discard_with_backup(&repo_path, &file_path)?;
-    emit_repo_changed(&app, repo_path, "discard_file_changes".to_string());
+    emit_repo_changed(&app, &repo_path, "discard_file_changes");
     Ok(token)
 }
 
@@ -243,7 +229,7 @@ pub fn restore_discard(
     token: String,
 ) -> Result<(), AppError> {
     crate::write::discard::restore_discard(&repo_path, &token)?;
-    emit_repo_changed(&app, repo_path, "restore_discard".to_string());
+    emit_repo_changed(&app, &repo_path, "restore_discard");
     Ok(())
 }
 
@@ -257,7 +243,7 @@ pub fn stage_hunk(
     is_staged: bool,
 ) -> Result<(), AppError> {
     crate::write::staging::stage_hunk(&repo_path, &file_path, hunk_index, is_staged)?;
-    emit_repo_changed(&app, repo_path, "stage_hunk".to_string());
+    emit_repo_changed(&app, &repo_path, "stage_hunk");
     Ok(())
 }
 
@@ -278,7 +264,7 @@ pub fn stage_lines(
         &line_indices,
         is_staged,
     )?;
-    emit_repo_changed(&app, repo_path, "stage_lines".to_string());
+    emit_repo_changed(&app, &repo_path, "stage_lines");
     Ok(())
 }
 
@@ -297,7 +283,7 @@ pub fn create_commit(
         description.as_deref(),
         amend.unwrap_or(false),
     )?;
-    emit_repo_changed(&app, repo_path, "create_commit".to_string());
+    emit_repo_changed(&app, &repo_path, "create_commit");
     Ok(details)
 }
 
@@ -316,7 +302,7 @@ pub fn create_branch(
         target_commit.as_deref(),
         checkout.unwrap_or(false),
     )?;
-    emit_repo_changed(&app, repo_path, "create_branch".to_string());
+    emit_repo_changed(&app, &repo_path, "create_branch");
     Ok(())
 }
 
@@ -328,7 +314,7 @@ pub fn checkout_branch(
     branch_name: String,
 ) -> Result<(), AppError> {
     crate::write::branch::checkout_branch(&repo_path, &branch_name)?;
-    emit_repo_changed(&app, repo_path, "checkout_branch".to_string());
+    emit_repo_changed(&app, &repo_path, "checkout_branch");
     Ok(())
 }
 
@@ -341,7 +327,7 @@ pub fn rename_branch(
     new_name: String,
 ) -> Result<(), AppError> {
     crate::write::branch::rename_branch(&repo_path, &old_name, &new_name)?;
-    emit_repo_changed(&app, repo_path, "rename_branch".to_string());
+    emit_repo_changed(&app, &repo_path, "rename_branch");
     Ok(())
 }
 
@@ -355,6 +341,6 @@ pub fn delete_branch(
 ) -> Result<String, AppError> {
     let backup_ref =
         crate::write::branch::delete_branch(&repo_path, &branch_name, force.unwrap_or(false))?;
-    emit_repo_changed(&app, repo_path, "delete_branch".to_string());
+    emit_repo_changed(&app, &repo_path, "delete_branch");
     Ok(backup_ref)
 }

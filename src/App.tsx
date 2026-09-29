@@ -1,33 +1,25 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Shell } from "./components/Shell";
-import { WelcomeScreen } from "./components/welcome/WelcomeScreen";
+import React, { useState } from "react";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { RepoHeader } from "./components/header/RepoHeader";
-import { WindowTabBar } from "./components/header/WindowTabBar";
-import { ChangesScreen } from "./components/changes/ChangesScreen";
 import { InProgressOperationBanner } from "./components/banner/InProgressOperationBanner";
-import { listenToRepoChanged, invokeCommand } from "./ipc/client";
 import { type RepoSummary } from "./ipc/bindings.generated";
+import { useRepoState } from "./features/conflict";
 import { useRepoStore } from "./store/useRepoStore";
 import { useTabStore } from "./store/useTabStore";
 import { useViewStore } from "./store/useViewStore";
 import { useSettingsStore } from "./store/useSettingsStore";
-import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
+import { useRepoChangedListener } from "./hooks/useRepoChangedListener";
+import { useInProgressActions } from "./hooks/useInProgressActions";
+import { useAppTabSync } from "./hooks/useAppTabSync";
+import { useAppTabHandlers } from "./hooks/useAppTabHandlers";
+import { useAppShellControls } from "./hooks/useAppShellControls";
 import { CreateBranchModal } from "./features/branch";
-import { ConflictResolverScreen } from "./components/conflict/ConflictResolverScreen";
-import { ToastContainer } from "./components/toast/ToastContainer";
-import { CommandPalette } from "./components/palette/CommandPalette";
-import { ShortcutsHelpModal } from "./components/shortcuts/ShortcutsHelpModal";
+import { ScreenRouter } from "./components/ScreenRouter";
+import { AppShellBody } from "./components/AppShellBody";
 import { SplashScreen } from "./components/splash/SplashScreen";
-import { SettingsModal } from "./components/settings/SettingsModal";
 import { FileInspectorDrawer } from "./components/inspector/FileInspectorDrawer";
-import { ManageRemotesModal } from "./features/remote";
-import { InteractiveRebaseModal } from "./components/rebase";
-import { CompareModal } from "./components/compare";
 import { PullRequestDetailDrawer, CreatePullRequestModal } from "./components/pullrequests";
-import { usePullRequestStore } from "./store/usePullRequestStore";
 import { useCommandPaletteStore } from "./store/useCommandPaletteStore";
-import { type CommandContext } from "./utils/commandRegistry";
 import { qk } from "./domain/queryKeys";
 
 const queryClient = new QueryClient({
@@ -56,23 +48,10 @@ const RepoContent: React.FC<RepoContentProps> = ({
   const { activeScreen, setActiveScreen, activeConflictFile, closeConflictResolver } =
     useViewStore();
 
-  const { data: repoState } = useQuery({
-    queryKey: qk.repo.state(currentRepo.path),
-    queryFn: () => invokeCommand.getRepoState(currentRepo.path),
-    enabled: Boolean(currentRepo),
-  });
-
-  const handleAbort = async (operation: string) => {
-    await invokeCommand.abortInProgress(currentRepo.path, operation);
-    // Git operation on the current repo: only refresh this repo's cache
-    queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
-  };
-
-  const handleContinue = async (operation: string) => {
-    await invokeCommand.continueInProgress(currentRepo.path, operation);
-    // Git operation on the current repo: only refresh this repo's cache
-    queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
-  };
+  const { data: repoState } = useRepoState(currentRepo.path);
+  const { handleAbort, handleContinue, handleResolveAndStage } = useInProgressActions(
+    currentRepo.path
+  );
 
   return (
     <>
@@ -84,28 +63,13 @@ const RepoContent: React.FC<RepoContentProps> = ({
         onNavigateToChanges={() => setActiveScreen("changes")}
       />
       <div className="flex-1 min-h-0 h-full w-full overflow-hidden flex flex-col">
-        {activeScreen === "history" ? (
-          <Shell />
-        ) : activeScreen === "conflict" && activeConflictFile ? (
-          <ConflictResolverScreen
-            filePath={activeConflictFile}
-            repoPath={currentRepo.path}
-            onBack={closeConflictResolver}
-            onSaveAndStage={async (content) => {
-              await invokeCommand.resolveConflictFile(
-                currentRepo.path,
-                activeConflictFile,
-                content,
-                true
-              );
-              closeConflictResolver();
-              // Git operation on the current repo: only refresh this repo's cache
-              queryClient.invalidateQueries({ queryKey: qk.repo.all(currentRepo.path) });
-            }}
-          />
-        ) : (
-          <ChangesScreen />
-        )}
+        <ScreenRouter
+          activeScreen={activeScreen}
+          activeConflictFile={activeConflictFile}
+          repoPath={currentRepo.path}
+          closeConflictResolver={closeConflictResolver}
+          onResolveAndStage={handleResolveAndStage}
+        />
       </div>
       <CreateBranchModal
         isOpen={isGlobalCreateBranchOpen}
@@ -131,13 +95,6 @@ export const App: React.FC<AppProps> = ({
   skipSplash = typeof process !== "undefined" && process.env?.NODE_ENV === "test",
 }) => {
   const [splashFinished, setSplashFinished] = useState(skipSplash);
-  const [isGlobalCreateBranchOpen, setIsGlobalCreateBranchOpen] = useState(false);
-  const [isGlobalManageRemotesOpen, setIsGlobalManageRemotesOpen] = useState(false);
-  const [isGlobalInteractiveRebaseOpen, setIsGlobalInteractiveRebaseOpen] = useState(false);
-  const [isGlobalCompareOpen, setIsGlobalCompareOpen] = useState(false);
-  const [compareBaseRev, setCompareBaseRev] = useState<string | undefined>(undefined);
-  const [compareTargetRev, setCompareTargetRev] = useState<string | undefined>(undefined);
-  const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const { currentRepo, setRepo, clearRepo } = useRepoStore();
   const { tabs, activeTabId, setActiveTab, openRepoTab, openHomeTab, closeTab, restoreSession } =
     useTabStore();
@@ -148,221 +105,52 @@ export const App: React.FC<AppProps> = ({
     useSettingsStore();
   const { open: openCommandPalette, close: closeCommandPalette } = useCommandPaletteStore();
 
-  const handleToggleTheme = () => {
-    setTheme(resolvedTheme === "dark" ? "light" : "dark");
-  };
+  useAppTabSync(tabs, activeTabId, setRepo, clearRepo, restoreSession);
 
-  const handleToggleMode = () => {
-    setMode(mode === "simple" ? "advanced" : "simple");
-  };
-
-  // Sync the active tab into repoStore for backward compatibility with all child components
-  useEffect(() => {
-    const activeTab = tabs.find((t) => t.id === activeTabId);
-    if (activeTab && activeTab.type === "repo" && activeTab.repo) {
-      setRepo(activeTab.repo);
-    } else if (activeTabId === "home") {
-      clearRepo();
-    }
-  }, [activeTabId, tabs, setRepo, clearRepo]);
-
-  // Restore the previous session on app startup
-  useEffect(() => {
-    restoreSession();
-  }, [restoreSession]);
-
-  const handleSelectRepo = useCallback(
-    (repo: RepoSummary) => {
-      openRepoTab(repo);
-      setRepo(repo);
-    },
-    [openRepoTab, setRepo]
-  );
-
-  const handleBackToWelcome = useCallback(() => {
-    openHomeTab();
-    clearRepo();
-  }, [openHomeTab, clearRepo]);
-
-  const handleNextTab = useCallback(() => {
-    const currentIndex = tabs.findIndex((t) => t.id === activeTabId);
-    if (currentIndex >= 0 && tabs.length > 1) {
-      const nextIndex = (currentIndex + 1) % tabs.length;
-      const nextTab = tabs[nextIndex];
-      if (nextTab) setActiveTab(nextTab.id);
-    }
-  }, [tabs, activeTabId, setActiveTab]);
-
-  const handlePrevTab = useCallback(() => {
-    const currentIndex = tabs.findIndex((t) => t.id === activeTabId);
-    if (currentIndex >= 0 && tabs.length > 1) {
-      const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-      const prevTab = tabs[prevIndex];
-      if (prevTab) setActiveTab(prevTab.id);
-    }
-  }, [tabs, activeTabId, setActiveTab]);
-
-  useGlobalShortcuts({
-    onOpenCreateBranch: () => {
-      if (repoToDisplay) setIsGlobalCreateBranchOpen(true);
-    },
-    onOpenCommandPalette: () => {
-      openCommandPalette();
-    },
-    onOpenShortcutsHelp: () => {
-      setIsShortcutsHelpOpen(true);
-    },
-    onToggleTheme: handleToggleTheme,
-    onOpenSettings: () => {
-      openSettings();
-    },
-    onNewTab: handleBackToWelcome,
-    onCloseTab: () => {
-      if (activeTabId !== "home") {
-        closeTab(activeTabId);
-      }
-    },
-    onNextTab: handleNextTab,
-    onPrevTab: handlePrevTab,
-    onEscape: () => {
-      setIsGlobalCreateBranchOpen(false);
-      setIsGlobalManageRemotesOpen(false);
-      setIsGlobalInteractiveRebaseOpen(false);
-      setIsGlobalCompareOpen(false);
-      setIsShortcutsHelpOpen(false);
-      usePullRequestStore.getState().closeCreateModal();
-      usePullRequestStore.getState().closeDrawer();
-      closeSettings();
-      closeCommandPalette();
-    },
-    enabled: true,
-  });
-
-  const commandContext: CommandContext = {
-    repoPath: repoToDisplay?.path,
-    navigate: (screen) => setActiveScreen(screen),
-    openCreateBranch: () => {
-      if (repoToDisplay) setIsGlobalCreateBranchOpen(true);
-    },
-    openManageRemotes: () => {
-      if (repoToDisplay) setIsGlobalManageRemotesOpen(true);
-    },
-    openInteractiveRebase: () => {
-      if (repoToDisplay) setIsGlobalInteractiveRebaseOpen(true);
-    },
-    openCompare: () => {
-      if (repoToDisplay) {
-        setCompareBaseRev(repoToDisplay.head_branch || "main");
-        setCompareTargetRev("HEAD");
-        setIsGlobalCompareOpen(true);
-      }
-    },
-    openCreatePullRequest: () => {
-      if (repoToDisplay) usePullRequestStore.getState().openCreateModal();
-    },
-    openPullRequests: () => {
-      if (repoToDisplay) {
-        setActiveScreen("history");
-      }
-    },
-    openShortcutsHelp: () => setIsShortcutsHelpOpen(true),
-    toggleTheme: handleToggleTheme,
-    toggleMode: handleToggleMode,
-    openSettings: () => openSettings(),
-  };
-
-  useEffect(() => {
-    let unlistenFn: (() => void) | undefined;
-    let cancelled = false;
-
-    listenToRepoChanged((payload) => {
-      console.log("🔔 [Event] repo-changed payload:", payload);
-      // Selective invalidation: only refresh queries belonging to the repo that changed
-      if (payload?.repo_path) {
-        queryClient.invalidateQueries({
-          predicate: (query) => {
-            return query.queryKey.some(
-              (part) => typeof part === "string" && part.includes(payload.repo_path)
-            );
-          },
-        });
-      } else {
-        // A repo-changed event without repo_path means we don't know which repo was
-        // affected: deliberately wipe the whole cache rather than guess the scope
-        // wrong and leave stale data behind.
-        queryClient.invalidateQueries();
-      }
-    }).then((unlisten) => {
-      if (cancelled) {
-        unlisten();
-      } else {
-        unlistenFn = unlisten;
-      }
+  const { handleSelectRepo, handleBackToWelcome, handleNextTab, handlePrevTab } =
+    useAppTabHandlers({
+      tabs,
+      activeTabId,
+      setActiveTab,
+      openRepoTab,
+      openHomeTab,
+      setRepo,
+      clearRepo,
     });
 
-    return () => {
-      cancelled = true;
-      if (unlistenFn) unlistenFn();
-    };
-  }, []);
+  const shellControls = useAppShellControls({
+    repoToDisplay,
+    activeTabId,
+    closeTab,
+    handleBackToWelcome,
+    handleNextTab,
+    handlePrevTab,
+    setActiveScreen,
+    resolvedTheme,
+    setTheme,
+    mode,
+    setMode,
+    openSettings,
+    closeSettings,
+    openCommandPalette,
+    closeCommandPalette,
+    queryClient,
+  });
+
+  useRepoChangedListener(queryClient);
 
   return (
     <QueryClientProvider client={queryClient}>
       {!splashFinished && (
         <SplashScreen onFinish={() => setSplashFinished(true)} skipSplash={skipSplash} />
       )}
-      <div className="flex flex-col h-screen w-screen overflow-hidden">
-        {/* Top Window Tab Bar */}
-        <WindowTabBar onNewTab={handleBackToWelcome} />
-
-        {/* Main Workspace Area */}
-        {repoToDisplay ? (
-          <RepoContent
-            currentRepo={repoToDisplay}
-            clearRepo={handleBackToWelcome}
-            isGlobalCreateBranchOpen={isGlobalCreateBranchOpen}
-            setIsGlobalCreateBranchOpen={setIsGlobalCreateBranchOpen}
-          />
-        ) : (
-          <WelcomeScreen onSelectRepo={handleSelectRepo} />
-        )}
-        <ToastContainer />
-        <CommandPalette context={commandContext} />
-        <ShortcutsHelpModal
-          isOpen={isShortcutsHelpOpen}
-          onClose={() => setIsShortcutsHelpOpen(false)}
-        />
-        <SettingsModal currentRepoPath={repoToDisplay?.path ?? null} />
-        {repoToDisplay && (
-          <ManageRemotesModal
-            isOpen={isGlobalManageRemotesOpen}
-            onClose={() => setIsGlobalManageRemotesOpen(false)}
-            repoPath={repoToDisplay.path}
-          />
-        )}
-        {repoToDisplay && (
-          <InteractiveRebaseModal
-            isOpen={isGlobalInteractiveRebaseOpen}
-            onClose={() => setIsGlobalInteractiveRebaseOpen(false)}
-            repoPath={repoToDisplay.path}
-            baseCommitId={useRepoStore.getState().selectedCommitId || "HEAD~5"}
-            onRebaseSuccess={() => {
-              setIsGlobalInteractiveRebaseOpen(false);
-              // Interactive rebase on the current repo: only refresh this repo's cache
-              queryClient.invalidateQueries({ queryKey: qk.repo.all(repoToDisplay.path) });
-            }}
-          />
-        )}
-        {repoToDisplay && (
-          <CompareModal
-            isOpen={isGlobalCompareOpen}
-            onClose={() => setIsGlobalCompareOpen(false)}
-            repoPath={repoToDisplay.path}
-            initialBaseRev={compareBaseRev}
-            initialTargetRev={compareTargetRev}
-          />
-        )}
-      </div>
+      <AppShellBody
+        repoToDisplay={repoToDisplay}
+        handleBackToWelcome={handleBackToWelcome}
+        handleSelectRepo={handleSelectRepo}
+        RepoContent={RepoContent}
+        {...shellControls}
+      />
     </QueryClientProvider>
   );
 };

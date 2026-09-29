@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { GitMerge, ArrowRight } from "lucide-react";
-import { useTranslation } from "../../i18n";
 import { Modal, Button, Alert } from "../../shared/ui";
+import { useMergeBranchModal } from "./useMergeBranchModal";
 
 const TITLE_ID = "merge-branch-title";
 
@@ -22,40 +22,11 @@ export const MergeBranchModal: React.FC<MergeBranchModalProps> = ({
   hasUncommittedChanges,
   onMerge,
 }) => {
-  const { t } = useTranslation();
-  const [noFf, setNoFf] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      setNoFf(false);
-      setLoading(false);
-      setError(null);
-    }
-  }, [isOpen]);
-
-  const handleMergeSubmit = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await onMerge(noFf);
-      if (res.success) {
-        onClose();
-      } else {
-        if (res.status === "Conflict") {
-          setError(t.modals.merge.conflictError);
-        } else {
-          setError(res.output || t.modals.merge.genericError.replace("{msg}", res.status));
-        }
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(t.modals.merge.genericError.replace("{msg}", msg));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { t, noFf, setNoFf, loading, error, handleMergeSubmit } = useMergeBranchModal(
+    isOpen,
+    onMerge,
+    onClose
+  );
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} labelledBy={TITLE_ID}>

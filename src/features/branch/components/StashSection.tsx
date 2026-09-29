@@ -6,10 +6,10 @@
  * IPC calls, the undo toast and the selected-stash panel.
  */
 import React from "react";
-import clsx from "clsx";
-import { Archive, ChevronDown, ChevronRight, Play, PlayCircle, Trash2 } from "lucide-react";
+import { Archive, ChevronDown, ChevronRight } from "lucide-react";
 import { useTranslation } from "../../../i18n";
 import { type StashItem } from "../../../ipc/bindings.generated";
+import { StashRow } from "./StashRow";
 
 export interface StashSectionProps {
   isOpen: boolean;
@@ -55,51 +55,15 @@ export const StashSection: React.FC<StashSectionProps> = ({
             <div className="px-2 py-1 text-xs text-tertiary italic">{t.sidebar.emptyStashes}</div>
           ) : (
             stashes.map((item) => (
-              <div
+              <StashRow
                 key={item.index}
-                className={clsx(
-                  "group flex items-center justify-between rounded-sm px-2 py-1 cursor-pointer text-xs transition-colors",
-                  selectedStash?.index === item.index
-                    ? "bg-accent-subtle text-accent font-semibold"
-                    : "bg-transparent text-primary hover:bg-surface-hover"
-                )}
-                onClick={() => onSelectStash(item)}
-              >
-                <span className="truncate">
-                  stash@{"{"}
-                  {item.index}
-                  {"}"}: {item.message.substring(0, 40)}
-                </span>
-                <div
-                  className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    type="button"
-                    title={t.sidebar.applyStashTitle}
-                    onClick={() => onApply(item.index)}
-                    className="p-0.5 bg-transparent border-0 text-secondary hover:text-accent cursor-pointer rounded-sm"
-                  >
-                    <Play size={11} />
-                  </button>
-                  <button
-                    type="button"
-                    title={t.sidebar.popStashTitle}
-                    onClick={() => onPop(item.index)}
-                    className="p-0.5 bg-transparent border-0 text-secondary hover:text-accent cursor-pointer rounded-sm"
-                  >
-                    <PlayCircle size={11} />
-                  </button>
-                  <button
-                    type="button"
-                    title={t.sidebar.dropStashTitle}
-                    onClick={() => onDrop(item.index)}
-                    className="p-0.5 bg-transparent border-0 text-secondary hover:text-diff-remove-text cursor-pointer rounded-sm"
-                  >
-                    <Trash2 size={11} />
-                  </button>
-                </div>
-              </div>
+                item={item}
+                isSelected={selectedStash?.index === item.index}
+                onSelect={onSelectStash}
+                onApply={onApply}
+                onPop={onPop}
+                onDrop={onDrop}
+              />
             ))
           )}
         </div>

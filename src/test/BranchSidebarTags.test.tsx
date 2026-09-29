@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, fireEvent, within } from "@testing-library/react";
 import { BranchSidebar, isDialog, type SidebarDialog } from "../features/branch";
 import { CreateTagModal, DeleteTagModal } from "../features/tag";
@@ -7,6 +7,17 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { invokeCommand } from "../ipc/client";
 import { type TagItem } from "../ipc/bindings.generated";
 import { qk } from "../domain/queryKeys";
+import { Shell } from "../components/Shell";
+import { useLayoutStore } from "../store/useLayoutStore";
+import { useToastStore } from "../store/useToastStore";
+import type * as HistoryFeature from "../features/history";
+
+// These panels are outside the sidebar/stash action seam under test.
+vi.mock("../features/history", async (importOriginal) => ({
+  ...(await importOriginal<typeof HistoryFeature>()),
+  CommitGraph: () => null,
+  CommitDetailPanel: () => null,
+}));
 
 const mockTags: TagItem[] = [
   {
@@ -65,6 +76,8 @@ const renderTagDialogs = (dialog: SidebarDialog, close: () => void) => (
 describe("BranchSidebar - Tags Management", () => {
   let queryClient: QueryClient;
 
+  afterEach(() => vi.restoreAllMocks());
+
   beforeEach(() => {
     vi.clearAllMocks();
     queryClient = new QueryClient({
@@ -88,6 +101,50 @@ describe("BranchSidebar - Tags Management", () => {
     vi.spyOn(invokeCommand, "pushTag").mockResolvedValue(undefined);
     vi.spyOn(invokeCommand, "deleteTag").mockResolvedValue(undefined);
   });
+
+  it.each([
+    ["applyStash", "Áp dụng (Apply)", false],
+    ["popStash", "Áp dụng & Xoá (Pop)", true],
+    ["dropStash", "Xoá Stash (Drop)", true],
+  ] as const)(
+    "routes the stash panel %s button through the real Shell once",
+    async (command, label, closesPanel) => {
+      useLayoutStore.setState({ sidebarOpen: true, detailPanelOpen: false });
+      useToastStore.getState().clearToasts();
+      vi.spyOn(window, "confirm").mockReturnValue(true);
+      vi.spyOn(invokeCommand, "getStashes").mockResolvedValue([
+        { index: 0, message: "Saved work", commit_id: "stash-commit", created_at: 1700000000 },
+      ]);
+      vi.spyOn(invokeCommand, "getCommitDetails").mockResolvedValue({
+        id: "stash-commit",
+        full_message: "Saved work",
+        author_name: "Example User",
+        author_email: "user@example.com",
+        author_timestamp_sec: 1700000000,
+        parent_ids: [],
+        files: [],
+        total_additions: 0,
+        total_deletions: 0,
+      });
+      vi.spyOn(invokeCommand, "applyStash").mockResolvedValue(undefined);
+      vi.spyOn(invokeCommand, "popStash").mockResolvedValue(undefined);
+      vi.spyOn(invokeCommand, "dropStash").mockResolvedValue("drop-receipt");
+      render(
+        <QueryClientProvider client={queryClient}>
+          <Shell />
+        </QueryClientProvider>
+      );
+      fireEvent.click(screen.getByRole("button", { name: /STASHES/i }));
+      fireEvent.click(await screen.findByText("stash@{0}: Saved work"));
+      fireEvent.click(await screen.findByRole("button", { name: label }));
+      await waitFor(() =>
+        expect(invokeCommand[command]).toHaveBeenCalledExactlyOnceWith("d:/project-v3", 0)
+      );
+      await waitFor(() =>
+        expect(screen.queryByRole("button", { name: label }) !== null).toBe(!closesPanel)
+      );
+    }
+  );
 
   it("renders tag list with short commit SHA when accordion is opened", async () => {
     render(
@@ -192,7 +249,7 @@ describe("BranchSidebar - Tags Management", () => {
     fireEvent.click(pushBtn);
 
     await waitFor(() => {
-      expect(invokeCommand.pushTag).toHaveBeenCalledWith("d:/project-v3", "v1.0.0");
+      expect(invokeCommand.pushTag).toHaveBeenCalledWith("d:/project-v3", "v1.0.0", undefined);
     });
   });
 

@@ -1,0 +1,107 @@
+import { useState, useRef, useMemo, useEffect } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { useRepoStore } from "../../../store/useRepoStore";
+import { useViewStore } from "../../../store/useViewStore";
+import { useLayoutStore } from "../../../store/useLayoutStore";
+import { useToastStore } from "../../../store/useToastStore";
+import { useTranslation } from "../../../i18n";
+import { useCommitGraph } from "../api/useCommitGraph";
+import { useRepoStatus } from "../api/useRepoStatus";
+import {
+  getMaxGraphColumns,
+  getUncommittedSummary,
+  GRAPH_ROW_HEIGHT,
+} from "../model/graphPresentation";
+import type { GraphContextMenu, GraphDialog } from "../model/graphDialog";
+
+/** All state, effects and derived values CommitGraph's JSX reads. */
+export function useCommitGraphState() {
+  const { t } = useTranslation();
+  const { currentRepo, selectedCommitId, setSelectedCommit } = useRepoStore();
+  const { setActiveScreen } = useViewStore();
+  const { setDetailPanelOpen } = useLayoutStore();
+  const parentRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [contextMenu, setContextMenu] = useState<GraphContextMenu | null>(null);
+  const [dialog, setDialog] = useState<GraphDialog>({ type: "closed" });
+
+  useEffect(() => {
+    if (!contextMenu) return;
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setContextMenu(null);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setContextMenu(null);
+      }
+    };
+
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [contextMenu]);
+
+  const handleCopySha = async (commitId: string) => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(commitId);
+      }
+    } catch {
+      // ignore clipboard errors
+    }
+    useToastStore.getState().showSuccess(t.graph.copyShaSuccess);
+    setContextMenu(null);
+  };
+
+  const repoPath = currentRepo?.path ?? "";
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useCommitGraph(repoPath);
+  const { data: repoStatus } = useRepoStatus(repoPath);
+  const { hasUncommittedChanges, modifiedCount, untrackedCount } =
+    getUncommittedSummary(repoStatus);
+
+  const commits = useMemo(() => (data ? data.pages.flatMap((page) => page.commits) : []), [data]);
+
+  const maxCols = useMemo(() => getMaxGraphColumns(commits), [commits]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: commits.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => GRAPH_ROW_HEIGHT,
+    overscan: 10,
+  });
+
+  const handleSelectCommit = (commitId: string) => {
+    setSelectedCommit(commitId);
+    setDetailPanelOpen(true);
+  };
+
+  return {
+    t,
+    selectedCommitId,
+    parentRef,
+    menuRef,
+    contextMenu,
+    setContextMenu,
+    dialog,
+    setDialog,
+    handleCopySha,
+    commits,
+    maxCols,
+    rowVirtualizer,
+    hasUncommittedChanges,
+    modifiedCount,
+    untrackedCount,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    handleSelectCommit,
+    setActiveScreen,
+  };
+}

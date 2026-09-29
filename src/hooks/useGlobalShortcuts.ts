@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useViewStore } from "../store/useViewStore";
+import { buildModifierShortcuts } from "./useGlobalShortcuts.shortcuts";
 
 export interface UseGlobalShortcutsOptions {
   onOpenCreateBranch?: () => void;
@@ -34,6 +35,21 @@ export function useGlobalShortcuts(options: UseGlobalShortcutsOptions = {}) {
   useEffect(() => {
     if (!enabled) return;
 
+    const modifierShortcuts = buildModifierShortcuts(
+      {
+        onOpenCreateBranch,
+        onOpenCommandPalette,
+        onOpenShortcutsHelp,
+        onToggleTheme,
+        onOpenSettings,
+        onNewTab,
+        onCloseTab,
+        onNextTab,
+        onPrevTab,
+      },
+      setActiveScreen
+    );
+
     const handleKeyDown = (e: KeyboardEvent) => {
       // Escape can always trigger
       if (e.key === "Escape") {
@@ -60,57 +76,9 @@ export function useGlobalShortcuts(options: UseGlobalShortcutsOptions = {}) {
         return;
       }
 
-      if (isModifier) {
-        if (e.key === "/" || e.key === "?") {
-          e.preventDefault();
-          if (onOpenShortcutsHelp) {
-            onOpenShortcutsHelp();
-          }
-        } else if (e.key === "k" || e.key === "K") {
-          e.preventDefault();
-          if (onOpenCommandPalette) {
-            onOpenCommandPalette();
-          }
-        } else if (e.key === "t" || e.key === "T") {
-          e.preventDefault();
-          if (e.shiftKey && onToggleTheme) {
-            onToggleTheme();
-          } else if (onNewTab) {
-            onNewTab();
-          } else if (onToggleTheme) {
-            onToggleTheme();
-          }
-        } else if (e.key === "w" || e.key === "W") {
-          if (onCloseTab) {
-            e.preventDefault();
-            onCloseTab();
-          }
-        } else if (e.key === "Tab") {
-          if (e.shiftKey && onPrevTab) {
-            e.preventDefault();
-            onPrevTab();
-          } else if (onNextTab) {
-            e.preventDefault();
-            onNextTab();
-          }
-        } else if (e.key === "1") {
-          e.preventDefault();
-          setActiveScreen("history");
-        } else if (e.key === "2") {
-          e.preventDefault();
-          setActiveScreen("changes");
-        } else if (e.key === "b" || e.key === "B") {
-          e.preventDefault();
-          if (onOpenCreateBranch) {
-            onOpenCreateBranch();
-          }
-        } else if (e.key === "," || e.key === "<") {
-          e.preventDefault();
-          if (onOpenSettings) {
-            onOpenSettings();
-          }
-        }
-      }
+      if (!isModifier) return;
+
+      modifierShortcuts.find((shortcut) => shortcut.match(e))?.run(e);
     };
 
     window.addEventListener("keydown", handleKeyDown);

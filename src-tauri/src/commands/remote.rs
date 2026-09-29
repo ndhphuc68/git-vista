@@ -1,19 +1,7 @@
 use crate::error::AppError;
+use crate::events::emit_repo_changed;
 use std::time::{SystemTime, UNIX_EPOCH};
 use tauri::Emitter;
-
-fn emit_repo_changed(app: &tauri::AppHandle, repo_path: &str, reason: &str) {
-    let now = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_millis() as f64;
-    let payload = crate::events::RepoChangedPayload {
-        repo_path: repo_path.to_string(),
-        reason: reason.to_string(),
-        timestamp_ms: now,
-    };
-    let _ = app.emit("repo-changed", payload);
-}
 
 fn emit_task_progress(
     app: &tauri::AppHandle,

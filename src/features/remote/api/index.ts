@@ -1,5 +1,5 @@
 export { useRemotes } from "./useRemotes";
-export { useRemoteTask, type RemoteOperation } from "./useRemoteTask";
+export { useRemoteTask, pushRepo, type RemoteOperation } from "./useRemoteTask";
 export {
   useAddRemote,
   useRenameRemote,

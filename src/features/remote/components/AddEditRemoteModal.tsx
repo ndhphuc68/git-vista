@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import { Cloud } from "lucide-react";
 import { useTranslation } from "../../../i18n";
-import { useToastStore } from "../../../store/useToastStore";
-import { mapGitError } from "../../../utils/errorMapping";
 import { Modal, Button, Alert } from "../../../shared/ui";
 import type { RemoteItem } from "../../../ipc/bindings.generated";
-import { useAddRemote, useRenameRemote, useSetRemoteUrl } from "../api";
+import { useAddEditRemoteForm } from "../hooks/useAddEditRemoteForm";
+import { RemoteNameField } from "./RemoteNameField";
+import { RemoteFetchUrlField } from "./RemoteFetchUrlField";
+import { RemotePushUrlSection } from "./RemotePushUrlSection";
 
 export interface AddEditRemoteModalProps {
   isOpen: boolean;
@@ -17,11 +18,6 @@ export interface AddEditRemoteModalProps {
 
 const TITLE_ID = "add-edit-remote-title";
 
-const INPUT_CLASS =
-  "px-3 py-2 text-xs bg-window border border-border-subtle rounded-lg text-primary " +
-  "placeholder:text-tertiary focus:outline-none focus:border-accent focus:ring-1 " +
-  "focus:ring-accent/20 transition-all font-mono";
-
 export const AddEditRemoteModal: React.FC<AddEditRemoteModalProps> = ({
   isOpen,
   onClose,
@@ -30,122 +26,22 @@ export const AddEditRemoteModal: React.FC<AddEditRemoteModalProps> = ({
   onSuccess,
 }) => {
   const { t } = useTranslation();
-  const isEdit = Boolean(initialRemote);
-
-  const [name, setName] = useState("");
-  const [fetchUrl, setFetchUrl] = useState("");
-  const [useSeparatePush, setUseSeparatePush] = useState(false);
-  const [pushUrl, setPushUrl] = useState("");
-  // A real useState rather than mutation.isPending: the submit is a sequence
-  // of up to two mutateAsync calls (rename then setUrl, or add then setUrl),
-  // and the button must stay disabled across the whole sequence, not flicker
-  // enabled between the two awaits.
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const addRemote = useAddRemote(repoPath);
-  const renameRemote = useRenameRemote(repoPath);
-  const setRemoteUrl = useSetRemoteUrl(repoPath);
-
-  const nameInputRef = useRef<HTMLInputElement>(null);
-  const fetchUrlInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      if (initialRemote) {
-        setName(initialRemote.name);
-        setFetchUrl(initialRemote.fetch_url || "");
-        const hasCustomPush =
-          Boolean(initialRemote.push_url) && initialRemote.push_url !== initialRemote.fetch_url;
-        setUseSeparatePush(hasCustomPush);
-        setPushUrl(initialRemote.push_url || "");
-      } else {
-        setName("");
-        setFetchUrl("");
-        setUseSeparatePush(false);
-        setPushUrl("");
-      }
-      setError(null);
-      setLoading(false);
-    }
-  }, [isOpen, initialRemote]);
-
-  const sanitizeRemoteName = (val: string) => {
-    return val.replace(/[\s~^:?*[\\@{}]/g, "");
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmedName = name.trim();
-    const trimmedFetch = fetchUrl.trim();
-    const trimmedPush = pushUrl.trim();
-
-    if (!trimmedName) {
-      setError(t.modals.remotes.addModal.errorNameEmpty);
-      nameInputRef.current?.focus();
-      return;
-    }
-
-    if (trimmedName.startsWith("-") || /[\s\0~^:?*[\\]/.test(trimmedName)) {
-      setError(t.modals.remotes.addModal.errorNameInvalid);
-      nameInputRef.current?.focus();
-      return;
-    }
-
-    if (!trimmedFetch) {
-      setError(t.modals.remotes.addModal.errorUrlEmpty);
-      fetchUrlInputRef.current?.focus();
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      if (isEdit && initialRemote) {
-        let currentName = initialRemote.name;
-        if (trimmedName !== initialRemote.name) {
-          // Rename first: setRemoteUrl below addresses the remote by its new
-          // name, so reversing the order would set the URL on a remote that
-          // no longer exists.
-          await renameRemote.mutateAsync({ oldName: initialRemote.name, newName: trimmedName });
-          currentName = trimmedName;
-        }
-
-        const effectivePush = useSeparatePush && trimmedPush ? trimmedPush : null;
-        await setRemoteUrl.mutateAsync({
-          name: currentName,
-          fetchUrl: trimmedFetch,
-          pushUrl: effectivePush,
-        });
-
-        useToastStore
-          .getState()
-          .showSuccess(t.modals.remotes.addModal.editSuccess.replace("{name}", currentName));
-      } else {
-        await addRemote.mutateAsync({ name: trimmedName, url: trimmedFetch });
-
-        if (useSeparatePush && trimmedPush && trimmedPush !== trimmedFetch) {
-          await setRemoteUrl.mutateAsync({
-            name: trimmedName,
-            fetchUrl: trimmedFetch,
-            pushUrl: trimmedPush,
-          });
-        }
-
-        useToastStore
-          .getState()
-          .showSuccess(t.modals.remotes.addModal.addSuccess.replace("{name}", trimmedName));
-      }
-
-      onSuccess?.();
-      onClose();
-    } catch (err) {
-      setError(mapGitError(err).message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    isEdit,
+    name,
+    fetchUrl,
+    useSeparatePush,
+    setUseSeparatePush,
+    pushUrl,
+    setPushUrl,
+    loading,
+    error,
+    nameInputRef,
+    fetchUrlInputRef,
+    handleNameChange,
+    handleFetchUrlChange,
+    handleSubmit,
+  } = useAddEditRemoteForm({ isOpen, repoPath, initialRemote, onSuccess, onClose });
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} labelledBy={TITLE_ID} stacked>
@@ -162,86 +58,32 @@ export const AddEditRemoteModal: React.FC<AddEditRemoteModalProps> = ({
         <Modal.Body className="gap-4">
           {error && <Alert variant="error">{error}</Alert>}
 
-          {/* Remote Name */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="remote-name-input" className="text-xs font-semibold text-primary">
-              {t.modals.remotes.addModal.nameLabel} <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="remote-name-input"
-              ref={nameInputRef}
-              type="text"
-              // When editing, the name is already filled in, so focus starts
-              // on the URL — the field the user actually came to change.
-              {...(isEdit ? {} : { "data-autofocus": true })}
-              value={name}
-              onChange={(e) => {
-                setName(sanitizeRemoteName(e.target.value));
-                if (error) setError(null);
-              }}
-              placeholder={t.modals.remotes.addModal.namePlaceholder}
-              disabled={loading}
-              className={INPUT_CLASS}
-            />
-          </div>
+          <RemoteNameField
+            name={name}
+            onNameChange={handleNameChange}
+            isEdit={isEdit}
+            loading={loading}
+            nameInputRef={nameInputRef}
+          />
 
-          {/* Fetch URL */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="remote-fetch-url-input" className="text-xs font-semibold text-primary">
-              {t.modals.remotes.addModal.fetchUrlLabel} <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="remote-fetch-url-input"
-              ref={fetchUrlInputRef}
-              type="text"
-              {...(isEdit ? { "data-autofocus": true } : {})}
-              value={fetchUrl}
-              onChange={(e) => {
-                setFetchUrl(e.target.value);
-                if (error) setError(null);
-              }}
-              placeholder={t.modals.remotes.addModal.fetchUrlPlaceholder}
-              disabled={loading}
-              className={INPUT_CLASS}
-            />
-          </div>
+          <RemoteFetchUrlField
+            fetchUrl={fetchUrl}
+            onFetchUrlChange={handleFetchUrlChange}
+            isEdit={isEdit}
+            loading={loading}
+            fetchUrlInputRef={fetchUrlInputRef}
+          />
 
-          {/* Custom Push URL Checkbox */}
-          <div className="flex flex-col gap-2 pt-1 border-t border-border-subtle/50">
-            <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-primary">
-              <input
-                type="checkbox"
-                checked={useSeparatePush}
-                onChange={(e) => {
-                  setUseSeparatePush(e.target.checked);
-                  if (!e.target.checked) setPushUrl("");
-                }}
-                disabled={loading}
-                className="rounded border-border-subtle text-accent focus:ring-accent"
-              />
-              <span>{t.modals.remotes.addModal.separatePushUrl}</span>
-            </label>
-
-            {useSeparatePush && (
-              <div className="flex flex-col gap-1.5 pl-6 animate-fade-in">
-                <label
-                  htmlFor="remote-push-url-input"
-                  className="text-xs font-medium text-secondary"
-                >
-                  {t.modals.remotes.addModal.pushUrlLabel}
-                </label>
-                <input
-                  id="remote-push-url-input"
-                  type="text"
-                  value={pushUrl}
-                  onChange={(e) => setPushUrl(e.target.value)}
-                  placeholder={t.modals.remotes.addModal.pushUrlPlaceholder}
-                  disabled={loading}
-                  className={INPUT_CLASS}
-                />
-              </div>
-            )}
-          </div>
+          <RemotePushUrlSection
+            useSeparatePush={useSeparatePush}
+            onUseSeparatePushChange={(checked) => {
+              setUseSeparatePush(checked);
+              if (!checked) setPushUrl("");
+            }}
+            pushUrl={pushUrl}
+            onPushUrlChange={setPushUrl}
+            loading={loading}
+          />
         </Modal.Body>
 
         <Modal.Footer>

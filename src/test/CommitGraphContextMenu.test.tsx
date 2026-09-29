@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
-import { CommitGraph } from "../components/graph/CommitGraph";
+import { CommitGraph } from "../features/history";
+import { CreateTagModal } from "../features/tag";
+import { CreateBranchModal } from "../features/branch";
 import { useRepoStore } from "../store/useRepoStore";
 import { useViewStore } from "../store/useViewStore";
 import { useToastStore } from "../store/useToastStore";
@@ -43,7 +45,7 @@ describe("CommitGraph Context Menu", () => {
   it("verifies right-clicking a commit row opens the context menu with cherry-pick and revert options", async () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph />
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
       </QueryClientProvider>
     );
 
@@ -66,7 +68,7 @@ describe("CommitGraph Context Menu", () => {
   it("verifies clicking 'Create Tag here...' opens CreateTagModal targeting that commit", async () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph />
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
       </QueryClientProvider>
     );
 
@@ -87,7 +89,7 @@ describe("CommitGraph Context Menu", () => {
   it("verifies clicking 'Create Branch here...' opens CreateBranchModal targeting that commit", async () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph />
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
       </QueryClientProvider>
     );
 
@@ -105,7 +107,7 @@ describe("CommitGraph Context Menu", () => {
   it("verifies clicking 'Cherry-pick...' opens CherryPickModal targeting that commit", async () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph />
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
       </QueryClientProvider>
     );
 
@@ -129,7 +131,7 @@ describe("CommitGraph Context Menu", () => {
   it("verifies clicking 'Revert...' opens RevertModal targeting that commit", async () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph />
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
       </QueryClientProvider>
     );
 
@@ -163,7 +165,7 @@ describe("CommitGraph Context Menu", () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph />
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
       </QueryClientProvider>
     );
 
@@ -220,7 +222,7 @@ describe("CommitGraph Context Menu", () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph />
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
       </QueryClientProvider>
     );
 
@@ -263,7 +265,7 @@ describe("CommitGraph Context Menu", () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph />
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
       </QueryClientProvider>
     );
 
@@ -302,7 +304,7 @@ describe("CommitGraph Context Menu", () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph />
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
       </QueryClientProvider>
     );
 
@@ -343,7 +345,7 @@ describe("CommitGraph Context Menu", () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph />
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
       </QueryClientProvider>
     );
 
@@ -392,7 +394,7 @@ describe("CommitGraph Context Menu", () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph />
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
       </QueryClientProvider>
     );
 
@@ -431,7 +433,7 @@ describe("CommitGraph Context Menu", () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph />
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
       </QueryClientProvider>
     );
 
@@ -459,10 +461,29 @@ describe("CommitGraph Context Menu", () => {
     expect(useViewStore.getState().activeScreen).toBe("changes");
   });
 
+  it("replaces an open graph action when another action is selected", async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
+      </QueryClientProvider>
+    );
+
+    const commitRow = await screen.findByText("feat(m1): visual git viewer");
+    fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
+    fireEvent.click(screen.getByText(/Create tag here|Tạo thẻ tại đây/i));
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+
+    fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
+    fireEvent.click(screen.getByText(/Create branch here|Tạo nhánh tại đây/i));
+
+    await waitFor(() => expect(screen.getAllByRole("dialog")).toHaveLength(1));
+    expect(screen.getByRole("dialog")).toHaveTextContent(/Create Branch|Tạo nhánh/i);
+  });
+
   it("verifies pressing Escape closes the context menu", async () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph />
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
       </QueryClientProvider>
     );
 
@@ -479,7 +500,7 @@ describe("CommitGraph Context Menu", () => {
   it("verifies clicking 'Copy SHA' copies commit SHA and triggers toast", async () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph />
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
       </QueryClientProvider>
     );
 

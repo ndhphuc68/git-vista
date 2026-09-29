@@ -13,14 +13,21 @@ features/<name>/
 ## Năm quy tắc bất biến
 
 1. Phụ thuộc chỉ đi xuống: `features → shared → domain`.
-2. `features/a` KHÔNG import `features/b`. Cần dùng chung thì đẩy xuống `shared/`.
+2. `features/a` chỉ được import `features/b` qua `index.ts` (cổng public) của
+   `features/b` — không import sâu vào `api/`, `components/` hay `model/` của
+   feature khác. Cần dùng chung nhiều hơn mức đó thì đẩy xuống `shared/`.
 3. `shared/ui/` KHÔNG import `ipc/`, `store/`, `i18n/`. Nhận mọi thứ qua props.
 4. Component KHÔNG gọi `invokeCommand` trực tiếp. Luôn đi qua `features/*/api`.
 5. KHÔNG viết query key literal. Luôn dùng `domain/queryKeys`.
 
-Quy tắc 3 và 4 được `no-restricted-imports` trong `.oxlintrc.json` ép buộc.
+Quy tắc 3 và 4 được `no-restricted-imports` trong `.oxlintrc.json` ép buộc
+(mức `error`, không chỉ `warn`). Từ Giai đoạn 7b, quy tắc 4 được ép buộc cho
+toàn bộ `src/`, không riêng `features/`: ngoài `src/ipc/**` và
+`src/features/*/api/**`, không file nào được import `ipc/` ở runtime.
 Quy tắc 5 được `scripts/check-query-keys.mjs` ép buộc.
-Quy tắc 1 và 2 sẽ được `src/test/architectureBoundaries.test.ts` ép buộc (Task 2).
+Quy tắc 1 và 2 được `src/test/architectureBoundaries.test.ts` ép buộc, bao gồm
+cả kiểm tra không có chu trình import public giữa các feature. Cũng file test
+này chứa bài kiểm tra "toàn `src/`" cho quy tắc 4 ở trên.
 
 ## Thêm một feature mới
 

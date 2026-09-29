@@ -1,12 +1,9 @@
-import React, { useState } from "react";
-import clsx from "clsx";
-import { GitCommit, AlertCircle, RefreshCw } from "lucide-react";
-import { invokeCommand } from "../../ipc/client";
+import React from "react";
 import type { CommitDetails } from "../../ipc/bindings.generated";
-import { useToastStore } from "../../store/useToastStore";
-import { useSettingsStore } from "../../store/useSettingsStore";
-import { mapGitError } from "../../utils/errorMapping";
-import { useTranslation } from "../../i18n";
+import { useCommitBox } from "./useCommitBox";
+import { CommitBoxHeader } from "./CommitBoxHeader";
+import { CommitSummaryInput } from "./CommitSummaryInput";
+import { CommitSubmitButton } from "./CommitSubmitButton";
 
 export interface CommitBoxProps {
   repoPath: string;
@@ -21,137 +18,35 @@ export interface CommitBoxProps {
   isLoading?: boolean;
 }
 
-export const CommitBox: React.FC<CommitBoxProps> = ({
-  repoPath,
-  stagedCount,
-  lastCommitMessage,
-  onCommit,
-  onSuccess,
-  isLoading = false,
-}) => {
-  const { t } = useTranslation();
-  const [summary, setSummary] = useState("");
-  const [description, setDescription] = useState("");
-  const [isAmend, setIsAmend] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const mode = useSettingsStore((s) => s.mode);
-
-  const isMac =
-    typeof navigator !== "undefined" &&
-    /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform || navigator.userAgent || "");
-  const shortcutHint = isMac ? "Cmd+Enter" : "Ctrl+Enter";
-
-  const isOver72 = summary.length > 72;
-  const canCommit =
-    summary.trim().length > 0 && (isAmend || stagedCount > 0) && !isLoading && !submitting;
-
-  const handleAmendToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const checked = e.target.checked;
-    setIsAmend(checked);
-
-    if (checked && lastCommitMessage && summary.trim() === "") {
-      const parts = lastCommitMessage.split("\n\n");
-      const firstLine = parts[0] ? parts[0].trim() : "";
-      const remaining = parts.slice(1).join("\n\n").trim();
-      setSummary(firstLine);
-      setDescription(remaining);
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!canCommit) return;
-
-    try {
-      setSubmitting(true);
-      let result: CommitDetails | void;
-      if (onCommit) {
-        result = await onCommit(
-          summary.trim(),
-          description.trim() ? description.trim() : undefined,
-          isAmend
-        );
-      } else {
-        result = await invokeCommand.createCommit(
-          repoPath,
-          summary.trim(),
-          description.trim() ? description.trim() : undefined,
-          isAmend
-        );
-      }
-
-      useToastStore.getState().showToast({
-        message: isAmend ? t.commit.amendSuccess : t.commit.commitSuccess,
-        type: "success",
-        durationMs: 10000,
-        undoAction: result?.undo_token
-          ? async () => {
-              await invokeCommand.undoCommit(repoPath, result.undo_token!);
-              if (onSuccess) onSuccess();
-            }
-          : undefined,
-      });
-
-      setSummary("");
-      setDescription("");
-      setIsAmend(false);
-      if (onSuccess) onSuccess();
-    } catch (err: unknown) {
-      useToastStore.getState().showError(mapGitError(err));
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-      e.preventDefault();
-      handleSubmit();
-    }
-  };
+export const CommitBox: React.FC<CommitBoxProps> = (props) => {
+  const { stagedCount, isLoading = false } = props;
+  const {
+    t,
+    mode,
+    summary,
+    setSummary,
+    description,
+    setDescription,
+    isAmend,
+    submitting,
+    shortcutHint,
+    isOver72,
+    canCommit,
+    handleAmendToggle,
+    handleSubmit,
+    handleKeyDown,
+  } = useCommitBox(props);
 
   return (
     <div className="flex flex-col gap-2 p-3 bg-surface border-t border-border-subtle">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <GitCommit size={14} className="text-accent" />
-          <span className="text-xs font-semibold text-secondary">{t.commit.title}</span>
-        </div>
+      <CommitBoxHeader summaryLength={summary.length} isOver72={isOver72} />
 
-        <div className="flex items-center gap-1.5">
-          <span
-            className={clsx(
-              "text-[11px] font-mono",
-              isOver72 ? "text-diff-remove-text font-semibold" : "text-secondary font-normal"
-            )}
-          >
-            {summary.length}/72
-          </span>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <input
-          type="text"
-          data-testid="commit-summary-input"
-          value={summary}
-          onChange={(e) => setSummary(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={t.commit.summaryPlaceholder}
-          className={clsx(
-            "w-full px-2 py-1.5 bg-window rounded-sm text-xs text-primary outline-none box-border transition-colors",
-            isOver72
-              ? "border border-diff-remove-text focus:border-diff-remove-text"
-              : "border border-border-subtle focus:border-accent"
-          )}
-        />
-
-        {isOver72 && (
-          <div className="flex items-center gap-1 text-diff-remove-text text-[10px] mt-0.5">
-            <AlertCircle size={11} />
-            <span>{t.commit.charLimitWarn}</span>
-          </div>
-        )}
-      </div>
+      <CommitSummaryInput
+        summary={summary}
+        onSummaryChange={setSummary}
+        onKeyDown={handleKeyDown}
+        isOver72={isOver72}
+      />
 
       <textarea
         data-testid="commit-description-input"
@@ -178,35 +73,15 @@ export const CommitBox: React.FC<CommitBoxProps> = ({
         <span className="text-[10px] text-tertiary">{shortcutHint}</span>
       </div>
 
-      <button
-        type="button"
-        data-testid="commit-button"
-        disabled={!canCommit}
-        onClick={handleSubmit}
-        className={clsx(
-          "flex items-center justify-center gap-1.5 w-full py-2 px-3 border rounded-sm text-xs font-semibold transition-all duration-150 ease-macos btn-press",
-          canCommit
-            ? "bg-accent text-accent-contrast border-accent cursor-pointer hover:bg-accent-hover active:scale-[0.98]"
-            : "bg-window text-tertiary border-border-subtle cursor-not-allowed"
-        )}
-      >
-        {submitting || isLoading ? (
-          <>
-            <RefreshCw size={13} className="animate-spin" />
-            <span>{t.commit.saving}</span>
-          </>
-        ) : isAmend ? (
-          <span>
-            {mode === "simple" ? t.commit.amendCommitSimple : t.commit.amendCommitAdvanced}
-          </span>
-        ) : (
-          <span>
-            {mode === "simple"
-              ? t.commit.commitSimple.replace("{count}", String(stagedCount))
-              : t.commit.commitAdvanced.replace("{count}", String(stagedCount))}
-          </span>
-        )}
-      </button>
+      <CommitSubmitButton
+        canCommit={canCommit}
+        submitting={submitting}
+        isLoading={isLoading}
+        isAmend={isAmend}
+        mode={mode}
+        stagedCount={stagedCount}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 };

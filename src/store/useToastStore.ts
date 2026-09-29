@@ -44,6 +44,49 @@ const safeFlushSync = (fn: () => void) => {
   }
 };
 
+function withoutToast(toasts: ToastItem[], id: string): ToastItem[] {
+  return toasts.filter((t) => t.id !== id);
+}
+
+// Exported for unit testing only; not part of this module's public API surface.
+export type ErrorToastOptions = {
+  title?: string;
+  message?: string;
+  rawError?: string;
+  friendlyError?: FriendlyError;
+};
+
+// Exported for unit testing only; not part of this module's public API surface.
+export function extractFriendlyError(errorOrOptions: FriendlyError | ErrorToastOptions) {
+  if ("friendlyError" in errorOrOptions && errorOrOptions.friendlyError) {
+    return errorOrOptions.friendlyError;
+  }
+  if ("actionHint" in errorOrOptions) {
+    return errorOrOptions as FriendlyError;
+  }
+  return undefined;
+}
+
+// Exported for unit testing only; not part of this module's public API surface.
+export function resolveErrorToastFields(errorOrOptions: FriendlyError | ErrorToastOptions) {
+  const friendlyError = extractFriendlyError(errorOrOptions);
+  const title = "title" in errorOrOptions ? errorOrOptions.title : undefined;
+  const message = "message" in errorOrOptions ? errorOrOptions.message : undefined;
+  const rawError = "rawError" in errorOrOptions ? errorOrOptions.rawError : undefined;
+
+  const effectiveTitle = title || friendlyError?.title;
+  const effectiveMessage =
+    message || friendlyError?.message || effectiveTitle || rawError || "Có lỗi xảy ra";
+  const effectiveRawError = rawError || friendlyError?.rawError;
+
+  return {
+    title: effectiveTitle,
+    message: effectiveMessage,
+    rawError: effectiveRawError,
+    friendlyError,
+  };
+}
+
 export const useToastStore = create<ToastState>((set, get) => ({
   toasts: [],
   showToast: (options) => {
@@ -80,35 +123,14 @@ export const useToastStore = create<ToastState>((set, get) => ({
       });
     }
 
-    const friendlyError =
-      "friendlyError" in errorOrOptions && errorOrOptions.friendlyError
-        ? errorOrOptions.friendlyError
-        : "actionHint" in errorOrOptions
-          ? (errorOrOptions as FriendlyError)
-          : undefined;
-
-    const title = "title" in errorOrOptions ? errorOrOptions.title : undefined;
-    const message = "message" in errorOrOptions ? errorOrOptions.message : undefined;
-    const rawError = "rawError" in errorOrOptions ? errorOrOptions.rawError : undefined;
-
-    const effectiveTitle = title || friendlyError?.title;
-    const effectiveMessage =
-      message || friendlyError?.message || effectiveTitle || rawError || "Có lỗi xảy ra";
-    const effectiveRawError = rawError || friendlyError?.rawError;
-
     return get().showToast({
       type: "error",
-      title: effectiveTitle,
-      message: effectiveMessage,
-      rawError: effectiveRawError,
-      friendlyError,
+      ...resolveErrorToastFields(errorOrOptions),
     });
   },
   removeToast: (id) => {
     safeFlushSync(() => {
-      set((state) => ({
-        toasts: state.toasts.filter((t) => t.id !== id),
-      }));
+      set((state) => ({ toasts: withoutToast(state.toasts, id) }));
     });
   },
   clearToasts: () => {

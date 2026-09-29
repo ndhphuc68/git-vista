@@ -1,0 +1,105 @@
+import { describe, it, expect } from "vitest";
+import { type RecentRepoEntry } from "../../../ipc/bindings.generated";
+import { formatRelativeTime, sortRecentRepositories } from "./recentRepositories";
+
+const relativeTimeStrings = {
+  justNow: "just now",
+  minutesAgo: "{m}m ago",
+  hoursAgo: "{h}h ago",
+  daysAgo: "{d}d ago",
+};
+
+function makeEntry(overrides: Partial<RecentRepoEntry>): RecentRepoEntry {
+  return {
+    path: "/repos/default",
+    name: "default",
+    last_opened_at_ms: 0,
+    ...overrides,
+  };
+}
+
+describe("sortRecentRepositories", () => {
+  it("filters by name case-insensitively", () => {
+    const repos = [
+      makeEntry({ path: "/a", name: "Project-V3", last_opened_at_ms: 1 }),
+      makeEntry({ path: "/b", name: "other", last_opened_at_ms: 2 }),
+    ];
+
+    const result = sortRecentRepositories(repos, [], "project");
+
+    expect(result.map((r) => r.path)).toEqual(["/a"]);
+  });
+
+  it("filters by path case-insensitively", () => {
+    const repos = [
+      makeEntry({ path: "/Repos/Project-V3", name: "one", last_opened_at_ms: 1 }),
+      makeEntry({ path: "/repos/other", name: "two", last_opened_at_ms: 2 }),
+    ];
+
+    const result = sortRecentRepositories(repos, [], "PROJECT-V3");
+
+    expect(result.map((r) => r.path)).toEqual(["/Repos/Project-V3"]);
+  });
+
+  it("places pinned entries before unpinned entries regardless of recency", () => {
+    const repos = [
+      makeEntry({ path: "/newest", name: "newest", last_opened_at_ms: 300 }),
+      makeEntry({ path: "/pinned-old", name: "pinned-old", last_opened_at_ms: 100 }),
+      makeEntry({ path: "/middle", name: "middle", last_opened_at_ms: 200 }),
+    ];
+
+    const result = sortRecentRepositories(repos, ["/pinned-old"], "");
+
+    expect(result.map((r) => r.path)).toEqual(["/pinned-old", "/newest", "/middle"]);
+  });
+
+  it("sorts by descending last_opened_at_ms within the same pinned group", () => {
+    const repos = [
+      makeEntry({ path: "/a", name: "a", last_opened_at_ms: 100 }),
+      makeEntry({ path: "/b", name: "b", last_opened_at_ms: 300 }),
+      makeEntry({ path: "/c", name: "c", last_opened_at_ms: 200 }),
+    ];
+
+    const result = sortRecentRepositories(repos, [], "");
+
+    expect(result.map((r) => r.path)).toEqual(["/b", "/c", "/a"]);
+  });
+
+  it("does not mutate the input array", () => {
+    const repos = [
+      makeEntry({ path: "/a", name: "a", last_opened_at_ms: 100 }),
+      makeEntry({ path: "/b", name: "b", last_opened_at_ms: 300 }),
+    ];
+    const original = [...repos];
+
+    sortRecentRepositories(repos, [], "");
+
+    expect(repos).toEqual(original);
+  });
+});
+
+describe("formatRelativeTime", () => {
+  it("returns an empty string for a missing timestamp", () => {
+    expect(formatRelativeTime(undefined, relativeTimeStrings)).toBe("");
+  });
+
+  it("returns an empty string for an invalid timestamp", () => {
+    expect(formatRelativeTime(NaN, relativeTimeStrings)).toBe("");
+  });
+
+  it("reports just now for under a minute", () => {
+    expect(formatRelativeTime(Date.now() - 5_000, relativeTimeStrings)).toBe("just now");
+  });
+
+  it("reports minutes ago for under an hour", () => {
+    expect(formatRelativeTime(Date.now() - 5 * 60_000, relativeTimeStrings)).toBe("5m ago");
+  });
+
+  it("reports hours ago for under a day", () => {
+    expect(formatRelativeTime(Date.now() - 3 * 3_600_000, relativeTimeStrings)).toBe("3h ago");
+  });
+
+  it("reports days ago for a day or more", () => {
+    expect(formatRelativeTime(Date.now() - 2 * 86_400_000, relativeTimeStrings)).toBe("2d ago");
+  });
+});

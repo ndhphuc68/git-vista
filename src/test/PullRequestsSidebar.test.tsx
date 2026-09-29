@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PullRequestsSection } from "../components/sidebar/PullRequestsSection";
 import * as githubService from "../services/githubService";
@@ -21,6 +21,21 @@ vi.mock("../ipc/client", () => ({
     checkoutPullRequest: vi.fn(),
   },
 }));
+
+const mockPr = {
+  number: 101,
+  title: "Awesome Feature",
+  state: "open" as const,
+  draft: false,
+  user: { login: "alice", avatar_url: "https://avatar.url/1", html_url: "" },
+  created_at: "2026-09-18T10:00:00Z",
+  updated_at: "2026-09-18T10:00:00Z",
+  head: { ref: "feature", sha: "111" },
+  base: { ref: "main", sha: "222" },
+  comments: 3,
+  labels: [],
+  html_url: "https://github.com/my-org/my-repo/pull/101",
+};
 
 describe("PullRequestsSection", () => {
   let queryClient: QueryClient;
@@ -100,5 +115,43 @@ describe("PullRequestsSection", () => {
     fireEvent.click(addBtn);
 
     expect(usePullRequestStore.getState().isCreateModalOpen).toBe(true);
+  });
+
+  it("fires repo-info and token queries and checks out a PR from the context menu", async () => {
+    vi.mocked(invokeCommand.getGitHubRepoInfo).mockResolvedValue({
+      is_github: true,
+      owner: "my-org",
+      repo: "my-repo",
+      default_branch: "main",
+    });
+    vi.mocked(invokeCommand.getGitHubToken).mockResolvedValue("mock_token");
+    vi.mocked(invokeCommand.checkoutPullRequest).mockResolvedValue({
+      branch_name: "pr/101",
+      message: "Đã chuyển sang nhánh pr/101 thành công.",
+    });
+    vi.mocked(githubService.fetchPullRequests).mockResolvedValue([mockPr]);
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <PullRequestsSection repoPath="/path/to/repo" />
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByText("Awesome Feature")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(invokeCommand.getGitHubRepoInfo).toHaveBeenCalledWith("/path/to/repo");
+      expect(invokeCommand.getGitHubToken).toHaveBeenCalled();
+    });
+
+    const prRow = screen.getByText("Awesome Feature").closest(".group");
+    if (!prRow) throw new Error("PR row not found");
+    fireEvent.contextMenu(prRow);
+
+    const checkoutBtn = await screen.findByText(t.pullRequests.checkout);
+    fireEvent.click(checkoutBtn);
+
+    await waitFor(() => {
+      expect(invokeCommand.checkoutPullRequest).toHaveBeenCalledWith("/path/to/repo", 101);
+    });
   });
 });

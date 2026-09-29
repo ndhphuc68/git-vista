@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { AlertTriangle, Play, XCircle, FileText } from "lucide-react";
 import { type RepoStateInfo } from "../../ipc/bindings.generated";
-import { useTranslation } from "../../i18n";
+import { useInProgressOperationBanner } from "./useInProgressOperationBanner";
 
 export interface InProgressOperationBannerProps {
   repoState: RepoStateInfo | null | undefined;
@@ -10,62 +10,27 @@ export interface InProgressOperationBannerProps {
   onNavigateToChanges: () => void;
 }
 
+const OP_LABELS: Record<string, string> = {
+  merge: "Merge",
+  rebase: "Rebase",
+  cherry_pick: "Cherry-Pick",
+  revert: "Revert",
+};
+
 export const InProgressOperationBanner: React.FC<InProgressOperationBannerProps> = ({
   repoState,
   onAbort,
   onContinue,
   onNavigateToChanges,
 }) => {
-  const { t } = useTranslation();
-  const [isAborting, setIsAborting] = useState(false);
-  const [isContinuing, setIsContinuing] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
+  const { t, isAborting, isContinuing, actionError, handleAbort, handleContinue } =
+    useInProgressOperationBanner(repoState, onAbort, onContinue);
 
   if (!repoState || !repoState.is_in_progress) {
     return null;
   }
 
-  const opLabel = (() => {
-    switch (repoState.state.toLowerCase()) {
-      case "merge":
-        return "Merge";
-      case "rebase":
-        return "Rebase";
-      case "cherry_pick":
-        return "Cherry-Pick";
-      case "revert":
-        return "Revert";
-      default:
-        return repoState.state.toUpperCase();
-    }
-  })();
-
-  const handleAbort = async () => {
-    setIsAborting(true);
-    setActionError(null);
-    try {
-      await onAbort(repoState.state);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setActionError(t.banner.abortError.replace("{msg}", msg));
-    } finally {
-      setIsAborting(false);
-    }
-  };
-
-  const handleContinue = async () => {
-    if (repoState.conflict_count > 0) return;
-    setIsContinuing(true);
-    setActionError(null);
-    try {
-      await onContinue(repoState.state);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setActionError(t.banner.continueError.replace("{msg}", msg));
-    } finally {
-      setIsContinuing(false);
-    }
-  };
+  const opLabel = OP_LABELS[repoState.state.toLowerCase()] ?? repoState.state.toUpperCase();
 
   return (
     <div

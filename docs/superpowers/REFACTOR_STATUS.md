@@ -2,10 +2,46 @@
 
 > **Đọc file này trước khi làm tiếp.** Đây là điểm vào duy nhất cho công việc tái cấu trúc — nó cho biết đã làm gì, đang ở đâu, và làm gì tiếp theo.
 
-**Cập nhật**: 2026-09-19
-**Nhánh làm việc**: `refactor/phase0-foundation` (chứa GĐ0–GĐ4 + GĐ5 lát 1 + GĐ5 lát 2, chưa merge vào `main`)
-**Tiến độ**: 5 / 8 giai đoạn xong, **GĐ5 lát 2 xong — 8 task triển khai + 1 task handover**
-**Việc tiếp theo**: GĐ5b hoặc GĐ6. Xem mục 4 và mục 10/11.
+**Cập nhật**: 2026-09-29
+**Nhánh làm việc**: `refactor/phase0-foundation` (chứa GĐ0–GĐ4 + GĐ5 lát 1 + GĐ5 lát 2, chưa merge vào `main`). **GĐ5b sống trên nhánh riêng `refactor/phase5b-large-modules`**, rẽ nhánh từ `refactor/phase0-foundation` tại `2e01698` và đã hoà (merge) commit `4fe9bfb` (luật public-index + acyclicity guard) của `refactor/phase0-foundation` vào giữa chừng — xem **mục 12**.
+**Tiến độ**: 8 / 8 giai đoạn xong (GĐ0–GĐ7, kể cả GĐ5b; GĐ7 tự nó chia 7a/7b/7c, cả ba lát đều xong).
+**Việc tiếp theo**: không còn task tái cấu trúc nào đang mở. Hai việc cần quyết định/hoàn tất trước khi coi cả dự án là xong: (1) quyết định merge nhánh `refactor/phase0-foundation` vào `main` (xem mục 8; nhánh `refactor/phase5b-large-modules` vẫn là nhánh riêng, xem mục 12); (2) chạy app Tauri thật để xác minh đầu-cuối — Task 5 của kế hoạch GĐ3 còn nợ (xem mục 9).
+
+> **GĐ7c đã xong — con người quyết định giữ nguyên ngưỡng (80/15/300) và dọn sạch, thay vì nới ngưỡng hoặc dùng ratchet.** 127 vi phạm (90 `max-lines-per-function` + 27 `complexity` + 10 `max-lines`) về **0** qua 13 task, rồi cả ba luật nâng lên `error`. Chi tiết ở mục 3, "Giai đoạn 7c".
+
+> **GĐ7b đã xong — 24 import runtime `ipc/` cuối cùng đã chuyển vào `features/*/api`, `no-restricted-imports` đã nâng lên `error`.**
+> Năm feature mới ra đời (`compare`, `changes`, `conflict`, `repo`, `github`);
+> bảy feature có sẵn (`undo`, `history`, `merge`, `settings`, `welcome`,
+> `remote`, `branch`) được mở rộng thêm hook/wrapper. Bài kiểm tra
+> `architectureBoundaries.test.ts` giờ quét **toàn bộ `src/`**, không chỉ
+> `features/**` — chi tiết ở mục 3, "Giai đoạn 7b".
+
+> **GĐ7a đã xong — nâng 7 luật lint đã dọn sạch lên `error`.** `no-console`,
+> `typescript/no-explicit-any`, `react/exhaustive-deps`,
+> `react/only-export-components`, `max-depth`, `max-params`,
+> `max-nested-callbacks` giờ chặn `pnpm lint` khi vi phạm — đã chứng minh
+> bằng một probe `any` cố ý (xem mục 3, "Giai đoạn 7a"). Bốn luật còn `warn`
+> để dành cho GĐ7b/GĐ7c: `no-restricted-imports`, `max-lines`,
+> `max-lines-per-function`, `complexity`. Phát hiện đáng chú ý nhất không
+> phải việc mới của lát này mà là một con số cũ bị hiểu sai: `allowTypeImports`
+> (thêm ở đầu GĐ7a) cho thấy oxlint đã đếm cả `import type` vào
+> `no-restricted-imports` từ trước tới giờ — mốc "70" ở mục 3/6 thổi phồng
+> phần việc còn lại tới **46** dòng; con số runtime thật là **24**.
+
+> **GĐ6 đã xong — có sai lệch có chủ đích so với spec.** 9 bản `emit_repo_changed`
+> gom về một hàm trong `src-tauri/src/events/mod.rs`; 3 `map_err(|e| e.to_string())`
+> trong `commands/undo.rs` đã bỏ. **`with_repo()` không làm** — con người quyết định
+> bỏ sau khảo sát (lý do ở mục 3, GĐ6). Gom emitter lộ ra **hai lệnh undo gửi sai
+> payload**, khiến frontend xoá sạch cache mọi repo sau mỗi lần hoàn tác.
+
+> **GĐ5b đã xong.** Năm module entry mục tiêu của kế hoạch GĐ5b đều đã dưới
+> mốc 300 dòng đo được: `BranchSidebar.tsx` **247**, `CommitGraph.tsx` **140**,
+> `CommitDetailPanel.tsx` **211**, `GitBehaviorTab.tsx` **70**,
+> `WelcomeScreen.tsx` **202**. Quyết định của con người giữa chừng: ranh giới
+> cross-feature co lại thành "chỉ được import qua `index.ts` công khai của
+> feature khác" (không còn `CROSS_FEATURE_EXCEPTIONS`). Bốn file khác trong
+> `src/features/**` hiện vượt 300 dòng — ghi trung thực ở **mục 12**, không
+> xẻ tiếp trong phạm vi task này. Chi tiết đầy đủ ở **mục 12**.
 
 > **GĐ5 lát 2 đã xong.** Feature `remote` và `stash` đều đã migrate:
 > `src/components/remote/` và `src/components/stash/` **xoá hẳn**.
@@ -34,7 +70,7 @@ pnpm install
 # Xác nhận mọi thứ xanh trước khi làm gì
 pnpm lint                     # phải exit 0
 pnpm build                    # phải exit 0
-pnpm test                     # phải 101 file / 634 test xanh
+pnpm test                     # phải 162 file / 1013 test xanh
 pnpm check-query-keys         # "No query key literals found..."
 pnpm check-comment-language   # "All comments are in English."
 pnpm check-bindings           # "...is in sync with the Rust commands."
@@ -55,6 +91,8 @@ Nếu một trong các lệnh trên đỏ, **dừng lại và tìm nguyên nhân
 | `docs/superpowers/plans/2026-09-19-refactor-phase3-tauri-specta.md` | Kế hoạch GĐ3 (đã xong, trừ Task 5) |
 | `docs/superpowers/plans/2026-09-19-refactor-phase4-split-ipc-client.md` | Kế hoạch GĐ4 (đã xong) |
 | `docs/superpowers/plans/2026-09-19-refactor-phase5-features-tag-branch.md` | **Kế hoạch GĐ5 lát 1 (đã xong, 11/11 task)** |
+| `docs/superpowers/specs/2026-09-20-refactor-phase5b-large-modules-design.md` | Thiết kế GĐ5b — xẻ nhỏ 5 module entry khổng lồ |
+| `docs/superpowers/plans/2026-09-20-refactor-phase5b-large-modules.md` | **Kế hoạch GĐ5b (đã xong, 7/7 task kể cả Task 0')** |
 | `docs/DESIGN_SYSTEM.md` | Design token — nguồn chuẩn cho màu, bo góc, khoảng cách |
 
 ---
@@ -260,11 +298,267 @@ Việc thay Shell cung cấp "cái gì để mở" thay cho import chéo compone
 
 Chi tiết đầy đủ ở **mục 11**.
 
+### Giai đoạn 5b — Xẻ nhỏ 5 module entry khổng lồ ✅
+
+**Kế hoạch**: `docs/superpowers/plans/2026-09-20-refactor-phase5b-large-modules.md`, làm trên nhánh riêng `refactor/phase5b-large-modules` (rẽ từ `refactor/phase0-foundation` tại `2e01698`).
+
+Bảy task (Task 1–4, Task 0', Task 5–7) đưa cả 5 module entry mục tiêu xuống dưới 300 dòng đo được: `BranchSidebar.tsx` (247), `CommitGraph.tsx` (140), `CommitDetailPanel.tsx` (211), `GitBehaviorTab.tsx` (70), `WelcomeScreen.tsx` (202) — giảm từ 611/791/764/597/586 dòng lúc bắt đầu (branch/history/history/settings/welcome).
+
+**Quyết định giữa chừng quan trọng nhất — Task 0'.** Một phiên song song trên `refactor/phase0-foundation` đã làm xong luật "feature chỉ được import feature khác qua `index.ts` công khai của nó, cấm import sâu vào `api/`/`components/`/`model/`" (commit `4fe9bfb`), cùng một test bất-chu-kỳ (acyclicity) giữa các feature. Con người quyết định: nhánh GĐ5b phải hoà commit đó vào **giữa** kế hoạch (sau Task 4, trước Task 5) thay vì bỏ qua, vì Task 2 và Task 3 của chính GĐ5b đã **nới rộng** `CROSS_FEATURE_EXCEPTIONS` — vi phạm ràng buộc toàn cục ("Global Constraint") mà bản kế hoạch gốc đặt ra. Task 0' hoà nhánh, xử lý 2 xung đột (giữ code Task 1–4 của `BranchSidebar`, lấy toàn bộ máy phân loại `crossFeatureViolation` mới từ nhánh kia), rồi chuyển mọi import sâu còn sót (`useSidebarActions.ts`, `useSidebarData.ts`) sang import qua `index.ts`. Kết quả: `CROSS_FEATURE_EXCEPTIONS` **biến mất hoàn toàn** khỏi codebase — không còn cơ chế ngoại lệ cross-feature nào, thay bằng luật cứng ép bằng test.
+
+**Ba quyết định của controller (người điều phối) áp dụng xuyên suốt GĐ5b:**
+
+- **IPC chỉ được gọi trong `api/`** cho `settings` và `welcome` — kể cả khi brief chỉ liệt kê `hooks/` không có `api/` (Task 5, Task 6), controller vẫn yêu cầu thêm lớp `api/` mỏng bọc `invokeCommand` để tuân thủ luật `only features/*/api may import ipc/` mà không cần thêm ngoại lệ `IPC_IMPORT_EXCEPTIONS`.
+- **Dialog của commit graph do `Shell` cung cấp renderer cụ thể** — theo đúng tiền lệ quy ước 19 (mục 7): feature giữ quyết định *khi nào* mở dialog, `Shell` cung cấp *cái gì* để render, tránh việc `history` phải import chéo component của feature khác.
+- **Hook trạng thái repo (`useRepoStatus`) đặt trong `history`**, không phải một feature mới — vì Task 2 cần nó để gỡ import IPC trực tiếp trong `branch`, và `history` đã là chủ sở hữu tự nhiên của dữ liệu trạng thái repo trong luồng UI hiện có.
+
+**Ghi chú môi trường:** pool mặc định (`forks`) của Vitest bị treo (hang) trong worktree Windows liên kết (linked worktree) này trước khi worker nào kịp khởi tạo — không rõ nguyên nhân gốc, không phải lỗi sản phẩm. Toàn bộ xác minh trong worktree này phải dùng `pnpm vitest run --pool=threads`; không sửa `vitest.config.ts`. CI/máy khác chạy `pnpm test` bình thường.
+
+Chi tiết đầy đủ — bảng task/commit, số liệu đo từng bước, danh sách nợ hoãn lại — ở **mục 12**.
+
+### Giai đoạn 6 — Rust: gom `emit_repo_changed`, dọn `map_err` ✅
+
+**Đã làm:**
+
+- **`emit_repo_changed` từ 9 bản sao còn 1 hàm**: `events::emit_repo_changed(&AppHandle, &str, &str)`, cộng thêm `repo_changed_payload()` và hằng `REPO_CHANGED_EVENT`. Trước đó 9 bản đã chia thành 2 chữ ký (`&str` ở 6 file, `String` ở 3 file), và có 3 dạng payload khác nhau.
+- **`commands/undo.rs`**: 3 lệnh undo trả `Result<(), AppError>` thay cho `Result<(), String>`, giống 74 lệnh còn lại. Bindings sinh lại, chỉ đổi đúng 3 dòng (`typedError<null, string>` → `typedError<null, AppError>`). Mọi chỗ gọi đã đọc lỗi qua `err.message`/`toErrorMessage` nên không phải sửa. `InteractiveRebaseModal` giờ hiện lỗi thật thay cho câu fallback, vì trước đây lỗi là chuỗi thô, không có `.message`.
+- `simulate_repo_change` dùng chung payload builder, nhưng **vẫn tự emit và trả lỗi** thay vì nuốt: lệnh này sinh ra để kiểm tra kênh event.
+
+**Lỗi thật lộ ra khi gom — cùng kiểu với bug cache của GĐ1:**
+
+| Chỗ | Payload cũ | Hậu quả |
+| --- | --- | --- |
+| `undo_delete_branch`, `undo_drop_stash` | `{ "path": ... }` — thiếu `repo_path`, thiếu `reason` | `App.tsx` không thấy `payload.repo_path` nên rơi vào nhánh `invalidateQueries()` trống → **mỗi lần hoàn tác xoá nhánh hoặc stash là xoá cache của mọi repo ở mọi tab** rồi fetch lại hết. Dữ liệu không sai, chỉ lãng phí. |
+| `execute_interactive_rebase` | `serde_json::json!` tự dựng, key `timestamp` thay vì `timestamp_ms` | Không ai đọc timestamp nên chưa có hành vi sai. `ControlsBar` khai kiểu `RepoChangedPayload`, nên kiểu đang nói dối về dữ liệu. |
+
+**Chống tái phát:** `src-tauri/tests/events_test.rs`, 4 test. Test ghim đúng 3 key payload (`reason`, `repo_path`, `timestamp_ms`) và tên kênh. Có một test quét `src/commands/` sẽ đỏ nếu file nào lại chứa `"repo-changed"` hoặc `fn emit_repo_changed` riêng. Thí nghiệm phá (quy ước 3): đổi tên field thành `timestamp` và thêm literal `"repo-changed"` vào `undo.rs` → đúng 2 test tương ứng đỏ.
+
+**Sai lệch có chủ đích so với spec — bỏ `with_repo()`.** Spec (mục 4.8) muốn thay ~60 chỗ `let repo = Repository::open(path)?;` bằng `with_repo(path, |repo| {...})`. Khảo sát cho thấy làm việc này không được gì:
+
+- Mỗi chỗ vốn chỉ có 1 dòng. `?` đã tự chuyển `git2::Error` sang `AppError` (qua `From`), nên helper không gom được logic nào. Bọc closure chỉ thêm một tầng thụt lề cho khoảng 60 hàm.
+- Chữ ký của spec (`&Repository`) không dùng được ở 6 chỗ trong `write/stash.rs` cần `&mut`. Nó cũng không hợp với 3 chỗ trong `exec/` mở lại repo giữa chừng (`fresh_repo` sau khi chạy git CLI), và với các chỗ dùng `if let Ok(...)`.
+
+Con người đã chọn bỏ. Nếu sau này cần một chỗ chung để mở repo (ví dụ chuyển sang `Repository::open_ext` với flag), khi đó mới tạo helper `open_repo()` trả `Result<Repository, AppError>`, không dùng closure.
+
+**Kiểm chứng:** `cargo test` **144 passed / 0 failed** (140 + 4 mới); `cargo clippy --all-targets -- -D warnings` sạch; `cargo fmt --check` sạch; `pnpm build`/`pnpm lint` exit 0; frontend **111 file / 762 test** xanh.
+
+### Giai đoạn 7a — Dọn nhanh, nâng 7 luật lên `error` ✅
+
+**Kế hoạch**: `docs/superpowers/plans/2026-09-28-refactor-phase7a-lint-quick-wins.md` (task 1–7). GĐ7 gốc ("nâng lint từ `warn` lên `error`") bị chia thành ba lát vì hai luật `no-restricted-imports` (24 vi phạm runtime thật) và `max-lines-per-function`/`complexity`/`max-lines` (**128** vi phạm: 90 + 28 + 10) cần dọn code trước khi khoá — không thể nâng cả 11 luật cùng lúc mà không chặn merge nhiều ngày. 7a dọn 89 trong 241 warning baseline để đưa bảy luật còn lại về 0 vi phạm, rồi mới nâng chúng lên `error` — không phải bảy luật này vốn đã sẵn 0 vi phạm.
+
+**Việc đã làm, theo commit:**
+
+| Commit | Nội dung |
+| --- | --- |
+| `0820516` | Thêm `allowTypeImports` cho `no-restricted-imports`; loại trừ `no-console` cho `scripts/**`; loại trừ `max-lines` cho hai từ điển i18n |
+| `676fd6d` | Helper `messageOf` + gõ kiểu 11 `catch` clause — dọn `no-explicit-any` |
+| `ab25ad5` + `a082292` | Gõ kiểu payload REST của GitHub trong `githubService`; review bắt được `mapUserLink` thêm fallback `?? "unknown"` làm đổi dữ liệu hiển thị cho assignee/reviewer — sửa bằng kiểu raw bắt buộc field, không thêm fallback |
+| `b75f465` | Nốt `any` cuối cùng — đường dẫn file kéo-thả và fixture test |
+| `3089f28` | `qk.compareFileDiff` nhận một object option thay vì tham số rời; loại trừ `max-params` cho `src/ipc/**` |
+| `fc37a4f` | Sửa hook dependencies, `withoutToast`, `repoUrl.ts`, xoá `console.log` debug còn sót; `useWelcomeShortcuts` giờ gọi callback **mới nhất** thay vì đóng closure ở lần render đầu — có test ghim |
+| `09f1e69` | Nâng bảy luật đã 0 vi phạm lên `error`, cập nhật tài liệu này |
+| `36a18dc` | Ghi phát hiện eslint-disable vào bảng nợ kỹ thuật mục 6 |
+
+**Số lượt vi phạm theo luật, trước → sau (baseline 241 warning):**
+
+| Luật | Trước | Sau | Mức mới |
+| --- | --- | --- | --- |
+| `no-restricted-imports` | 70 | **24** | `warn` (GĐ7b) |
+| `no-console` | 9 | **0** | `error` |
+| `max-lines` | 12 | **10** | `warn` (GĐ7c) |
+| `typescript/no-explicit-any` | 23 | **0** | `error` |
+| `react/exhaustive-deps` | 4 | **0** | `error` |
+| `max-params` | 3 | **0** | `error` |
+| `max-nested-callbacks` | 1 | **0** | `error` |
+| `react/only-export-components` | 1 | **0** | `error` |
+| `max-depth` | 0 | **0** | `error` |
+| `max-lines-per-function` | 90 | **90** | `warn` (GĐ7c) |
+| `complexity` | 28 | **28** | `warn` (GĐ7c) |
+| **Tổng** | **241** | **152** | |
+
+**Phát hiện quan trọng nhất không phải là dọn code mới, mà là một con số cũ bị đếm sai.** `no-restricted-imports` từng báo 70 — mốc này được mục 3/6 dùng làm thước đo tiến độ migrate `ipc/`. Thêm `allowTypeImports: true` vào hai pattern của luật (đã có từ commit `0820516`, đầu GĐ7a) làm con số rơi thẳng xuống **24**, không phải vì có 46 chỗ vừa migrate mà vì oxlint **vẫn luôn** tính cả `import type` là vi phạm — nó không phân biệt type-only như `architectureBoundaries.test.ts` (`importsIpcAtRuntime`) đã làm từ GĐ5. Xác nhận bằng ratchet probe (mục dưới): sau khi `allowTypeImports` có hiệu lực, một import kiểu thuần tuý từ `ipc/` không còn bị đếm, chỉ import giá trị mới bị đếm. Nói cách khác: **46 trong 70 dòng "còn phải migrate" trước đây chưa từng là nợ thật** — chỉ là oxlint đếm nhầm. 24 dòng còn lại mới là việc thật của GĐ7b.
+
+**Ba ngoại lệ thêm vào cấu hình, mỗi cái có lý do:**
+
+- `scripts/**` tắt `no-console` — script chạy bằng Node, in ra console là giao diện chính của nó, không phải debug sót.
+- `src/i18n/en.ts` / `src/i18n/vi.ts` tắt `max-lines` — từ điển dịch dài theo số lượng chuỗi UI, không phải theo độ phức tạp logic; xẻ nhỏ không có ý nghĩa kiến trúc.
+- `src/ipc/**` tắt `max-params` — facade IPC có nhiều hàm nhận tham số 1-1 với command Rust nhiều field; đã có 3 vi phạm hợp lệ trước khi thêm ngoại lệ, không sửa bằng cách gom object vì đó không phải chỗ mất giá trị.
+
+**Một thay đổi hành vi có chủ đích, có test ghim:** `useWelcomeShortcuts` — sửa dependency rỗng ở GĐ5b (mục 6/12.6 từng ghi là "verbatim từ code gốc, không phải regression") giờ khiến hook gọi **callback mới nhất** ở mỗi lần render thay vì đóng (closure) callback của lần render đầu tiên. Đây **là** thay đổi hành vi, không phải thay thế cơ học — được cho phép vì mục đích của GĐ7 là khoá kiến trúc lại, và một callback đóng sai là đúng loại lỗi mà `exhaustive-deps` sinh ra để bắt. Có test ghim hành vi mới.
+
+**Một thay đổi hành vi nhỏ khác từ helper `messageOf` (commit `676fd6d`):** ở `GitHubSettingsTab.tsx` (3 chỗ), `PullRequestDetailDrawer.tsx` và `PullRequestsSection.tsx`, code cũ đọc thẳng `err.message` (không có `?.`) nên sẽ ném `TypeError` ngay trong khối `catch` nếu giá trị bị `throw` là `null`/`undefined`; `messageOf` dùng `?.` nên giờ hiển thị fallback tiếng Việt thay vì crash. Tương tự, một `message` không phải chuỗi nhưng truthy giờ cũng rơi về fallback thay vì hiển thị nguyên văn. Đây thuần tuý là cải thiện, và cả hai tình huống đều gần như không xảy ra trong thực tế.
+
+**Ratchet probe (Step 3, Task 7) — chứng minh luật `error` thật sự chặn:** thêm tạm `const _probe: any = 1; export { _probe };` vào `src/shared/utils/git.ts` → `pnpm lint` thoát mã **1**, dòng `src/shared/utils/git.ts:8:15: error typescript(no-explicit-any): Unexpected \`any\`.` xuất hiện. Xoá probe → `pnpm lint` thoát mã **0** trở lại. Xác nhận đã xoá sạch, `git status` chỉ còn `.oxlintrc.json` và tài liệu này trước khi commit.
+
+**Phát hiện phụ, ghi vào mục 6:** ba test file (`useBranchMutations.test.ts:51`, `useRemoteMutations.test.ts:53`, `useStashMutations.test.ts:44`) có comment tắt luật dạng tên ESLint đứng trước `vars as any` — kết quả đo và ý nghĩa ở mục 6. Không sửa ba file này (đúng theo brief).
+
+**Kiểm chứng đầy đủ (đo tại task này, HEAD sau commit `fc37a4f`, tức cây `09f1e69`):**
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `pnpm lint` | exit 0 — **152 warning** (90 `max-lines-per-function`, 28 `complexity`, 24 `no-restricted-imports`, 10 `max-lines`); 0 vi phạm ở bảy luật vừa nâng |
+| `pnpm build` | exit 0 |
+| `pnpm test` | PASS — **113 file / 772 test** |
+| `pnpm check-comment-language` | PASS — "All comments are in English." |
+| `pnpm check-query-keys` | PASS — "No query key literals found outside src/domain/queryKeys.ts." |
+
+### Giai đoạn 7b — Chuyển 24 import runtime `ipc/` còn lại vào `features/*/api`, nâng `no-restricted-imports` lên `error` ✅
+
+**Kế hoạch**: `docs/superpowers/plans/2026-09-29-refactor-phase7b-ipc-imports.md` (10 task). Mỗi task chuyển một nhóm call site sang gọi qua `features/*/api` thay vì `ipc/client` trực tiếp; Task 10 khoá luật lại và mở rộng bài kiểm tra ranh giới ra toàn bộ `src/`.
+
+**Việc đã làm, theo commit:**
+
+| Commit | Nội dung |
+| --- | --- |
+| `d89d8e0` | Kế hoạch |
+| `e542b93`, `74477fd` (Task 1) | Feature có sẵn `undo`, `history` mở rộng; đóng lại lỗ hổng coverage §11.4 (StashDiffView apply/pop/drop) |
+| `3ba2036` (Task 2) | `history` mở rộng: `FileDiffViewer`, `BlameView`, `FileHistoryView`, `CherryPickModal`, `RevertModal` |
+| `6df6fa8` (Task 3) | Feature mới `compare` — `CompareModal`, `CompareDiffViewer` |
+| `689b1a9` (Task 4) | `merge` mở rộng — `InteractiveRebaseModal` |
+| `0deb5cf` (Task 5) | Feature mới `changes` — `ChangesScreen`, `CommitBox`, `InteractiveDiffViewer` |
+| `4dfb4dc` (Task 6) | Feature mới `conflict` — `ConflictResolverScreen`, nửa `App.tsx` xử lý in-progress |
+| `c80f1e6` (Task 7) | Feature mới `repo` — `useTabStore`, `RepoHeader`, `ControlsBar`, nửa `App.tsx` xử lý event |
+| `8d5eb7c`, `c390832` (Task 8) | Feature mới `github` — `PullRequestDetailDrawer`, `CreatePullRequestModal`, `PullRequestsSection`, `GitHubSettingsTab`. Fix round: `staleTime: options?.staleTime` (`useBranches`, `useGitHubRepoInfo`) âm thầm ghi đè `staleTime` mặc định 60s của `QueryClient` toàn cục bằng `undefined` khi caller không truyền option — TanStack spread options nên field vắng mặt vẫn thắng field mặc định. Bắt được lúc kiểm chứng bởi controller, sửa kèm test |
+| `07fa06e` (Task 9) | `settings` + `welcome` mở rộng — `GitProfileTab`, `CloneModal`. `CloneModal` (+ test) dọn hẳn vào `features/welcome/components/` để tránh chu trình import ES |
+| `2e82ad2` (Task 10) | Nâng `no-restricted-imports` lên `error`; mở rộng `architectureBoundaries.test.ts` ra toàn `src/`; cập nhật tài liệu |
+| `bc5506e` | Tài liệu hoá việc hoàn thành GĐ7b |
+| `d46d844`, `64cfed4`, `8e2457e` (final-review fix wave, xem mục dưới) | Sửa 2 chu trình import ES qua `features/history/index.ts`, dọn export không dùng ở `welcome`/`github`, thêm bài kiểm tra chống chu trình toàn `src/` |
+
+**Bài kiểm tra ranh giới mở rộng ra toàn `src/`:** trước Task 10, `"only features/*/api may import ipc/"` chỉ quét `src/features/**`, nên một file ngoài `features/` (ví dụ `src/store/` hay `src/components/`) gọi thẳng `ipc/` sẽ không bị bắt bởi test, chỉ bị `no-restricted-imports` (khi đó còn `warn`) cảnh báo. Test mới `"outside ipc/ and features/*/api, nothing imports ipc/ at runtime"` quét mọi file `.ts`/`.tsx` không phải test dưới `src/`, loại trừ `src/ipc/**` và `src/features/*/api/**`, dùng lại `collectSourceFiles`/`importsIpcAtRuntime` đã có.
+
+**Break experiment (Step 1):** thêm `import { invokeCommand } from "../ipc/client"; void invokeCommand;` vào `src/store/useTabStore.ts` → test mới FAIL, liệt kê `store/useTabStore.ts`:
+
+```
+FAIL  src/test/architectureBoundaries.test.ts > architecture boundaries > outside ipc/ and features/*/api, nothing imports ipc/ at runtime
+AssertionError: expected [ 'store/useTabStore.ts' ] to deeply equal []
+```
+
+Xoá import → 36/36 test trong file xanh trở lại.
+
+**Ratchet probe (Step 2):** thêm cùng import vào `src/components/ControlsBar.tsx`, luật đã nâng `error` → `pnpm lint` thoát mã **1**:
+
+```
+src/components/ControlsBar.tsx:2:1: error eslint(no-restricted-imports): '../ipc/client' import is restricted from being used by a pattern. help: Component phải gọi qua features/*/api, không import ipc trực tiếp.
+```
+
+Xoá import → `pnpm lint` thoát mã **0** trở lại, 0 dòng `no-restricted-imports`.
+
+**Kiểm chứng đầy đủ (đo thật ở cuối Task 10):**
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `pnpm lint` | exit 0 — **127 warning** (90 `max-lines-per-function`, 27 `complexity`, 10 `max-lines`); **0** `no-restricted-imports` (luật giờ `error`) |
+| `pnpm build` | exit 0 |
+| `pnpm test` | PASS — **122 file / 796 test** sau fix wave cuối cùng (baseline cuối Task 10: 122 file / 786 test; baseline đầu 7b: 113 file / 772 test) |
+| `pnpm check-comment-language` | PASS — "All comments are in English." |
+| `pnpm check-query-keys` | PASS — "No query key literals found outside src/domain/queryKeys.ts." |
+
+Con số `complexity` giảm nhẹ từ 28 xuống 27 (chưa được lát này chủ đích dọn) — hệ quả phụ của việc hook chuyển ra khỏi component gốc làm hàm gốc ngắn/đơn giản đi đôi chút; không phải việc của GĐ7c bị lấn trước.
+
+**Đặc tả hoá (characterization test) thêm trong GĐ7b:** `StashDiffView`, `FileDiffViewer`, `BlameView`, `FileHistoryView`, `CompareDiffViewer`, `ControlsBar`, `GitProfileTab`, test checkout của PR sidebar (`src/test/PullRequestsSidebar.test.tsx`), và hai test hồi quy chốt fix `staleTime` (Task 8) — `src/features/branch/api/useBranches.test.ts`, `src/features/github/api/githubApi.test.ts`.
+
+**Sai lệch có chủ đích so với plan (không phải lỗi):**
+
+- Vài hook nhận thêm tham số `isOpen` để giữ nguyên gate `enabled` gốc thay vì suy luận lại từ input khác (`useCompareSummary`, `useRebaseCommits`).
+- Wrapper `pushRepo` gom `force`/`taskId` vào một object option, vì `max-params` (đã `error` từ GĐ7a) áp dụng cho `features/*/api`.
+
+**Nợ còn lại, ghi nhận không sửa trong GĐ7b (xem mục 6):**
+
+- Vài file feature vẫn import ngược lên `src/components/` (ví dụ `features/welcome/components/CloneModal.tsx` → `../../../components/welcome/repoUrl`) — mẫu hình có từ trước, không phải GĐ7b tạo ra.
+- Một số file `api/` có từ trước GĐ7b thiếu docblock chuẩn (ví dụ `features/merge/api/useMergeMutations.ts`).
+- Invalidation vẫn nằm trong vài component thay vì `api/` — theo kế hoạch để GĐ7c.
+
+**Fix wave sau final review (sau `bc5506e`):** review cuối GĐ7b phát hiện Task 2 (`3ba2036`) đã để lại hai chu trình import ES chạy vòng qua `features/history/index.ts` — `CommitGraph → CommitGraphDialogs → CherryPickModal`/`RevertModal` (ở `src/components/modals/`) quay lại `import ... from "../../features/history"`, và `CommitDetailPanel → CommitFileDiff → FileDiffViewer` (ở `src/components/diff/`) cũng vậy. Sửa theo đúng khuôn Task 9 đã làm với `CloneModal`: chuyển cả ba component (`CherryPickModal.tsx`, `RevertModal.tsx`, `FileDiffViewer.tsx`, cùng test đi kèm) vào `src/features/history/components/`, đổi sang import `../api` (sibling), không còn tự import index của chính feature mình. `FileDiffViewer` được thêm vào export public của `features/history` vì `FileHistoryView.tsx` (ngoài feature) vẫn cần dùng nó. Đồng thời dọn 2 export thừa: `openRepository`/`selectRepoFolder`/`cloneRepo`/`cancelRemoteTask`/`listenToTaskProgress` khỏi `features/welcome/index.ts` (chỉ dùng nội bộ feature) và `type GitHubRepoInfo` khỏi `features/github/index.ts` (không ai dùng ngoài feature); và một docblock lạc hậu ở `features/welcome/api/index.ts`. Thêm bài kiểm tra mới trong `architectureBoundaries.test.ts`: dựng đồ thị import toàn `src/` (loại `import type`/`export type` vì bị xoá lúc biên dịch), tìm thành phần liên thông mạnh (Tarjan), và chặn mọi chu trình đi qua `features/*/index.ts`. Test chỉ vướng đúng một chu trình có sẵn không liên quan tới feature — `ipc/history.ts` ↔ `ipc/client.ts` — thực chất là false positive của bộ trích xuất import dựa trên regex (nó khớp nhầm các chuỗi nội dung file giả lập git kiểu `"import React from 'react';"` nằm trong dữ liệu fallback dev của `history.ts`, không phải import thật); vì chu trình này không đi qua `features/*/index.ts` nên test vẫn xanh mà không cần loại trừ thủ công. Break experiment: tạm thêm lại `import { cherryPickCommit } from "../../../features/history";` vào `CherryPickModal.tsx` đã chuyển — test cụ thể FAIL, đúng như dự kiến; xoá dòng đó, xanh trở lại.
+
+### Giai đoạn 7c — Dọn 127 vi phạm kích thước/độ phức tạp, nâng ba luật cuối lên `error` ✅
+
+**Kế hoạch**: `docs/superpowers/plans/2026-09-29-refactor-phase7c-function-size.md` (commit `fa67294`), 13 task. **Quyết định của con người (2026-09-29):** giữ nguyên ngưỡng hiện có (80 dòng/hàm, complexity 15, 300 dòng/file) và dọn sạch mọi vi phạm, **từ chối cả hai lựa chọn thay thế** — nới ngưỡng cho khớp code hiện tại, và một cơ chế ratchet theo từng file. Mỗi split phải theo **trách nhiệm**, không tách cho đủ số dòng (spec §8).
+
+**Từ 127 xuống 0 qua 13 task** (90 `max-lines-per-function` + 27 `complexity` + 10 `max-lines`):
+
+| Task | Phạm vi | Commit | Trước → Sau |
+| --- | --- | --- | --- |
+| 1 | `services`, `ipc`, `store`, `utils`: `services/githubService.ts`, `ipc/config.ts`, `ipc/mocks.ts`, `store/useSettingsStore.ts`, `store/useTabStore.ts`, `store/useToastStore.ts`, `utils/commandRegistry.ts` | `fa67294..92ff2f5` | 127 → 117 |
+| 2 | Hook và model độc lập: `hooks/useGlobalShortcuts.ts`, `features/remote/api/useRemoteTask.ts`, `features/settings/hooks/useGitBehaviorSettings.ts`, `features/welcome/hooks/useRecentRepositories.ts`, `features/branch/hooks/useSidebarActions.ts`, `features/history/model/commitDetails.ts` | `92ff2f5..4698697` | 117 → 110 |
+| 3 | `changes`: `components/changes/ChangesScreen.tsx`, `CommitBox.tsx`, `InteractiveDiffViewer.tsx`, `StagingFileList.tsx` | `4698697..537d5e0` | 110 → 98 |
+| 4 | Pull request: `components/pullrequests/CreatePullRequestModal.tsx`, `PullRequestDetailDrawer.tsx`, `components/sidebar/PullRequestsSection.tsx` | `537d5e0..f3177fc` | 98 → 89 |
+| 5 | Rebase, merge, conflict: `components/rebase/InteractiveRebaseModal.tsx`, `RebaseCommitRow.tsx`, `RebaseLivePreview.tsx`, `components/merge/MergeBranchModal.tsx`, `components/conflict/ConflictResolverScreen.tsx`, `components/banner/InProgressOperationBanner.tsx` | `f3177fc..6836773` | 89 → 79 |
+| 6 | Settings (git): `components/settings/tabs/GitProfileTab.tsx`, `SettingsModal.tsx`, `tabs/GitHubSettingsTab.tsx`, `features/settings/components/GitBehaviorOptions.tsx`, `GitBehaviorPullStrategy.tsx` | `6836773..30f36c6` | 79 → 69 |
+| 7 | Settings (hiển thị): `components/settings/HelpTooltip.tsx`, `helpDiagrams/PullStrategyDiagram.tsx`, `tabs/AppearanceTab.tsx`, `tabs/DiffViewerTab.tsx`, `tabs/ExternalToolsTab.tsx` | `30f36c6..4fe8527` | 69 → 64 |
+| 8 | App shell và header: `App.tsx`, `components/Shell.tsx`, `components/ControlsBar.tsx`, `components/header/RepoHeader.tsx`, `header/WindowTabBar.tsx` | `4fe8527..5f8fbbe` | 64 → 54 |
+| 9 | Overlay và chrome: `components/palette/CommandPalette.tsx`, `shortcuts/ShortcutsHelpModal.tsx`, `splash/SplashScreen.tsx`, `toast/ToastItem.tsx`, `common/RemoteProgressBanner.tsx` | `5f8fbbe..18e5fe6` | 54 → 47 |
+| 10 | Compare, inspector, graph: `components/compare/CompareDiffViewer.tsx`, `CompareFileList.tsx`, `CompareHeader.tsx`, `CompareModal.tsx`, `components/inspector/BlameView.tsx`, `FileHistoryView.tsx`, `FileInspectorDrawer.tsx`, `components/graph/GraphSvgLane.tsx` | `18e5fe6..0e30d60` | 47 → 37 |
+| 11 | `features/branch`: `BranchSidebar.tsx`, `BranchSidebarSections.tsx`, `BranchTreeNode.tsx`, `CheckoutConflictModal.tsx`, `CreateBranchModal.tsx`, `DeleteBranchModal.tsx`, `RemoteTreeNode.tsx`, `RenameBranchModal.tsx`, `StashSection.tsx`, `TagSection.tsx` | `0e30d60..59c59bb` | 37 → 23 |
+| 12a | `features/history`: `CherryPickModal.tsx`, `CommitDetailPanel.tsx`, `CommitFileDiff.tsx`, `CommitFileList.tsx`, `CommitGraph.tsx`, `CommitGraphContextMenu.tsx`, `CommitGraphDialogs.tsx`, `CommitGraphRows.tsx`, `CommitMetadata.tsx`, `FileDiffViewer.tsx`, `RevertModal.tsx` | `59c59bb..50f7a17` | 23 → 11 |
+| 12b | `remote`/`stash`/`tag`/`welcome`: `features/remote/components/AddEditRemoteModal.tsx`, `ManageRemotesModal.tsx`, `features/stash/components/StashDiffView.tsx`, `features/tag/components/CreateTagModal.tsx`, `DeleteTagModal.tsx`, `features/welcome/components/CloneModal.tsx`, `RecentRepositoryList.tsx`, `WelcomeScreen.tsx` | `50f7a17..b2c871c` | 11 → 0 |
+| 13 | Nâng ba luật lên `error`, sửa nợ ghi chú GĐ7b, tài liệu hoá | `b2c871c..` (task này) | 0 → 0 |
+
+**Quy ước áp dụng xuyên suốt 13 task (kế thừa từ GĐ7a/7b, củng cố thêm ở 7c):**
+
+- **Mẫu factory `.actions.ts`/`.load.ts`.** Thân hook mutation/effect chuyển ra file cùng thư mục (`<hook>.actions.ts`, và `.load.ts` cho effect nạp dữ liệu) dưới dạng `create<Name>Handler(context)` nhận một object context chứa state/setter/dependency thuần — giữ hook gốc dưới ngưỡng dòng trong khi thân factory giữ nguyên văn.
+- **Helper thuần luôn có unit test riêng.** Mọi module mới giữ một helper thuần có logic (bảng tra cứu, predicate, mapper, phép chiếu) đều có file test riêng trong cùng task, kể cả khi component test đã phủ gián tiếp.
+- **Thay đổi thứ tự effect phải ghim bằng test chạy trên cả hai bản.** Nếu một split đổi thứ tự tương đối của effect/hook call, hoặc dời chỗ một early return, phải viết test ghim kết quả quan sát được và chạy trên **cả file gốc** (`git show <base>:path > path`, chạy, `git checkout -- path`) **và** bản mới, ghi lại cả hai lần chạy.
+- **Không tách effect đọc ref ra hook riêng.** Một effect đọc `ref`/setter không được chuyển sang custom hook riêng — `react/exhaustive-deps` không chứng minh được tính ổn định qua ranh giới đó; chỉ tách phần logic thuần, giữ effect trong file hook.
+- **Đối tượng trả về của hook làm một prop kiểu duy nhất.** Một hook trả về nhiều field có thể truyền nguyên vẹn xuống subcomponent con dưới dạng một prop kiểu (`view`/`data`/`actions`), subcomponent tự destructure — không phải rải từng field riêng lẻ.
+- **`ipc/mocks.ts` xẻ theo domain**, các file con đặt trong `src/ipc/mocks/*.ts` và re-export lại từ `ipc/mocks.ts` để không đổi chỗ gọi.
+
+**Ba vấn đề thật do review bắt được xuyên suốt 13 task:**
+
+1. **Tráo thứ tự effect trong `CreatePullRequestModal` (Task 4).** Split đầu tiên đảo thứ tự tương đối của hai effect. Lựa chọn nhánh mặc định (default branch selection) chưa từng được ghim bởi test nào trước đó, nên không có gì "gãy" để sửa; reviewer phát hiện sự đảo thứ tự ở vòng review đầu và yêu cầu chứng minh nó tương đương hành vi. Test mới ghim kết quả quan sát được và chạy xanh trên **cả bản gốc lẫn bản mới**, xác nhận đảo thứ tự này tương đương hành vi — giữ nguyên bản đã đảo, không revert.
+2. **Một task đã commit HEAD nhưng không build được (Task 9).** Bản implement đầu để lại một bản sửa build cho 2 file test helper **chưa commit** — HEAD báo cáo là "xong" nhưng cây làm việc không sạch nên `pnpm build` đỏ tại đúng commit đó. Review bắt được, fix round commit nốt bản sửa còn sót. Sau sự cố này, luật "cây làm việc phải sạch trước khi báo cáo xong" được thêm vào implementer-instructions.
+3. **Helper xuất xưởng không kèm test, hai lần (Task 1, Task 7).** Task 1: helper thuần được tách ra nhưng không có unit test riêng — review round 1 bắt, bổ sung test. Task 7: `helpTooltipDismissal`/`helpTooltipPlacement` cũng thiếu test tương tự — cùng một lỗi lặp lại, cùng cách sửa (thêm test ở fix round 1).
+
+**Đặc tả hoá (characterization test) thêm cho component trước đó chưa có test trực tiếp:**
+
+- `CompareFileList`, `CompareHeader`, `GraphSvgLane` (Task 10) — không có test sẵn, viết characterization test **trước** khi tách, commit riêng (`f8edc61`) trước mọi thay đổi code.
+- `CommitGraphRows` (Task 12a) — `src/test/CommitGraphRows.test.tsx`, commit riêng trước khi tách (`2a3e1c1`).
+- `GitBehaviorOptions`/`GitBehaviorPullStrategy` (Task 6) — chưa test nào từng bấm các nút pull-strategy/auto-fetch; viết test trước khi split.
+- `PullStrategyDiagram` (Task 7) — tách thành lane rebase/merge, kèm characterization test mới trước.
+- `RebaseCommitRow`/`RebaseLivePreview` (Task 5) — chưa có test trực tiếp; viết trước khi tách.
+- `ToastItem` (Task 9) — `src/test/ToastItem.test.tsx` mới.
+
+Các file còn lại trong 13 task đều đã có test bao phủ từ trước (Task 1, 2, 3, 4, 8, 11, 12b) nên không cần characterization test mới — chỉ cần chạy suite hiện có xanh trước/sau mỗi split.
+
+**Ratchet probe (Step 2, Task 13) — chứng minh luật `error` thật sự chặn:** thêm tạm một hàm `_probe` 82 dòng vào `src/shared/utils/git.ts` → `pnpm lint` thoát mã **1**:
+
+```
+src/shared/utils/git.ts:8:1: error eslint(max-lines-per-function): The function `_probe` has too many lines (82). Maximum allowed is 80. help: Consider splitting it into smaller functions.
+```
+
+Xoá hàm probe (`git checkout -- src/shared/utils/git.ts`) → `pnpm lint` thoát mã **0** trở lại, cây làm việc sạch.
+
+**Nợ còn lại từ GĐ7a/7b/7c, chưa sửa trong phạm vi task này (xem thêm mục 6):**
+
+- `useRemoteTask`'s success path (`status: "success"` + `invalidateQueries` đi kèm) chưa có test trực tiếp (Task 2, có từ trước, không phải Task 2 gây ra).
+- `ChangedFileRow`/`StagedFileRow` gần như trùng lặp (Task 3, có từ trước).
+- Các handler stage/unstage-all/hunk/line/commit vẫn chưa thành mutation hook `features/changes/api` (Task 3) — riêng stage/unstage một file thì **không** làm được vì thứ tự `setSelectedFile` đan xen với lệnh IPC.
+- `rebaseStepsHelpers`'s `commitsToPickSteps`/`buildCommitMap` chưa có unit test trực tiếp; `getRebaseActionColor` switch không có nhánh `default` (Task 5, có từ trước).
+- `RemoteProgressError`'s hằng số chuỗi `ACTION_CLASS` bị lặp cục bộ (Task 9).
+- ~~`useCompareModalState` trả về `commitsCount`/`filesCount` không ai dùng, bị tính lại ở `CompareModalWorkspace` (Task 10).~~ **Đã sửa** trong lượt fix cuối GĐ7c: đã xoá hai field chết khỏi `useCompareModalState.ts` sau khi xác nhận bằng grep rằng chỉ `CompareModalWorkspace.tsx` tự tính lại, không component nào đọc từ hook.
+- `RemoteFolderRow`'s prop `fullPath` không dùng — dữ liệu chết có từ trước (Task 11).
+- Commit `2a3e1c1` (Task 12a) — thông điệp commit chỉ mô tả việc thêm characterization test, không nhắc tới split `CommitMetadata` cũng nằm trong cùng commit (do cả hai bị stage chung trước commit đầu tiên; không có vấn đề chức năng, chỉ là commit message thiếu sót); `CommitGraphContextMenuItem`'s `className` ghép chuỗi thay vì dùng `clsx`.
+- `useWelcomeDragAndDrop`'s đường kéo/thả chưa có test trực tiếp (Task 12b, có từ trước).
+- Một số file trong `features/*/components` vẫn import ngược lên `src/components/` (ví dụ `features/welcome/components/CloneModal.tsx` → `../../../components/welcome/repoUrl`; `features/history/components/FileDiffViewer.tsx` → `../../../components/diff/DiffLineContent`) — mẫu hình có từ GĐ7b, chưa sửa trong GĐ7c vì đây là cấu trúc thư mục, không phải vi phạm của ba luật lint đang khoá lại.
+- Commit `2a3e1c1` message chưa sửa (ghi lại làm bằng chứng, không rewrite lịch sử).
+
+**Test flaky:** sau GĐ7b có một lần fail không giải thích được (1/7 lần chạy toàn bộ `pnpm test`, không ghi lại được tên test). **Không tái diễn ở GĐ7c** — cả 13 báo cáo task đều ghi "no flake observed" trên các lần chạy `pnpm test` đầy đủ của mình (task 1–12b), và lần chạy cuối cùng của Task 13 (`162 file / 1013 test`, một lần chạy, exit 0) cũng không gặp lại.
+
+**Kiểm chứng đầy đủ (đo thật ở cuối Task 13, HEAD sau commit `8ca9d9d`):**
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `pnpm lint` | exit 0 — **0 warning, 0 error** (11 luật đã `error`: 7 từ GĐ7a, `no-restricted-imports` từ GĐ7b, `max-lines`/`max-lines-per-function`/`complexity` từ GĐ7c) |
+| `pnpm build` | exit 0 |
+| `pnpm test` | PASS — **162 file / 1013 test** |
+| `pnpm check-comment-language` | PASS — "All comments are in English." |
+| `pnpm check-query-keys` | PASS — "No query key literals found outside src/domain/queryKeys.ts." |
+
 ### Số liệu hiện tại
 
 | Chỉ số | Khi bắt đầu | Bây giờ |
 | --- | --- | --- |
-| Test | 73 file / ~370 | **101 file / 634** |
+| Test | 73 file / ~370 | **162 file / 1013** (frontend, sau GĐ7c) + **144** Rust (sau GĐ6) |
+| Bản sao `emit_repo_changed` | 9 (2 chữ ký, 3 dạng payload) | **1** (`events::emit_repo_changed`) |
 | `src/ipc/bindings.ts` viết tay | 486 dòng | **0** (do máy sinh) |
 | `src/ipc/client.ts` | 1748 dòng | **124** (facade) |
 | File IPC viết tay quá 300 dòng | 1 | **0** |
@@ -274,12 +568,13 @@ Chi tiết đầy đủ ở **mục 11**.
 | Modal tự dựng overlay | 26 | **4** (drawer/palette/splash, cố ý) |
 | Escape handler lặp | ~30 | **1** (`useEscapeKey`) |
 | Nút Cancel/Submit bespoke | 13 + ~20 | **0** (dùng `Button`) |
-| Component trong `src/components/` gọi thẳng `ipc/` | 36 / 60 file | **32 / 64 file** ¹ |
-| `src/components/sidebar/BranchSidebar.tsx` → `src/features/branch/components/BranchSidebar.tsx` | 1327 dòng, 25 `useState` | **611 dòng, 10 `useState`** |
-| `pnpm lint` | exit 1 | **exit 0, 240 warning** (68 là `no-restricted-imports`) |
+| Component trong `src/components/` gọi thẳng `ipc/` | 36 / 60 file | **0** ¹ (GĐ7b: mọi import runtime `ipc/` ngoài `ipc/` và `features/*/api/` đã chuyển hết, ép buộc bằng `no-restricted-imports` `error` + bài kiểm tra toàn `src/`) |
+| `src/components/sidebar/BranchSidebar.tsx` → `src/features/branch/components/BranchSidebar.tsx` | 1327 dòng, 25 `useState` | **247 dòng** (sau GĐ5b, xem mục 12) |
+| `pnpm lint` | exit 1 | **exit 0, 0 warning** (sau GĐ7c — trước GĐ7a là 241, sau GĐ7a là 152, sau GĐ7b là 127; toàn bộ 11 luật độ phức tạp/ranh giới đã `error`: 7 từ GĐ7a, `no-restricted-imports` từ GĐ7b, `max-lines`/`max-lines-per-function`/`complexity` từ GĐ7c) |
 | `pnpm build` | exit 0 | exit 0 |
+| `CROSS_FEATURE_EXCEPTIONS` | chưa tồn tại | **đã xoá hẳn khỏi codebase** (Task 0', GĐ5b) — thay bằng luật public-index + acyclicity test |
 
-> ¹ Mẫu số vẫn đang đổi vì migrate làm file **rời khỏi** `src/components/` sang `features/`, nên so hai con số tuyệt đối qua các lát không có nhiều ý nghĩa. Chỉ số theo dõi tiến độ đáng tin hơn là warning `no-restricted-imports` (**68**, sau GĐ5 lát 2) — nó đếm đúng số chỗ còn gọi thẳng `ipc/`, ở bất kỳ thư mục nào, không phụ thuộc file đó có còn nằm trong `components/` hay không.
+> ¹ Mẫu số vẫn đang đổi vì migrate làm file **rời khỏi** `src/components/` sang `features/`, nên so hai con số tuyệt đối qua các lát không có nhiều ý nghĩa. Chỉ số theo dõi tiến độ đáng tin hơn là warning `no-restricted-imports` — **70** sau GĐ5b (tăng nhẹ từ **68** sau GĐ5 lát 2 — feature mới (`settings`, `welcome`, `history`) tạo thêm vài chỗ import kiểu bị oxlint đếm nhầm là runtime; xem mục 12), **24** sau khi GĐ7a thêm `allowTypeImports` (xem mục 3, "Giai đoạn 7a") — 46 trong 70 dòng cũ chỉ là `import type` bị oxlint đếm nhầm, không phải nợ thật — và nay **0** sau GĐ7b (mục 3, "Giai đoạn 7b"), với luật nâng lên `error` và bài kiểm tra ranh giới quét toàn `src/`, không riêng `features/`.
 
 ---
 
@@ -289,9 +584,11 @@ Chi tiết đầy đủ ở **mục 11**.
 | --- | --- | --- | --- |
 | **5 lát 1** | ✅ **Xong — 11/11 task.** Hạ tầng `features/` + `tag` + `branch` đã migrate | Thấp mỗi bước | Chi tiết ở **mục 10** |
 | **5 lát 2** | ✅ **Xong — 8 task triển khai + 1 task handover.** `remote` + `stash` đã migrate | Thấp mỗi bước | Chi tiết ở **mục 11**. `changes` chưa làm, để lát sau |
-| **5b** | Xẻ nhỏ file khổng lồ, gom state modal về union | Trung bình | `BranchSidebar` còn 611 dòng sau 2 lát; phần dư phụ thuộc `changes` + domain undo/tag/merge chưa có feature — xem **mục 11** |
-| **6** | Rust: `with_repo()` thay 58 chỗ lặp, gom `emit_repo_changed` (9 bản, 2 chữ ký) | Thấp | |
-| **7** | Nâng lint từ `warn` lên `error` | Không | Khoá kiến trúc lại vĩnh viễn |
+| **5b** | ✅ **Xong — 7 task triển khai (Task 1–4, Task 0', Task 5–7).** 5 module entry mục tiêu đều dưới 300 dòng đo được | Trung bình | Chi tiết ở **mục 12**. 4 file khác trong `features/**` vẫn trên 300 dòng — ghi trung thực, không xẻ trong phạm vi GĐ5b |
+| **6** | ✅ **Xong.** Gom `emit_repo_changed` (9 → 1), dọn `map_err` trong `undo.rs`. `with_repo()` **bỏ có chủ đích** | Thấp | Chi tiết ở GĐ6, mục 3 |
+| **7a** | ✅ **Xong.** Nâng 7 luật đã sẵn 0 vi phạm lên `error` (`no-console`, `typescript/no-explicit-any`, `react/exhaustive-deps`, `react/only-export-components`, `max-depth`, `max-params`, `max-nested-callbacks`) | Không | Chi tiết ở mục 3, "Giai đoạn 7a" |
+| **7b** | ✅ **Xong.** Dọn 24 warning `no-restricted-imports` còn lại (import runtime `ipc/` trực tiếp), nâng luật lên `error`, mở rộng bài kiểm tra ranh giới ra toàn `src/` | Trung bình | Chi tiết ở mục 3, "Giai đoạn 7b" |
+| **7c** | ✅ **Xong — 13 task.** Dọn 90 `max-lines-per-function` + 27 `complexity` + 10 `max-lines` (127 → 0), nâng cả ba lên `error` | Cao — nhiều file, nhiều lượt xẻ nhỏ | Chi tiết ở mục 3, "Giai đoạn 7c" |
 
 ---
 
@@ -326,12 +623,27 @@ Thêm `src/shared/hooks/useFocusTrap.ts` — `useFocusTrap(containerRef, enabled
 
 | Vấn đề | Mức | Ghi chú |
 | --- | --- | --- |
-| `App.tsx:284` dùng `part.includes(repo_path)` thay vì so sánh bằng | Minor | Repo `/proj` cũng khớp `/proj-legacy` → thừa refetch, không sai dữ liệu. Giờ `qk` đặt path ở vị trí cố định nên sửa rất dễ. |
+| `useRepoChangedListener.ts:22` dùng `part.includes(repo_path)` thay vì so sánh bằng | Minor | Repo `/proj` cũng khớp `/proj-legacy` → thừa refetch, không sai dữ liệu. Giờ `qk` đặt path ở vị trí cố định nên sửa rất dễ. Code này từng nằm ở `App.tsx:284`, đã dời sang `src/hooks/useRepoChangedListener.ts` trong một lần tách trước đó; con trỏ dòng cập nhật lại cho khớp vị trí hiện tại. |
 | `qk.githubToken()` chưa ai invalidate | Minor | An toàn hiện tại (không có UI ghi token). Sẽ thành bẫy khi thêm màn hình cài đặt token. |
 | `qk.github.repoInfo` không được invalidate khi đổi remote URL | Minor | Đã giảm nhẹ ở GĐ1 (`refreshData()` giờ có invalidate), nhưng chưa phủ hết đường. |
-| 240 warning lint độ phức tạp | Theo kế hoạch | `no-restricted-imports` chiếm **68** warning, dùng để **đo tiến độ migrate** — mỗi cái là một chỗ còn gọi thẳng `ipc/`. Giảm dần qua các lát sau, nâng lên `error` ở GĐ7. |
-| `BranchSidebar.tsx` còn 611 dòng, mốc kế hoạch là dưới 300 | Theo kế hoạch | Sau 2 lát (619 → 611) gần như không nhích — gỡ 7 khối modal bị bù lại bởi interface prop mới. Phần dư là logic của domain chưa có feature (`changes`, 2 lệnh tag, merge/rebase, undo). Tách thêm bây giờ chỉ là cắt cho đủ số dòng. Xem **mục 11.2**. |
+| ~~127 warning lint độ phức tạp (đo sau GĐ7b)~~ | Đã giải quyết | **Đã xong ở GĐ7c.** Cả ba luật còn lại (`max-lines-per-function` 90, `complexity` 27, `max-lines` 10) đã dọn về 0 qua 13 task rồi nâng lên `error`. Tất cả 11 luật độ phức tạp/ranh giới của `.oxlintrc.json` giờ là `error`, không còn luật nào ở `warn`. Xem mục 3, "Giai đoạn 7c". |
+| `PullRequestStatusBadge`'s trạng thái merged/closed/draft chưa từng có unit test trực tiếp (Task 4, GĐ7c) | Đã giải quyết | Đã thêm `src/components/pullrequests/pullRequestStatusBadge.test.ts` phủ mọi nhánh của `getStatusKey` (merged/closed/draft/open) trong lần fix này (xem GĐ7c, mục 3). |
+| Bất nhất cách đặt tên module: `useInteractiveRebase.handlers.ts` vs `InteractiveRebaseModal.actions.ts`, `useConflictResolver.handlers.ts`, `CommitGraphDialogs.actions.ts` (trong `components/`), `useSidebarActions.actions.ts`, `pullRequestStatusBadge.tsx` camelCase, và test model bị chia giữa `src/test/` và cạnh module | Minor, hoãn lại | Ghi nhận ở review cuối GĐ7c (item 8): không đổi tên trong lượt sửa này để tránh rung lắc không cần thiết, chỉ ghi lại làm nợ kỹ thuật cho một lượt dọn dẹp đặt tên riêng sau này. |
+| `BranchSidebar.tsx` — **đã đạt mốc dưới 300 dòng sau GĐ5b** | Đã giải quyết | Đo được **247 dòng** sau Task 2 (GĐ5b), giảm từ 611 dòng cuối GĐ5 lát 2. Tách owner hook `useSidebarActions`/`useSidebarData` + `BranchSidebarSections`. Xem **mục 12.2**. |
+| 4 file trong `src/features/**` vượt 300 dòng | Theo kế hoạch, ngoài phạm vi GĐ5b | `ManageRemotesModal.tsx` (319), `BranchSidebarSections.tsx` (313), `RemoteTreeNode.tsx` (312), `CommitGraphRows.tsx` (301) — đo bằng `wc -l`/`git show \| wc -l`, xác nhận khớp nhau. Không phải 5 module entry mục tiêu của GĐ5b nên không xẻ trong task này; ghi lại trung thực để lát sau cân nhắc. Xem **mục 12.2**. |
+| `m2_watcher_test::test_watcher_debounce_consolidation` flaky | Minor, có từ trước | Test dựa vào thời gian (debounce 200ms, cửa sổ 350ms). Đỏ 1 lần khi chạy toàn bộ `cargo test` lúc máy đang tải nặng (app dev + rust-analyzer chạy song song). Chạy riêng thì 5/5 xanh, chạy lại toàn bộ cũng xanh. GĐ6 không chạm vào watcher. |
+| Thư mục sót `.worktrees/phase5b-large-modules/` | Minor, dọn tay | `git worktree list` không còn liệt kê nó, nhưng thư mục vẫn trên đĩa. Nó không bị `vitest.config.ts` loại trừ, nên `pnpm test` ở máy này đếm **gấp đôi** (222 file / 1524 test). Xoá thư mục, hoặc thêm `.worktrees/**` vào `exclude`. |
 | `useFocusTrap` coi phần tử là "nhìn thấy được" nếu không có `hidden`/`aria-hidden` | Minor | jsdom trả rect bằng 0 cho mọi thứ nên không dùng kích thước để xét được. Phần tử ẩn bằng CSS (`display:none`) vẫn lọt vào danh sách focus được. Chưa gặp trong thực tế vì modal ẩn nội dung bằng cách không render. |
+| `useSidebarActions.ts:63`-adjacent: toast hoàn tác retained callback | Đã sửa trong GĐ5b | Task 2 tìm và sửa một regression thật (repo-switch undo dùng nhầm mutation của repo mới) trước khi commit; xem **mục 12.4**. |
+| `resolveSpecifier` docblock — trường hợp null im lặng; regex trích import có thể khớp cả trong comment/string | Minor, hoãn lại | Phát hiện ở Task 0' (GĐ5b), chưa vá — guard vẫn đúng cho mọi trường hợp thực tế gặp phải, nhưng chưa chứng minh kín 100%. |
+| Component settings import `HelpTooltip`/`helpDiagrams` từ `src/components/settings` | Minor, hoãn lại | Feature `settings` (GĐ5b Task 5) vẫn "thò tay" vào `components/` cũ cho hai tiện ích UI dùng chung; chưa có chỗ chuẩn trong `shared/` cho chúng. |
+| `SettingsModal` vẫn truyền `onScopeChange` (không dùng) cho `GitBehaviorTab` | Minor, có từ trước | Đã tồn tại trước GĐ5b (component gốc cũng không đọc prop này); giữ nguyên vì "migrate là thay thế cơ học", không sửa hành vi cũ nhân tiện. |
+| `clearRecents`/`removeRecent` nuốt lỗi qua `console.warn` | Minor, có từ trước | Có từ code gốc `WelcomeScreen.tsx`, giữ nguyên theo quy ước "migrate là thay thế cơ học". |
+| `CommitDetailPanel` lắng nghe Escape trực tiếp trên `window` | Minor, hoãn lại | Nên dùng `useEscapeKey` như mọi nơi khác, nhưng làm vậy đổi hành vi: Escape hiện đóng được panel này **ngay cả khi** có modal khác đang stack đè lên, vì listener không tham gia registry cấp module của `useEscapeKey`. Ghi lại, không sửa trong phạm vi GĐ7a. |
+| Comment `// eslint-disable-next-line @typescript-eslint/no-explicit-any` ở `useBranchMutations.test.ts:51`, `useRemoteMutations.test.ts:53`, `useStashMutations.test.ts:44` | Minor, có từ trước | Không phải comment chết: oxlint hiểu tên luật dạng ESLint (`@typescript-eslint/no-explicit-any`) và áp đúng luật `typescript/no-explicit-any` của nó. Xác nhận bằng cách xoá comment ở một file — `pnpm lint` báo `error typescript(no-explicit-any)` đúng dòng `vars as any`; phục hồi comment thì hết lỗi. Vậy cả ba comment đang suppress `any` thật, thứ lẽ ra bị luật `error` mới chặn. Sửa gợi ý cho sau này: gõ kiểu cho ba mock đó rồi bỏ comment, thay vì tiếp tục suppress. |
+| Không có gì canh gác comment `eslint-disable`/`oxlint-disable` mới | Minor, hoãn lại | Một comment suppress mới thêm vào sẽ âm thầm vượt qua một luật đã `error` mà không ai nhận ra. Đề xuất: thêm `scripts/check-lint-suppressions.mjs` vào `pnpm check`/CI, báo lỗi nếu số lượng directive tăng quá mốc hiện tại (3, đúng 3 comment ở dòng trên) hoặc dùng allowlist; và/hoặc bật cờ oxlint `--report-unused-disable-directives`. Làm sớm ở đầu GĐ7b, cùng lúc dọn ba comment suppress đã ghi ở dòng trên. |
+| `res.json()` trong `src/services/githubService.ts` trả về `any`, nên annotation `RawCheckRun`/`RawPullRequestFile` không được kiểm tra | Minor, hoãn lại | Các luật type-aware `typescript/no-unsafe-assignment`/`no-unsafe-member-access` là ứng viên cho một lát bật `warn` trước khi lên kế hoạch GĐ7c. |
+| Ngoại lệ `max-params` cho `src/ipc/**` áp cho cả file viết tay trong tương lai | Minor, hoãn lại | Hiện chỉ có 3 vi phạm hợp lệ, nhưng ngoại lệ đang khai báo theo cả thư mục nên che luôn logic viết tay sẽ thêm sau này. Thu hẹp về từng file cụ thể nếu `ipc/` phình thêm logic. |
 
 ---
 
@@ -642,3 +954,117 @@ src/features/stash/
 | `CheckoutConflictModal.tsx` (cross-feature) | stash rồi checkout | tương tự trên |
 
 Danh sách chỉ được **co lại**, không được phình ra — `architectureBoundaries.test.ts` có test đỏ nếu một ngoại lệ còn nằm đó sau khi import tương ứng đã biến mất.
+
+---
+
+## 12. Giai đoạn 5b — Xẻ nhỏ 5 module entry khổng lồ — ĐÃ XONG (7 task, gồm Task 0')
+
+**Kế hoạch**: `docs/superpowers/plans/2026-09-20-refactor-phase5b-large-modules.md`
+**Thiết kế**: `docs/superpowers/specs/2026-09-20-refactor-phase5b-large-modules-design.md`
+**Nhánh**: `refactor/phase5b-large-modules`, rẽ từ `refactor/phase0-foundation` tại `2e01698`, sau đó hoà (merge) commit `4fe9bfb` của `refactor/phase0-foundation` vào giữa chừng (Task 0').
+**Ledger đầy đủ**: `.superpowers/sdd/2026-09-20-refactor-phase5b-large-modules/progress.md` (không nằm trong `docs/`, không đi theo nhánh khi merge — chỉ tồn tại trong worktree làm việc).
+
+### 12.1 Trạng thái từng task và commit
+
+| Task | Nội dung | Người làm | Commit |
+| --- | --- | --- | --- |
+| 1 | Owner hook cho hành động sidebar (`useCheckoutTag`, `usePushTag`, `useMergeBranch`, `useRebaseBranch`, `useUndoDropStash`) | Phiên trước | `9894513 ✨ add owner hooks for sidebar actions` |
+| 2 | Tách trách nhiệm `BranchSidebar` (`useSidebarActions` + `useSidebarData` + `BranchSidebarSections`) | Phiên trước | `9b8d580 ♻️ split branch sidebar responsibilities`, `4224665 🐛 preserve repository ownership for stash undo` |
+| 3 | Chuyển commit graph vào `features/history` | Phiên trước | `3cf7fe9 ♻️ move commit graph into history feature` |
+| 4 | Chuyển commit detail vào `features/history` | Phiên trước | `6c5d318 ♻️ move commit detail into history feature` (salvage một phiên bị ngắt quãng) |
+| 0' | Hoà luật public-index + acyclicity guard từ `refactor/phase0-foundation`, xoá `CROSS_FEATURE_EXCEPTIONS`, chuyển import sâu còn sót | Phiên này | `89b77bd 🔀 merge public-index boundary rule into phase 5b`, `2cc6af3 ♻️ route cross-feature imports through public indexes` (mang theo `4fe9bfb 🔒 allow cross-feature imports only through public index` từ nhánh kia) |
+| 5 | Chuyển tab git-behavior settings vào `features/settings` | Phiên này | `d6bc089 ♻️ move git behavior settings into feature` |
+| 6 | Chuyển luồng welcome/mở-repo vào `features/welcome` | Phiên này | `1ffccaa ♻️ move welcome flow into feature` |
+| 7 | Đóng giai đoạn, xác minh toàn bộ, ghi status handover | Phiên này | (commit này) |
+
+Tất cả các review độc lập trong ledger đều kết luận "clean" (không có finding nào còn mở khi task đóng), ngoại trừ Task 2 có 1 vòng sửa (Important: xem mục 12.4).
+
+### 12.2 Số liệu đo được (Task 7 — `wc -l` / `git show <rev>:<path> | wc -l`, hai cách khớp nhau)
+
+**Năm module entry mục tiêu — tất cả dưới 300 dòng:**
+
+| File | Trước GĐ5b | Sau GĐ5b |
+| --- | --- | --- |
+| `src/features/branch/components/BranchSidebar.tsx` | 611 dòng | **247 dòng** |
+| `src/features/history/components/CommitGraph.tsx` | 791 dòng (`src/components/graph/CommitGraph.tsx` cũ) | **140 dòng** |
+| `src/features/history/components/CommitDetailPanel.tsx` | 764 dòng (`src/components/diff/CommitDetailPanel.tsx` cũ) | **211 dòng** |
+| `src/features/settings/components/GitBehaviorTab.tsx` | 597 dòng (`src/components/settings/tabs/GitBehaviorTab.tsx` cũ) | **70 dòng** |
+| `src/features/welcome/components/WelcomeScreen.tsx` | 586 dòng (`src/components/welcome/WelcomeScreen.tsx` cũ) | **202 dòng** |
+
+**Bốn file khác trong `src/features/**` hiện vượt 300 dòng — ghi trung thực, không xẻ trong phạm vi task này** (không phải entry mục tiêu của kế hoạch GĐ5b; brief Task 7 yêu cầu chỉ *ghi lại*, không tách):
+
+| File | Dòng đo được |
+| --- | --- |
+| `src/features/remote/components/ManageRemotesModal.tsx` | 319 |
+| `src/features/branch/components/BranchSidebarSections.tsx` | 313 |
+| `src/features/branch/components/RemoteTreeNode.tsx` | 312 |
+| `src/features/history/components/CommitGraphRows.tsx` | 301 |
+
+> Ghi chú phương pháp đo: `Get-Content <file> | Measure-Object -Line` của PowerShell cho ra số **thấp hơn thực tế khoảng 10-15 dòng** trên các file này trong môi trường này (ví dụ báo 302 dòng cho `BranchSidebarSections.tsx` thay vì 313). Đối chiếu chéo bằng `wc -l` (đếm ký tự newline) và `git show HEAD:<path> | wc -l` (đọc thẳng từ object Git, không qua encoding của shell) cho kết quả **khớp nhau tuyệt đối** ở cả 9 file đo trong task này, nên các con số trong bảng trên dùng `wc -l`/`git show` làm chuẩn, không dùng `Measure-Object -Line`.
+
+### 12.3 Quyết định ranh giới public-index (Task 0')
+
+**Bối cảnh sai lệch bị bắt giữa chừng.** Task 2 và Task 3 của GĐ5b (làm trước khi phát hiện) đã **nới rộng** `CROSS_FEATURE_EXCEPTIONS` để `useSidebarActions.ts`/`useSidebarData.ts` import sâu vào `../../tag/api`, `../../stash/api`, `../../remote/api` — đúng cách làm của GĐ5 lát 1/2, nhưng **vi phạm ràng buộc toàn cục** ("Global Constraint") mà bản kế hoạch GĐ5b gốc đặt ra: không được nới danh sách ngoại lệ cross-feature thêm nữa.
+
+Đồng thời, một phiên khác trên `refactor/phase0-foundation` đã độc lập làm xong đúng luật cần: "feature `a` chỉ được import feature `b` qua `index.ts` công khai của `b` — cấm import sâu vào `api/`, `components/`, `model/`, và cấm cả dạng `/index` tường minh" (commit `4fe9bfb`), kèm một test bất-chu-kỳ (`feature -> feature public imports form no cycle`) chạy DFS ba màu trên đồ thị cạnh feature→feature suy ra từ các import public.
+
+**Quyết định của con người:** hoà commit `4fe9bfb` vào nhánh GĐ5b ngay (Task 0'), không đợi đến khi merge cuối cùng. Lý do: nếu để `CROSS_FEATURE_EXCEPTIONS` tiếp tục phình ra qua Task 5/6, việc hoà nhánh sau này sẽ phải viết lại nhiều hơn, và bản thân việc phình ra đã là vi phạm ràng buộc đang có hiệu lực.
+
+**Cách hoà:** `git merge refactor/phase0-foundation --no-commit --no-ff`, xử lý đúng 2 xung đột — giữ nguyên code Task 1-2 của `BranchSidebar.tsx` (đã tách khỏi import sâu), lấy toàn bộ máy phân loại `crossFeatureViolation`/`extractImportSpecifiers`/`resolveSpecifier` mới từ nhánh kia cho `architectureBoundaries.test.ts` (xoá hẳn `CROSS_FEATURE_EXCEPTIONS` và test độ mới của nó). Sau merge, chạy lại test ranh giới lộ ra đúng 5 vi phạm — toàn bộ nằm trong `useSidebarActions.ts` và `useSidebarData.ts` — chuyển hết sang import qua `index.ts` công khai (không cần thêm export mới, mọi hook cần dùng đã có sẵn trong `index.ts` của feature nguồn). Xác nhận không có chu trình (cycle) nào phát sinh dù `branch` giờ có cạnh public-import tới `tag`, `stash`, `remote`, `merge`, `undo`, `history`. Có thí nghiệm phá: đổi tạm một import về dạng sâu, xác nhận test đỏ đúng thông điệp, rồi phục hồi.
+
+**Kết quả:** `CROSS_FEATURE_EXCEPTIONS` không còn tồn tại ở bất kỳ đâu trong codebase (`grep -rn "CROSS_FEATURE_EXCEPTIONS" src/` rỗng). Toàn bộ ranh giới cross-feature giờ chỉ do hai luật ép bằng test: import chỉ qua `index.ts` công khai, và đồ thị import đó không được có chu trình.
+
+### 12.4 Ba ruling của controller xuyên suốt GĐ5b
+
+1. **IPC chỉ được gọi trong `api/`, kể cả khi brief không liệt kê `api/`.** Task 5 (settings) và Task 6 (welcome) có brief chỉ liệt kê `hooks/` gọi thẳng `ipc/`. Controller ra ruling: vẫn phải thêm lớp `api/` mỏng (`gitBehaviorApi.ts`, `welcome/api/index.ts`) bọc `invokeCommand`, để tuân thủ luật có sẵn "chỉ `features/*/api` được chạm `ipc/`" mà **không** cần thêm entry mới vào `IPC_IMPORT_EXCEPTIONS` — giữ đúng tinh thần "danh sách ngoại lệ chỉ co lại".
+2. **Dialog liên-feature của commit graph: `Shell` cung cấp renderer cụ thể.** Nối tiếp quy ước 19 đã dùng ở GĐ5 lát 2 (Task 8): `history` giữ quyết định *khi nào* mở dialog tạo tag/tạo nhánh từ đồ thị commit (state/điều kiện nằm trong feature), còn `Shell` — không phải một feature — cung cấp *cái gì* để render (component thật của `tag`/`branch`, nhận state qua props). Nhờ vậy `history` không phải import chéo component của `tag`/`branch`.
+3. **Hook trạng thái repo (`useRepoStatus`) đặt trong `features/history`, không phải feature mới.** Task 2 cần gỡ import IPC trực tiếp cho trạng thái repo trong `branch`, nhưng bản thân trạng thái repo chưa có feature riêng. Thay vì tạo một feature `repo-status` chỉ để chứa một hook, ruling đặt `useRepoStatus` vào `history` (đã là chủ sở hữu tự nhiên của luồng dữ liệu này trong UI hiện có) và để `branch` import qua `index.ts` công khai của `history`.
+
+### 12.5 Ghi chú môi trường — `--pool=threads`
+
+Pool mặc định của Vitest (`forks`, cấu hình trong `vitest.config.ts`) **treo hoàn toàn** trước khi bất kỳ worker nào được tạo, trong worktree Windows liên kết (linked worktree, tạo bằng `git worktree add`) này. Nguyên nhân gốc chưa xác định (nghi vấn: cách `forks` pool tạo tiến trình con tương tác xấu với worktree liên kết trên Windows), nhưng đây là vấn đề môi trường, không phải lỗi sản phẩm — `pnpm vitest run --pool=threads` chạy bình thường và xanh toàn bộ 110 file / 760 test. Mọi lệnh xác minh trong worktree này (Task 0' đến Task 7) đều dùng cờ `--pool=threads`; **không** sửa `vitest.config.ts` để đổi pool mặc định, vì máy CI và checkout thường không có vấn đề này. Người làm việc trên nhánh này ở một worktree/máy khác nên thử `pnpm test` (mặc định) trước; chỉ cần `--pool=threads` nếu gặp treo tương tự.
+
+### 12.6 Danh sách nợ hoãn lại (deferred minors) từ ledger
+
+Các phát hiện nhỏ, không chặn merge, được controller xác nhận và cố ý hoãn lại trong quá trình GĐ5b:
+
+| Task | Nợ | Ghi chú |
+| --- | --- | --- |
+| 4 | `Shell.tsx` gộp hai import `history` thành một | Dọn dẹp ngoài yêu cầu (unrequested cleanup), không phải regression. |
+| 4 | Thêm `CommitFileDiff.tsx` ngoài danh sách file của brief | Cần thiết để giữ entry dưới 300 dòng. |
+| 0' | `resolveSpecifier` — docblock có trường hợp trả về `null` âm thầm; regex trích import có thể khớp nhầm bên trong comment/string | Guard vẫn đúng cho mọi trường hợp thực tế gặp phải trong codebase hiện tại, chưa chứng minh kín 100%. |
+| 5 | Component settings import `HelpTooltip`/`helpDiagrams` từ `src/components/settings` cũ | Feature "thò tay" vào `components/`; chưa có vị trí chuẩn trong `shared/` cho hai tiện ích này. |
+| 5 | `SettingsModal` vẫn truyền `onScopeChange` không dùng cho `GitBehaviorTab` | Có từ trước GĐ5b (component gốc cũng không đọc prop này) — giữ nguyên theo quy ước "migrate là thay thế cơ học". |
+| 6 | `useWelcomeShortcuts` deps rỗng, đóng callback từ lần render đầu | Verbatim từ `useEffect` gốc, controller xác nhận không phải regression. |
+| 6 | `clearRecents`/`removeRecent` nuốt lỗi qua `console.warn` | Có từ code gốc, giữ nguyên. |
+| 6 | oxlint `no-restricted-imports` báo warning trên import kiểu (`import type`) của `ipc/` trong feature | Mẫu lặp lại có từ `branch`/`settings`; `architectureBoundaries.test.ts` mới là luật có thẩm quyền, đã phân biệt đúng type-only. |
+
+**Sai lệch được con người duyệt (không phải nợ hoãn lại — đã chốt, không sửa code):** `useCheckoutTag`/`usePushTag` (`src/features/tag/api/useTagActions.ts`) invalidate `qk.repo.all(repoPath)` thay vì đúng năm khoá gốc (`branches`, `commitGraph`, `repo.status`, `repo.head`, `tags`). Kế hoạch Task 1 Bước 3 đã chủ động chọn phạm vi rộng này ("keep tag invalidation broad"), khác với spec ("retain their current invalidation rules"). Con người quyết định ngày 2026-09-28: **giữ nguyên** — nhất quán với `useCreateTag`/`useDeleteTag` (vốn đã invalidate `repo.all`), chỉ gây refetch thừa (kể cả `pushTag`, vốn không đổi state cục bộ nào), không bao giờ để cache cũ (stale). Xem review cuối GĐ5b, finding I2.
+
+**Một regression thật đã được tìm và sửa trong lúc làm (không phải nợ hoãn lại):** Task 2, vòng review đầu tiên, tìm ra tại `useSidebarActions.ts:63` một callback toast hoàn tác (undo) bị giữ lại (retained) qua re-render nhưng trỏ tới mutation đã bị rebind sang repo **mới**, khiến hoàn tác **xoá stash** (`useUndoDropStash`/`dropStash`) sau khi chuyển repo sẽ tác động sai repo. Implementer đã thêm test hồi quy thất bại trước, rồi sửa để giữ đúng danh tính repo gốc; review vòng hai chấp thuận không còn finding.
+
+### 12.7 Xác minh đầy đủ (đo tại HEAD `1ffccaa`, trước commit của task này)
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `pnpm vitest run --pool=threads src/test/architectureBoundaries.test.ts` | PASS — 1 file / 35 test |
+| `pnpm check-query-keys` | PASS — "No query key literals found outside src/domain/queryKeys.ts." |
+| `pnpm check-comment-language` | PASS — "All comments are in English." |
+| `pnpm lint` | exit 0 — 241 warning (0 error thật; các dòng chứa chữ "error" chỉ là văn bản trợ giúp của rule `no-console`), **70** warning là `no-restricted-imports` |
+| `pnpm build` | exit 0 — `tsc && vite build`, 2103 module, 1 cảnh báo chunk > 500kB (có từ trước, không liên quan) |
+| `pnpm vitest run --pool=threads` (toàn bộ) | PASS — **110 file / 760 test**, ~223s |
+| `cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings` | exit 0 — biên dịch sạch, 0 warning (build "dev" 5m33s, phần lớn thời gian là biên dịch lại dependency) |
+| `cargo test --manifest-path src-tauri/Cargo.toml` | exit 0 — **140 test passed, 0 failed** trên toàn bộ binary test |
+
+Không có lệnh nào đỏ; không cần sửa code sản phẩm ở Task 7.
+
+### 12.8 Đối chiếu guard kiến trúc (Step 2 của Task 7)
+
+- `CROSS_FEATURE_EXCEPTIONS`: xác nhận **không tồn tại** ở bất kỳ đâu trong `src/` (grep rỗng) — đúng như Task 0' để lại, không có cơ chế ngoại lệ cross-feature nào tái xuất hiện.
+- `IPC_IMPORT_EXCEPTIONS` còn đúng 2 mục, cả hai đã kiểm tra lại và còn hợp lệ:
+  - `features/branch/components/DeleteBranchModal.tsx` — gọi `invokeCommand.undoDeleteBranch(...)` thật (dòng 53), lý do "undo toast calls undoDeleteBranch", điều kiện gỡ "removed once the undo domain has a hook".
+  - `features/stash/components/StashDiffView.tsx` — import giá trị `invokeCommand` từ `../../../ipc/client` (dòng 4) và dùng để đọc `CommitDetails`, lý do "reads commit details to render the stash diff", điều kiện gỡ "removed once the commit domain has a hook".
+- Test `every ipc-import exception still exists` (kiểm tra file còn tồn tại trên đĩa) và `only features/*/api may import ipc/` đều PASS, xác nhận cả hai mục trên không phải ngoại lệ "chết" (stale).
+- Không tìm thấy cơ chế ngoại lệ cross-feature nào khác (không có `EXCEPTIONS`, `ALLOWLIST`, hay danh sách tương tự nào ngoài `IPC_IMPORT_EXCEPTIONS`) khi quét `src/test/architectureBoundaries.test.ts` toàn văn.
+
+---

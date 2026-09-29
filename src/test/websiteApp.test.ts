@@ -2,6 +2,15 @@ import { describe, it, expect } from "vitest";
 import * as fs from "fs";
 import * as path from "path";
 
+interface FakeWindow {
+  navigator: { userAgent: string };
+  document: Record<string, unknown>;
+  localStorage: Record<string, unknown>;
+  I18N_DATA: Record<string, Record<string, string>>;
+  GitVistaWeb?: { detectPlatform: (userAgent: string) => string };
+  [key: string]: unknown;
+}
+
 describe("Website app.js logic", () => {
   it("should correctly define detectPlatform, setLanguage, and integrate with DOM", () => {
     const appJsPath = path.resolve(__dirname, "../../website/app.js");
@@ -18,7 +27,7 @@ describe("Website app.js logic", () => {
     const appJsPath = path.resolve(__dirname, "../../website/app.js");
     const appCode = fs.readFileSync(appJsPath, "utf-8");
 
-    const fakeWindow: any = {
+    const fakeWindow: FakeWindow = {
       navigator: { userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" },
       document: {
         addEventListener: () => {},
@@ -39,12 +48,12 @@ describe("Website app.js logic", () => {
     fn(fakeWindow, fakeWindow.document, fakeWindow.navigator, fakeWindow.localStorage);
 
     expect(fakeWindow.GitVistaWeb).toBeDefined();
-    expect(fakeWindow.GitVistaWeb.detectPlatform("Mozilla/5.0 (Windows NT 10.0; Win64; x64)")).toBe(
-      "windows"
-    );
     expect(
-      fakeWindow.GitVistaWeb.detectPlatform("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)")
+      fakeWindow.GitVistaWeb!.detectPlatform("Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+    ).toBe("windows");
+    expect(
+      fakeWindow.GitVistaWeb!.detectPlatform("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)")
     ).toBe("mac");
-    expect(fakeWindow.GitVistaWeb.detectPlatform("Mozilla/5.0 (X11; Linux x86_64)")).toBe("linux");
+    expect(fakeWindow.GitVistaWeb!.detectPlatform("Mozilla/5.0 (X11; Linux x86_64)")).toBe("linux");
   });
 });

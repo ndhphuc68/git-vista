@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { DiffViewerTab } from "../components/settings/tabs/DiffViewerTab";
 import { ExternalToolsTab } from "../components/settings/tabs/ExternalToolsTab";
 import { AppearanceTab } from "../components/settings/tabs/AppearanceTab";
-import { GitBehaviorTab } from "../components/settings/tabs/GitBehaviorTab";
+import { GitBehaviorTab } from "../features/settings";
 import { GitProfileTab } from "../components/settings/tabs/GitProfileTab";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { resetMockGitConfig } from "../ipc/client";

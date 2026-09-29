@@ -1,8 +1,8 @@
 import React, { useMemo } from "react";
-import clsx from "clsx";
 import { Search, File } from "lucide-react";
 import { useTranslation } from "../../i18n";
 import type { CompareFileItem } from "../../ipc/bindings.generated";
+import { CompareFileRow } from "./CompareFileRow";
 
 export interface CompareFileListProps {
   files: CompareFileItem[];
@@ -31,48 +31,6 @@ export const CompareFileList: React.FC<CompareFileListProps> = ({
         f.path.toLowerCase().includes(q) || (f.old_path && f.old_path.toLowerCase().includes(q))
     );
   }, [files, searchQuery]);
-
-  const renderStatusBadge = (status: string) => {
-    const s = status.toLowerCase();
-    if (s === "added" || s === "new") {
-      return (
-        <span
-          className="flex items-center justify-center w-4 h-4 rounded text-[10px] font-bold bg-diff-add-bg text-diff-add-text border border-diff-add-border"
-          title="Added"
-        >
-          A
-        </span>
-      );
-    }
-    if (s === "deleted") {
-      return (
-        <span
-          className="flex items-center justify-center w-4 h-4 rounded text-[10px] font-bold bg-diff-remove-bg text-diff-remove-text border border-diff-remove-border"
-          title="Deleted"
-        >
-          D
-        </span>
-      );
-    }
-    if (s === "renamed") {
-      return (
-        <span
-          className="flex items-center justify-center w-4 h-4 rounded text-[10px] font-bold bg-purple-500/15 text-purple-400 border border-purple-500/30"
-          title="Renamed"
-        >
-          R
-        </span>
-      );
-    }
-    return (
-      <span
-        className="flex items-center justify-center w-4 h-4 rounded text-[10px] font-bold bg-amber-500/15 text-amber-500 dark:text-amber-400 border border-amber-500/30"
-        title="Modified"
-      >
-        M
-      </span>
-    );
-  };
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -106,47 +64,14 @@ export const CompareFileList: React.FC<CompareFileListProps> = ({
             <span>{t.compare.noFiles}</span>
           </div>
         ) : (
-          filteredFiles.map((file) => {
-            const isSelected = selectedFile?.path === file.path;
-
-            return (
-              <button
-                key={file.path}
-                type="button"
-                onClick={() => onSelectFile(file)}
-                className={clsx(
-                  "w-full flex items-center justify-between px-3 py-2 text-left text-xs gap-2 cursor-pointer transition-colors border-l-2",
-                  isSelected
-                    ? "bg-accent/15 border-accent text-primary font-medium"
-                    : "border-transparent text-secondary hover:bg-surface-hover hover:text-primary"
-                )}
-              >
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  {renderStatusBadge(file.status)}
-                  <div className="flex flex-col min-w-0 flex-1">
-                    <span className="font-mono text-xs truncate" title={file.path}>
-                      {file.path}
-                    </span>
-                    {file.old_path && (
-                      <span className="font-mono text-[10px] text-tertiary truncate">
-                        ← {file.old_path}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Stat numbers */}
-                <div className="flex items-center gap-1 font-mono text-[11px] shrink-0">
-                  {file.additions > 0 && (
-                    <span className="text-diff-add-text">+{file.additions}</span>
-                  )}
-                  {file.deletions > 0 && (
-                    <span className="text-diff-remove-text">-{file.deletions}</span>
-                  )}
-                </div>
-              </button>
-            );
-          })
+          filteredFiles.map((file) => (
+            <CompareFileRow
+              key={file.path}
+              file={file}
+              isSelected={selectedFile?.path === file.path}
+              onSelect={onSelectFile}
+            />
+          ))
         )}
       </div>
     </div>
