@@ -1,17 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
-import { FolderOpen, X, Download, AlertCircle, Loader2 } from "lucide-react";
+import React from "react";
+import { X, AlertCircle } from "lucide-react";
 import { type RepoSummary } from "../../../ipc/bindings.generated";
 import { useTranslation } from "../../../i18n";
 import { Modal } from "../../../shared/ui";
-import { messageOf } from "../../../shared/utils/toError";
-import { extractRepoNameFromUrl } from "../../../components/welcome/repoUrl";
-import {
-  selectRepoFolder,
-  cloneRepo,
-  cancelRemoteTask,
-  openRepository,
-  listenToTaskProgress,
-} from "../api";
+import { useCloneModalState } from "../hooks/useCloneModalState";
+import { CloneModalHeader } from "./CloneModalHeader";
+import { CloneModalFields } from "./CloneModalFields";
+import { CloneProgressBar } from "./CloneProgressBar";
+import { CloneModalActions } from "./CloneModalActions";
 
 const TITLE_ID = "clone-modal-title";
 
@@ -23,116 +19,20 @@ export interface CloneModalProps {
 
 export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onCloneSuccess }) => {
   const { t } = useTranslation();
-  const [url, setUrl] = useState("");
-  const [targetDir, setTargetDir] = useState("");
-  const [baseDir, setBaseDir] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isCloning, setIsCloning] = useState(false);
-  const [progressPercent, setProgressPercent] = useState(0);
-  const [statusText, setStatusText] = useState("");
-  const activeTaskIdRef = useRef<string | null>(null);
-  const urlInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      setUrl("");
-      setTargetDir("");
-      setBaseDir("");
-      setError(null);
-      setIsCloning(false);
-      setProgressPercent(0);
-      setStatusText("");
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    let unlisten: (() => void) | undefined;
-    if (isOpen) {
-      listenToTaskProgress((payload) => {
-        if (payload.task_id === activeTaskIdRef.current) {
-          setProgressPercent(payload.progress_percent);
-          setStatusText(payload.status_text);
-        }
-      }).then((fn) => {
-        unlisten = fn;
-      });
-    }
-    return () => {
-      if (unlisten) unlisten();
-    };
-  }, [isOpen]);
-
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newUrl = e.target.value;
-    setUrl(newUrl);
-    const repoName = extractRepoNameFromUrl(newUrl);
-
-    if (repoName) {
-      if (baseDir) {
-        const separator = baseDir.includes("\\") ? "\\" : "/";
-        setTargetDir(`${baseDir}${separator}${repoName}`);
-      } else if (
-        !targetDir ||
-        targetDir.endsWith(repoName) ||
-        (!targetDir.includes("/") && !targetDir.includes("\\"))
-      ) {
-        setTargetDir(repoName);
-      }
-    }
-  };
-
-  const handleSelectFolder = async () => {
-    try {
-      const selected = await selectRepoFolder();
-      if (selected) {
-        setBaseDir(selected);
-        const repoName = extractRepoNameFromUrl(url);
-        const separator = selected.includes("\\") ? "\\" : "/";
-        if (repoName) {
-          setTargetDir(`${selected}${separator}${repoName}`);
-        } else {
-          setTargetDir(selected);
-        }
-      }
-    } catch (err: unknown) {
-      console.warn("Folder picker error:", err);
-    }
-  };
-
-  const handleCancel = async () => {
-    if (isCloning && activeTaskIdRef.current) {
-      await cancelRemoteTask(activeTaskIdRef.current);
-      setIsCloning(false);
-      setError(t.cloneModal.cancelError);
-    } else {
-      onClose();
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!url.trim() || !targetDir.trim() || isCloning) return;
-
-    setError(null);
-    setIsCloning(true);
-    setProgressPercent(0);
-    setStatusText(t.cloneModal.initStatus);
-
-    const taskId = `task-clone-${Date.now()}`;
-    activeTaskIdRef.current = taskId;
-
-    try {
-      await cloneRepo(url.trim(), targetDir.trim(), taskId);
-      const summary = await openRepository(targetDir.trim());
-      onCloneSuccess(summary);
-      onClose();
-    } catch (err: unknown) {
-      setError(typeof err === "string" ? err : messageOf(err) || t.cloneModal.defaultError);
-    } finally {
-      setIsCloning(false);
-      activeTaskIdRef.current = null;
-    }
-  };
+  const {
+    url,
+    targetDir,
+    setTargetDir,
+    error,
+    isCloning,
+    progressPercent,
+    statusText,
+    urlInputRef,
+    handleUrlChange,
+    handleSelectFolder,
+    handleCancel,
+    handleSubmit,
+  } = useCloneModalState({ isOpen, onCloneSuccess, onClose });
 
   return (
     <Modal
@@ -162,18 +62,7 @@ export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onClone
             <X size={18} />
           </button>
 
-          {/* Modal Header */}
-          <div className="flex items-center gap-3.5 mb-6">
-            <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-accent-subtle text-accent">
-              <Download size={22} />
-            </div>
-            <div>
-              <h2 id={TITLE_ID} className="text-lg font-bold text-primary">
-                {t.cloneModal.title}
-              </h2>
-              <p className="text-xs sm:text-sm text-secondary mt-0.5">{t.cloneModal.desc}</p>
-            </div>
-          </div>
+          <CloneModalHeader titleId={TITLE_ID} />
 
           {/* Error Notification */}
           {error && (
@@ -188,109 +77,25 @@ export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onClone
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5">
-            <div>
-              <label
-                htmlFor="clone-url"
-                className="block text-xs sm:text-sm font-semibold text-primary mb-1.5"
-              >
-                {t.cloneModal.urlLabel}
-              </label>
-              <input
-                ref={urlInputRef}
-                id="clone-url"
-                data-autofocus
-                type="text"
-                required
-                disabled={isCloning}
-                value={url}
-                onChange={handleUrlChange}
-                placeholder={t.cloneModal.urlPlaceholder}
-                className="w-full px-3.5 py-2 text-xs sm:text-sm bg-window border border-border-subtle rounded-lg text-primary placeholder-tertiary focus:outline-none focus:border-accent disabled:opacity-50 font-mono"
-              />
-            </div>
+            <CloneModalFields
+              url={url}
+              onUrlChange={handleUrlChange}
+              urlInputRef={urlInputRef}
+              targetDir={targetDir}
+              onTargetDirChange={setTargetDir}
+              onSelectFolder={handleSelectFolder}
+              isCloning={isCloning}
+            />
 
-            <div>
-              <label
-                htmlFor="clone-target-dir"
-                className="block text-xs sm:text-sm font-semibold text-primary mb-1.5"
-              >
-                {t.cloneModal.targetDirLabel}
-              </label>
-              <div className="flex gap-2">
-                <input
-                  id="clone-target-dir"
-                  type="text"
-                  required
-                  disabled={isCloning}
-                  value={targetDir}
-                  onChange={(e) => setTargetDir(e.target.value)}
-                  placeholder={t.cloneModal.targetDirPlaceholder}
-                  className="flex-1 px-3.5 py-2 text-xs sm:text-sm bg-window border border-border-subtle rounded-lg text-primary placeholder-tertiary focus:outline-none focus:border-accent disabled:opacity-50 font-mono"
-                />
-                <button
-                  type="button"
-                  onClick={handleSelectFolder}
-                  disabled={isCloning}
-                  className="flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-medium text-secondary hover:text-primary bg-window border border-border-subtle hover:bg-surface-hover rounded-lg transition-colors disabled:opacity-50 cursor-pointer shrink-0"
-                >
-                  <FolderOpen size={16} />
-                  <span>{t.cloneModal.selectFolder}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Progress Bar (during cloning) */}
             {isCloning && (
-              <div className="mt-1 p-3.5 rounded-xl bg-window border border-border-subtle">
-                <div className="flex items-center justify-between text-xs sm:text-sm mb-2">
-                  <span className="flex items-center gap-2 text-secondary">
-                    <Loader2 size={15} className="animate-spin text-accent" />
-                    <span>{t.cloneModal.cloning}</span>
-                  </span>
-                  <span className="font-mono font-medium text-accent">{progressPercent}%</span>
-                </div>
-                <div
-                  role="progressbar"
-                  aria-valuenow={progressPercent}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  className="h-2 w-full bg-surface rounded-full overflow-hidden"
-                >
-                  <div
-                    className="h-full bg-accent transition-all duration-300 ease-out"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-                {statusText && (
-                  <p className="mt-2 text-xs text-tertiary truncate font-mono">{statusText}</p>
-                )}
-              </div>
+              <CloneProgressBar progressPercent={progressPercent} statusText={statusText} />
             )}
 
-            {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-2.5 mt-2 pt-3 border-t border-border-subtle">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="px-4 py-2 text-xs sm:text-sm font-medium text-secondary hover:text-primary bg-transparent hover:bg-surface-hover border border-border-subtle rounded-lg transition-colors cursor-pointer"
-              >
-                {t.cloneModal.cancel}
-              </button>
-              <button
-                type="submit"
-                disabled={!url.trim() || !targetDir.trim() || isCloning}
-                className="flex items-center gap-2 px-5 py-2 text-xs sm:text-sm font-semibold text-accent-contrast bg-accent hover:bg-accent-hover active:scale-[0.99] rounded-lg transition-all shadow-sm disabled:opacity-50 cursor-pointer"
-              >
-                {isCloning ? (
-                  <>
-                    <Loader2 size={15} className="animate-spin" />
-                    <span>{t.cloneModal.cloning}</span>
-                  </>
-                ) : (
-                  <span>{t.cloneModal.clone}</span>
-                )}
-              </button>
-            </div>
+            <CloneModalActions
+              onCancel={handleCancel}
+              isSubmitDisabled={!url.trim() || !targetDir.trim() || isCloning}
+              isCloning={isCloning}
+            />
           </form>
       </div>
     </Modal>
