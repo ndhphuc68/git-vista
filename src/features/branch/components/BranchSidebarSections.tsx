@@ -1,5 +1,6 @@
 import React from "react";
 import type { SidebarDialog } from "../model/sidebarDialog";
+import type { ActiveSidebarMenu } from "../model/activeSidebarMenu";
 import type { StashItem } from "../../../ipc/bindings.generated";
 import type { useSidebarData } from "../hooks/useSidebarData";
 import type { useSidebarActions } from "../hooks/useSidebarActions";
@@ -8,7 +9,6 @@ import { BranchSidebarSearchBox } from "./BranchSidebarSearchBox";
 import { BranchTreePanels } from "./BranchTreePanels";
 import { BranchSidebarExtraSections } from "./BranchSidebarExtraSections";
 
-export type ActiveSidebarMenu = { type: "branch" | "remote" | "tag"; name: string } | null;
 interface BranchSidebarSectionsProps {
   repoPath: string;
   data: ReturnType<typeof useSidebarData>;

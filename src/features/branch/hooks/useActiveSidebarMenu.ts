@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { ActiveSidebarMenu } from "../components/BranchSidebarSections";
+import type { ActiveSidebarMenu } from "../model/activeSidebarMenu";
 
 /**
  * The sidebar's single context-menu slot (strictly one active menu at a

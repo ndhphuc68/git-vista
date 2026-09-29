@@ -3,7 +3,7 @@ import { buildBranchTree } from "../model/branchTree";
 import { filterBranchesByName } from "../model/branchFilter";
 import { findHeadCommitId } from "../model/headCommit";
 import type { useSidebarData } from "./useSidebarData";
-import type { ActiveSidebarMenu } from "../components/BranchSidebarSections";
+import type { ActiveSidebarMenu } from "../model/activeSidebarMenu";
 
 export interface BranchSectionsViewOptions {
   data: ReturnType<typeof useSidebarData>;
