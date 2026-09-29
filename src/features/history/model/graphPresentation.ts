@@ -1,4 +1,4 @@
-import type { GraphCommitNode } from "../../../ipc/bindings.generated";
+import type { GraphCommitNode, RepoStatusResult } from "../../../ipc/bindings.generated";
 
 const BRANCH_PALETTES = [
   {
@@ -78,6 +78,26 @@ export function getBranchPillStyle(name: string, isHead: boolean, isTag: boolean
     dot: palette.dot,
     isHead: false,
   };
+}
+
+export interface UncommittedSummary {
+  hasUncommittedChanges: boolean;
+  modifiedCount: number;
+  untrackedCount: number;
+}
+
+/** Working-tree WIP row summary derived from the repository status query. */
+export function getUncommittedSummary(repoStatus: RepoStatusResult | undefined): UncommittedSummary {
+  const hasUncommittedChanges = Boolean(
+    repoStatus &&
+      (repoStatus.staged.length > 0 ||
+        repoStatus.unstaged.length > 0 ||
+        repoStatus.untracked.length > 0)
+  );
+  const modifiedCount = (repoStatus?.staged.length || 0) + (repoStatus?.unstaged.length || 0);
+  const untrackedCount = repoStatus?.untracked.length || 0;
+
+  return { hasUncommittedChanges, modifiedCount, untrackedCount };
 }
 
 export function getMaxGraphColumns(commits: GraphCommitNode[]): number {

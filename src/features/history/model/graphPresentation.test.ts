@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { GraphCommitNode } from "../../../ipc/bindings.generated";
-import { getBranchPillStyle, getMaxGraphColumns } from "./graphPresentation";
+import type { GraphCommitNode, RepoStatusResult } from "../../../ipc/bindings.generated";
+import { getBranchPillStyle, getMaxGraphColumns, getUncommittedSummary } from "./graphPresentation";
 
 function commit(overrides: Partial<GraphCommitNode> = {}): GraphCommitNode {
   return {
@@ -75,5 +75,44 @@ describe("maximum graph columns", () => {
     expect(
       getMaxGraphColumns([commit({ lines: [{ ...line, edge_type: "merge", color_index: 0 }] })])
     ).toBe(expected);
+  });
+});
+
+function repoStatus(overrides: Partial<RepoStatusResult> = {}): RepoStatusResult {
+  return { staged: [], unstaged: [], untracked: [], conflicted: [], ...overrides };
+}
+
+describe("getUncommittedSummary", () => {
+  it("reports no changes when the status is undefined or empty", () => {
+    expect(getUncommittedSummary(undefined)).toEqual({
+      hasUncommittedChanges: false,
+      modifiedCount: 0,
+      untrackedCount: 0,
+    });
+    expect(getUncommittedSummary(repoStatus())).toEqual({
+      hasUncommittedChanges: false,
+      modifiedCount: 0,
+      untrackedCount: 0,
+    });
+  });
+
+  it("counts staged and unstaged files as modified, and untracked separately", () => {
+    const status = repoStatus({
+      staged: [{ path: "a.ts", status: "Modified", is_staged: true, old_path: null }],
+      unstaged: [{ path: "b.ts", status: "Modified", is_staged: false, old_path: null }],
+      untracked: [{ path: "c.ts", status: "New", is_staged: false, old_path: null }],
+    });
+    expect(getUncommittedSummary(status)).toEqual({
+      hasUncommittedChanges: true,
+      modifiedCount: 2,
+      untrackedCount: 1,
+    });
+  });
+
+  it("flags uncommitted changes from untracked files alone", () => {
+    const status = repoStatus({
+      untracked: [{ path: "c.ts", status: "New", is_staged: false, old_path: null }],
+    });
+    expect(getUncommittedSummary(status).hasUncommittedChanges).toBe(true);
   });
 });
