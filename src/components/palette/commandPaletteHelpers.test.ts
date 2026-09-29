@@ -42,6 +42,6 @@ describe("groupCommandsByCategory", () => {
       settings: "",
     });
 
-    expect(groups[0].label).toBe("settings");
+    expect(groups[0]?.label).toBe("settings");
   });
 });

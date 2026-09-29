@@ -19,19 +19,19 @@ describe("buildShortcutSections", () => {
   it("includes the command palette shortcut with its two key bindings", () => {
     const t = getTranslation("en");
     const sections = buildShortcutSections(t);
-    const general = sections[0];
+    const general = sections[0]!;
 
     expect(general.items[0]).toEqual({
       label: t.shortcuts.items.commandPalette,
       keys: ["Ctrl+K"],
     });
-    expect(general.items[1].keys).toEqual(["?", "Ctrl+/"]);
+    expect(general.items[1]!.keys).toEqual(["?", "Ctrl+/"]);
   });
 
   it("includes the settings screen shortcut sourced from t.settings.title", () => {
     const t = getTranslation("en");
     const sections = buildShortcutSections(t);
-    const settings = sections[3];
+    const settings = sections[3]!;
 
     expect(settings.items[1]).toEqual({ label: t.settings.title, keys: ["Ctrl+,"] });
   });
