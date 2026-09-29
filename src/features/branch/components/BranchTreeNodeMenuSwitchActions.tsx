@@ -27,6 +27,9 @@ export const BranchTreeNodeMenuSwitchActions: React.FC<BranchTreeNodeMenuSwitchA
   onCompare,
 }) => {
   const { t } = useTranslation();
+  // The label embeds the current branch name, which can be arbitrarily long;
+  // it is truncated in the menu and shown in full as a tooltip.
+  const compareLabel = t.sidebar.compareWithCurrent.replace("{branch}", currentBranchName);
 
   return (
     <>
@@ -69,10 +72,11 @@ export const BranchTreeNodeMenuSwitchActions: React.FC<BranchTreeNodeMenuSwitchA
           onSetMenuBranch(null);
           onCompare(branchName);
         }}
+        title={compareLabel}
         className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
       >
         <GitCompare size={14} className="text-secondary shrink-0" />
-        <span>{t.sidebar.compareWithCurrent.replace("{branch}", currentBranchName)}</span>
+        <span className="min-w-0 truncate">{compareLabel}</span>
       </button>
     </>
   );

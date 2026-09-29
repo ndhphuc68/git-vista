@@ -5,6 +5,7 @@
 import React from "react";
 import { Check, GitBranch, Cloud, Trash2 } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { useKeepInView } from "../../../shared/hooks/useKeepInView";
 import { type TagItem } from "../../../ipc/bindings.generated";
 import { type SidebarDialog } from "../model/sidebarDialog";
 
@@ -26,6 +27,7 @@ export const TagRowMenu: React.FC<TagRowMenuProps> = ({
   onOpenDialog,
 }) => {
   const { t } = useTranslation();
+  useKeepInView(menuRef);
 
   return (
     <div

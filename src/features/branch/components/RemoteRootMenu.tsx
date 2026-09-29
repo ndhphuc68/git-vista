@@ -4,6 +4,7 @@
 import React from "react";
 import { Scissors, Edit2, Trash2 } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { useKeepInView } from "../../../shared/hooks/useKeepInView";
 import { type RemoteItem } from "../../../ipc/bindings.generated";
 import { type SidebarDialog } from "../model/sidebarDialog";
 import { findRemoteOrPlaceholder } from "../model/remoteLookup";
@@ -26,6 +27,7 @@ export const RemoteRootMenu: React.FC<RemoteRootMenuProps> = ({
   onOpenDialog,
 }) => {
   const { t } = useTranslation();
+  useKeepInView(menuRef);
 
   return (
     <div
