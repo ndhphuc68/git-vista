@@ -330,6 +330,7 @@ export const vi = {
     delete: "Xoá",
     back: "Quay lại",
     loading: "Đang tải...",
+    processing: "Đang xử lý...",
     search: "Tìm kiếm",
     clearSearch: "Xoá tìm kiếm",
     copy: "Sao chép",

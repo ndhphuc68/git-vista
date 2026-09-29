@@ -334,6 +334,7 @@ export const en: Translations = {
     delete: "Delete",
     back: "Back",
     loading: "Loading...",
+    processing: "Processing...",
     search: "Search",
     clearSearch: "Clear search",
     copy: "Copy",
