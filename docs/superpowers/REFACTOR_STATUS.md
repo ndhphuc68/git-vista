@@ -478,19 +478,19 @@ Con số `complexity` giảm nhẹ từ 28 xuống 27 (chưa được lát này 
 
 | Task | Phạm vi | Commit | Trước → Sau |
 | --- | --- | --- | --- |
-| 1 | Helper thuần trong `undo`/`history` | `fa67294..92ff2f5` | 127 → 117 |
-| 2 | `useRemoteTask` + hook liên quan | `92ff2f5..4698697` | 117 → 110 |
-| 3 | Màn `Changes` (`ChangedFileRow`/`StagedFileRow`, các handler stage/unstage) | `4698697..537d5e0` | 110 → 98 |
-| 4 | `CreatePullRequestModal` + feature `github` | `537d5e0..f3177fc` | 98 → 89 |
-| 5 | `InteractiveRebaseModal` + helper rebase | `f3177fc..6836773` | 89 → 79 |
-| 6 | (feature/component không cần characterization mới) | `6836773..30f36c6` | 79 → 69 |
-| 7 | `HelpTooltip`/tương tác tooltip | `30f36c6..4fe8527` | 69 → 64 |
-| 8 | `App.tsx` → `useAppShellControls` | `4fe8527..5f8fbbe` | 64 → 54 |
-| 9 | `SplashScreen`/`ToastItem` + hook tách | `5f8fbbe..18e5fe6` | 54 → 47 |
-| 10 | `CompareModal` + `CompareFileList`/`CompareHeader`/`GraphSvgLane` | `18e5fe6..0e30d60` | 47 → 37 |
-| 11 | `RemoteFolderRow` + feature `remote` | `0e30d60..59c59bb` | 37 → 23 |
-| 12a | `CommitGraphRows`/`CommitMetadata` | `59c59bb..50f7a17` | 23 → 11 |
-| 12b | `remote`/`stash`/`tag`/`welcome` (8 file cuối cùng) | `50f7a17..b2c871c` | 11 → 0 |
+| 1 | `services`, `ipc`, `store`, `utils`: `services/githubService.ts`, `ipc/config.ts`, `ipc/mocks.ts`, `store/useSettingsStore.ts`, `store/useTabStore.ts`, `store/useToastStore.ts`, `utils/commandRegistry.ts` | `fa67294..92ff2f5` | 127 → 117 |
+| 2 | Hook và model độc lập: `hooks/useGlobalShortcuts.ts`, `features/remote/api/useRemoteTask.ts`, `features/settings/hooks/useGitBehaviorSettings.ts`, `features/welcome/hooks/useRecentRepositories.ts`, `features/branch/hooks/useSidebarActions.ts`, `features/history/model/commitDetails.ts` | `92ff2f5..4698697` | 117 → 110 |
+| 3 | `changes`: `components/changes/ChangesScreen.tsx`, `CommitBox.tsx`, `InteractiveDiffViewer.tsx`, `StagingFileList.tsx` | `4698697..537d5e0` | 110 → 98 |
+| 4 | Pull request: `components/pullrequests/CreatePullRequestModal.tsx`, `PullRequestDetailDrawer.tsx`, `components/sidebar/PullRequestsSection.tsx` | `537d5e0..f3177fc` | 98 → 89 |
+| 5 | Rebase, merge, conflict: `components/rebase/InteractiveRebaseModal.tsx`, `RebaseCommitRow.tsx`, `RebaseLivePreview.tsx`, `components/merge/MergeBranchModal.tsx`, `components/conflict/ConflictResolverScreen.tsx`, `components/banner/InProgressOperationBanner.tsx` | `f3177fc..6836773` | 89 → 79 |
+| 6 | Settings (git): `components/settings/tabs/GitProfileTab.tsx`, `SettingsModal.tsx`, `tabs/GitHubSettingsTab.tsx`, `features/settings/components/GitBehaviorOptions.tsx`, `GitBehaviorPullStrategy.tsx` | `6836773..30f36c6` | 79 → 69 |
+| 7 | Settings (hiển thị): `components/settings/HelpTooltip.tsx`, `helpDiagrams/PullStrategyDiagram.tsx`, `tabs/AppearanceTab.tsx`, `tabs/DiffViewerTab.tsx`, `tabs/ExternalToolsTab.tsx` | `30f36c6..4fe8527` | 69 → 64 |
+| 8 | App shell và header: `App.tsx`, `components/Shell.tsx`, `components/ControlsBar.tsx`, `components/header/RepoHeader.tsx`, `header/WindowTabBar.tsx` | `4fe8527..5f8fbbe` | 64 → 54 |
+| 9 | Overlay và chrome: `components/palette/CommandPalette.tsx`, `shortcuts/ShortcutsHelpModal.tsx`, `splash/SplashScreen.tsx`, `toast/ToastItem.tsx`, `common/RemoteProgressBanner.tsx` | `5f8fbbe..18e5fe6` | 54 → 47 |
+| 10 | Compare, inspector, graph: `components/compare/CompareDiffViewer.tsx`, `CompareFileList.tsx`, `CompareHeader.tsx`, `CompareModal.tsx`, `components/inspector/BlameView.tsx`, `FileHistoryView.tsx`, `FileInspectorDrawer.tsx`, `components/graph/GraphSvgLane.tsx` | `18e5fe6..0e30d60` | 47 → 37 |
+| 11 | `features/branch`: `BranchSidebar.tsx`, `BranchSidebarSections.tsx`, `BranchTreeNode.tsx`, `CheckoutConflictModal.tsx`, `CreateBranchModal.tsx`, `DeleteBranchModal.tsx`, `RemoteTreeNode.tsx`, `RenameBranchModal.tsx`, `StashSection.tsx`, `TagSection.tsx` | `0e30d60..59c59bb` | 37 → 23 |
+| 12a | `features/history`: `CherryPickModal.tsx`, `CommitDetailPanel.tsx`, `CommitFileDiff.tsx`, `CommitFileList.tsx`, `CommitGraph.tsx`, `CommitGraphContextMenu.tsx`, `CommitGraphDialogs.tsx`, `CommitGraphRows.tsx`, `CommitMetadata.tsx`, `FileDiffViewer.tsx`, `RevertModal.tsx` | `59c59bb..50f7a17` | 23 → 11 |
+| 12b | `remote`/`stash`/`tag`/`welcome`: `features/remote/components/AddEditRemoteModal.tsx`, `ManageRemotesModal.tsx`, `features/stash/components/StashDiffView.tsx`, `features/tag/components/CreateTagModal.tsx`, `DeleteTagModal.tsx`, `features/welcome/components/CloneModal.tsx`, `RecentRepositoryList.tsx`, `WelcomeScreen.tsx` | `50f7a17..b2c871c` | 11 → 0 |
 | 13 | Nâng ba luật lên `error`, sửa nợ ghi chú GĐ7b, tài liệu hoá | `b2c871c..` (task này) | 0 → 0 |
 
 **Quy ước áp dụng xuyên suốt 13 task (kế thừa từ GĐ7a/7b, củng cố thêm ở 7c):**
@@ -504,7 +504,7 @@ Con số `complexity` giảm nhẹ từ 28 xuống 27 (chưa được lát này 
 
 **Ba vấn đề thật do review bắt được xuyên suốt 13 task:**
 
-1. **Tráo thứ tự effect trong `CreatePullRequestModal` (Task 4).** Split đầu tiên đảo thứ tự tương đối của hai effect, khiến lựa chọn nhánh mặc định (default branch selection) không còn được ghim đúng. Reviewer phát hiện ở vòng review đầu; fix ghim bằng test chạy xanh trên **cả bản gốc lẫn bản mới** trước khi merge.
+1. **Tráo thứ tự effect trong `CreatePullRequestModal` (Task 4).** Split đầu tiên đảo thứ tự tương đối của hai effect. Lựa chọn nhánh mặc định (default branch selection) chưa từng được ghim bởi test nào trước đó, nên không có gì "gãy" để sửa; reviewer phát hiện sự đảo thứ tự ở vòng review đầu và yêu cầu chứng minh nó tương đương hành vi. Test mới ghim kết quả quan sát được và chạy xanh trên **cả bản gốc lẫn bản mới**, xác nhận đảo thứ tự này tương đương hành vi — giữ nguyên bản đã đảo, không revert.
 2. **Một task đã commit HEAD nhưng không build được (Task 9).** Bản implement đầu để lại một bản sửa build cho 2 file test helper **chưa commit** — HEAD báo cáo là "xong" nhưng cây làm việc không sạch nên `pnpm build` đỏ tại đúng commit đó. Review bắt được, fix round commit nốt bản sửa còn sót. Sau sự cố này, luật "cây làm việc phải sạch trước khi báo cáo xong" được thêm vào implementer-instructions.
 3. **Helper xuất xưởng không kèm test, hai lần (Task 1, Task 7).** Task 1: helper thuần được tách ra nhưng không có unit test riêng — review round 1 bắt, bổ sung test. Task 7: `helpTooltipDismissal`/`helpTooltipPlacement` cũng thiếu test tương tự — cùng một lỗi lặp lại, cùng cách sửa (thêm test ở fix round 1).
 
@@ -534,7 +534,7 @@ Xoá hàm probe (`git checkout -- src/shared/utils/git.ts`) → `pnpm lint` tho�
 - Các handler stage/unstage-all/hunk/line/commit vẫn chưa thành mutation hook `features/changes/api` (Task 3) — riêng stage/unstage một file thì **không** làm được vì thứ tự `setSelectedFile` đan xen với lệnh IPC.
 - `rebaseStepsHelpers`'s `commitsToPickSteps`/`buildCommitMap` chưa có unit test trực tiếp; `getRebaseActionColor` switch không có nhánh `default` (Task 5, có từ trước).
 - `RemoteProgressError`'s hằng số chuỗi `ACTION_CLASS` bị lặp cục bộ (Task 9).
-- `useCompareModalState` trả về `commitsCount`/`filesCount` không ai dùng, bị tính lại ở `CompareModalWorkspace` (Task 10).
+- ~~`useCompareModalState` trả về `commitsCount`/`filesCount` không ai dùng, bị tính lại ở `CompareModalWorkspace` (Task 10).~~ **Đã sửa** trong lượt fix cuối GĐ7c: đã xoá hai field chết khỏi `useCompareModalState.ts` sau khi xác nhận bằng grep rằng chỉ `CompareModalWorkspace.tsx` tự tính lại, không component nào đọc từ hook.
 - `RemoteFolderRow`'s prop `fullPath` không dùng — dữ liệu chết có từ trước (Task 11).
 - Commit `2a3e1c1` (Task 12a) — thông điệp commit chỉ mô tả việc thêm characterization test, không nhắc tới split `CommitMetadata` cũng nằm trong cùng commit (do cả hai bị stage chung trước commit đầu tiên; không có vấn đề chức năng, chỉ là commit message thiếu sót); `CommitGraphContextMenuItem`'s `className` ghép chuỗi thay vì dùng `clsx`.
 - `useWelcomeDragAndDrop`'s đường kéo/thả chưa có test trực tiếp (Task 12b, có từ trước).
@@ -623,10 +623,12 @@ Thêm `src/shared/hooks/useFocusTrap.ts` — `useFocusTrap(containerRef, enabled
 
 | Vấn đề | Mức | Ghi chú |
 | --- | --- | --- |
-| `App.tsx:284` dùng `part.includes(repo_path)` thay vì so sánh bằng | Minor | Repo `/proj` cũng khớp `/proj-legacy` → thừa refetch, không sai dữ liệu. Giờ `qk` đặt path ở vị trí cố định nên sửa rất dễ. |
+| `useRepoChangedListener.ts:22` dùng `part.includes(repo_path)` thay vì so sánh bằng | Minor | Repo `/proj` cũng khớp `/proj-legacy` → thừa refetch, không sai dữ liệu. Giờ `qk` đặt path ở vị trí cố định nên sửa rất dễ. Code này từng nằm ở `App.tsx:284`, đã dời sang `src/hooks/useRepoChangedListener.ts` trong một lần tách trước đó; con trỏ dòng cập nhật lại cho khớp vị trí hiện tại. |
 | `qk.githubToken()` chưa ai invalidate | Minor | An toàn hiện tại (không có UI ghi token). Sẽ thành bẫy khi thêm màn hình cài đặt token. |
 | `qk.github.repoInfo` không được invalidate khi đổi remote URL | Minor | Đã giảm nhẹ ở GĐ1 (`refreshData()` giờ có invalidate), nhưng chưa phủ hết đường. |
-~~127 warning lint độ phức tạp (đo sau GĐ7b)~~ | Đã giải quyết | **Đã xong ở GĐ7c.** Cả ba luật còn lại (`max-lines-per-function` 90, `complexity` 27, `max-lines` 10) đã dọn về 0 qua 13 task rồi nâng lên `error`. Tất cả 11 luật độ phức tạp/ranh giới của `.oxlintrc.json` giờ là `error`, không còn luật nào ở `warn`. Xem mục 3, "Giai đoạn 7c". |
+| ~~127 warning lint độ phức tạp (đo sau GĐ7b)~~ | Đã giải quyết | **Đã xong ở GĐ7c.** Cả ba luật còn lại (`max-lines-per-function` 90, `complexity` 27, `max-lines` 10) đã dọn về 0 qua 13 task rồi nâng lên `error`. Tất cả 11 luật độ phức tạp/ranh giới của `.oxlintrc.json` giờ là `error`, không còn luật nào ở `warn`. Xem mục 3, "Giai đoạn 7c". |
+| `PullRequestStatusBadge`'s trạng thái merged/closed/draft chưa từng có unit test trực tiếp (Task 4, GĐ7c) | Đã giải quyết | Đã thêm `src/components/pullrequests/pullRequestStatusBadge.test.ts` phủ mọi nhánh của `getStatusKey` (merged/closed/draft/open) trong lần fix này (xem GĐ7c, mục 3). |
+| Bất nhất cách đặt tên module: `useInteractiveRebase.handlers.ts` vs `InteractiveRebaseModal.actions.ts`, `useConflictResolver.handlers.ts`, `CommitGraphDialogs.actions.ts` (trong `components/`), `useSidebarActions.actions.ts`, `pullRequestStatusBadge.tsx` camelCase, và test model bị chia giữa `src/test/` và cạnh module | Minor, hoãn lại | Ghi nhận ở review cuối GĐ7c (item 8): không đổi tên trong lượt sửa này để tránh rung lắc không cần thiết, chỉ ghi lại làm nợ kỹ thuật cho một lượt dọn dẹp đặt tên riêng sau này. |
 | `BranchSidebar.tsx` — **đã đạt mốc dưới 300 dòng sau GĐ5b** | Đã giải quyết | Đo được **247 dòng** sau Task 2 (GĐ5b), giảm từ 611 dòng cuối GĐ5 lát 2. Tách owner hook `useSidebarActions`/`useSidebarData` + `BranchSidebarSections`. Xem **mục 12.2**. |
 | 4 file trong `src/features/**` vượt 300 dòng | Theo kế hoạch, ngoài phạm vi GĐ5b | `ManageRemotesModal.tsx` (319), `BranchSidebarSections.tsx` (313), `RemoteTreeNode.tsx` (312), `CommitGraphRows.tsx` (301) — đo bằng `wc -l`/`git show \| wc -l`, xác nhận khớp nhau. Không phải 5 module entry mục tiêu của GĐ5b nên không xẻ trong task này; ghi lại trung thực để lát sau cân nhắc. Xem **mục 12.2**. |
 | `m2_watcher_test::test_watcher_debounce_consolidation` flaky | Minor, có từ trước | Test dựa vào thời gian (debounce 200ms, cửa sổ 350ms). Đỏ 1 lần khi chạy toàn bộ `cargo test` lúc máy đang tải nặng (app dev + rust-analyzer chạy song song). Chạy riêng thì 5/5 xanh, chạy lại toàn bộ cũng xanh. GĐ6 không chạm vào watcher. |
