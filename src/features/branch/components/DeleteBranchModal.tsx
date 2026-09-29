@@ -1,11 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Trash2, AlertTriangle, ShieldCheck } from "lucide-react";
-import { undoDeleteBranch } from "../../undo";
-import { useDeleteBranch } from "../api";
-import { useToastStore } from "../../../store/useToastStore";
-import { mapGitError } from "../../../utils/errorMapping";
-import { useTranslation } from "../../../i18n";
 import { Modal, Button, Alert } from "../../../shared/ui";
+import { useDeleteBranchForm } from "../hooks/useDeleteBranchForm";
 
 const TITLE_ID = "delete-branch-title";
 
@@ -24,44 +20,13 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
   branchName,
   onSuccess,
 }) => {
-  const { t } = useTranslation();
-  const deleteBranch = useDeleteBranch(repoPath);
-  const [error, setError] = useState<string | null>(null);
-  const [isUnmerged, setIsUnmerged] = useState(false);
-  const loading = deleteBranch.isPending;
-
-  useEffect(() => {
-    if (isOpen) {
-      setError(null);
-      setIsUnmerged(false);
-    }
-  }, [isOpen, branchName]);
-
-  const handleDelete = async (force: boolean) => {
-    setError(null);
-
-    try {
-      const backupRef = await deleteBranch.mutateAsync({ name: branchName, force });
-      useToastStore.getState().showToast({
-        message: t.modals.deleteBranch.successToast.replace("{name}", branchName),
-        type: "success",
-        durationMs: 10000,
-        undoAction: async () => {
-          await undoDeleteBranch(repoPath, branchName, backupRef);
-        },
-      });
-      if (onSuccess) onSuccess(backupRef);
-      onClose();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes("UNMERGED_BRANCH")) {
-        setIsUnmerged(true);
-      } else {
-        setError(msg || t.modals.deleteBranch.errorGeneric);
-        useToastStore.getState().showError(mapGitError(err));
-      }
-    }
-  };
+  const { t, error, isUnmerged, loading, handleDelete } = useDeleteBranchForm({
+    isOpen,
+    repoPath,
+    branchName,
+    onClose,
+    onSuccess,
+  });
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} labelledBy={TITLE_ID}>
