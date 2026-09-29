@@ -41,12 +41,10 @@ export function normalizeText(text: string): string {
     .replace(/Đ/g, "d");
 }
 
-export function getAppCommands(
-  context: CommandContext,
-  tParam?: ReturnType<typeof getTranslation>
-): CommandItem[] {
-  const t = tParam ?? getTranslation();
-  const commands: CommandItem[] = [
+type Translation = ReturnType<typeof getTranslation>;
+
+function buildNavigationCommands(t: Translation, context: CommandContext): CommandItem[] {
+  return [
     {
       id: "nav-history",
       title: t.palette.commands.navHistoryTitle,
@@ -65,6 +63,11 @@ export function getAppCommands(
       keywords: ["changes", "thay doi", "thay đổi", "diff", "working directory", "status"],
       action: () => context.navigate("changes"),
     },
+  ];
+}
+
+function buildBranchCommands(t: Translation, context: CommandContext): CommandItem[] {
+  return [
     {
       id: "branch-create",
       title: t.palette.commands.branchCreateTitle,
@@ -74,6 +77,12 @@ export function getAppCommands(
       keywords: ["branch", "nhanh", "nhánh", "tao nhanh", "tạo nhánh", "new branch"],
       action: () => context.openCreateBranch?.(),
     },
+  ];
+}
+
+// The everyday working-tree actions: fetch/pull/push, staging and committing.
+function buildGitWorkflowCommands(t: Translation, context: CommandContext): CommandItem[] {
+  return [
     {
       id: "git-fetch",
       title: t.palette.commands.gitFetchTitle,
@@ -135,6 +144,12 @@ export function getAppCommands(
       ],
       action: () => context.commit?.(),
     },
+  ];
+}
+
+// Less-frequent git actions: remotes, rebase, compare and pull requests.
+function buildGitManagementCommands(t: Translation, context: CommandContext): CommandItem[] {
+  return [
     {
       id: "git-manage-remotes",
       title: t.palette.commands.gitManageRemotesTitle,
@@ -195,6 +210,11 @@ export function getAppCommands(
       keywords: ["pr", "pull requests", "github", "danh sach pr", "danh sách pr", "view prs"],
       action: () => context.openPullRequests?.(),
     },
+  ];
+}
+
+function buildSettingsCommands(t: Translation, context: CommandContext): CommandItem[] {
+  return [
     {
       id: "settings-theme",
       title: t.palette.commands.settingsThemeTitle,
@@ -241,8 +261,17 @@ export function getAppCommands(
       action: () => context.openSettings?.(),
     },
   ];
+}
 
-  return commands;
+export function getAppCommands(context: CommandContext, tParam?: Translation): CommandItem[] {
+  const t = tParam ?? getTranslation();
+  return [
+    ...buildNavigationCommands(t, context),
+    ...buildBranchCommands(t, context),
+    ...buildGitWorkflowCommands(t, context),
+    ...buildGitManagementCommands(t, context),
+    ...buildSettingsCommands(t, context),
+  ];
 }
 
 export function filterCommands(commands: CommandItem[], query: string): CommandItem[] {
