@@ -5,6 +5,7 @@ import { useWorkingFileDiff } from "../../features/changes";
 import { DiffViewerHeader } from "./DiffViewerHeader";
 import { DiffViewerStatus } from "./DiffViewerStatus";
 import { InteractiveHunk } from "./InteractiveHunk";
+import { hunkKey } from "../../shared/utils/listKeys";
 
 export interface InteractiveDiffViewerProps {
   repoPath: string;
@@ -83,7 +84,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
       <div className="flex flex-col font-mono text-xs overflow-x-auto">
         {diff.hunks.map((hunk, hIdx) => (
           <InteractiveHunk
-            key={`hunk-${hIdx}`}
+            key={hunkKey(hunk)}
             hunk={hunk}
             hIdx={hIdx}
             isStaged={isStaged}

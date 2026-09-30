@@ -9,6 +9,7 @@ import { type DiffHunk, type CompareMode, type CompareFileItem } from "../../ipc
 import { DiffLineContent } from "../diff/DiffLineContent";
 import { useCompareFileDiff } from "../../features/compare";
 import { CompareDiffToolbar } from "./CompareDiffToolbar";
+import { diffLineKey, hunkKey } from "../../shared/utils/listKeys";
 
 export interface CompareDiffViewerProps {
   repoPath: string;
@@ -41,7 +42,7 @@ const FileDiffHunk: React.FC<FileDiffHunkProps> = ({ hunk, showWordDiff }) => {
 
           return (
             <div
-              key={lIdx}
+              key={diffLineKey(line)}
               className={clsx(
                 "flex leading-5 whitespace-pre font-mono hover:brightness-95 dark:hover:brightness-110 transition-colors",
                 isAdd
@@ -165,8 +166,8 @@ export const CompareDiffViewer: React.FC<CompareDiffViewerProps> = ({
     <div className="flex flex-col h-full font-mono text-xs overflow-hidden bg-surface">
       {toolbar}
       <div className="flex-1 overflow-y-auto">
-        {diff.hunks.map((hunk, hIdx) => (
-          <FileDiffHunk key={hIdx} hunk={hunk} showWordDiff={showWordDiff} />
+        {diff.hunks.map((hunk) => (
+          <FileDiffHunk key={hunkKey(hunk)} hunk={hunk} showWordDiff={showWordDiff} />
         ))}
       </div>
     </div>

@@ -7,6 +7,7 @@ import { type DiffHunk } from "../../../ipc/bindings.generated";
 import { DiffLineContent } from "../../../components/diff/DiffLineContent";
 import { useCommitFileDiff } from "../api/useFileInspection";
 import { FileDiffToolbar } from "./FileDiffToolbar";
+import { diffLineKey, hunkKey } from "../../../shared/utils/listKeys";
 
 interface FileDiffViewerProps {
   repoPath: string;
@@ -37,7 +38,7 @@ const FileDiffHunk: React.FC<FileDiffHunkProps> = ({ hunk, showWordDiff }) => {
 
           return (
             <div
-              key={lIdx}
+              key={diffLineKey(line)}
               className={clsx(
                 "flex leading-5 whitespace-pre font-mono hover:brightness-95 dark:hover:brightness-110 transition-colors",
                 isAdd
@@ -131,8 +132,8 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
   return (
     <div className="flex flex-col font-mono text-xs overflow-x-auto rounded-md border border-border-subtle bg-surface shadow-2xs">
       {toolbar}
-      {diff.hunks.map((hunk, hIdx) => (
-        <FileDiffHunk key={hIdx} hunk={hunk} showWordDiff={showWordDiff} />
+      {diff.hunks.map((hunk) => (
+        <FileDiffHunk key={hunkKey(hunk)} hunk={hunk} showWordDiff={showWordDiff} />
       ))}
     </div>
   );

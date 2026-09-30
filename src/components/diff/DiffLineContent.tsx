@@ -1,5 +1,6 @@
 import React from "react";
 import { type WordDiffToken } from "../../utils/wordDiff";
+import { withOffsetKeys } from "../../shared/utils/listKeys";
 
 interface DiffLineContentProps {
   content: string;
@@ -19,11 +20,11 @@ export const DiffLineContent: React.FC<DiffLineContentProps> = ({
 
   return (
     <span>
-      {tokens.map((token, i) => {
+      {withOffsetKeys(tokens).map(({ token, key }) => {
         if (token.type === "removed") {
           return (
             <span
-              key={i}
+              key={key}
               className="bg-red-500/30 text-diff-remove-text font-semibold rounded-xs px-0.5"
             >
               {token.text}
@@ -33,14 +34,14 @@ export const DiffLineContent: React.FC<DiffLineContentProps> = ({
         if (token.type === "added") {
           return (
             <span
-              key={i}
+              key={key}
               className="bg-emerald-500/30 text-diff-add-text font-semibold rounded-xs px-0.5"
             >
               {token.text}
             </span>
           );
         }
-        return <span key={i}>{token.text}</span>;
+        return <span key={key}>{token.text}</span>;
       })}
     </span>
   );
