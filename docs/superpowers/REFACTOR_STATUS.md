@@ -2,10 +2,12 @@
 
 > **Đọc file này trước khi làm tiếp.** Đây là điểm vào duy nhất cho công việc tái cấu trúc — nó cho biết đã làm gì, đang ở đâu, và làm gì tiếp theo.
 
-**Cập nhật**: 2026-09-29
+**Cập nhật**: 2026-09-30
 **Nhánh làm việc**: `refactor/phase0-foundation` (chứa GĐ0–GĐ4 + GĐ5 lát 1 + GĐ5 lát 2, chưa merge vào `main`). **GĐ5b sống trên nhánh riêng `refactor/phase5b-large-modules`**, rẽ nhánh từ `refactor/phase0-foundation` tại `2e01698` và đã hoà (merge) commit `4fe9bfb` (luật public-index + acyclicity guard) của `refactor/phase0-foundation` vào giữa chừng — xem **mục 12**.
-**Tiến độ**: 8 / 8 giai đoạn xong (GĐ0–GĐ7, kể cả GĐ5b; GĐ7 tự nó chia 7a/7b/7c, cả ba lát đều xong).
+**Tiến độ**: 8 / 8 giai đoạn xong (GĐ0–GĐ7, kể cả GĐ5b; GĐ7 tự nó chia 7a/7b/7c, cả ba lát đều xong). **GĐ7d (luật lint chặt hơn và guard chống suppress) cũng đã xong** — xem mục 3, "Giai đoạn 7d".
 **Việc tiếp theo**: không còn task tái cấu trúc nào đang mở. Hai việc cần quyết định/hoàn tất trước khi coi cả dự án là xong: (1) quyết định merge nhánh `refactor/phase0-foundation` vào `main` (xem mục 8; nhánh `refactor/phase5b-large-modules` vẫn là nhánh riêng, xem mục 12); (2) chạy app Tauri thật để xác minh đầu-cuối — Task 5 của kế hoạch GĐ3 còn nợ (xem mục 9).
+
+> **GĐ7d đã xong — bốn luật lint mới (`switch-exhaustiveness-check`, `no-unsafe-assignment`, `no-unsafe-member-access`, `react/no-array-index-key`) đã dọn về 0 và nâng lên `error`, kèm guard chống comment suppress mới.** 31 warning về **0** qua 6 task. Chi tiết ở mục 3, "Giai đoạn 7d".
 
 > **GĐ7c đã xong — con người quyết định giữ nguyên ngưỡng (80/15/300) và dọn sạch, thay vì nới ngưỡng hoặc dùng ratchet.** 127 vi phạm (90 `max-lines-per-function` + 27 `complexity` + 10 `max-lines`) về **0** qua 13 task, rồi cả ba luật nâng lên `error`. Chi tiết ở mục 3, "Giai đoạn 7c".
 
@@ -553,6 +555,47 @@ Xoá hàm probe (`git checkout -- src/shared/utils/git.ts`) → `pnpm lint` tho�
 | `pnpm check-comment-language` | PASS — "All comments are in English." |
 | `pnpm check-query-keys` | PASS — "No query key literals found outside src/domain/queryKeys.ts." |
 
+### Giai đoạn 7d — Luật lint chặt hơn và guard chống suppress ✅
+
+**Kế hoạch**: `docs/superpowers/plans/2026-09-30-refactor-phase7d-lint-strictness.md`. **Nhánh**: `refactor/phase7d-lint-strictness`, rẽ từ `main` tại `4b6c211`. Commit `6f1edee` thêm `docs/CODING_RULES.md`, phần luật trong `AGENTS.md` và bản kế hoạch.
+
+| Task | Nội dung | Commit |
+| --- | --- | --- |
+| 1 | Thêm bốn luật ở mức `warn`, làm hai `switch` exhaustive (`case null:` trong `getTypeBadgeStyle`; `case "Typechange":` rơi xuống `default:` trong `getStatusBadge`), thêm characterization test | `f973d18` |
+| 2 | Thêm `readJson<T>()` (`src/services/readJson.ts`), mọi `res.json()` trong `githubService` đi qua nó; thêm `parseTabSession()` (`src/store/tabSession.ts`); gõ kiểu bảng DP của `wordDiff`; 3 characterization test cho `githubService` | `622a034` |
+| 3 | Thêm `hunkKey`/`diffLineKey`/`withOffsetKeys` (`src/shared/utils/listKeys.ts`), dùng trong `DiffLineContent`, `FileDiffViewer`, `CompareDiffViewer`, `InteractiveDiffViewer` | `b1ed827` |
+| 4 | Key theo định danh cho `GraphSvgLane`, rebase preview (dropped/timeline/squashed) và `CommitGraphBranchPills`, thêm 2 test bắt cảnh báo trùng key | `a6de9e4` |
+| 5 | `scripts/check-lint-suppressions.mjs` + `scripts/lintSuppressions.mjs` (baseline 3, chỉ được giảm) với 11 test, `--report-unused-disable-directives-severity=error`, nối vào `pnpm check` và CI | `ec564f9` |
+| 6 | Nâng bốn luật lên `error`, ratchet probe, cập nhật `docs/CODING_RULES.md` và tài liệu này | (task này) |
+
+**Trước → Sau: 31 → 0 warning** (13 `no-array-index-key`, 10 `no-unsafe-assignment`, 6 `no-unsafe-member-access`, 2 `switch-exhaustiveness-check`). `eqeqeq` có 0 vi phạm ngay từ đầu (con số 1 đo lúc trước đến từ một config probe ngoài repo không áp dụng `ignorePatterns`). Các luật `no-unsafe-*` tắt trong test và trong `scripts/**`/`website/**` vì matcher bất đối xứng của Vitest trả về `any`, còn JS thuần không có kiểu.
+
+**Hai thay đổi hành vi có chủ đích:**
+
+1. `parseTabSession`: một session lưu bị hỏng (ví dụ `null`, hoặc path không phải chuỗi) nay bị bỏ qua im lặng thay vì ném lỗi vào `console.warn`; JSON không hợp lệ vẫn ném lỗi.
+2. `InteractiveHunk` nay giữ state hover riêng của mình sau khi stage, thay vì thừa hưởng state của hunk khác qua key theo index.
+
+**Ratchet probe (Step 3, Task 6) — chứng minh luật `error` thật sự chặn:** thêm tạm hàm `_probe` (có `JSON.parse` gán vào biến, và một `switch` thiếu `case "b"`) vào cuối `src/shared/utils/git.ts` → `pnpm lint` thoát mã **1**:
+
+```
+src/shared/utils/git.ts:19:9: error typescript(no-unsafe-assignment): Unsafe assignment of an any value.
+src/shared/utils/git.ts:20:11: error typescript(switch-exhaustiveness-check): Switch is not exhaustive. Cases not matched: "b"
+src/shared/utils/git.ts:22:62: error typescript(no-unsafe-assignment): Unsafe assignment of an any value.
+```
+
+Probe không có JSX nên `react/no-array-index-key` không nổ ở đây; hai test trùng key của Task 4 phủ luật đó. Xoá probe (`git checkout -- src/shared/utils/git.ts`) → `pnpm lint` thoát mã **0** trở lại.
+
+**Kiểm chứng đầy đủ (đo thật ở cuối Task 6):**
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `pnpm lint` | exit 0 — **0 warning, 0 error** (bốn luật mới cùng `eqeqeq` đã `error`, không còn luật nào ở `warn`) |
+| `pnpm build` | exit 0 |
+| `pnpm test` | PASS — **177 file / 1107 test** |
+| `pnpm check-comment-language` | PASS — "All comments are in English." |
+| `pnpm check-query-keys` | PASS — "No query key literals found outside src/domain/queryKeys.ts." |
+| `pnpm check-lint-suppressions` | PASS — "Lint suppression comments match the baseline." |
+
 ### Số liệu hiện tại
 
 | Chỉ số | Khi bắt đầu | Bây giờ |
@@ -641,8 +684,8 @@ Thêm `src/shared/hooks/useFocusTrap.ts` — `useFocusTrap(containerRef, enabled
 | `clearRecents`/`removeRecent` nuốt lỗi qua `console.warn` | Minor, có từ trước | Có từ code gốc `WelcomeScreen.tsx`, giữ nguyên theo quy ước "migrate là thay thế cơ học". |
 | `CommitDetailPanel` lắng nghe Escape trực tiếp trên `window` | Minor, hoãn lại | Nên dùng `useEscapeKey` như mọi nơi khác, nhưng làm vậy đổi hành vi: Escape hiện đóng được panel này **ngay cả khi** có modal khác đang stack đè lên, vì listener không tham gia registry cấp module của `useEscapeKey`. Ghi lại, không sửa trong phạm vi GĐ7a. |
 | Comment `// eslint-disable-next-line @typescript-eslint/no-explicit-any` ở `useBranchMutations.test.ts:51`, `useRemoteMutations.test.ts:53`, `useStashMutations.test.ts:44` | Minor, có từ trước | Không phải comment chết: oxlint hiểu tên luật dạng ESLint (`@typescript-eslint/no-explicit-any`) và áp đúng luật `typescript/no-explicit-any` của nó. Xác nhận bằng cách xoá comment ở một file — `pnpm lint` báo `error typescript(no-explicit-any)` đúng dòng `vars as any`; phục hồi comment thì hết lỗi. Vậy cả ba comment đang suppress `any` thật, thứ lẽ ra bị luật `error` mới chặn. Sửa gợi ý cho sau này: gõ kiểu cho ba mock đó rồi bỏ comment, thay vì tiếp tục suppress. |
-| Không có gì canh gác comment `eslint-disable`/`oxlint-disable` mới | Minor, hoãn lại | Một comment suppress mới thêm vào sẽ âm thầm vượt qua một luật đã `error` mà không ai nhận ra. Đề xuất: thêm `scripts/check-lint-suppressions.mjs` vào `pnpm check`/CI, báo lỗi nếu số lượng directive tăng quá mốc hiện tại (3, đúng 3 comment ở dòng trên) hoặc dùng allowlist; và/hoặc bật cờ oxlint `--report-unused-disable-directives`. Làm sớm ở đầu GĐ7b, cùng lúc dọn ba comment suppress đã ghi ở dòng trên. |
-| `res.json()` trong `src/services/githubService.ts` trả về `any`, nên annotation `RawCheckRun`/`RawPullRequestFile` không được kiểm tra | Minor, hoãn lại | Các luật type-aware `typescript/no-unsafe-assignment`/`no-unsafe-member-access` là ứng viên cho một lát bật `warn` trước khi lên kế hoạch GĐ7c. |
+| ~~Không có gì canh gác comment `eslint-disable`/`oxlint-disable` mới~~ | Đã giải quyết | **Đã xong ở GĐ7d (Task 5).** `pnpm check-lint-suppressions` giữ baseline theo từng file (3, chỉ được giảm) và `pnpm lint` chạy với `--report-unused-disable-directives-severity=error`; cả hai nằm trong `pnpm check` và CI. Ghi chú gốc: một comment suppress mới thêm vào sẽ âm thầm vượt qua một luật đã `error` mà không ai nhận ra. Đề xuất: thêm `scripts/check-lint-suppressions.mjs` vào `pnpm check`/CI, báo lỗi nếu số lượng directive tăng quá mốc hiện tại (3, đúng 3 comment ở dòng trên) hoặc dùng allowlist; và/hoặc bật cờ oxlint `--report-unused-disable-directives`. Làm sớm ở đầu GĐ7b, cùng lúc dọn ba comment suppress đã ghi ở dòng trên. |
+| ~~`res.json()` trong `src/services/githubService.ts` trả về `any`, nên annotation `RawCheckRun`/`RawPullRequestFile` không được kiểm tra~~ | Đã giải quyết | **Đã xong ở GĐ7d (Task 2, 6).** Mọi `res.json()` đi qua `readJson<T>()`, hai luật `no-unsafe-*` đã `error`. Ghi chú gốc: các luật type-aware `typescript/no-unsafe-assignment/`no-unsafe-member-access` là ứng viên cho một lát bật `warn` trước khi lên kế hoạch GĐ7c. |
 | Ngoại lệ `max-params` cho `src/ipc/**` áp cho cả file viết tay trong tương lai | Minor, hoãn lại | Hiện chỉ có 3 vi phạm hợp lệ, nhưng ngoại lệ đang khai báo theo cả thư mục nên che luôn logic viết tay sẽ thêm sau này. Thu hẹp về từng file cụ thể nếu `ipc/` phình thêm logic. |
 
 ---

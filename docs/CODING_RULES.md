@@ -19,6 +19,7 @@ pnpm build                    # exit 0
 pnpm test                     # all green
 pnpm check-query-keys
 pnpm check-comment-language
+pnpm check-lint-suppressions
 pnpm check-bindings           # only needed when Rust commands change
 cargo test --manifest-path src-tauri/Cargo.toml   # when src-tauri/ changes
 ```
@@ -161,9 +162,10 @@ All of these are at `error` level in `.oxlintrc.json`. [enforced]
   boundary. Extract only the pure part and keep the effect where it is.
 - **Do not add new `eslint-disable` / `oxlint-disable` comments.** Fix the
   code instead. Three suppressions already exist in mutation hook tests;
-  treat them as debt, not as a pattern to copy. [not enforced yet: a
-  `scripts/check-lint-suppressions.mjs` guard with a baseline of 3, plus
-  oxlint's `--report-unused-disable-directives`, is planned]
+  treat them as debt, not as a pattern to copy.
+  [enforced: `pnpm check-lint-suppressions` holds a per-file baseline in
+  `scripts/lintSuppressions.mjs` that can only shrink, and `pnpm lint` fails
+  on a suppression that no longer suppresses anything]
 
 ---
 
@@ -181,22 +183,19 @@ All of these are at `error` level in `.oxlintrc.json`. [enforced]
 - `typescript/consistent-type-imports` with inline `type` imports, and
   `import/no-duplicates`.
 - Unused variables fail the build. Prefix intentionally unused args with `_`.
-
-### Adopted, enforcement pending
-
-These rules apply to all new and changed code now. They are not yet in
-`.oxlintrc.json` because existing code still breaks them. The plan is the
-same as in phase 7: clean up to zero, then add each rule at `error`. The
-counts are for production code in `src/` (tests and generated files
-excluded), measured on 2026-09-30 with oxlint 1.83. Each rule was confirmed
-to exist in a scratch file first.
-
-| Rule | Current violations | What to write instead |
-| --- | --- | --- |
-| `typescript/switch-exhaustiveness-check` | 2 | A `switch` over a union handles every member. When the union grows, the build should point at every `switch` to update. |
-| `eqeqeq` | 1 | Use `===` / `!==`. |
-| `typescript/no-unsafe-assignment`, `typescript/no-unsafe-member-access` | 16 (14 in `services/githubService.ts`) | Never let `any` flow in from `res.json()` or `JSON.parse`. Assign the result to `unknown`, then narrow it into a typed raw shape at the boundary. |
-| `react/no-array-index-key` | 13 | Use a stable id (SHA, path, name) as `key`. An index key reuses the wrong component state when a list is filtered or reordered. |
+- `eqeqeq`: use `===` / `!==`.
+- `typescript/switch-exhaustiveness-check`: a `switch` over a union names
+  every member (`case null:` included). A `default` does not count, so adding
+  a member to the union points at every `switch` that must handle it.
+- `typescript/no-unsafe-assignment` and `typescript/no-unsafe-member-access`:
+  never let `any` flow in. Read fetch bodies with `readJson<RawShape>(res)`
+  from `src/services/readJson.ts` and keep the runtime guards (`Array.isArray`,
+  `typeof`). Parse stored JSON into `unknown` and narrow it with a tested
+  parser (see `parseTabSession`). Off in tests (Vitest matchers return `any`)
+  and in untyped `scripts/**` / `website/**`.
+- `react/no-array-index-key`: key list items by identity (SHA, path,
+  `ref_type:name`). For diffs use `hunkKey`, `diffLineKey`, and
+  `withOffsetKeys` from `src/shared/utils/listKeys.ts`.
 
 ---
 
