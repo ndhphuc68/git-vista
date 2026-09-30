@@ -86,63 +86,107 @@ pub fn checkout_branch<P: AsRef<Path>>(repo_path: P, branch_name: &str) -> Resul
         ));
     }
 
-    let (target_local_name, commit) = match repo.find_branch(branch_name, BranchType::Local) {
-        Ok(branch) => {
-            let commit = branch.get().peel_to_commit()?;
-            (branch_name.to_string(), commit)
-        }
-        Err(err) => {
-            if let Ok(remote_branch) = repo.find_branch(branch_name, BranchType::Remote) {
-                let remote_commit = remote_branch.get().peel_to_commit()?;
-                let local_name = if let Some((_remote, rest)) = branch_name.split_once('/') {
-                    rest
-                } else {
-                    branch_name
-                };
-
-                let target_commit = match repo.find_branch(local_name, BranchType::Local) {
-                    Ok(existing_local) => existing_local.get().peel_to_commit()?,
-                    Err(_) => {
-                        let mut new_branch = repo.branch(local_name, &remote_commit, false)?;
-                        if new_branch.set_upstream(Some(branch_name)).is_err() {
-                            if let Some((remote, _)) = branch_name.split_once('/') {
-                                if let Ok(mut config) = repo.config() {
-                                    let _ = config.set_str(&format!("branch.{local_name}.remote"), remote);
-                                    let _ = config.set_str(
-                                        &format!("branch.{local_name}.merge"),
-                                        &format!("refs/heads/{local_name}"),
-                                    );
-                                }
-                            }
-                        }
-                        remote_commit
-                    }
-                };
-                (local_name.to_string(), target_commit)
-            } else {
-                return Err(err.into());
-            }
-        }
-    };
-
-    let tree = commit.tree()?;
+    let target = resolve_checkout_target(&repo, branch_name)?;
+    let tree = target.commit.tree()?;
 
     let mut checkout_opts = CheckoutBuilder::new();
     checkout_opts.safe();
 
+    // The working tree is switched before any branch is created, so a conflict
+    // leaves the repository exactly as it was.
     if let Err(e) = repo.checkout_tree(tree.as_object(), Some(&mut checkout_opts)) {
         if e.code() == git2::ErrorCode::Conflict {
             return Err(AppError::InvalidOperation(format!(
                 "CHECKOUT_CONFLICT: Không thể chuyển sang nhánh '{}' vì có các thay đổi chưa commit bị xung đột với nhánh đích.",
-                target_local_name
+                target.local_name
             )));
         }
         return Err(AppError::Git(e.message().to_string()));
     }
 
-    let ref_name = format!("refs/heads/{}", target_local_name);
+    if let Some(remote_name) = &target.create_from_remote {
+        create_tracking_branch(&repo, &target.local_name, remote_name, &target.commit)?;
+    }
+
+    let ref_name = format!("refs/heads/{}", target.local_name);
     repo.set_head(&ref_name)?;
 
+    Ok(())
+}
+
+/// Where a checkout request lands: the local branch to switch to, the commit it
+/// points at, and the remote-tracking branch to create it from when it does not
+/// exist yet.
+struct CheckoutTarget<'r> {
+    local_name: String,
+    commit: git2::Commit<'r>,
+    create_from_remote: Option<String>,
+}
+
+/// Resolves a local branch name, or a remote-tracking name such as
+/// `origin/feature`, to the local branch it checks out. Nothing is written.
+fn resolve_checkout_target<'r>(
+    repo: &'r Repository,
+    branch_name: &str,
+) -> Result<CheckoutTarget<'r>, AppError> {
+    let local_err = match repo.find_branch(branch_name, BranchType::Local) {
+        Ok(branch) => {
+            return Ok(CheckoutTarget {
+                local_name: branch_name.to_string(),
+                commit: branch.get().peel_to_commit()?,
+                create_from_remote: None,
+            })
+        }
+        Err(err) => err,
+    };
+    let Ok(remote_branch) = repo.find_branch(branch_name, BranchType::Remote) else {
+        return Err(local_err.into());
+    };
+    let local_name = branch_name
+        .split_once('/')
+        .map_or(branch_name, |(_remote, rest)| rest);
+
+    if let Ok(existing_local) = repo.find_branch(local_name, BranchType::Local) {
+        return Ok(CheckoutTarget {
+            local_name: local_name.to_string(),
+            commit: existing_local.get().peel_to_commit()?,
+            create_from_remote: None,
+        });
+    }
+    // Checked here, before the working tree changes, rather than left to
+    // `repo.branch` after it.
+    if !git2::Branch::name_is_valid(local_name)? {
+        return Err(AppError::InvalidOperation(format!(
+            "Tên nhánh '{}' không hợp lệ theo quy chuẩn Git",
+            local_name
+        )));
+    }
+    Ok(CheckoutTarget {
+        local_name: local_name.to_string(),
+        commit: remote_branch.get().peel_to_commit()?,
+        create_from_remote: Some(branch_name.to_string()),
+    })
+}
+
+/// Creates `local_name` at `commit` and makes it track `remote_name`.
+fn create_tracking_branch(
+    repo: &Repository,
+    local_name: &str,
+    remote_name: &str,
+    commit: &git2::Commit,
+) -> Result<(), AppError> {
+    let mut new_branch = repo.branch(local_name, commit, false)?;
+    if new_branch.set_upstream(Some(remote_name)).is_err() {
+        if let Some((remote, _)) = remote_name.split_once('/') {
+            if let Ok(mut config) = repo.config() {
+                let _ = config.set_str(&format!("branch.{local_name}.remote"), remote);
+                let _ = config.set_str(
+                    &format!("branch.{local_name}.merge"),
+                    &format!("refs/heads/{local_name}"),
+                );
+            }
+        }
+    }
     Ok(())
 }
 

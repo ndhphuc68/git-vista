@@ -259,7 +259,8 @@ fn test_checkout_remote_branch_creates_local_tracking_branch() {
     let repo = fixture.repo();
 
     let head_commit = repo.head().unwrap().peel_to_commit().unwrap();
-    repo.remote("origin", "https://example.com/repo.git").unwrap();
+    repo.remote("origin", "https://example.com/repo.git")
+        .unwrap();
     repo.reference(
         "refs/remotes/origin/feature-remote",
         head_commit.id(),
@@ -286,3 +287,40 @@ fn test_checkout_remote_branch_creates_local_tracking_branch() {
     assert_eq!(upstream.name().unwrap(), Some("origin/feature-remote"));
 }
 
+#[test]
+fn checkout_remote_branch_conflict_does_not_leave_a_local_branch() {
+    let fixture = TestRepoFixture::new();
+    let repo_path = fixture.path();
+    let repo = fixture.repo();
+
+    // A remote commit that changes file1.txt, so a dirty file1.txt conflicts with it.
+    let head_commit = repo.head().unwrap().peel_to_commit().unwrap();
+    fs::write(repo_path.join("file1.txt"), "remote version\n").unwrap();
+    let mut index = repo.index().unwrap();
+    index.add_path(std::path::Path::new("file1.txt")).unwrap();
+    index.write().unwrap();
+    let tree = repo.find_tree(index.write_tree().unwrap()).unwrap();
+    let sig = common::fixtures::test_signature();
+    let remote_commit = repo
+        .commit(None, &sig, &sig, "remote change", &tree, &[&head_commit])
+        .unwrap();
+    repo.remote("origin", "https://example.com/repo.git")
+        .unwrap();
+    repo.reference(
+        "refs/remotes/origin/feature-remote",
+        remote_commit,
+        true,
+        "remote ref",
+    )
+    .unwrap();
+    repo.checkout_head(Some(git2::build::CheckoutBuilder::new().force()))
+        .unwrap();
+    fs::write(repo_path.join("file1.txt"), "local dirty change\n").unwrap();
+
+    let err = checkout_branch(repo_path, "origin/feature-remote").unwrap_err();
+
+    assert!(err.to_string().contains("CHECKOUT_CONFLICT"), "got: {err}");
+    assert!(repo
+        .find_branch("feature-remote", git2::BranchType::Local)
+        .is_err());
+}

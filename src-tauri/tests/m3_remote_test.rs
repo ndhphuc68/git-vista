@@ -227,3 +227,31 @@ fn test_cancel_task_process() {
     unregister_task_process(task_id);
     assert!(!is_task_cancelled(task_id));
 }
+
+#[test]
+fn list_repo_branches_skips_the_remote_head_symbolic_ref() {
+    let fixture = TestRepoFixture::new();
+    let repo = fixture.repo();
+    let head_commit = repo.head().unwrap().peel_to_commit().unwrap();
+    repo.remote("origin", "https://example.com/repo.git")
+        .unwrap();
+    repo.reference(
+        "refs/remotes/origin/main",
+        head_commit.id(),
+        true,
+        "remote ref",
+    )
+    .unwrap();
+    repo.reference_symbolic(
+        "refs/remotes/origin/HEAD",
+        "refs/remotes/origin/main",
+        true,
+        "remote head",
+    )
+    .unwrap();
+
+    let result = list_repo_branches(fixture.path()).unwrap();
+
+    let names: Vec<&str> = result.remote.iter().map(|b| b.name.as_str()).collect();
+    assert_eq!(names, vec!["origin/main"]);
+}
