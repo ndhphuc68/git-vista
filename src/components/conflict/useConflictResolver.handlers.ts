@@ -1,6 +1,8 @@
 import type { RefObject } from "react";
 import type { ConflictFileData, ConflictHunk } from "../../ipc/bindings.generated";
 import type { Translations } from "../../i18n/vi";
+import { useToastStore } from "../../store/useToastStore";
+import { mapGitError } from "../../utils/errorMapping";
 
 /**
  * Handler factories for useConflictResolver, split out verbatim so the hook
@@ -127,6 +129,8 @@ export function createSaveHandler({
     setIsSaving(true);
     try {
       await onSaveAndStage(finalText);
+    } catch (err: unknown) {
+      useToastStore.getState().showError(mapGitError(err, t));
     } finally {
       setIsSaving(false);
     }
