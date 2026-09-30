@@ -4,6 +4,7 @@ import { useDeleteBranch } from "../api";
 import { useToastStore } from "../../../store/useToastStore";
 import { mapGitError } from "../../../utils/errorMapping";
 import { useTranslation } from "../../../i18n";
+import { toErrorMessage } from "../../../shared/utils/toError";
 
 export interface DeleteBranchFormOptions {
   isOpen: boolean;
@@ -50,7 +51,7 @@ export function useDeleteBranchForm({
       if (onSuccess) onSuccess(backupRef);
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err);
       if (msg.includes("UNMERGED_BRANCH")) {
         setIsUnmerged(true);
       } else {

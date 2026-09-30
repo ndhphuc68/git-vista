@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useCreateBranch } from "../api";
 import { useTranslation } from "../../../i18n";
 import { sanitizeBranchName } from "../model/branchName";
+import { toErrorMessage } from "../../../shared/utils/toError";
 
 export interface CreateBranchFormOptions {
   isOpen: boolean;
@@ -59,7 +60,7 @@ export function useCreateBranchForm({
       if (onSuccess) onSuccess();
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err);
       setError(msg || t.common.error);
     }
   };

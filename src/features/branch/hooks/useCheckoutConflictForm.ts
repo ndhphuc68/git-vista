@@ -5,6 +5,7 @@ import { checkedOutBranchName } from "../model/checkoutTarget";
 import { useRepoStore } from "../../../store/useRepoStore";
 import { useToastStore } from "../../../store/useToastStore";
 import { useTranslation } from "../../../i18n";
+import { toErrorMessage } from "../../../shared/utils/toError";
 
 export interface CheckoutConflictFormOptions {
   isOpen: boolean;
@@ -58,7 +59,7 @@ export function useCheckoutConflictForm({
       onClose();
       onSuccess?.();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err);
       setActionError(t.modals.checkoutConflict.stashError.replace("{msg}", msg));
     } finally {
       setIsStashing(false);

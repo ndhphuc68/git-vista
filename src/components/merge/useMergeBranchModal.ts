@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "../../i18n";
+import { toErrorMessage } from "../../shared/utils/toError";
 
 /**
  * State and submit handler for MergeBranchModal. Split out of the component
@@ -39,7 +40,7 @@ export function useMergeBranchModal(
         }
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err);
       setError(t.modals.merge.genericError.replace("{msg}", msg));
     } finally {
       setLoading(false);

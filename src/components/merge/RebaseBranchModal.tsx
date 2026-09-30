@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { GitCommit, ArrowRight } from "lucide-react";
 import { useTranslation } from "../../i18n";
 import { Modal, Button, Alert } from "../../shared/ui";
+import { toErrorMessage } from "../../shared/utils/toError";
 
 const TITLE_ID = "rebase-branch-title";
 
@@ -49,7 +50,7 @@ export const RebaseBranchModal: React.FC<RebaseBranchModalProps> = ({
         }
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err);
       setError(t.modals.rebase.genericError.replace("{msg}", msg));
     } finally {
       setLoading(false);

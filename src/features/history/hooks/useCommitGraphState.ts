@@ -19,6 +19,7 @@ import {
 import type { GraphContextMenu, GraphDialog } from "../model/graphDialog";
 import { graphCheckedOutBranchName } from "../model/graphCheckout";
 import type { GraphCommitNode } from "../../../ipc/bindings.generated";
+import { toErrorMessage } from "../../../shared/utils/toError";
 
 function useContextMenuDismiss(
   isOpen: boolean,
@@ -97,7 +98,7 @@ function useGraphCheckout({
         .getState()
         .showSuccess(t.sidebar.switchBranchSuccess.replace("{name}", checkedOut));
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err);
       // A conflict gets the dialog that offers stash-and-checkout, as in the sidebar.
       if (msg.includes("CHECKOUT_CONFLICT")) {
         setDialog({ type: "checkoutConflict", targetBranch: branchName, errorMessage: msg });

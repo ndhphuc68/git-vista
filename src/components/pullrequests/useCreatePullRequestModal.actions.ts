@@ -7,6 +7,7 @@ import { useToastStore } from "../../store/useToastStore";
 import { qk } from "../../domain/queryKeys";
 import { type Translations } from "../../i18n/vi";
 import { type GitHubRepoInfo, type BranchItem } from "../../ipc/bindings.generated";
+import { toErrorMessage } from "../../shared/utils/toError";
 
 interface PushBranchContext {
   repoPath: string;
@@ -34,7 +35,7 @@ export function createHandlePushBranch(context: PushBranchContext) {
         type: "success",
       });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err);
       setError(msg);
     } finally {
       setIsPushing(false);
@@ -124,7 +125,7 @@ export function createHandleSubmit(context: SubmitContext) {
 
       handleClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err);
       setError(msg || t.common.error);
     } finally {
       setSubmitting(false);

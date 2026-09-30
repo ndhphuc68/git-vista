@@ -137,6 +137,25 @@ describe("useBranchSidebarShell - checkout guards and handling", () => {
     expect(hook.result.current.dialog.kind).toBe("checkoutConflict");
   });
 
+  it("opens the conflict dialog for the {type, message} error the IPC layer throws", async () => {
+    vi.spyOn(invokeCommand, "checkoutBranch").mockRejectedValue({
+      type: "InvalidOperation",
+      message: "CHECKOUT_CONFLICT: file1.txt",
+    });
+
+    const { hook } = setup();
+
+    await act(async () => {
+      await hook.result.current.handleCheckout("feature-conflict");
+    });
+
+    expect(hook.result.current.dialog).toEqual({
+      kind: "checkoutConflict",
+      targetBranch: "feature-conflict",
+      errorMessage: "CHECKOUT_CONFLICT: file1.txt",
+    });
+  });
+
   it("shows an error toast, not the conflict dialog, for other errors that mention a conflict", async () => {
     vi.spyOn(invokeCommand, "checkoutBranch").mockRejectedValue(
       new Error("Git error: failed to lock file 'index.lock': conflict with another process")

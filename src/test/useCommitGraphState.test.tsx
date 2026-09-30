@@ -141,6 +141,25 @@ describe("useCommitGraphState - checkout branch", () => {
     expect(useToastStore.getState().toasts).toHaveLength(0);
   });
 
+  it("opens the conflict dialog for the {type, message} error the IPC layer throws", async () => {
+    vi.spyOn(invokeCommand, "checkoutBranch").mockRejectedValue({
+      type: "InvalidOperation",
+      message: "CHECKOUT_CONFLICT: file1.txt",
+    });
+
+    const { hook } = setup();
+
+    await act(async () => {
+      await hook.result.current.handleCheckoutBranch("feature-conflict");
+    });
+
+    expect(hook.result.current.dialog).toEqual({
+      type: "checkoutConflict",
+      targetBranch: "feature-conflict",
+      errorMessage: "CHECKOUT_CONFLICT: file1.txt",
+    });
+  });
+
   it("keeps showing an error toast for other checkout failures", async () => {
     vi.spyOn(invokeCommand, "checkoutBranch").mockRejectedValue(
       new Error("fatal: unable to read tree")

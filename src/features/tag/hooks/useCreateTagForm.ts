@@ -5,6 +5,7 @@ import { useToastStore } from "../../../store/useToastStore";
 import { mapGitError } from "../../../utils/errorMapping";
 import { useCreateTag } from "../api";
 import { sanitizeTagName } from "../model/tagNameHelpers";
+import { toErrorMessage } from "../../../shared/utils/toError";
 
 export interface UseCreateTagFormOptions {
   isOpen: boolean;
@@ -80,7 +81,7 @@ export function useCreateTagForm({
       if (onSuccess) onSuccess();
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err);
       setError(msg || t.common.error);
       useToastStore.getState().showError(mapGitError(err));
     }

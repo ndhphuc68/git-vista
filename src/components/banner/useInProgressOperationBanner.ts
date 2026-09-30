@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { type RepoStateInfo } from "../../ipc/bindings.generated";
 import { useTranslation } from "../../i18n";
+import { toErrorMessage } from "../../shared/utils/toError";
 
 /**
  * State and handlers for InProgressOperationBanner's abort/continue actions.
@@ -24,7 +25,7 @@ export function useInProgressOperationBanner(
     try {
       await onAbort(repoState.state);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err);
       setActionError(t.banner.abortError.replace("{msg}", msg));
     } finally {
       setIsAborting(false);
@@ -38,7 +39,7 @@ export function useInProgressOperationBanner(
     try {
       await onContinue(repoState.state);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err);
       setActionError(t.banner.continueError.replace("{msg}", msg));
     } finally {
       setIsContinuing(false);

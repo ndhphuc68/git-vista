@@ -3,6 +3,7 @@ import { useTranslation } from "../../../i18n";
 import { useToastStore } from "../../../store/useToastStore";
 import { mapGitError } from "../../../utils/errorMapping";
 import { useDeleteTag } from "../api";
+import { toErrorMessage } from "../../../shared/utils/toError";
 
 export interface UseDeleteTagActionOptions {
   isOpen: boolean;
@@ -47,7 +48,7 @@ export function useDeleteTagAction({
       if (onSuccess) onSuccess();
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err);
       setError(t.modals.deleteTag.errorGeneric.replace("{msg}", msg));
       useToastStore.getState().showError(mapGitError(err));
     }
