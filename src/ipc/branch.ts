@@ -52,6 +52,13 @@ export const branchCommands = {
     await commands.checkoutBranch(repoPath, branchName);
   },
 
+  checkoutCommit: async (repoPath: string, commitId: string): Promise<void> => {
+    if (!isTauri()) {
+      return;
+    }
+    await commands.checkoutCommit(repoPath, commitId);
+  },
+
   renameBranch: async (repoPath: string, oldName: string, newName: string): Promise<void> => {
     if (!isTauri()) {
       return;

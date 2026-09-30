@@ -42,6 +42,12 @@ describe("mapGitError utility", () => {
     expect(res.actionHint).toContain("Stash");
   });
 
+  it("maps operation in progress error", () => {
+    const res = mapGitError("OPERATION_IN_PROGRESS: Cannot switch branch");
+    expect(res.title).toContain("Tiến trình Git đang dở dang");
+    expect(res.actionHint).toBeDefined();
+  });
+
   it("maps network connection failure", () => {
     const res = mapGitError("fatal: unable to access: Could not resolve host");
     expect(res.title).toContain("kết nối");

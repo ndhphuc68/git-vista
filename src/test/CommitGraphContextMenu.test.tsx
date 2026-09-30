@@ -54,6 +54,11 @@ describe("CommitGraph Context Menu", () => {
 
     fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
 
+    expect(
+      screen.getByText(
+        /Checkout this commit \(Detached HEAD\)|Chuyển sang commit này \(Detached HEAD\)/i
+      )
+    ).toBeInTheDocument();
     expect(screen.getByText(/Create tag here|Tạo thẻ tại đây/i)).toBeInTheDocument();
     expect(screen.getByText(/Create branch here|Tạo nhánh tại đây/i)).toBeInTheDocument();
     expect(
@@ -63,6 +68,36 @@ describe("CommitGraph Context Menu", () => {
       screen.getByText(/Revert this commit|Hoàn tác \(Revert\) commit này/i)
     ).toBeInTheDocument();
     expect(screen.getByText(/Copy commit SHA|Sao chép mã commit \(SHA\)/i)).toBeInTheDocument();
+  });
+
+  it("verifies clicking 'Checkout this commit' invokes checkoutCommit and clears selectedBranch", async () => {
+    const checkoutCommitSpy = vi.spyOn(invokeCommand, "checkoutCommit").mockResolvedValue(undefined);
+    useRepoStore.getState().setSelectedBranch("main");
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
+      </QueryClientProvider>
+    );
+
+    const commitRow = await screen.findByText("feat(m1): visual git viewer");
+    fireEvent.contextMenu(commitRow, { clientX: 200, clientY: 300 });
+
+    const checkoutAction = screen.getByText(
+      /Checkout this commit \(Detached HEAD\)|Chuyển sang commit này \(Detached HEAD\)/i
+    );
+    fireEvent.click(checkoutAction);
+
+    await waitFor(() => {
+      expect(checkoutCommitSpy).toHaveBeenCalledWith(
+        REPO_PATH,
+        "1111111111111111111111111111111111111111"
+      );
+    });
+
+    expect(useRepoStore.getState().selectedBranch).toBeNull();
+    const toasts = useToastStore.getState().toasts;
+    expect(toasts.some((t) => t.type === "success" && t.message.includes("1111111"))).toBe(true);
   });
 
   it("verifies clicking 'Create Tag here...' opens CreateTagModal targeting that commit", async () => {

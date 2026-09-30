@@ -1,5 +1,6 @@
 export { useRepoStatus } from "./api/useRepoStatus";
 export { useCommitGraph } from "./api/useCommitGraph";
+export { useCheckoutCommit } from "./api/useCheckoutCommit";
 export { getCommitDetails } from "./api/commitDetailsApi";
 export { useCommitFileDiff, useFileBlame, useFileHistory } from "./api/useFileInspection";
 export { cherryPickCommit, revertCommit } from "./api/commitActionsApi";

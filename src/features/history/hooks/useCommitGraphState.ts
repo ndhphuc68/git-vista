@@ -8,6 +8,8 @@ import { useTranslation } from "../../../i18n";
 import { useCommitGraph } from "../api/useCommitGraph";
 import { useRepoStatus } from "../api/useRepoStatus";
 import { useCheckoutBranch } from "../api/useCheckoutBranch";
+import { useCheckoutCommit } from "../api/useCheckoutCommit";
+import { useRepoState } from "../../conflict";
 import { mapGitError } from "../../../utils/errorMapping";
 import {
   getMaxGraphColumns,
@@ -72,8 +74,10 @@ export function useCommitGraphState() {
 
   const repoPath = currentRepo?.path ?? "";
   const checkoutBranch = useCheckoutBranch(repoPath);
+  const checkoutCommit = useCheckoutCommit(repoPath);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useCommitGraph(repoPath);
   const { data: repoStatus } = useRepoStatus(repoPath);
+  const { data: repoState } = useRepoState(repoPath);
   const { hasUncommittedChanges, modifiedCount, untrackedCount } =
     getUncommittedSummary(repoStatus);
 
@@ -94,11 +98,36 @@ export function useCommitGraphState() {
   };
 
   const handleCheckoutBranch = async (branchName: string) => {
+    if (repoState?.is_in_progress) {
+      useToastStore.getState().showError(
+        mapGitError("OPERATION_IN_PROGRESS: Operation is already in progress", t)
+      );
+      return;
+    }
     try {
       await checkoutBranch.mutateAsync({ name: branchName });
       setSelectedBranch(branchName);
       useToastStore.getState().showSuccess(
         t.sidebar.switchBranchSuccess.replace("{name}", branchName)
+      );
+    } catch (err: unknown) {
+      useToastStore.getState().showError(mapGitError(err, t));
+    }
+  };
+
+  const handleCheckoutCommit = async (commitId: string) => {
+    setContextMenu(null);
+    if (repoState?.is_in_progress) {
+      useToastStore.getState().showError(
+        mapGitError("OPERATION_IN_PROGRESS: Operation is already in progress", t)
+      );
+      return;
+    }
+    try {
+      await checkoutCommit.mutateAsync({ commitId });
+      setSelectedBranch(null);
+      useToastStore.getState().showSuccess(
+        t.graph.checkoutCommitSuccess.replace("{sha}", commitId.slice(0, 7))
       );
     } catch (err: unknown) {
       useToastStore.getState().showError(mapGitError(err, t));
@@ -126,6 +155,7 @@ export function useCommitGraphState() {
     isFetchingNextPage,
     handleSelectCommit,
     handleCheckoutBranch,
+    handleCheckoutCommit,
     setActiveScreen,
   };
 }

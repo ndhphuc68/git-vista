@@ -72,6 +72,19 @@ export function mapGitError(
   }
 
   if (
+    lower.includes("operation_in_progress") ||
+    lower.includes("operation is already in progress") ||
+    lower.includes("cannot switch branch while")
+  ) {
+    return {
+      title: t.errors.operationInProgressTitle,
+      message: t.errors.operationInProgressMessage,
+      actionHint: t.errors.operationInProgressHint,
+      rawError: raw,
+    };
+  }
+
+  if (
     lower.includes("could not resolve host") ||
     lower.includes("connection timed out") ||
     lower.includes("network is unreachable")

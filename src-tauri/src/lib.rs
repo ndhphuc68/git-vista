@@ -40,6 +40,7 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
             create_commit,
             create_branch,
             checkout_branch,
+            checkout_commit,
             rename_branch,
             delete_branch,
             fetch_repo,

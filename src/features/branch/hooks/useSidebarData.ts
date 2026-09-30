@@ -3,6 +3,7 @@ import { useRemotes } from "../../remote";
 import { useStashes } from "../../stash";
 import { useTags } from "../../tag";
 import { useRepoStatus } from "../../history";
+import { useRepoState } from "../../conflict";
 
 /** Composes owner queries without taking ownership of their cache policy. */
 export function useSidebarData(repoPath: string) {
@@ -11,9 +12,11 @@ export function useSidebarData(repoPath: string) {
   const { data: repoStatus } = useRepoStatus(repoPath);
   const { data: stashes = [] } = useStashes(repoPath);
   const { data: tagItems = [] } = useTags(repoPath);
+  const { data: repoState } = useRepoState(repoPath);
   const hasUncommittedChanges = Boolean(
     repoStatus &&
     (repoStatus.staged.length || repoStatus.unstaged.length || repoStatus.untracked.length)
   );
-  return { branchData, remotesList, repoStatus, stashes, tagItems, hasUncommittedChanges };
+  return { branchData, remotesList, repoStatus, stashes, tagItems, hasUncommittedChanges, repoState };
 }
+

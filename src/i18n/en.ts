@@ -402,6 +402,8 @@ export const en: Translations = {
     headBadge: "HEAD",
     createTagHere: "Create tag here",
     createBranchHere: "Create branch here",
+    checkoutCommit: "Checkout this commit (Detached HEAD)",
+    checkoutCommitSuccess: "Checked out commit {sha} (Detached HEAD)",
     cherryPickHere: "Cherry-pick into current branch",
     revertHere: "Revert this commit",
     interactiveRebaseHere: "Interactive Rebase from here...",
@@ -935,6 +937,11 @@ export const en: Translations = {
     checkoutConflictTitle: "Checkout Conflict",
     checkoutConflictMessage: "You have uncommitted changes that would be overwritten.",
     checkoutConflictHint: "Commit or Stash your changes before switching branches.",
+    operationInProgressTitle: "Operation in progress",
+    operationInProgressMessage:
+      "Cannot switch branches while a merge, rebase, cherry-pick, or revert is in progress.",
+    operationInProgressHint:
+      "Please complete or abort the current operation before switching branches.",
     networkErrorTitle: "Network Error",
     networkErrorMessage: "Unable to communicate with the remote server.",
     networkErrorHint: "Please check your internet connection and try again.",

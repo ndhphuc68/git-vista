@@ -320,6 +320,18 @@ pub fn checkout_branch(
 
 #[tauri::command]
 #[specta::specta]
+pub fn checkout_commit(
+    app: tauri::AppHandle,
+    repo_path: String,
+    commit_id: String,
+) -> Result<(), AppError> {
+    crate::write::branch::checkout_commit(&repo_path, &commit_id)?;
+    emit_repo_changed(&app, &repo_path, "checkout_commit");
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub fn rename_branch(
     app: tauri::AppHandle,
     repo_path: String,

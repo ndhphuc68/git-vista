@@ -398,6 +398,8 @@ export const vi = {
     headBadge: "HEAD",
     createTagHere: "Tạo thẻ tại đây",
     createBranchHere: "Tạo nhánh tại đây",
+    checkoutCommit: "Chuyển sang commit này (Detached HEAD)",
+    checkoutCommitSuccess: "Đã chuyển sang commit {sha} (Detached HEAD)",
     cherryPickHere: "Cherry-pick vào nhánh hiện tại",
     revertHere: "Hoàn tác (Revert) commit này",
     interactiveRebaseHere: "Interactive Rebase từ commit này...",
@@ -930,6 +932,11 @@ export const vi = {
     checkoutConflictMessage: "Bạn đang có các thay đổi chưa lưu có thể bị ghi đè khi đổi nhánh.",
     checkoutConflictHint:
       "Hãy Commit các thay đổi hoặc bấm 'Lưu tạm (Stash)' trước khi chuyển nhánh.",
+    operationInProgressTitle: "Tiến trình Git đang dở dang",
+    operationInProgressMessage:
+      "Không thể chuyển nhánh khi kho lưu trữ đang có tiến trình Merge, Rebase, Cherry-pick hoặc Revert dở dang.",
+    operationInProgressHint:
+      "Vui lòng hoàn tất hoặc huỷ bỏ tiến trình hiện tại trước khi chuyển nhánh.",
     networkErrorTitle: "Không thể kết nối mạng",
     networkErrorMessage: "Không thể liên lạc với máy chủ từ xa.",
     networkErrorHint: "Vui lòng kiểm tra lại kết nối Internet của bạn và thử lại.",

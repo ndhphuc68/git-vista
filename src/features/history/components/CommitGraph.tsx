@@ -25,6 +25,7 @@ export function CommitGraph(dialogComponents: GraphDialogComponents) {
     isFetchingNextPage,
     handleSelectCommit,
     handleCheckoutBranch,
+    handleCheckoutCommit,
     setActiveScreen,
   } = useCommitGraphState();
 
@@ -68,6 +69,7 @@ export function CommitGraph(dialogComponents: GraphDialogComponents) {
           onOpenDialog={setDialog}
           onClose={() => setContextMenu(null)}
           onCopySha={handleCopySha}
+          onCheckoutCommit={handleCheckoutCommit}
         />
       )}
       <CommitGraphDialogs

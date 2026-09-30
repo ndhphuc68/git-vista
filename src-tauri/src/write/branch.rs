@@ -52,6 +52,12 @@ pub fn create_branch<P: AsRef<Path>>(
     validate_branch_name(trimmed)?;
     let repo = Repository::open(repo_path.as_ref())?;
 
+    if checkout && repo.state() != git2::RepositoryState::Clean {
+        return Err(AppError::InvalidOperation(
+            "OPERATION_IN_PROGRESS: Không thể chuyển sang nhánh mới khi kho lưu trữ đang có tiến trình dở dang (Merge, Rebase, Cherry-pick hoặc Revert). Vui lòng hoàn tất hoặc huỷ bỏ tiến trình trước.".to_string(),
+        ));
+    }
+
     let target_commit = if let Some(oid_str) = target_commit_id {
         let oid = Oid::from_str(oid_str.trim())
             .map_err(|e| AppError::InvalidOperation(format!("Commit OID không hợp lệ: {}", e)))?;
@@ -73,6 +79,12 @@ pub fn create_branch<P: AsRef<Path>>(
 /// Chuyển sang nhánh chỉ định bằng cơ chế Safe Checkout của Git (hỗ trợ cả nhánh Local và Remote)
 pub fn checkout_branch<P: AsRef<Path>>(repo_path: P, branch_name: &str) -> Result<(), AppError> {
     let repo = Repository::open(repo_path.as_ref())?;
+
+    if repo.state() != git2::RepositoryState::Clean {
+        return Err(AppError::InvalidOperation(
+            "OPERATION_IN_PROGRESS: Không thể chuyển nhánh khi kho lưu trữ đang có tiến trình dở dang (Merge, Rebase, Cherry-pick hoặc Revert). Vui lòng hoàn tất hoặc huỷ bỏ tiến trình trước.".to_string(),
+        ));
+    }
 
     let (target_local_name, commit) = match repo.find_branch(branch_name, BranchType::Local) {
         Ok(branch) => {
@@ -130,6 +142,39 @@ pub fn checkout_branch<P: AsRef<Path>>(repo_path: P, branch_name: &str) -> Resul
 
     let ref_name = format!("refs/heads/{}", target_local_name);
     repo.set_head(&ref_name)?;
+
+    Ok(())
+}
+
+/// Chuyển sang commit chỉ định (Detached HEAD) bằng cơ chế Safe Checkout của Git
+pub fn checkout_commit<P: AsRef<Path>>(repo_path: P, commit_id: &str) -> Result<(), AppError> {
+    let repo = Repository::open(repo_path.as_ref())?;
+
+    if repo.state() != git2::RepositoryState::Clean {
+        return Err(AppError::InvalidOperation(
+            "OPERATION_IN_PROGRESS: Không thể chuyển sang commit khi kho lưu trữ đang có tiến trình dở dang (Merge, Rebase, Cherry-pick hoặc Revert). Vui lòng hoàn tất hoặc huỷ bỏ tiến trình trước.".to_string(),
+        ));
+    }
+
+    let oid = git2::Oid::from_str(commit_id.trim())
+        .map_err(|e| AppError::InvalidOperation(format!("Commit OID không hợp lệ: {}", e)))?;
+    let commit = repo.find_commit(oid)?;
+    let tree = commit.tree()?;
+
+    let mut checkout_opts = CheckoutBuilder::new();
+    checkout_opts.safe();
+
+    if let Err(e) = repo.checkout_tree(tree.as_object(), Some(&mut checkout_opts)) {
+        if e.code() == git2::ErrorCode::Conflict {
+            return Err(AppError::InvalidOperation(format!(
+                "CHECKOUT_CONFLICT: Không thể chuyển sang commit '{}' vì có các thay đổi chưa commit bị xung đột.",
+                &commit_id[..std::cmp::min(7, commit_id.len())]
+            )));
+        }
+        return Err(AppError::Git(e.message().to_string()));
+    }
+
+    repo.set_head_detached(oid)?;
 
     Ok(())
 }
@@ -232,3 +277,109 @@ pub fn delete_branch<P: AsRef<Path>>(
 
     Ok(backup_ref_name)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+    use tempfile::TempDir;
+
+    #[test]
+    fn test_checkout_branch_rejects_when_operation_in_progress() {
+        let temp = TempDir::new().unwrap();
+        let repo = Repository::init(temp.path()).unwrap();
+        let mut config = repo.config().unwrap();
+        config.set_str("user.name", "Test").unwrap();
+        config.set_str("user.email", "test@example.com").unwrap();
+
+        let file_path = temp.path().join("file.txt");
+        fs::write(&file_path, "initial\n").unwrap();
+        let mut index = repo.index().unwrap();
+        index.add_path(std::path::Path::new("file.txt")).unwrap();
+        index.write().unwrap();
+        let tree_id = index.write_tree().unwrap();
+        let tree = repo.find_tree(tree_id).unwrap();
+        let sig = repo.signature().unwrap();
+        let commit = repo
+            .commit(Some("HEAD"), &sig, &sig, "Initial commit", &tree, &[])
+            .unwrap();
+
+        // Create branch-b
+        let commit_obj = repo.find_commit(commit).unwrap();
+        repo.branch("branch-b", &commit_obj, false).unwrap();
+
+        // Simulate in-progress merge
+        let git_dir = repo.path();
+        fs::write(
+            git_dir.join("MERGE_HEAD"),
+            format!("{}\n", commit),
+        )
+        .unwrap();
+        fs::write(git_dir.join("MERGE_MSG"), "Merge commit\n").unwrap();
+
+        assert_eq!(repo.state(), git2::RepositoryState::Merge);
+
+        // Attempt checkout branch-b
+        let result = checkout_branch(temp.path(), "branch-b");
+        assert!(result.is_err(), "Checkout should fail when merge is in progress");
+        let err_str = result.unwrap_err().to_string();
+        assert!(
+            err_str.contains("OPERATION_IN_PROGRESS"),
+            "Error should indicate OPERATION_IN_PROGRESS, got: {}",
+            err_str
+        );
+
+        // Verify HEAD did not change
+        let head = repo.head().unwrap();
+        assert_ne!(head.shorthand().unwrap(), "branch-b");
+    }
+
+    #[test]
+    fn test_checkout_commit_detached_head() {
+        let temp = TempDir::new().unwrap();
+        let repo = Repository::init(temp.path()).unwrap();
+        let mut config = repo.config().unwrap();
+        config.set_str("user.name", "Test").unwrap();
+        config.set_str("user.email", "test@example.com").unwrap();
+
+        let file_path = temp.path().join("file.txt");
+        fs::write(&file_path, "c1\n").unwrap();
+        let mut index = repo.index().unwrap();
+        index.add_path(std::path::Path::new("file.txt")).unwrap();
+        index.write().unwrap();
+        let tree_id = index.write_tree().unwrap();
+        let tree = repo.find_tree(tree_id).unwrap();
+        let sig = repo.signature().unwrap();
+        let c1 = repo
+            .commit(Some("HEAD"), &sig, &sig, "commit 1", &tree, &[])
+            .unwrap();
+
+        fs::write(&file_path, "c2\n").unwrap();
+        let mut index = repo.index().unwrap();
+        index.add_path(std::path::Path::new("file.txt")).unwrap();
+        index.write().unwrap();
+        let tree_id2 = index.write_tree().unwrap();
+        let tree2 = repo.find_tree(tree_id2).unwrap();
+        let _c2 = repo
+            .commit(
+                Some("HEAD"),
+                &sig,
+                &sig,
+                "commit 2",
+                &tree2,
+                &[&repo.find_commit(c1).unwrap()],
+            )
+            .unwrap();
+
+        assert!(!repo.head_detached().unwrap());
+
+        // Checkout c1
+        checkout_commit(temp.path(), &c1.to_string()).expect("checkout commit should succeed");
+
+        let repo_reopened = Repository::open(temp.path()).unwrap();
+        assert!(repo_reopened.head_detached().unwrap());
+        assert_eq!(repo_reopened.head().unwrap().target().unwrap(), c1);
+        assert_eq!(fs::read_to_string(&file_path).unwrap().trim(), "c1");
+    }
+}
+

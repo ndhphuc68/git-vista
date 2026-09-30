@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { type StashItem } from "../../../ipc/bindings.generated";
 import { NO_DIALOG, type SidebarDialog } from "../model/sidebarDialog";
+import { useToastStore } from "../../../store/useToastStore";
+import { useTranslation } from "../../../i18n";
+import { mapGitError } from "../../../utils/errorMapping";
 import { useCheckoutBranch } from "../api";
 import { useSidebarData } from "./useSidebarData";
 import { useSidebarActions } from "./useSidebarActions";
@@ -51,6 +54,7 @@ export function useBranchSidebarShell({
     closeStashPanel: () => setSelectedStash(null),
     closeMenu: () => setActiveMenu(null),
   });
+  const { t } = useTranslation();
   const currentBranchName =
     branchData?.current_branch ||
     branchData?.local.find((branch) => branch.is_head)?.name ||
@@ -60,16 +64,25 @@ export function useBranchSidebarShell({
 
   const handleCheckout = async (branchName: string) => {
     setActiveMenu(null);
+    if (data.repoState?.is_in_progress) {
+      useToastStore.getState().showError(
+        mapGitError("OPERATION_IN_PROGRESS: Operation is already in progress", t)
+      );
+      return;
+    }
     try {
       // invalidateRepo is gone from here: useCheckoutBranch owns invalidation.
       await checkoutBranch.mutateAsync({ name: branchName });
       setSelectedBranch(branchName);
+      useToastStore.getState().showSuccess(
+        t.sidebar.switchBranchSuccess.replace("{name}", branchName)
+      );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes("CHECKOUT_CONFLICT") || msg.toLowerCase().includes("conflict")) {
         setDialog({ kind: "checkoutConflict", targetBranch: branchName, errorMessage: msg });
       } else {
-        alert(`Không thể chuyển nhánh: ${msg}`);
+        useToastStore.getState().showError(mapGitError(err, t));
       }
     }
   };

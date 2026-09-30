@@ -1,5 +1,5 @@
 import type { RefObject } from "react";
-import { GitBranch, Tag, Copy, GitPullRequest, RotateCcw, GitMerge, GitCompare } from "lucide-react";
+import { GitBranch, GitCommit, Tag, Copy, GitPullRequest, RotateCcw, GitMerge, GitCompare } from "lucide-react";
 import { useTranslation } from "../../../i18n";
 import type { GraphContextMenu, GraphDialog } from "../model/graphDialog";
 import { buildCompareDialogFromContextMenu } from "../model/graphDialog";
@@ -12,6 +12,7 @@ interface CommitGraphContextMenuProps {
   onOpenDialog: (dialog: GraphDialog) => void;
   onClose: () => void;
   onCopySha: (commitId: string) => void;
+  onCheckoutCommit: (commitId: string) => void;
 }
 
 export function CommitGraphContextMenu({
@@ -21,6 +22,7 @@ export function CommitGraphContextMenu({
   onOpenDialog,
   onClose,
   onCopySha,
+  onCheckoutCommit,
 }: CommitGraphContextMenuProps) {
   const { t } = useTranslation();
   const { commit } = contextMenu;
@@ -63,6 +65,15 @@ export function CommitGraphContextMenu({
       className="min-w-56 w-max bg-surface border border-border-subtle rounded-lg shadow-2xl py-1.5 text-xs flex flex-col animate-fade-in"
       onClick={(e) => e.stopPropagation()}
     >
+      <CommitGraphContextMenuItem
+        icon={GitCommit}
+        label={t.graph.checkoutCommit}
+        onClick={() => {
+          onCheckoutCommit(commit.id);
+          onClose();
+        }}
+      />
+
       {actions.map((action) => (
         <CommitGraphContextMenuItem
           key={action.dialog.type}

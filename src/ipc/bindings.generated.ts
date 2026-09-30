@@ -32,6 +32,7 @@ export const commands = {
 	createCommit: (repoPath: string, summary: string, description: string | null, amend: boolean | null) => typedError<CommitDetails_Serialize, AppError>(__TAURI_INVOKE("create_commit", { repoPath, summary, description, amend })),
 	createBranch: (repoPath: string, name: string, targetCommit: string | null, checkout: boolean | null) => typedError<null, AppError>(__TAURI_INVOKE("create_branch", { repoPath, name, targetCommit, checkout })),
 	checkoutBranch: (repoPath: string, branchName: string) => typedError<null, AppError>(__TAURI_INVOKE("checkout_branch", { repoPath, branchName })),
+	checkoutCommit: (repoPath: string, commitId: string) => typedError<null, AppError>(__TAURI_INVOKE("checkout_commit", { repoPath, commitId })),
 	renameBranch: (repoPath: string, oldName: string, newName: string) => typedError<null, AppError>(__TAURI_INVOKE("rename_branch", { repoPath, oldName, newName })),
 	deleteBranch: (repoPath: string, branchName: string, force: boolean | null) => typedError<string, AppError>(__TAURI_INVOKE("delete_branch", { repoPath, branchName, force })),
 	fetchRepo: (repoPath: string, remote: string | null, prune: boolean | null, taskId: string | null) => typedError<string, AppError>(__TAURI_INVOKE("fetch_repo", { repoPath, remote, prune, taskId })),
