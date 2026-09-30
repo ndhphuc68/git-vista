@@ -49,7 +49,7 @@ export const tagCommands = {
       }
       return;
     }
-    await commands.createTag(repoPath, name, targetCommit, message ?? null);
+    unwrap(await commands.createTag(repoPath, name, targetCommit, message ?? null));
   },
 
   deleteTag: async (repoPath: string, name: string, deleteRemote?: boolean): Promise<void> => {
@@ -68,7 +68,7 @@ export const tagCommands = {
       }
       return;
     }
-    await commands.deleteTag(repoPath, name, deleteRemote ?? null);
+    unwrap(await commands.deleteTag(repoPath, name, deleteRemote ?? null));
   },
 
   checkoutTag: async (repoPath: string, name: string): Promise<void> => {
@@ -86,13 +86,13 @@ export const tagCommands = {
       }
       return;
     }
-    await commands.checkoutTag(repoPath, name);
+    unwrap(await commands.checkoutTag(repoPath, name));
   },
 
   pushTag: async (repoPath: string, name: string, remoteName?: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    await commands.pushTag(repoPath, name, remoteName ?? null);
+    unwrap(await commands.pushTag(repoPath, name, remoteName ?? null));
   },
 };

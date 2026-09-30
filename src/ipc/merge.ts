@@ -56,13 +56,13 @@ export const mergeCommands = {
     if (!isTauri()) {
       return;
     }
-    await commands.abortInProgress(repoPath, operation);
+    unwrap(await commands.abortInProgress(repoPath, operation));
   },
 
   continueInProgress: async (repoPath: string, operation: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    await commands.continueInProgress(repoPath, operation);
+    unwrap(await commands.continueInProgress(repoPath, operation));
   },
 };

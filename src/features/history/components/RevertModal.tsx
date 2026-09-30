@@ -8,6 +8,7 @@ import { Modal, Button, Alert } from "../../../shared/ui";
 import { revertCommit } from "../api/commitActionsApi";
 import { CommitActionTargetCard } from "./CommitActionTargetCard";
 import { AutoCommitCheckbox } from "./AutoCommitCheckbox";
+import { toErrorMessage } from "../../../shared/utils/toError";
 
 const TITLE_ID = "revert-modal-title";
 
@@ -61,7 +62,7 @@ export const RevertModal: React.FC<RevertModalProps> = ({
         setError(errorMsg);
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err);
       setError(msg || t.common.error);
       useToastStore.getState().showError(mapGitError(err));
     } finally {

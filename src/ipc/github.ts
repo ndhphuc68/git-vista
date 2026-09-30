@@ -32,7 +32,7 @@ export const githubCommands = {
       localStorage.setItem("gitvista_github_token", token);
       return;
     }
-    await commands.saveGithubToken(token);
+    unwrap(await commands.saveGithubToken(token));
   },
 
   removeGitHubToken: async (): Promise<void> => {
@@ -40,7 +40,7 @@ export const githubCommands = {
       localStorage.removeItem("gitvista_github_token");
       return;
     }
-    await commands.removeGithubToken();
+    unwrap(await commands.removeGithubToken());
   },
 
   checkoutPullRequest: async (repoPath: string, prNumber: number): Promise<CheckoutPrResult> => {

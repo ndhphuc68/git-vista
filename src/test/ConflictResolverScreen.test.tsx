@@ -2,6 +2,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { ConflictResolverScreen } from "../components/conflict/ConflictResolverScreen";
 import { type ConflictFileData } from "../ipc/bindings.generated";
+import { useToastStore } from "../store/useToastStore";
 
 describe("ConflictResolverScreen Component", () => {
   const mockData: ConflictFileData = {
@@ -199,5 +200,30 @@ describe("ConflictResolverScreen Component", () => {
     fireEvent.click(backBtn);
 
     expect(handleBack).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows an error toast and stays open when saving the resolution fails", async () => {
+    useToastStore.setState({ toasts: [] });
+    const handleResolve = vi
+      .fn()
+      .mockRejectedValue({ type: "Git", message: "failed to write src/main.rs" });
+
+    render(
+      <ConflictResolverScreen
+        filePath="src/main.rs"
+        repoPath="/test/repo"
+        conflictData={mockData}
+        onBack={vi.fn()}
+        onSaveAndStage={handleResolve}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Lấy bên này \(Ours\)/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Hoàn tất/i }));
+
+    await waitFor(() => {
+      expect(useToastStore.getState().toasts.some((toast) => toast.type === "error")).toBe(true);
+    });
+    expect(screen.getByText("src/main.rs")).toBeInTheDocument();
   });
 });

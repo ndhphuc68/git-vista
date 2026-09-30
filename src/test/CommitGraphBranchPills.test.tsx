@@ -132,4 +132,37 @@ describe("CommitGraphBranchPills", () => {
     );
     expect(screen.getByTitle("1 more")).toBeInTheDocument();
   });
+
+  it("keeps clicks on a checkout-able pill from reaching the commit row", () => {
+    // The row opens the detail drawer on click, whose backdrop would swallow the
+    // second click of a double click.
+    const onRowClick = vi.fn();
+    const refs: RefBadge[] = [
+      { name: "origin/feat-a", ref_type: "remote" },
+      { name: "feat-b", ref_type: "local" },
+    ];
+    render(
+      <div onClick={onRowClick}>
+        <CommitGraphBranchPills refs={refs} onCheckout={vi.fn()} />
+      </div>
+    );
+
+    fireEvent.click(screen.getByTestId("commit-graph-primary-pill"));
+    fireEvent.click(screen.getByTestId("branch-pill-popover-feat-b"));
+
+    expect(onRowClick).not.toHaveBeenCalled();
+  });
+
+  it("still lets a click on the HEAD pill select the commit row", () => {
+    const onRowClick = vi.fn();
+    render(
+      <div onClick={onRowClick}>
+        <CommitGraphBranchPills refs={[{ name: "main", ref_type: "head" }]} onCheckout={vi.fn()} />
+      </div>
+    );
+
+    fireEvent.click(screen.getByTestId("commit-graph-primary-pill"));
+
+    expect(onRowClick).toHaveBeenCalledTimes(1);
+  });
 });

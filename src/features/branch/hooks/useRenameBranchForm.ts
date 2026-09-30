@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRenameBranch } from "../api";
 import { useTranslation } from "../../../i18n";
 import { sanitizeBranchName } from "../model/branchName";
+import { toErrorMessage } from "../../../shared/utils/toError";
 
 export interface RenameBranchFormOptions {
   isOpen: boolean;
@@ -77,7 +78,7 @@ export function useRenameBranchForm({
       if (onSuccess) onSuccess();
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err);
       setError(msg || t.common.error);
     }
   };

@@ -126,6 +126,6 @@ export const configCommands = {
       }
       return;
     }
-    await commands.setGitConfig(repoPath ?? null, scope, key, value);
+    unwrap(await commands.setGitConfig(repoPath ?? null, scope, key, value));
   },
 };

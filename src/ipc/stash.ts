@@ -42,7 +42,7 @@ export const stashCommands = {
     if (!isTauri()) {
       return;
     }
-    await commands.applyStash(repoPath, index);
+    unwrap(await commands.applyStash(repoPath, index));
   },
 
   popStash: async (repoPath: string, index: number): Promise<void> => {
@@ -52,7 +52,7 @@ export const stashCommands = {
         .map((s, idx) => ({ ...s, index: idx }));
       return;
     }
-    await commands.popStash(repoPath, index);
+    unwrap(await commands.popStash(repoPath, index));
   },
 
   dropStash: async (repoPath: string, index: number): Promise<string> => {

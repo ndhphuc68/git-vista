@@ -9,6 +9,7 @@ import { useCheckoutBranch } from "../api";
 import { useSidebarData } from "./useSidebarData";
 import { useSidebarActions } from "./useSidebarActions";
 import { useActiveSidebarMenu } from "./useActiveSidebarMenu";
+import { toErrorMessage } from "../../../shared/utils/toError";
 
 export interface BranchSidebarShellOptions {
   repoPath: string;
@@ -53,7 +54,7 @@ async function performCheckout({
       .getState()
       .showSuccess(t.sidebar.switchBranchSuccess.replace("{name}", checkedOut));
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = toErrorMessage(err);
     // Only the backend's own code: other errors can mention a "conflict" too.
     if (msg.includes("CHECKOUT_CONFLICT")) {
       setDialog({ kind: "checkoutConflict", targetBranch: branchName, errorMessage: msg });

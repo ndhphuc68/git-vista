@@ -28,6 +28,9 @@ function BranchPillPopoverRow({ refBadge, headBadgeText, onCheckout }: BranchPil
   return (
     <div
       data-testid={`branch-pill-popover-${refBadge.name}`}
+      onClick={(e) => {
+        if (canCheckout) e.stopPropagation();
+      }}
       onDoubleClick={(e) => {
         if (canCheckout) {
           e.stopPropagation();
@@ -148,6 +151,11 @@ export function CommitGraphBranchPills({
     <div className="relative group/pills inline-flex items-center gap-1.5 shrink-0 min-w-0">
       <div
         data-testid="commit-graph-primary-pill"
+        // A checkout-able pill keeps its clicks: the row would open the detail drawer,
+        // whose backdrop then swallows the second click of the double click.
+        onClick={(e) => {
+          if (canCheckoutPrimary) e.stopPropagation();
+        }}
         onDoubleClick={(e) => {
           if (canCheckoutPrimary) {
             e.stopPropagation();

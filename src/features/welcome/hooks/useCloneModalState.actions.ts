@@ -1,5 +1,5 @@
 import type { ChangeEvent, FormEvent, RefObject } from "react";
-import { messageOf } from "../../../shared/utils/toError";
+import { messageOf, toErrorMessage } from "../../../shared/utils/toError";
 import { cancelRemoteTask, cloneRepo, openRepository, selectRepoFolder } from "../api";
 import { resolveTargetDirOnFolderSelect, resolveTargetDirOnUrlChange } from "../model/cloneTargetDir";
 import type { RepoSummary } from "../../../ipc/bindings.generated";
@@ -56,7 +56,13 @@ export interface CloneSubmitContext {
 export function createCloneCancelHandler(context: CloneSubmitContext) {
   return async () => {
     if (context.isCloning && context.activeTaskIdRef.current) {
-      await cancelRemoteTask(context.activeTaskIdRef.current);
+      try {
+        await cancelRemoteTask(context.activeTaskIdRef.current);
+      } catch (err: unknown) {
+        // The clone is still running when the cancel request itself fails.
+        context.setError(toErrorMessage(err));
+        return;
+      }
       context.setIsCloning(false);
       context.setError(context.t.cloneModal.cancelError);
     } else {

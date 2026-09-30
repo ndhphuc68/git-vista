@@ -1,7 +1,16 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render as rtlRender, screen, fireEvent, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactElement } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { invokeCommand } from "../ipc/client";
 import { WindowTabBar } from "../components/header/WindowTabBar";
 import { useTabStore } from "../store/useTabStore";
+
+// Repo tabs read the live HEAD through React Query.
+function render(ui: ReactElement) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return rtlRender(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+}
 
 describe("WindowTabBar", () => {
   beforeEach(() => {
@@ -26,6 +35,30 @@ describe("WindowTabBar", () => {
     expect(screen.getByText("alpha")).toBeInTheDocument();
     expect(screen.getByText("main")).toBeInTheDocument();
     expect(screen.getByTestId("close-tab-d:/projects/alpha")).toBeInTheDocument();
+  });
+
+  it("shows the branch HEAD is on now, not the one it was on when the tab opened", async () => {
+    vi.spyOn(invokeCommand, "getRepoHeadInfo").mockResolvedValue({
+      branch_name: "feature",
+      head_commit_id: "456",
+      is_detached: false,
+      ahead: 0,
+      behind: 0,
+      upstream: null,
+    });
+    useTabStore.getState().openRepoTab({
+      path: "d:/projects/alpha",
+      name: "alpha",
+      is_bare: false,
+      head_branch: "main",
+      head_commit_id: "123",
+    });
+
+    render(<WindowTabBar />);
+
+    await waitFor(() => expect(screen.getByText("feature")).toBeInTheDocument());
+    expect(screen.queryByText("main")).not.toBeInTheDocument();
+    vi.mocked(invokeCommand.getRepoHeadInfo).mockRestore();
   });
 
   it("switches active tab on click", () => {

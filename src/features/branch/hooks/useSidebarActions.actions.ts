@@ -5,6 +5,7 @@ import type { Translations } from "../../../i18n/vi";
 import type { useApplyStash, useDropStash, usePopStash } from "../../stash";
 import type { useCheckoutTag, usePushTag } from "../../tag";
 import type { useUndoDropStash } from "../../undo";
+import { toErrorMessage } from "../../../shared/utils/toError";
 
 export interface SidebarStashContext {
   stashes: StashItem[];
@@ -23,7 +24,7 @@ export function createStashActionHandlers(context: SidebarStashContext) {
     try {
       await apply.mutateAsync({ index });
     } catch (err: unknown) {
-      alert(`Khong the ap dung stash: ${err instanceof Error ? err.message : String(err)}`);
+      alert(`Khong the ap dung stash: ${toErrorMessage(err)}`);
     }
   };
 
@@ -32,7 +33,7 @@ export function createStashActionHandlers(context: SidebarStashContext) {
       await pop.mutateAsync({ index });
       closeStashPanel();
     } catch (err: unknown) {
-      alert(`Khong the pop stash: ${err instanceof Error ? err.message : String(err)}`);
+      alert(`Khong the pop stash: ${toErrorMessage(err)}`);
     }
   };
 

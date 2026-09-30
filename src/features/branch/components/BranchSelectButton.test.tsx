@@ -19,7 +19,6 @@ describe("BranchSelectButton", () => {
         name="feature"
         isSelected={false}
         onSelectBranch={vi.fn()}
-        onCheckout={vi.fn()}
       />
     );
 
@@ -36,7 +35,6 @@ describe("BranchSelectButton", () => {
         name="main"
         isSelected={false}
         onSelectBranch={vi.fn()}
-        onCheckout={vi.fn()}
       />
     );
 

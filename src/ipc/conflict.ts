@@ -49,6 +49,8 @@ export const conflictCommands = {
     if (!isTauri()) {
       return;
     }
-    await commands.resolveConflictFile(repoPath, filePath, resolvedContent, autoStage ?? null);
+    unwrap(
+      await commands.resolveConflictFile(repoPath, filePath, resolvedContent, autoStage ?? null)
+    );
   },
 };

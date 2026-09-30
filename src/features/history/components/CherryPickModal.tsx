@@ -9,6 +9,7 @@ import { cherryPickCommit } from "../api/commitActionsApi";
 import { CommitActionTargetCard } from "./CommitActionTargetCard";
 import { AutoCommitCheckbox } from "./AutoCommitCheckbox";
 import { CherryPickDestinationBranch } from "./CherryPickDestinationBranch";
+import { toErrorMessage } from "../../../shared/utils/toError";
 
 const TITLE_ID = "cherry-pick-title";
 
@@ -65,7 +66,7 @@ export const CherryPickModal: React.FC<CherryPickModalProps> = ({
         setError(errorMsg);
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err);
       setError(msg || t.common.error);
       useToastStore.getState().showError(mapGitError(err));
     } finally {

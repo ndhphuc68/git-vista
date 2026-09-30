@@ -1,5 +1,5 @@
 /**
- * The select/checkout button for a local branch leaf row: HEAD dot, name and
+ * The select button for a local branch leaf row: HEAD dot, name and
  * the HEAD badge. Split out of BranchLeafRow to keep that row's own function
  * under the line limit.
  */
@@ -13,7 +13,6 @@ export interface BranchSelectButtonProps {
   name: string;
   isSelected: boolean;
   onSelectBranch: (name: string) => void;
-  onCheckout: (name: string) => void;
 }
 
 export const BranchSelectButton: React.FC<BranchSelectButtonProps> = ({
@@ -21,15 +20,11 @@ export const BranchSelectButton: React.FC<BranchSelectButtonProps> = ({
   name,
   isSelected,
   onSelectBranch,
-  onCheckout,
 }) => {
   const { t } = useTranslation();
   return (
     <button
       onClick={() => onSelectBranch(branch.name)}
-      onDoubleClick={() => {
-        if (!branch.is_head) onCheckout(branch.name);
-      }}
       aria-selected={isSelected}
       className={clsx(
         "flex-1 flex items-center gap-1.5 px-2 py-1 rounded-sm border-0 cursor-pointer text-left min-h-[26px] text-xs transition-colors overflow-hidden",
