@@ -3,6 +3,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, it, expect, vi } from "vitest";
 import { CheckoutConflictModal } from "../features/branch";
 import { invokeCommand } from "../ipc/client";
+import { useRepoStore } from "../store/useRepoStore";
+import { useToastStore } from "../store/useToastStore";
+import { qk } from "../domain/queryKeys";
 
 function renderWithClient(ui: React.ReactElement) {
   const client = new QueryClient({
@@ -139,5 +142,61 @@ describe("CheckoutConflictModal", () => {
 
       expect(screen.queryByRole("button", { name: /stash/i })).not.toBeInTheDocument();
     });
+  });
+});
+
+describe("CheckoutConflictModal - after stash-and-checkout", () => {
+  it("selects the checked-out local branch and shows a success toast", async () => {
+    const item = (name: string) => ({
+      name,
+      is_head: false,
+      target_commit_id: "abc",
+      upstream: null,
+      ahead: 0,
+      behind: 0,
+    });
+    vi.spyOn(invokeCommand, "getBranches").mockResolvedValue({
+      current_branch: "main",
+      is_detached: false,
+      local: [item("main")],
+      remote: [item("origin/feature/next")],
+      tags: [],
+    });
+    const saveStashSpy = vi.spyOn(invokeCommand, "saveStash").mockResolvedValue("stash123");
+    const checkoutBranchSpy = vi
+      .spyOn(invokeCommand, "checkoutBranch")
+      .mockResolvedValue(undefined);
+    useRepoStore.getState().setSelectedBranch("main");
+    useToastStore.setState({ toasts: [] });
+
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+    render(
+      <QueryClientProvider client={client}>
+        <CheckoutConflictModal
+          isOpen={true}
+          onClose={vi.fn()}
+          repoPath="/test/repo"
+          targetBranch="origin/feature/next"
+          errorMessage="CHECKOUT_CONFLICT: file1.txt"
+          onNavigateToChanges={vi.fn()}
+        />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => expect(client.getQueryData(qk.branches("/test/repo"))).toBeDefined());
+    fireEvent.click(screen.getByRole("button", { name: /lưu tạm \(stash\) rồi chuyển nhánh/i }));
+
+    await waitFor(() => {
+      expect(checkoutBranchSpy).toHaveBeenCalledWith("/test/repo", "origin/feature/next");
+      expect(useRepoStore.getState().selectedBranch).toBe("feature/next");
+    });
+    const toasts = useToastStore.getState().toasts;
+    expect(toasts.some((toast) => toast.type === "success")).toBe(true);
+
+    saveStashSpy.mockRestore();
+    checkoutBranchSpy.mockRestore();
+    vi.mocked(invokeCommand.getBranches).mockRestore();
   });
 });

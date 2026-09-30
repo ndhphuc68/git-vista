@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useSaveStash } from "../../stash";
-import { useCheckoutBranch } from "../api";
+import { useBranches, useCheckoutBranch } from "../api";
+import { checkedOutBranchName } from "../model/checkoutTarget";
+import { useRepoStore } from "../../../store/useRepoStore";
+import { useToastStore } from "../../../store/useToastStore";
 import { useTranslation } from "../../../i18n";
 
 export interface CheckoutConflictFormOptions {
@@ -24,6 +27,7 @@ export function useCheckoutConflictForm({
   // renders when it is set, so an empty path never reaches the mutation.
   const checkoutBranch = useCheckoutBranch(repoPath ?? "");
   const saveStash = useSaveStash(repoPath ?? "");
+  const { data: branchData } = useBranches(repoPath ?? "");
   const [actionError, setActionError] = useState<string | null>(null);
   const [isStashing, setIsStashing] = useState(false);
 
@@ -44,6 +48,13 @@ export function useCheckoutConflictForm({
         includeUntracked: true,
       });
       await checkoutBranch.mutateAsync({ name: targetBranch });
+      // Same follow-up as a direct checkout: the selection and the toast name the
+      // local branch HEAD landed on.
+      const checkedOut = checkedOutBranchName(targetBranch, branchData);
+      useRepoStore.getState().setSelectedBranch(checkedOut);
+      useToastStore
+        .getState()
+        .showSuccess(t.sidebar.switchBranchSuccess.replace("{name}", checkedOut));
       onClose();
       onSuccess?.();
     } catch (err: unknown) {
