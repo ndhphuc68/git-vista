@@ -8,6 +8,7 @@ import {
   type CheckStatus,
   type PullRequestFileItem,
 } from "../ipc/githubApi";
+import { readJson } from "./readJson";
 
 const GITHUB_API_BASE = "https://api.github.com";
 
@@ -151,7 +152,7 @@ async function fetchPullRequestCheckRuns(
     const checksUrl = `${GITHUB_API_BASE}/repos/${owner}/${repo}/commits/${sha}/check-runs`;
     const checksRes = await fetch(checksUrl, { headers: getHeaders(token) });
     if (!checksRes.ok) return [];
-    const checksData = await checksRes.json();
+    const checksData = await readJson<{ check_runs?: RawCheckRun[] }>(checksRes);
     if (!Array.isArray(checksData.check_runs)) return [];
     return checksData.check_runs.map(mapCheckRun);
   } catch {
@@ -170,7 +171,7 @@ async function fetchPullRequestFilesList(
     const filesUrl = `${GITHUB_API_BASE}/repos/${owner}/${repo}/pulls/${number}/files`;
     const filesRes = await fetch(filesUrl, { headers: getHeaders(token) });
     if (!filesRes.ok) return [];
-    const filesData = await filesRes.json();
+    const filesData = await readJson<RawPullRequestFile[]>(filesRes);
     if (!Array.isArray(filesData)) return [];
     return filesData.map(mapPullRequestFile);
   } catch {
@@ -199,7 +200,7 @@ export async function testGitHubToken(token: string): Promise<GitHubUserSummary>
     }
     throw new Error(`Kiểm tra token thất bại (mã lỗi ${res.status}).`);
   }
-  const data = await res.json();
+  const data = await readJson<RawGitHubUserLink>(res);
   return {
     login: data.login,
     avatar_url: data.avatar_url,
@@ -228,7 +229,7 @@ export async function fetchPullRequests(
     throw new Error(`Tải danh sách PR thất bại (mã lỗi ${res.status}).`);
   }
 
-  const items = (await res.json()) as RawPullRequest[];
+  const items = await readJson<RawPullRequest[]>(res);
   return items.map(mapRawPullRequest);
 }
 
@@ -243,7 +244,7 @@ export async function fetchPullRequestDetail(
   if (!prRes.ok) {
     throw new Error(`Không thể lấy thông tin PR #${number} (mã lỗi ${prRes.status}).`);
   }
-  const p = (await prRes.json()) as RawPullRequest;
+  const p = await readJson<RawPullRequest>(prRes);
   const pr = mapRawPullRequest(p);
 
   // Fetch checks if head sha is present
@@ -289,11 +290,13 @@ export async function createPullRequest(
   });
 
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
+    const errorData = await readJson<{ message?: string }>(res).catch(
+      (): { message?: string } => ({})
+    );
     const message = errorData.message || `Lỗi khi tạo Pull Request (mã ${res.status})`;
     throw new Error(message);
   }
 
-  const p = (await res.json()) as RawPullRequest;
+  const p = await readJson<RawPullRequest>(res);
   return mapRawPullRequest(p);
 }

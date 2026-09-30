@@ -26,7 +26,7 @@ export function computeWordDiff(oldText: string, newText: string): WordDiffResul
   const m = tOld.length;
   const n = tNew.length;
 
-  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array<number>(n + 1).fill(0));
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
       if (tOld[i - 1] === tNew[j - 1]) {

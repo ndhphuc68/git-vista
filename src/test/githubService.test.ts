@@ -205,4 +205,57 @@ describe("GitHub Service & Translation Parity", () => {
     expect(enSettings).toBeDefined();
     expect(Object.keys(viSettings).sort()).toEqual(Object.keys(enSettings).sort());
   });
+
+  it("fetchPullRequestDetail returns no check runs when check_runs is not an array", async () => {
+    const mockPr = {
+      number: 11,
+      title: "No checks",
+      state: "open",
+      head: { ref: "topic", sha: "abc123" },
+      base: { ref: "main", sha: "def456" },
+      labels: [],
+      assignees: [],
+      requested_reviewers: [],
+      html_url: "https://github.com/owner/repo/pull/11",
+    };
+    global.fetch = vi.fn().mockImplementation(async (url: string) => {
+      if (url.includes("/check-runs")) {
+        return { ok: true, json: async () => ({ total_count: 0 }) } as Response;
+      }
+      if (url.includes("/files")) {
+        return { ok: true, json: async () => ({ message: "not a list" }) } as Response;
+      }
+      return { ok: true, json: async () => mockPr } as Response;
+    });
+
+    const detail = await fetchPullRequestDetail("owner", "repo", 11, "token");
+    expect(detail.check_runs).toEqual([]);
+    expect(detail.files).toEqual([]);
+  });
+
+  it("createPullRequest throws the API message when the request fails", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 422,
+      json: async () => ({ message: "Validation Failed" }),
+    } as Response);
+
+    await expect(
+      createPullRequest("owner", "repo", { title: "t", body: "", head: "a", base: "b" }, "token")
+    ).rejects.toThrow("Validation Failed");
+  });
+
+  it("createPullRequest falls back to the status message when the error body is not JSON", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => {
+        throw new SyntaxError("Unexpected token");
+      },
+    } as unknown as Response);
+
+    await expect(
+      createPullRequest("owner", "repo", { title: "t", body: "", head: "a", base: "b" }, "token")
+    ).rejects.toThrow("(mã 500)");
+  });
 });
