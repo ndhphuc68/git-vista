@@ -5,7 +5,7 @@ import { invokeCommand } from "../ipc/client";
 import { qk } from "../domain/queryKeys";
 import { CommitGraph, useCommitGraph } from "../features/history";
 import { CreateTagModal } from "../features/tag";
-import { CreateBranchModal } from "../features/branch";
+import { CheckoutConflictModal, CreateBranchModal } from "../features/branch";
 import { useRepoStore } from "../store/useRepoStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -65,7 +65,11 @@ describe("CommitGraph", () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
+        <CommitGraph
+          CreateTagModal={CreateTagModal}
+          CreateBranchModal={CreateBranchModal}
+          CheckoutConflictModal={CheckoutConflictModal}
+        />
       </QueryClientProvider>
     );
 

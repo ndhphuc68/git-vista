@@ -92,6 +92,37 @@ describe("useBranchSidebarShell - checkout guards and handling", () => {
     expect(toasts.some((t) => t.type === "success")).toBe(true);
   });
 
+  it("selects the local branch after checking out a remote-tracking branch", async () => {
+    const item = (name: string) => ({
+      name,
+      is_head: false,
+      target_commit_id: "abc",
+      upstream: null,
+      ahead: 0,
+      behind: 0,
+    });
+    vi.spyOn(invokeCommand, "getBranches").mockResolvedValue({
+      current_branch: "main",
+      is_detached: false,
+      local: [item("main")],
+      remote: [item("origin/feature/login")],
+      tags: [],
+    });
+    const checkoutSpy = vi.spyOn(invokeCommand, "checkoutBranch").mockResolvedValue(undefined);
+
+    const { hook, setSelectedBranch } = setup();
+
+    await waitFor(() => {
+      expect(hook.result.current.data.branchData?.remote).toHaveLength(1);
+    });
+    await act(async () => {
+      await hook.result.current.handleCheckout("origin/feature/login");
+    });
+
+    expect(checkoutSpy).toHaveBeenCalledWith(REPO, "origin/feature/login");
+    expect(setSelectedBranch).toHaveBeenCalledWith("feature/login");
+  });
+
   it("opens checkoutConflict dialog when checkout fails with CHECKOUT_CONFLICT", async () => {
     vi.spyOn(invokeCommand, "checkoutBranch").mockRejectedValue(
       new Error("CHECKOUT_CONFLICT: file1.txt")

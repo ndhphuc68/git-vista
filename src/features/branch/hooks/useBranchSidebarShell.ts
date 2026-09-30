@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { type StashItem } from "../../../ipc/bindings.generated";
+import { type BranchListResult, type StashItem } from "../../../ipc/bindings.generated";
 import { NO_DIALOG, type SidebarDialog } from "../model/sidebarDialog";
+import { checkedOutBranchName } from "../model/checkoutTarget";
 import { useToastStore } from "../../../store/useToastStore";
 import { useTranslation } from "../../../i18n";
 import { mapGitError } from "../../../utils/errorMapping";
@@ -18,6 +19,7 @@ export interface BranchSidebarShellOptions {
 interface PerformCheckoutOptions {
   branchName: string;
   isInProgress: boolean | undefined;
+  branchData: BranchListResult | undefined;
   checkoutBranch: (variables: { name: string }) => Promise<unknown>;
   setSelectedBranch: (name: string) => void;
   setDialog: (dialog: SidebarDialog) => void;
@@ -28,6 +30,7 @@ interface PerformCheckoutOptions {
 async function performCheckout({
   branchName,
   isInProgress,
+  branchData,
   checkoutBranch,
   setSelectedBranch,
   setDialog,
@@ -44,10 +47,11 @@ async function performCheckout({
   try {
     // invalidateRepo is gone from here: useCheckoutBranch owns invalidation.
     await checkoutBranch({ name: branchName });
-    setSelectedBranch(branchName);
+    const checkedOut = checkedOutBranchName(branchName, branchData);
+    setSelectedBranch(checkedOut);
     useToastStore
       .getState()
-      .showSuccess(t.sidebar.switchBranchSuccess.replace("{name}", branchName));
+      .showSuccess(t.sidebar.switchBranchSuccess.replace("{name}", checkedOut));
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     if (msg.includes("CHECKOUT_CONFLICT") || msg.toLowerCase().includes("conflict")) {
@@ -109,6 +113,7 @@ export function useBranchSidebarShell({
     performCheckout({
       branchName,
       isInProgress: data.repoState?.is_in_progress,
+      branchData,
       checkoutBranch: checkoutBranch.mutateAsync,
       setSelectedBranch,
       setDialog,

@@ -1,6 +1,6 @@
 import React from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CreateBranchModal, useBranches } from "../features/branch";
+import { CheckoutConflictModal, CreateBranchModal, useBranches } from "../features/branch";
 import { CreateTagModal } from "../features/tag";
 import { CommitGraph } from "../features/history";
 import { useLayoutStore } from "../store/useLayoutStore";
@@ -78,7 +78,11 @@ export const Shell: React.FC = () => {
         data-testid="shell-graph-container"
         className="flex-1 min-w-0 h-full overflow-hidden flex flex-col"
       >
-        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
+        <CommitGraph
+          CreateTagModal={CreateTagModal}
+          CreateBranchModal={CreateBranchModal}
+          CheckoutConflictModal={CheckoutConflictModal}
+        />
       </div>
 
       {/* Right: Commit Detail 3/4 Slide-in Drawer with Backdrop */}

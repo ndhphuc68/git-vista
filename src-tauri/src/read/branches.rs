@@ -78,6 +78,10 @@ pub fn list_repo_branches<P: AsRef<Path>>(repo_path: P) -> Result<BranchListResu
     if let Ok(branches) = repo.branches(Some(BranchType::Remote)) {
         for (branch, _) in branches.flatten() {
             if let Ok(Some(name)) = branch.name() {
+                // `<remote>/HEAD` is a symbolic ref, not a branch that can be checked out.
+                if name.ends_with("/HEAD") {
+                    continue;
+                }
                 let target = branch
                     .get()
                     .target()

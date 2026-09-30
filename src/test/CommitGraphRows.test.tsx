@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor, within } from "@testing-library/rea
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CommitGraph } from "../features/history";
 import { CreateTagModal } from "../features/tag";
-import { CreateBranchModal } from "../features/branch";
+import { CheckoutConflictModal, CreateBranchModal } from "../features/branch";
 import { useRepoStore } from "../store/useRepoStore";
 import { useViewStore } from "../store/useViewStore";
 import { useSettingsStore } from "../store/useSettingsStore";
@@ -90,7 +90,11 @@ describe("CommitGraphRows (via CommitGraph)", () => {
   function renderGraph() {
     return render(
       <QueryClientProvider client={queryClient}>
-        <CommitGraph CreateTagModal={CreateTagModal} CreateBranchModal={CreateBranchModal} />
+        <CommitGraph
+          CreateTagModal={CreateTagModal}
+          CreateBranchModal={CreateBranchModal}
+          CheckoutConflictModal={CheckoutConflictModal}
+        />
       </QueryClientProvider>
     );
   }
