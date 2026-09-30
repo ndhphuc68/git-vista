@@ -63,6 +63,7 @@ interface UseGraphCheckoutParams {
   repoState: RepoStateInfo | undefined;
   setSelectedBranch: (branch: string | null) => void;
   setContextMenu: (menu: GraphContextMenu | null) => void;
+  setDialog: (dialog: GraphDialog) => void;
   t: ReturnType<typeof useTranslation>["t"];
 }
 
@@ -71,6 +72,7 @@ function useGraphCheckout({
   repoState,
   setSelectedBranch,
   setContextMenu,
+  setDialog,
   t,
 }: UseGraphCheckoutParams) {
   const checkoutBranch = useCheckoutBranch(repoPath);
@@ -90,7 +92,13 @@ function useGraphCheckout({
         .getState()
         .showSuccess(t.sidebar.switchBranchSuccess.replace("{name}", branchName));
     } catch (err: unknown) {
-      useToastStore.getState().showError(mapGitError(err, t));
+      const msg = err instanceof Error ? err.message : String(err);
+      // A conflict gets the dialog that offers stash-and-checkout, as in the sidebar.
+      if (msg.includes("CHECKOUT_CONFLICT")) {
+        setDialog({ type: "checkoutConflict", targetBranch: branchName, errorMessage: msg });
+      } else {
+        useToastStore.getState().showError(mapGitError(err, t));
+      }
     }
   };
 
@@ -146,6 +154,7 @@ export function useCommitGraphState() {
     repoState,
     setSelectedBranch,
     setContextMenu,
+    setDialog,
     t,
   });
 

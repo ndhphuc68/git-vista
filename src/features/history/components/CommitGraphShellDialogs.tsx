@@ -9,9 +9,13 @@ interface CommitGraphShellDialogsProps extends GraphDialogComponents {
   onClose: () => void;
   currentRepo: RepoSummary;
   queryClient: QueryClient;
+  onNavigateToChanges: () => void;
 }
 
-/** Create Tag / Create Branch dialogs, owned by the tag/branch features but shown from here. */
+/**
+ * Create Tag, Create Branch and checkout-conflict dialogs, owned by the
+ * tag/branch features but shown from here.
+ */
 export function CommitGraphShellDialogs({
   dialog,
   onClose,
@@ -19,6 +23,8 @@ export function CommitGraphShellDialogs({
   queryClient,
   CreateTagModal,
   CreateBranchModal,
+  CheckoutConflictModal,
+  onNavigateToChanges,
 }: CommitGraphShellDialogsProps) {
   return (
     <>
@@ -48,6 +54,17 @@ export function CommitGraphShellDialogs({
             queryClient.invalidateQueries({ queryKey: qk.commitGraph(currentRepo.path) });
             queryClient.invalidateQueries({ queryKey: qk.branches(currentRepo.path) });
           }}
+        />
+      )}
+
+      {dialog.type === "checkoutConflict" && (
+        <CheckoutConflictModal
+          isOpen={true}
+          onClose={() => onClose()}
+          repoPath={currentRepo.path}
+          targetBranch={dialog.targetBranch}
+          errorMessage={dialog.errorMessage}
+          onNavigateToChanges={onNavigateToChanges}
         />
       )}
     </>

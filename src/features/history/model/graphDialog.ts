@@ -7,7 +7,8 @@ export type GraphDialog =
   | { type: "cherryPick"; commit: GraphCommitNode }
   | { type: "revert"; commit: GraphCommitNode }
   | { type: "interactiveRebase"; commit: GraphCommitNode }
-  | { type: "compare"; baseRev: string; targetRev: string };
+  | { type: "compare"; baseRev: string; targetRev: string }
+  | { type: "checkoutConflict"; targetBranch: string; errorMessage: string };
 
 export type GraphContextMenu = { x: number; y: number; commit: GraphCommitNode };
 

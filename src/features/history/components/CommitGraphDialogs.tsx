@@ -24,6 +24,14 @@ export interface GraphDialogComponents {
     }
   >;
   CreateBranchModal: ComponentType<GraphActionModalProps & { targetCommit: string }>;
+  CheckoutConflictModal: ComponentType<{
+    isOpen: boolean;
+    onClose: () => void;
+    repoPath: string;
+    targetBranch: string;
+    errorMessage: string;
+    onNavigateToChanges: () => void;
+  }>;
 }
 
 interface CommitGraphDialogsProps extends GraphDialogComponents {
@@ -36,6 +44,7 @@ export function CommitGraphDialogs({
   onClose,
   CreateTagModal,
   CreateBranchModal,
+  CheckoutConflictModal,
 }: CommitGraphDialogsProps) {
   const { currentRepo } = useRepoStore();
   const { setActiveScreen } = useViewStore();
@@ -53,6 +62,8 @@ export function CommitGraphDialogs({
         queryClient={queryClient}
         CreateTagModal={CreateTagModal}
         CreateBranchModal={CreateBranchModal}
+        CheckoutConflictModal={CheckoutConflictModal}
+        onNavigateToChanges={() => setActiveScreen("changes")}
       />
       <CommitGraphActionDialogs
         dialog={dialog}

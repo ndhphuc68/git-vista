@@ -86,6 +86,42 @@ describe("useCommitGraphState - checkout branch", () => {
     const toasts = useToastStore.getState().toasts;
     expect(toasts.some((t) => t.type === "success")).toBe(true);
   });
+
+  it("opens the checkout conflict dialog instead of a toast on CHECKOUT_CONFLICT", async () => {
+    vi.spyOn(invokeCommand, "checkoutBranch").mockRejectedValue(
+      new Error("CHECKOUT_CONFLICT: file1.txt")
+    );
+
+    const { hook } = setup();
+
+    await act(async () => {
+      await hook.result.current.handleCheckoutBranch("feature-conflict");
+    });
+
+    expect(hook.result.current.dialog).toEqual({
+      type: "checkoutConflict",
+      targetBranch: "feature-conflict",
+      errorMessage: "CHECKOUT_CONFLICT: file1.txt",
+    });
+    expect(useToastStore.getState().toasts).toHaveLength(0);
+  });
+
+  it("keeps showing an error toast for other checkout failures", async () => {
+    vi.spyOn(invokeCommand, "checkoutBranch").mockRejectedValue(
+      new Error("fatal: unable to read tree")
+    );
+
+    const { hook } = setup();
+
+    await act(async () => {
+      await hook.result.current.handleCheckoutBranch("feature-err");
+    });
+
+    expect(hook.result.current.dialog).toEqual({ type: "closed" });
+    const toasts = useToastStore.getState().toasts;
+    expect(toasts).toHaveLength(1);
+    expect(toasts[0]!.type).toBe("error");
+  });
 });
 
 describe("useCommitGraphState - checkout commit", () => {
