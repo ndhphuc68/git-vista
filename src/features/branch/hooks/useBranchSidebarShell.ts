@@ -15,6 +15,49 @@ export interface BranchSidebarShellOptions {
   setSelectedBranch: (name: string) => void;
 }
 
+interface PerformCheckoutOptions {
+  branchName: string;
+  isInProgress: boolean | undefined;
+  checkoutBranch: (variables: { name: string }) => Promise<unknown>;
+  setSelectedBranch: (name: string) => void;
+  setDialog: (dialog: SidebarDialog) => void;
+  setActiveMenu: (menu: null) => void;
+  t: ReturnType<typeof useTranslation>["t"];
+}
+
+async function performCheckout({
+  branchName,
+  isInProgress,
+  checkoutBranch,
+  setSelectedBranch,
+  setDialog,
+  setActiveMenu,
+  t,
+}: PerformCheckoutOptions) {
+  setActiveMenu(null);
+  if (isInProgress) {
+    useToastStore
+      .getState()
+      .showError(mapGitError("OPERATION_IN_PROGRESS: Operation is already in progress", t));
+    return;
+  }
+  try {
+    // invalidateRepo is gone from here: useCheckoutBranch owns invalidation.
+    await checkoutBranch({ name: branchName });
+    setSelectedBranch(branchName);
+    useToastStore
+      .getState()
+      .showSuccess(t.sidebar.switchBranchSuccess.replace("{name}", branchName));
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("CHECKOUT_CONFLICT") || msg.toLowerCase().includes("conflict")) {
+      setDialog({ kind: "checkoutConflict", targetBranch: branchName, errorMessage: msg });
+    } else {
+      useToastStore.getState().showError(mapGitError(err, t));
+    }
+  }
+}
+
 /**
  * All of the sidebar's own UI state (search, section open/closed, the
  * dialog slot, the context-menu slot and its outside-click/Escape handling,
@@ -62,30 +105,16 @@ export function useBranchSidebarShell({
     "main";
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
 
-  const handleCheckout = async (branchName: string) => {
-    setActiveMenu(null);
-    if (data.repoState?.is_in_progress) {
-      useToastStore.getState().showError(
-        mapGitError("OPERATION_IN_PROGRESS: Operation is already in progress", t)
-      );
-      return;
-    }
-    try {
-      // invalidateRepo is gone from here: useCheckoutBranch owns invalidation.
-      await checkoutBranch.mutateAsync({ name: branchName });
-      setSelectedBranch(branchName);
-      useToastStore.getState().showSuccess(
-        t.sidebar.switchBranchSuccess.replace("{name}", branchName)
-      );
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes("CHECKOUT_CONFLICT") || msg.toLowerCase().includes("conflict")) {
-        setDialog({ kind: "checkoutConflict", targetBranch: branchName, errorMessage: msg });
-      } else {
-        useToastStore.getState().showError(mapGitError(err, t));
-      }
-    }
-  };
+  const handleCheckout = (branchName: string) =>
+    performCheckout({
+      branchName,
+      isInProgress: data.repoState?.is_in_progress,
+      checkoutBranch: checkoutBranch.mutateAsync,
+      setSelectedBranch,
+      setDialog,
+      setActiveMenu,
+      t,
+    });
 
   const toggleFolder = (folderPath: string) => {
     setExpandedFolders((prev) => ({

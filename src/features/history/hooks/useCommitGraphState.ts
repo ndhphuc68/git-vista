@@ -9,7 +9,7 @@ import { useCommitGraph } from "../api/useCommitGraph";
 import { useRepoStatus } from "../api/useRepoStatus";
 import { useCheckoutBranch } from "../api/useCheckoutBranch";
 import { useCheckoutCommit } from "../api/useCheckoutCommit";
-import { useRepoState } from "../../conflict";
+import { useRepoState, type RepoStateInfo } from "../../conflict";
 import { mapGitError } from "../../../utils/errorMapping";
 import {
   getMaxGraphColumns,
@@ -47,6 +47,75 @@ function useContextMenuDismiss(
   }, [isOpen, menuRef, onClose]);
 }
 
+async function copyShaToClipboard(commitId: string, successMessage: string) {
+  try {
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(commitId);
+    }
+  } catch {
+    // ignore clipboard errors
+  }
+  useToastStore.getState().showSuccess(successMessage);
+}
+
+interface UseGraphCheckoutParams {
+  repoPath: string;
+  repoState: RepoStateInfo | undefined;
+  setSelectedBranch: (branch: string | null) => void;
+  setContextMenu: (menu: GraphContextMenu | null) => void;
+  t: ReturnType<typeof useTranslation>["t"];
+}
+
+function useGraphCheckout({
+  repoPath,
+  repoState,
+  setSelectedBranch,
+  setContextMenu,
+  t,
+}: UseGraphCheckoutParams) {
+  const checkoutBranch = useCheckoutBranch(repoPath);
+  const checkoutCommit = useCheckoutCommit(repoPath);
+
+  const handleCheckoutBranch = async (branchName: string) => {
+    if (repoState?.is_in_progress) {
+      useToastStore
+        .getState()
+        .showError(mapGitError("OPERATION_IN_PROGRESS: Operation is already in progress", t));
+      return;
+    }
+    try {
+      await checkoutBranch.mutateAsync({ name: branchName });
+      setSelectedBranch(branchName);
+      useToastStore
+        .getState()
+        .showSuccess(t.sidebar.switchBranchSuccess.replace("{name}", branchName));
+    } catch (err: unknown) {
+      useToastStore.getState().showError(mapGitError(err, t));
+    }
+  };
+
+  const handleCheckoutCommit = async (commitId: string) => {
+    setContextMenu(null);
+    if (repoState?.is_in_progress) {
+      useToastStore
+        .getState()
+        .showError(mapGitError("OPERATION_IN_PROGRESS: Operation is already in progress", t));
+      return;
+    }
+    try {
+      await checkoutCommit.mutateAsync({ commitId });
+      setSelectedBranch(null);
+      useToastStore
+        .getState()
+        .showSuccess(t.graph.checkoutCommitSuccess.replace("{sha}", commitId.slice(0, 7)));
+    } catch (err: unknown) {
+      useToastStore.getState().showError(mapGitError(err, t));
+    }
+  };
+
+  return { handleCheckoutBranch, handleCheckoutCommit };
+}
+
 /** All state, effects and derived values CommitGraph's JSX reads. */
 export function useCommitGraphState() {
   const { t } = useTranslation();
@@ -61,25 +130,24 @@ export function useCommitGraphState() {
   useContextMenuDismiss(Boolean(contextMenu), menuRef, () => setContextMenu(null));
 
   const handleCopySha = async (commitId: string) => {
-    try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(commitId);
-      }
-    } catch {
-      // ignore clipboard errors
-    }
-    useToastStore.getState().showSuccess(t.graph.copyShaSuccess);
+    await copyShaToClipboard(commitId, t.graph.copyShaSuccess);
     setContextMenu(null);
   };
 
   const repoPath = currentRepo?.path ?? "";
-  const checkoutBranch = useCheckoutBranch(repoPath);
-  const checkoutCommit = useCheckoutCommit(repoPath);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useCommitGraph(repoPath);
   const { data: repoStatus } = useRepoStatus(repoPath);
   const { data: repoState } = useRepoState(repoPath);
   const { hasUncommittedChanges, modifiedCount, untrackedCount } =
     getUncommittedSummary(repoStatus);
+
+  const { handleCheckoutBranch, handleCheckoutCommit } = useGraphCheckout({
+    repoPath,
+    repoState,
+    setSelectedBranch,
+    setContextMenu,
+    t,
+  });
 
   const commits = useMemo(() => (data ? data.pages.flatMap((page) => page.commits) : []), [data]);
 
@@ -95,43 +163,6 @@ export function useCommitGraphState() {
   const handleSelectCommit = (commitId: string) => {
     setSelectedCommit(commitId);
     setDetailPanelOpen(true);
-  };
-
-  const handleCheckoutBranch = async (branchName: string) => {
-    if (repoState?.is_in_progress) {
-      useToastStore.getState().showError(
-        mapGitError("OPERATION_IN_PROGRESS: Operation is already in progress", t)
-      );
-      return;
-    }
-    try {
-      await checkoutBranch.mutateAsync({ name: branchName });
-      setSelectedBranch(branchName);
-      useToastStore.getState().showSuccess(
-        t.sidebar.switchBranchSuccess.replace("{name}", branchName)
-      );
-    } catch (err: unknown) {
-      useToastStore.getState().showError(mapGitError(err, t));
-    }
-  };
-
-  const handleCheckoutCommit = async (commitId: string) => {
-    setContextMenu(null);
-    if (repoState?.is_in_progress) {
-      useToastStore.getState().showError(
-        mapGitError("OPERATION_IN_PROGRESS: Operation is already in progress", t)
-      );
-      return;
-    }
-    try {
-      await checkoutCommit.mutateAsync({ commitId });
-      setSelectedBranch(null);
-      useToastStore.getState().showSuccess(
-        t.graph.checkoutCommitSuccess.replace("{sha}", commitId.slice(0, 7))
-      );
-    } catch (err: unknown) {
-      useToastStore.getState().showError(mapGitError(err, t));
-    }
   };
 
   return {
