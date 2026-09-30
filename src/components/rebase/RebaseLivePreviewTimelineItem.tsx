@@ -63,9 +63,9 @@ export const RebaseLivePreviewTimelineItem: React.FC<RebaseLivePreviewTimelineIt
             <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1">
               <Layers size={10} />+{item.squashedSubCommits.length} squashed into this commit:
             </span>
-            {item.squashedSubCommits.map((sub, sIdx) => (
+            {item.squashedSubCommits.map((sub) => (
               <div
-                key={sIdx}
+                key={sub.short_id}
                 className="text-[10px] text-secondary font-mono truncate pl-2 border-l border-amber-500/30"
               >
                 {sub.short_id} • {sub.summary}

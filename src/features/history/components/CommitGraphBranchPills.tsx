@@ -95,9 +95,9 @@ function BranchPillListPopover({
         <span>{sortedRefs.length}</span>
       </div>
       <div className="flex flex-col gap-1 max-h-48 overflow-y-auto pt-0.5">
-        {sortedRefs.map((r, idx) => (
+        {sortedRefs.map((r) => (
           <BranchPillPopoverRow
-            key={idx}
+            key={`${r.ref_type}:${r.name}`}
             refBadge={r}
             headBadgeText={headBadgeText}
             onCheckout={onCheckout}

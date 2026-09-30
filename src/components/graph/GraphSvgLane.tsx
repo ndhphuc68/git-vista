@@ -41,8 +41,14 @@ export const GraphSvgLane: React.FC<GraphSvgLaneProps> = ({
         height: `${rowHeight}px`,
       }}
     >
-      {lines.map((edge, idx) => (
-        <GraphSvgEdge key={idx} edge={edge} colWidth={colWidth} rowHeight={rowHeight} nodeY={nodeY} />
+      {lines.map((edge) => (
+        <GraphSvgEdge
+          key={`${edge.edge_type}:${edge.from_col}:${edge.to_col}`}
+          edge={edge}
+          colWidth={colWidth}
+          rowHeight={rowHeight}
+          nodeY={nodeY}
+        />
       ))}
 
       {isHead ? (

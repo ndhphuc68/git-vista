@@ -45,7 +45,7 @@ export const RebaseLivePreviewTimeline: React.FC<RebaseLivePreviewTimelineProps>
       {/* Projected Commits Chain (from bottom to top or top to bottom) */}
       {projectedCommits.map((item, idx) => (
         <RebaseLivePreviewTimelineItem
-          key={item.id + idx}
+          key={item.id}
           item={item}
           isLastItem={idx === projectedCommits.length - 1}
         />
