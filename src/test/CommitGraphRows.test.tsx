@@ -154,4 +154,19 @@ describe("CommitGraphRows (via CommitGraph)", () => {
       expect(screen.getByText("Compare Commits & Branches")).toBeInTheDocument();
     });
   });
+
+  it("shows branch pills inline within the commit message column without a separate branch column", async () => {
+    renderGraph();
+    const row = (await screen.findByText("third commit")).closest('[role="button"]') as HTMLElement;
+
+    // Header bar must NOT contain a separate BRANCH / TAG column
+    const header = screen.getByText("GRAPH").parentElement as HTMLElement;
+    expect(within(header).queryByText("BRANCH / TAG")).toBeNull();
+    expect(within(header).getByText("GRAPH")).toBeInTheDocument();
+    expect(within(header).getByText("COMMIT MESSAGE")).toBeInTheDocument();
+
+    // The commit row must contain the branch pill inline
+    expect(within(row).getByTitle("main")).toBeInTheDocument();
+    expect(within(row).getByText("third commit")).toBeInTheDocument();
+  });
 });

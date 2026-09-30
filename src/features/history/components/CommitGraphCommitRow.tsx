@@ -4,7 +4,6 @@ import type { GraphCommitNode } from "../../../ipc/bindings.generated";
 import { GraphSvgLane } from "../../../components/graph/GraphSvgLane";
 import type { GraphContextMenu } from "../model/graphDialog";
 import { GRAPH_ROW_HEIGHT } from "../model/graphPresentation";
-import { CommitGraphBranchPills } from "./CommitGraphBranchPills";
 import { CommitGraphCommitRowSummary } from "./CommitGraphCommitRowSummary";
 
 interface CommitGraphCommitRowProps {
@@ -21,7 +20,7 @@ interface CommitGraphCommitRowProps {
   onContextMenu: (menu: GraphContextMenu) => void;
 }
 
-/** One virtualized commit row: branch pills, graph lane, message, author and SHA. */
+/** One virtualized commit row: graph lane, message with branch pills, author, date and SHA. */
 export function CommitGraphCommitRow({
   commit,
   style,
@@ -71,15 +70,13 @@ export function CommitGraphCommitRow({
       }}
       style={style}
       className={clsx(
-        "absolute top-0 left-0 w-full flex items-center px-3 border-b border-border-subtle cursor-pointer text-xs outline-none transition-colors group",
+        "absolute top-0 left-0 w-full flex items-center px-3 border-b border-border-subtle cursor-pointer text-xs outline-none transition-colors group hover:z-20",
         isSelected
           ? "bg-accent-subtle"
           : "bg-transparent hover:bg-surface-hover focus:bg-surface-hover"
       )}
     >
-      <CommitGraphBranchPills refs={commit.refs} isFirstRow={isFirstRow} />
-
-      {/* Col 2: Multi-lane SVG Tracks */}
+      {/* Col 1: Multi-lane SVG Tracks */}
       <div className="w-32 shrink-0 flex items-center">
         <GraphSvgLane
           col={commit.col}
@@ -93,7 +90,11 @@ export function CommitGraphCommitRow({
         />
       </div>
 
-      <CommitGraphCommitRowSummary commit={commit} isSelected={isSelected} />
+      <CommitGraphCommitRowSummary
+        commit={commit}
+        isSelected={isSelected}
+        isFirstRow={isFirstRow}
+      />
     </div>
   );
 }
