@@ -34,8 +34,9 @@ rules, most of which fail `pnpm check` when broken:
   imports `ipc/`, `store/`, or `i18n/`.
 - Only `src/ipc/**` and `src/features/*/api/**` import `ipc/` at runtime.
   Everything else goes through `features/*/api`.
-- A feature imports another feature only through its `index.ts`, never
-  through its own `index.ts`, and never in a cycle.
+- A feature imports another feature only through that feature's
+  `index.ts`; it never imports its own `index.ts`, and imports never form a
+  cycle.
 - No query key literals; use `qk` from `src/domain/queryKeys.ts`. Mutation
   hooks in `api/` own cache invalidation. Never call `invalidateQueries()`
   without a key.

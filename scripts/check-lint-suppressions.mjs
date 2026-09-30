@@ -7,7 +7,7 @@
  * A single suppression comment switches one of them off for a line or a file
  * without anyone noticing in review, so the repo keeps an explicit per-file
  * baseline (see `lintSuppressions.mjs`) and this script fails on any
- * difference from it. oxlint's `--report-unused-disable-directives` (wired
+ * difference from it. oxlint's `--report-unused-disable-directives-severity=error` (wired
  * into `pnpm lint`) covers the other half: a suppression that no longer
  * suppresses anything.
  */

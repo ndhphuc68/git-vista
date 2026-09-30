@@ -37,14 +37,21 @@ cargo test --manifest-path src-tauri/Cargo.toml   # when src-tauri/ changes
 ```
 src/
 ├─ domain/        queryKeys, enums, constants — depends on nothing
-├─ shared/        ui/ (Modal, Button, Alert), hooks/, utils/ — depends on domain only
+├─ shared/        ui/ (Modal, Button, Alert), hooks/, utils/ — meant to depend on domain only (not fully enforced, see rule 1)
 ├─ ipc/           generated bindings + hand-written command wrappers + mocks
 ├─ features/<n>/  one business slice each (see section 3)
-└─ components/, hooks/, store/, App.tsx — the app shell that composes features
+├─ components/, hooks/, store/, App.tsx — the app shell that composes features
+└─ services/, utils/, types/ — services/: external APIs such as GitHub via
+   `readJson`; utils/: app-level pure helpers such as `wordDiff`;
+   types/: shared TS types
 ```
 
-1. **Dependencies only point down: `features → shared → domain`.** [enforced:
-   `architectureBoundaries.test.ts`]
+1. **Dependencies only point down: `features → shared → domain`.**
+   [partly enforced: only rule 3 (`shared/ui`) and the ipc/feature rules
+   below are tested; the general direction is checked in review]
+   - Known debt: `src/shared/ui/Modal.tsx` imports
+     `../../components/common/Transition`, which points up into the app
+     shell. New code must not add more imports like it.
 2. **Only `src/ipc/**` and `src/features/*/api/**` may import `ipc/` at
    runtime.** Components, hooks, and stores call through `features/*/api`.
    `import type` from `ipc/` is allowed everywhere. [enforced:
@@ -188,7 +195,11 @@ All of these are at `error` level in `.oxlintrc.json`. [enforced]
   every member (`case null:` included). A `default` does not count, so adding
   a member to the union points at every `switch` that must handle it.
 - `typescript/no-unsafe-assignment` and `typescript/no-unsafe-member-access`:
-  never let `any` flow in. Read fetch bodies with `readJson<RawShape>(res)`
+  `any` may not be assigned to a typed variable or have its members read.
+  `no-unsafe-return`, `no-unsafe-argument` and `no-unsafe-call` are not
+  enabled yet, so returning or passing `JSON.parse(...)` directly is still
+  possible; narrow stored JSON with a tested parser anyway.
+  Read fetch bodies with `readJson<RawShape>(res)`
   from `src/services/readJson.ts` and keep the runtime guards (`Array.isArray`,
   `typeof`). Parse stored JSON into `unknown` and narrow it with a tested
   parser (see `parseTabSession`). Off in tests (Vitest matchers return `any`)
