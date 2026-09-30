@@ -120,4 +120,35 @@ describe("BranchSidebar", () => {
     fireEvent.keyDown(window, { key: "Escape" });
     expect(screen.queryByText(/Đổi tên/i)).not.toBeInTheDocument();
   });
+
+  it("keeps search input outside the scrollable branch list container", async () => {
+    useRepoStore.getState().setRepo({
+      path: "d:/project-v3",
+      name: "project-v3",
+      is_bare: false,
+      head_branch: "main",
+      head_commit_id: "c1",
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <BranchSidebar />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getAllByText("main").length).toBeGreaterThanOrEqual(1);
+    });
+
+    const searchInput = screen.getByRole("textbox", { name: "Tìm nhánh" });
+    const scrollContainer = screen.getByTestId("branch-sidebar-scroll-container");
+
+    expect(scrollContainer).toBeInTheDocument();
+    expect(scrollContainer.className).toContain("overflow-y-auto");
+    expect(scrollContainer).not.toContainElement(searchInput);
+
+    const aside = screen.getByRole("complementary");
+    expect(aside.className).not.toContain("overflow-y-auto");
+  });
 });
+

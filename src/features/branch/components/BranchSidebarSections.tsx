@@ -56,10 +56,13 @@ export function BranchSidebarSections({
   const view = useBranchSectionsView({ data, search, activeMenu, setActiveMenu });
 
   return (
-    <aside className="bg-surface border-r border-border-subtle w-full shrink-0 h-full flex flex-col overflow-y-auto">
+    <aside className="bg-surface border-r border-border-subtle w-full shrink-0 h-full flex flex-col">
       <BranchSidebarSearchBox search={search} setSearch={setSearch} />
 
-      <div className="p-2 flex flex-col gap-3">
+      <div
+        data-testid="branch-sidebar-scroll-container"
+        className="flex-1 min-h-0 overflow-y-auto p-2 flex flex-col gap-3"
+      >
         <BranchTreePanels
           openSections={openSections}
           toggleSection={toggleSection}

@@ -18,7 +18,7 @@ export const BranchSidebarSearchBox: React.FC<BranchSidebarSearchBoxProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="px-3 py-2 border-b border-border-subtle bg-surface">
+    <div className="px-3 py-2 border-b border-border-subtle bg-surface shrink-0">
       <div className="group relative flex items-center gap-2 bg-window/80 hover:bg-window focus-within:bg-surface focus-within:ring-2 focus-within:ring-accent/20 border border-border-subtle focus-within:border-accent rounded-md px-2.5 py-1.5 transition-all duration-150 shadow-2xs">
         <Search
           size={13}
