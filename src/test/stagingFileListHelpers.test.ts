@@ -47,6 +47,14 @@ describe("getStatusBadge", () => {
       title: "Weird",
     });
   });
+
+  it("renders a type change with the neutral M badge and the raw status as title", () => {
+    expect(getStatusBadge("Typechange", badgeDict)).toEqual({
+      label: "M",
+      className: "bg-window text-secondary",
+      title: "Typechange",
+    });
+  });
 });
 
 describe("resolveStagingLists", () => {

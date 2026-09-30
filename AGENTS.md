@@ -21,6 +21,42 @@ product ships in. Leave these alone:
 The rule of thumb: if a user could read it in the running app, keep the
 product's language. If only a developer reads it, write English.
 
+"Leave these alone" is about language only. New user-facing text must not be
+hardcoded at all: it goes into both i18n dictionaries (see "Architecture and
+code rules" below).
+
+## Architecture and code rules
+
+Read `docs/CODING_RULES.md` before writing or refactoring code. The hard
+rules, most of which fail `pnpm check` when broken:
+
+- Layers point down only: `features → shared → domain`. `shared/ui/**` never
+  imports `ipc/`, `store/`, or `i18n/`.
+- Only `src/ipc/**` and `src/features/*/api/**` import `ipc/` at runtime.
+  Everything else goes through `features/*/api`.
+- A feature imports another feature only through that feature's
+  `index.ts`; it never imports its own `index.ts`, and imports never form a
+  cycle.
+- No query key literals; use `qk` from `src/domain/queryKeys.ts`. Mutation
+  hooks in `api/` own cache invalidation. Never call `invalidateQueries()`
+  without a key.
+- Never edit `src/ipc/bindings.generated.ts` by hand.
+- Lint limits are fixed: 300 lines/file, 80 lines/function, complexity 15,
+  depth 4, 5 params, 3 nested callbacks. Split by responsibility. Do not
+  raise the limits, and do not add `eslint-disable`/`oxlint-disable`
+  comments or guard exceptions to get green.
+- No hardcoded user-facing text (JSX, `aria-label`, `title`, `placeholder`,
+  toasts, error fallbacks). Use `useTranslation()` / `getTranslation()` and
+  add every key to both `src/i18n/vi.ts` and `src/i18n/en.ts` with a real
+  translation. Use placeholders, not string concatenation.
+- Put new domain UI in `features/`, new tests next to their module, and
+  extracted handlers in `<owner>.actions.ts`. Use `clsx` for conditional
+  classes and design tokens for colors (no hex or `bg-[#…]`).
+- Reuse `Modal`/`Button`/`Alert`, `useEscapeKey`, `toErrorMessage`, and
+  `domain/constants` instead of writing new ones.
+- A refactor is a mechanical replacement: pin behavior with a test first and
+  do not change logic along the way.
+
 ## Testing
 
 For regular feature, bug-fix, or refactoring work, add or update the relevant

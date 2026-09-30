@@ -48,6 +48,7 @@ export function getStatusBadge(
         className: "bg-accent-subtle text-accent",
         title: badgeDict.renamed,
       };
+    case "Typechange":
     default:
       return {
         label: "M",

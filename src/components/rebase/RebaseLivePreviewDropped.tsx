@@ -23,9 +23,9 @@ export const RebaseLivePreviewDropped: React.FC<RebaseLivePreviewDroppedProps> =
         )}
       </span>
       <div className="flex flex-col gap-1">
-        {droppedCommits.map((d, idx) => (
+        {droppedCommits.map((d) => (
           <div
-            key={idx}
+            key={d.short_id}
             className="flex items-center gap-2 text-[11px] font-mono text-secondary bg-surface-subtle/50 px-2 py-1 rounded line-through opacity-75"
           >
             <span className="font-semibold">{d.short_id}</span>

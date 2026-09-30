@@ -4,6 +4,7 @@ import { type TabItem, type TabSessionData } from "../types/tab";
 import { closeRepository, openRepository } from "../features/repo";
 import { useRepoStore } from "./useRepoStore";
 import { useViewStore } from "./useViewStore";
+import { parseTabSession } from "./tabSession";
 
 const SESSION_STORAGE_KEY = "gitvista_session_tabs_v1";
 
@@ -160,8 +161,8 @@ async function restoreSessionAction(set: TabStoreSet, get: TabStoreGet) {
     const raw = localStorage.getItem(SESSION_STORAGE_KEY);
     if (!raw) return;
 
-    const session: TabSessionData = JSON.parse(raw);
-    if (!session.openRepoPaths || !Array.isArray(session.openRepoPaths)) return;
+    const session = parseTabSession(raw);
+    if (!session) return;
 
     for (const path of session.openRepoPaths) {
       try {

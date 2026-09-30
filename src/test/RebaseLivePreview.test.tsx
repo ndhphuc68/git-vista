@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { RebaseLivePreview } from "../components/rebase/RebaseLivePreview";
 import type { RebaseCommitItem, RebasePlanStep } from "../ipc/bindings.generated";
 
@@ -64,5 +64,36 @@ describe("RebaseLivePreview", () => {
     );
 
     expect(screen.getByText(/không thể loại bỏ tất cả/i)).toBeInTheDocument();
+  });
+
+  it("renders squashed and dropped rows without duplicate keys", () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const commits = [
+      makeCommit("c1", "1111111", "Commit One"),
+      makeCommit("c2", "2222222", "Commit Two"),
+      makeCommit("c3", "3333333", "Commit Three"),
+      makeCommit("c4", "4444444", "Commit Four"),
+      makeCommit("c5", "5555555", "Commit Five"),
+    ];
+    const steps: RebasePlanStep[] = [
+      { commit_id: "c1", action: "Pick", new_message: null },
+      { commit_id: "c2", action: "Squash", new_message: null },
+      { commit_id: "c3", action: "Fixup", new_message: null },
+      { commit_id: "c4", action: "Drop", new_message: null },
+      { commit_id: "c5", action: "Drop", new_message: null },
+    ];
+
+    render(
+      <RebaseLivePreview
+        baseCommitId="0000000000000000000000000000000000000000"
+        baseCommitSummary="Base"
+        steps={steps}
+        commitMap={new Map(commits.map((c) => [c.id, c]))}
+      />
+    );
+
+    const keyWarnings = errorSpy.mock.calls.filter((args) => String(args[0]).includes("same key"));
+    expect(keyWarnings).toEqual([]);
+    errorSpy.mockRestore();
   });
 });

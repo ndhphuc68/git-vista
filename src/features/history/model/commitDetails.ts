@@ -114,6 +114,7 @@ export function getTypeBadgeStyle(type: string | null) {
       return "bg-cyan-100 text-cyan-800 dark:bg-cyan-950 dark:text-cyan-300 border-cyan-300 dark:border-cyan-800";
     case "chore":
       return "bg-stone-100 text-stone-800 dark:bg-stone-800 dark:text-stone-300 border-stone-300 dark:border-stone-700";
+    case null:
     default:
       return "bg-accent-subtle text-accent border-accent/30";
   }

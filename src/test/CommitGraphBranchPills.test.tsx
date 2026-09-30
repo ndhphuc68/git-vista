@@ -99,5 +99,20 @@ describe("CommitGraphBranchPills", () => {
     expect(onCheckout).toHaveBeenCalledTimes(1);
     expect(onCheckout).toHaveBeenCalledWith("feature/payment");
   });
+
+  it("renders a branch and a tag with the same name without duplicate keys", () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const refs: RefBadge[] = [
+      { name: "main", ref_type: "head" },
+      { name: "v1", ref_type: "local" },
+      { name: "v1", ref_type: "tag" },
+    ];
+    render(<CommitGraphBranchPills refs={refs} />);
+
+    expect(screen.getAllByText("v1").length).toBeGreaterThanOrEqual(2);
+    const keyWarnings = errorSpy.mock.calls.filter((args) => String(args[0]).includes("same key"));
+    expect(keyWarnings).toEqual([]);
+    errorSpy.mockRestore();
+  });
 });
 
