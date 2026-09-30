@@ -17,6 +17,7 @@ interface BranchPillPopoverRowProps {
 }
 
 function BranchPillPopoverRow({ refBadge, headBadgeText, onCheckout }: BranchPillPopoverRowProps) {
+  const { t } = useTranslation();
   const isHead = refBadge.ref_type === "head";
   const isTag = refBadge.ref_type === "tag";
   const isRemote = refBadge.ref_type === "remote";
@@ -33,7 +34,9 @@ function BranchPillPopoverRow({ refBadge, headBadgeText, onCheckout }: BranchPil
           onCheckout?.(refBadge.name);
         }
       }}
-      title={canCheckout ? `Nhấn đúp để chuyển sang nhánh ${refBadge.name}` : refBadge.name}
+      title={
+        canCheckout ? t.graph.checkoutBranchHint.replace("{name}", refBadge.name) : refBadge.name
+      }
       className={clsx(
         "flex items-center gap-2 px-2 py-1 rounded bg-white/5 min-w-0 transition-colors",
         canCheckout && "cursor-pointer hover:bg-white/10"
@@ -56,12 +59,12 @@ function BranchPillPopoverRow({ refBadge, headBadgeText, onCheckout }: BranchPil
       )}
       {isTag && (
         <span className="text-[8.5px] px-1 bg-amber-500/20 text-amber-300 rounded font-medium shrink-0">
-          tag
+          {t.graph.tagBadge}
         </span>
       )}
       {isRemote && (
         <span className="text-[8.5px] px-1 bg-sky-500/20 text-sky-300 rounded font-medium shrink-0">
-          remote
+          {t.graph.remoteBadge}
         </span>
       )}
     </div>
@@ -153,7 +156,7 @@ export function CommitGraphBranchPills({
         }}
         title={
           canCheckoutPrimary
-            ? `Nhấn đúp để chuyển sang nhánh ${primaryRef.name}`
+            ? t.graph.checkoutBranchHint.replace("{name}", primaryRef.name)
             : isPrimaryHead
             ? `${primaryRef.name} (${t.graph.headBadge})`
             : primaryRef.name
@@ -182,7 +185,7 @@ export function CommitGraphBranchPills({
 
       {remainingCount > 0 && (
         <div
-          title={`${remainingCount} more`}
+          title={t.graph.moreRefs.replace("{count}", String(remainingCount))}
           className="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-surface border border-border-strong text-secondary shrink-0 cursor-pointer"
         >
           +{remainingCount}

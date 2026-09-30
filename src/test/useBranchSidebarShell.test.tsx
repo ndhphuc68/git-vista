@@ -137,6 +137,23 @@ describe("useBranchSidebarShell - checkout guards and handling", () => {
     expect(hook.result.current.dialog.kind).toBe("checkoutConflict");
   });
 
+  it("shows an error toast, not the conflict dialog, for other errors that mention a conflict", async () => {
+    vi.spyOn(invokeCommand, "checkoutBranch").mockRejectedValue(
+      new Error("Git error: failed to lock file 'index.lock': conflict with another process")
+    );
+
+    const { hook } = setup();
+
+    await act(async () => {
+      await hook.result.current.handleCheckout("feature-locked");
+    });
+
+    expect(hook.result.current.dialog.kind).not.toBe("checkoutConflict");
+    const toasts = useToastStore.getState().toasts;
+    expect(toasts).toHaveLength(1);
+    expect(toasts[0]!.type).toBe("error");
+  });
+
   it("shows error toast without calling window.alert on non-conflict failure", async () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
     vi.spyOn(invokeCommand, "checkoutBranch").mockRejectedValue(

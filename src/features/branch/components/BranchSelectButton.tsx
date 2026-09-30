@@ -6,6 +6,7 @@
 import React from "react";
 import clsx from "clsx";
 import { type BranchItem } from "../../../ipc/bindings.generated";
+import { useTranslation } from "../../../i18n";
 
 export interface BranchSelectButtonProps {
   branch: BranchItem;
@@ -21,33 +22,40 @@ export const BranchSelectButton: React.FC<BranchSelectButtonProps> = ({
   isSelected,
   onSelectBranch,
   onCheckout,
-}) => (
-  <button
-    onClick={() => onSelectBranch(branch.name)}
-    onDoubleClick={() => {
-      if (!branch.is_head) onCheckout(branch.name);
-    }}
-    aria-selected={isSelected}
-    className={clsx(
-      "flex-1 flex items-center gap-1.5 px-2 py-1 rounded-sm border-0 cursor-pointer text-left min-h-[26px] text-xs transition-colors overflow-hidden",
-      isSelected
-        ? "bg-accent-subtle text-accent font-semibold"
-        : "bg-transparent text-primary hover:bg-surface-hover font-normal",
-      branch.is_head && "font-semibold"
-    )}
-    title={branch.is_head ? `${branch.name} (HEAD)` : `Nhấn đúp để chuyển sang nhánh ${branch.name}`}
-  >
-    <span
+}) => {
+  const { t } = useTranslation();
+  return (
+    <button
+      onClick={() => onSelectBranch(branch.name)}
+      onDoubleClick={() => {
+        if (!branch.is_head) onCheckout(branch.name);
+      }}
+      aria-selected={isSelected}
       className={clsx(
-        "w-1.5 h-1.5 rounded-full shrink-0",
-        branch.is_head ? "bg-accent" : "border border-tertiary bg-transparent"
+        "flex-1 flex items-center gap-1.5 px-2 py-1 rounded-sm border-0 cursor-pointer text-left min-h-[26px] text-xs transition-colors overflow-hidden",
+        isSelected
+          ? "bg-accent-subtle text-accent font-semibold"
+          : "bg-transparent text-primary hover:bg-surface-hover font-normal",
+        branch.is_head && "font-semibold"
       )}
-    />
-    <span className="overflow-hidden text-ellipsis whitespace-nowrap">{name}</span>
-    {branch.is_head && (
-      <span className="text-[10px] text-accent ml-auto shrink-0 px-1 py-0.2 bg-accent/10 rounded-xs font-semibold">
-        HEAD
-      </span>
-    )}
-  </button>
-);
+      title={
+        branch.is_head
+          ? `${branch.name} (HEAD)`
+          : t.sidebar.checkoutBranchHint.replace("{name}", branch.name)
+      }
+    >
+      <span
+        className={clsx(
+          "w-1.5 h-1.5 rounded-full shrink-0",
+          branch.is_head ? "bg-accent" : "border border-tertiary bg-transparent"
+        )}
+      />
+      <span className="overflow-hidden text-ellipsis whitespace-nowrap">{name}</span>
+      {branch.is_head && (
+        <span className="text-[10px] text-accent ml-auto shrink-0 px-1 py-0.2 bg-accent/10 rounded-xs font-semibold">
+          HEAD
+        </span>
+      )}
+    </button>
+  );
+};

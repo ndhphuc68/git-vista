@@ -371,6 +371,7 @@ export const en: Translations = {
     toggleTags: "Toggle tags list",
     toggleStashes: "Toggle stashes list",
     checkoutBranch: "Checkout this branch",
+    checkoutBranchHint: "Double-click to check out branch {name}",
     mergeIntoCurrent: "Merge into current branch",
     rebaseOntoThis: "Rebase current branch onto this",
     renameBranch: "Rename",
@@ -410,6 +411,10 @@ export const en: Translations = {
     compareWith: "Compare with...",
     copySha: "Copy commit SHA",
     copyShaSuccess: "Copied commit SHA to clipboard",
+    checkoutBranchHint: "Double-click to check out branch {name}",
+    moreRefs: "{count} more",
+    tagBadge: "tag",
+    remoteBadge: "remote",
   },
   diff: {
     ignoreWhitespace: "Ignore whitespace",

@@ -114,5 +114,22 @@ describe("CommitGraphBranchPills", () => {
     expect(keyWarnings).toEqual([]);
     errorSpy.mockRestore();
   });
-});
 
+  it("translates the checkout hint and the hidden ref count", () => {
+    const refs: RefBadge[] = [
+      { name: "feat-a", ref_type: "local" },
+      { name: "origin/feat-a", ref_type: "remote" },
+    ];
+    render(<CommitGraphBranchPills refs={refs} onCheckout={vi.fn()} />);
+
+    expect(screen.getByTestId("commit-graph-primary-pill")).toHaveAttribute(
+      "title",
+      "Double-click to check out branch feat-a"
+    );
+    expect(screen.getByTestId("branch-pill-popover-origin/feat-a")).toHaveAttribute(
+      "title",
+      "Double-click to check out branch origin/feat-a"
+    );
+    expect(screen.getByTitle("1 more")).toBeInTheDocument();
+  });
+});

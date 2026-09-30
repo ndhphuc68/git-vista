@@ -54,7 +54,8 @@ async function performCheckout({
       .showSuccess(t.sidebar.switchBranchSuccess.replace("{name}", checkedOut));
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
-    if (msg.includes("CHECKOUT_CONFLICT") || msg.toLowerCase().includes("conflict")) {
+    // Only the backend's own code: other errors can mention a "conflict" too.
+    if (msg.includes("CHECKOUT_CONFLICT")) {
       setDialog({ kind: "checkoutConflict", targetBranch: branchName, errorMessage: msg });
     } else {
       useToastStore.getState().showError(mapGitError(err, t));

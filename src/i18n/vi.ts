@@ -367,6 +367,7 @@ export const vi = {
     toggleTags: "Mở/đóng danh sách tag",
     toggleStashes: "Mở/đóng danh sách stash",
     checkoutBranch: "Chuyển tới nhánh này",
+    checkoutBranchHint: "Nhấn đúp để chuyển sang nhánh {name}",
     mergeIntoCurrent: "Gộp vào nhánh hiện tại",
     rebaseOntoThis: "Rebase nhánh hiện tại lên đây",
     renameBranch: "Đổi tên",
@@ -406,6 +407,10 @@ export const vi = {
     compareWith: "So sánh với...",
     copySha: "Sao chép mã commit (SHA)",
     copyShaSuccess: "Đã sao chép mã commit vào clipboard",
+    checkoutBranchHint: "Nhấn đúp để chuyển sang nhánh {name}",
+    moreRefs: "{count} nhánh/tag khác",
+    tagBadge: "tag",
+    remoteBadge: "remote",
   },
   diff: {
     ignoreWhitespace: "Bỏ qua khoảng trắng",
