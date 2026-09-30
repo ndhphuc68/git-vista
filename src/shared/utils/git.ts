@@ -14,3 +14,13 @@ export function shortSha(sha: string): string {
 export function sanitizeRefName(value: string): string {
   return value.replace(/\s+/g, "-").replace(/[~^:?*[\\@{}]/g, "");
 }
+
+/**
+ * The local branch a remote-tracking branch checks out as: `origin/feature/x`
+ * becomes `feature/x`. Only the first segment is the remote name, matching how
+ * the backend resolves a remote checkout.
+ */
+export function localNameOfRemoteBranch(remoteBranch: string): string {
+  const slash = remoteBranch.indexOf("/");
+  return slash === -1 ? remoteBranch : remoteBranch.slice(slash + 1);
+}

@@ -17,6 +17,8 @@ import {
   GRAPH_ROW_HEIGHT,
 } from "../model/graphPresentation";
 import type { GraphContextMenu, GraphDialog } from "../model/graphDialog";
+import { graphCheckedOutBranchName } from "../model/graphCheckout";
+import type { GraphCommitNode } from "../../../ipc/bindings.generated";
 
 function useContextMenuDismiss(
   isOpen: boolean,
@@ -64,6 +66,7 @@ interface UseGraphCheckoutParams {
   setSelectedBranch: (branch: string | null) => void;
   setContextMenu: (menu: GraphContextMenu | null) => void;
   setDialog: (dialog: GraphDialog) => void;
+  commits: Pick<GraphCommitNode, "refs">[];
   t: ReturnType<typeof useTranslation>["t"];
 }
 
@@ -73,6 +76,7 @@ function useGraphCheckout({
   setSelectedBranch,
   setContextMenu,
   setDialog,
+  commits,
   t,
 }: UseGraphCheckoutParams) {
   const checkoutBranch = useCheckoutBranch(repoPath);
@@ -87,10 +91,11 @@ function useGraphCheckout({
     }
     try {
       await checkoutBranch.mutateAsync({ name: branchName });
-      setSelectedBranch(branchName);
+      const checkedOut = graphCheckedOutBranchName(branchName, commits);
+      setSelectedBranch(checkedOut);
       useToastStore
         .getState()
-        .showSuccess(t.sidebar.switchBranchSuccess.replace("{name}", branchName));
+        .showSuccess(t.sidebar.switchBranchSuccess.replace("{name}", checkedOut));
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       // A conflict gets the dialog that offers stash-and-checkout, as in the sidebar.
@@ -149,16 +154,17 @@ export function useCommitGraphState() {
   const { hasUncommittedChanges, modifiedCount, untrackedCount } =
     getUncommittedSummary(repoStatus);
 
+  const commits = useMemo(() => (data ? data.pages.flatMap((page) => page.commits) : []), [data]);
+
   const { handleCheckoutBranch, handleCheckoutCommit } = useGraphCheckout({
     repoPath,
     repoState,
     setSelectedBranch,
     setContextMenu,
     setDialog,
+    commits,
     t,
   });
-
-  const commits = useMemo(() => (data ? data.pages.flatMap((page) => page.commits) : []), [data]);
 
   const maxCols = useMemo(() => getMaxGraphColumns(commits), [commits]);
 

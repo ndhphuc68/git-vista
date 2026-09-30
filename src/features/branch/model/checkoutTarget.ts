@@ -1,4 +1,5 @@
 import { type BranchListResult } from "../../../ipc/bindings.generated";
+import { localNameOfRemoteBranch } from "../../../shared/utils/git";
 
 /**
  * The local branch HEAD lands on after checking out `name`. Checking out a
@@ -11,6 +12,5 @@ export function checkedOutBranchName(
 ): string {
   if (!branchData || branchData.local.some((branch) => branch.name === name)) return name;
   if (!branchData.remote.some((branch) => branch.name === name)) return name;
-  const slash = name.indexOf("/");
-  return slash === -1 ? name : name.slice(slash + 1);
+  return localNameOfRemoteBranch(name);
 }

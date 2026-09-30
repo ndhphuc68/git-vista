@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { shortSha, sanitizeRefName } from "./git";
+import { shortSha, sanitizeRefName, localNameOfRemoteBranch } from "./git";
 
 describe("shortSha", () => {
   it("truncates a full SHA to 7 characters", () => {
@@ -46,5 +46,19 @@ describe("sanitizeRefName", () => {
 
   it("leaves an already-valid tag-style name untouched", () => {
     expect(sanitizeRefName("v2.1.0")).toBe("v2.1.0");
+  });
+});
+
+describe("localNameOfRemoteBranch", () => {
+  it("strips the remote name", () => {
+    expect(localNameOfRemoteBranch("origin/main")).toBe("main");
+  });
+
+  it("keeps slashes that belong to the branch name", () => {
+    expect(localNameOfRemoteBranch("origin/feature/login")).toBe("feature/login");
+  });
+
+  it("returns a name without a remote prefix unchanged", () => {
+    expect(localNameOfRemoteBranch("main")).toBe("main");
   });
 });

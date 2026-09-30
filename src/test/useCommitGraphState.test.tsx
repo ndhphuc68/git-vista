@@ -87,6 +87,41 @@ describe("useCommitGraphState - checkout branch", () => {
     expect(toasts.some((t) => t.type === "success")).toBe(true);
   });
 
+  it("selects the local branch after checking out a remote-tracking pill", async () => {
+    vi.spyOn(invokeCommand, "getCommitGraph").mockResolvedValue({
+      commits: [
+        {
+          id: "c1",
+          short_id: "c1",
+          summary: "Initial commit",
+          author_name: "Tester",
+          author_email: "tester@example.com",
+          timestamp_sec: 0,
+          parent_ids: [],
+          col: 0,
+          color_index: 0,
+          lines: [],
+          refs: [{ name: "origin/feature/login", ref_type: "remote" }],
+        },
+      ],
+      has_more: false,
+      total_count: 1,
+    });
+    const checkoutSpy = vi.spyOn(invokeCommand, "checkoutBranch").mockResolvedValue(undefined);
+
+    const { hook } = setup();
+
+    await waitFor(() => {
+      expect(hook.result.current.commits).toHaveLength(1);
+    });
+    await act(async () => {
+      await hook.result.current.handleCheckoutBranch("origin/feature/login");
+    });
+
+    expect(checkoutSpy).toHaveBeenCalledWith(REPO, "origin/feature/login");
+    expect(useRepoStore.getState().selectedBranch).toBe("feature/login");
+  });
+
   it("opens the checkout conflict dialog instead of a toast on CHECKOUT_CONFLICT", async () => {
     vi.spyOn(invokeCommand, "checkoutBranch").mockRejectedValue(
       new Error("CHECKOUT_CONFLICT: file1.txt")
