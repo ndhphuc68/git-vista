@@ -44,12 +44,12 @@ export const repoCommands = {
 
   clearRecentRepos: async (): Promise<void> => {
     if (!isTauri()) return;
-    await commands.clearRecentRepos();
+    unwrap(await commands.clearRecentRepos());
   },
 
   removeRecentRepo: async (path: string): Promise<void> => {
     if (!isTauri()) return;
-    await commands.removeRecentRepo(path);
+    unwrap(await commands.removeRecentRepo(path));
   },
 
   selectRepoFolder: async (): Promise<string | null> => {

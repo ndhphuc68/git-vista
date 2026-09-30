@@ -59,7 +59,7 @@ export const remoteCommands = {
       }
       return;
     }
-    await commands.renameRemote(repoPath, oldName, newName);
+    unwrap(await commands.renameRemote(repoPath, oldName, newName));
   },
 
   removeRemote: async (repoPath: string, name: string): Promise<void> => {
@@ -78,7 +78,7 @@ export const remoteCommands = {
       }
       return;
     }
-    await commands.removeRemote(repoPath, name);
+    unwrap(await commands.removeRemote(repoPath, name));
   },
 
   setRemoteUrl: async (
@@ -106,7 +106,7 @@ export const remoteCommands = {
       }
       return;
     }
-    await commands.setRemoteUrl(repoPath, name, fetchUrl, pushUrl ?? null);
+    unwrap(await commands.setRemoteUrl(repoPath, name, fetchUrl, pushUrl ?? null));
   },
 
   pruneRemote: async (repoPath: string, remote: string, taskId?: string): Promise<PruneResult> => {
@@ -200,7 +200,7 @@ export const remoteCommands = {
     if (!isTauri()) {
       return;
     }
-    await commands.cancelRemoteTask(taskId);
+    unwrap(await commands.cancelRemoteTask(taskId));
   },
 
   setRepoPullRebase: async (repoPath: string, rebase: boolean): Promise<void> => {
@@ -209,6 +209,6 @@ export const remoteCommands = {
       mockState.localConfigs[repoPath].pullRebase = rebase;
       return;
     }
-    await commands.setRepoPullRebase(repoPath, rebase);
+    unwrap(await commands.setRepoPullRebase(repoPath, rebase));
   },
 };

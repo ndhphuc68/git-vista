@@ -42,28 +42,28 @@ export const branchCommands = {
     if (!isTauri()) {
       return;
     }
-    await commands.createBranch(repoPath, name, targetCommit ?? null, checkout ?? null);
+    unwrap(await commands.createBranch(repoPath, name, targetCommit ?? null, checkout ?? null));
   },
 
   checkoutBranch: async (repoPath: string, branchName: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    await commands.checkoutBranch(repoPath, branchName);
+    unwrap(await commands.checkoutBranch(repoPath, branchName));
   },
 
   checkoutCommit: async (repoPath: string, commitId: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    await commands.checkoutCommit(repoPath, commitId);
+    unwrap(await commands.checkoutCommit(repoPath, commitId));
   },
 
   renameBranch: async (repoPath: string, oldName: string, newName: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    await commands.renameBranch(repoPath, oldName, newName);
+    unwrap(await commands.renameBranch(repoPath, oldName, newName));
   },
 
   deleteBranch: async (repoPath: string, branchName: string, force?: boolean): Promise<string> => {

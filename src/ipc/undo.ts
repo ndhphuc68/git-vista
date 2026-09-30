@@ -5,14 +5,14 @@
  * these commands had before they moved out of client.ts.
  */
 import { commands } from "./bindings.generated";
-import { isTauri } from "./core";
+import { isTauri, unwrap } from "./core";
 
 export const undoCommands = {
   undoCommit: async (repoPath: string, undoToken: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    await commands.undoCommit(repoPath, undoToken);
+    unwrap(await commands.undoCommit(repoPath, undoToken));
   },
 
   undoDeleteBranch: async (
@@ -23,13 +23,13 @@ export const undoCommands = {
     if (!isTauri()) {
       return;
     }
-    await commands.undoDeleteBranch(repoPath, branchName, backupRef);
+    unwrap(await commands.undoDeleteBranch(repoPath, branchName, backupRef));
   },
 
   undoDropStash: async (repoPath: string, receipt: string): Promise<void> => {
     if (!isTauri()) {
       return;
     }
-    await commands.undoDropStash(repoPath, receipt);
+    unwrap(await commands.undoDropStash(repoPath, receipt));
   },
 };
