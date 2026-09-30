@@ -2,6 +2,7 @@ import React from "react";
 import { X, GitBranch, FolderGit2 } from "lucide-react";
 import { clsx } from "clsx";
 import { type TabItem } from "../../types/tab";
+import { useRepoHeadInfo } from "../../features/repo";
 
 interface RepoWindowTabProps {
   tab: TabItem;
@@ -20,7 +21,10 @@ export const RepoWindowTab: React.FC<RepoWindowTabProps> = ({
   onClose,
 }) => {
   const repoName = tab.alias || tab.repo?.name || tab.id.split("/").pop() || "repository";
-  const branchName = tab.selectedBranch || tab.repo?.head_branch;
+  // The live HEAD: the tab's own snapshot is taken when it opens and never
+  // follows a checkout. Until the query answers, fall back to that snapshot.
+  const { data: headInfo } = useRepoHeadInfo(tab.repo?.path);
+  const branchName = headInfo ? headInfo.branch_name : tab.repo?.head_branch;
 
   return (
     <>
