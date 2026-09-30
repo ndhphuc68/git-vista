@@ -80,6 +80,9 @@ jobs:
       - name: Frontend lint
         run: pnpm lint
 
+      - name: No new lint suppressions
+        run: pnpm check-lint-suppressions
+
       - name: TypeScript Typecheck & Frontend Build
         run: pnpm build
 
