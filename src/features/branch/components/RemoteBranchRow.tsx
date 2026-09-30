@@ -54,7 +54,6 @@ export const RemoteBranchRow: React.FC<RemoteBranchRowProps> = ({
     >
       <button
         onClick={() => onSelectBranch(branchName)}
-        onDoubleClick={() => onCheckout(branchName)}
         aria-selected={isSelected}
         aria-label={branchName}
         className={clsx(

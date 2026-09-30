@@ -66,7 +66,6 @@ export const BranchLeafRow: React.FC<BranchLeafRowProps> = ({
         name={name}
         isSelected={isSelected}
         onSelectBranch={onSelectBranch}
-        onCheckout={onCheckout}
       />
 
       {/* Three dots menu button */}
