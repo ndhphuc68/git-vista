@@ -35,4 +35,54 @@ describe("BranchLeafRow", () => {
 
     expect(row).toHaveClass("bg-surface-hover");
   });
+
+  it("triggers onCheckout when double-clicking a non-head branch row", () => {
+    const onCheckout = vi.fn();
+    render(
+      <BranchLeafRow
+        branch={{ name: "feature/beta", is_head: false, target_commit_id: "c2", upstream: null, ahead: 0, behind: 0 }}
+        name="beta"
+        selectedBranch={null}
+        onSelectBranch={vi.fn()}
+        menuBranch={null}
+        onSetMenuBranch={vi.fn()}
+        menuRef={createRef<HTMLDivElement>()}
+        currentBranchName="main"
+        onCheckout={onCheckout}
+        onMerge={vi.fn()}
+        onRebase={vi.fn()}
+        onCompare={vi.fn()}
+        onRename={vi.fn()}
+        onDelete={vi.fn()}
+      />
+    );
+
+    fireEvent.doubleClick(screen.getByText("beta"));
+    expect(onCheckout).toHaveBeenCalledWith("feature/beta");
+  });
+
+  it("does not trigger onCheckout when double-clicking a HEAD branch row", () => {
+    const onCheckout = vi.fn();
+    render(
+      <BranchLeafRow
+        branch={{ name: "main", is_head: true, target_commit_id: "c1", upstream: null, ahead: 0, behind: 0 }}
+        name="main"
+        selectedBranch={null}
+        onSelectBranch={vi.fn()}
+        menuBranch={null}
+        onSetMenuBranch={vi.fn()}
+        menuRef={createRef<HTMLDivElement>()}
+        currentBranchName="main"
+        onCheckout={onCheckout}
+        onMerge={vi.fn()}
+        onRebase={vi.fn()}
+        onCompare={vi.fn()}
+        onRename={vi.fn()}
+        onDelete={vi.fn()}
+      />
+    );
+
+    fireEvent.doubleClick(screen.getByText("main"));
+    expect(onCheckout).not.toHaveBeenCalled();
+  });
 });

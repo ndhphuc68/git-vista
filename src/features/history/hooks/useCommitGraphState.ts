@@ -7,6 +7,8 @@ import { useToastStore } from "../../../store/useToastStore";
 import { useTranslation } from "../../../i18n";
 import { useCommitGraph } from "../api/useCommitGraph";
 import { useRepoStatus } from "../api/useRepoStatus";
+import { useCheckoutBranch } from "../api/useCheckoutBranch";
+import { mapGitError } from "../../../utils/errorMapping";
 import {
   getMaxGraphColumns,
   getUncommittedSummary,
@@ -14,29 +16,23 @@ import {
 } from "../model/graphPresentation";
 import type { GraphContextMenu, GraphDialog } from "../model/graphDialog";
 
-/** All state, effects and derived values CommitGraph's JSX reads. */
-export function useCommitGraphState() {
-  const { t } = useTranslation();
-  const { currentRepo, selectedCommitId, setSelectedCommit } = useRepoStore();
-  const { setActiveScreen } = useViewStore();
-  const { setDetailPanelOpen } = useLayoutStore();
-  const parentRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [contextMenu, setContextMenu] = useState<GraphContextMenu | null>(null);
-  const [dialog, setDialog] = useState<GraphDialog>({ type: "closed" });
-
+function useContextMenuDismiss(
+  isOpen: boolean,
+  menuRef: React.RefObject<HTMLDivElement | null>,
+  onClose: () => void
+) {
   useEffect(() => {
-    if (!contextMenu) return;
+    if (!isOpen) return;
 
     const handleMouseDown = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setContextMenu(null);
+        onClose();
       }
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setContextMenu(null);
+        onClose();
       }
     };
 
@@ -46,7 +42,21 @@ export function useCommitGraphState() {
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [contextMenu]);
+  }, [isOpen, menuRef, onClose]);
+}
+
+/** All state, effects and derived values CommitGraph's JSX reads. */
+export function useCommitGraphState() {
+  const { t } = useTranslation();
+  const { currentRepo, selectedCommitId, setSelectedCommit, setSelectedBranch } = useRepoStore();
+  const { setActiveScreen } = useViewStore();
+  const { setDetailPanelOpen } = useLayoutStore();
+  const parentRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [contextMenu, setContextMenu] = useState<GraphContextMenu | null>(null);
+  const [dialog, setDialog] = useState<GraphDialog>({ type: "closed" });
+
+  useContextMenuDismiss(Boolean(contextMenu), menuRef, () => setContextMenu(null));
 
   const handleCopySha = async (commitId: string) => {
     try {
@@ -61,6 +71,7 @@ export function useCommitGraphState() {
   };
 
   const repoPath = currentRepo?.path ?? "";
+  const checkoutBranch = useCheckoutBranch(repoPath);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useCommitGraph(repoPath);
   const { data: repoStatus } = useRepoStatus(repoPath);
   const { hasUncommittedChanges, modifiedCount, untrackedCount } =
@@ -80,6 +91,18 @@ export function useCommitGraphState() {
   const handleSelectCommit = (commitId: string) => {
     setSelectedCommit(commitId);
     setDetailPanelOpen(true);
+  };
+
+  const handleCheckoutBranch = async (branchName: string) => {
+    try {
+      await checkoutBranch.mutateAsync({ name: branchName });
+      setSelectedBranch(branchName);
+      useToastStore.getState().showSuccess(
+        t.sidebar.switchBranchSuccess.replace("{name}", branchName)
+      );
+    } catch (err: unknown) {
+      useToastStore.getState().showError(mapGitError(err, t));
+    }
   };
 
   return {
@@ -102,6 +125,7 @@ export function useCommitGraphState() {
     hasNextPage,
     isFetchingNextPage,
     handleSelectCommit,
+    handleCheckoutBranch,
     setActiveScreen,
   };
 }

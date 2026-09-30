@@ -24,6 +24,7 @@ export function CommitGraph(dialogComponents: GraphDialogComponents) {
     hasNextPage,
     isFetchingNextPage,
     handleSelectCommit,
+    handleCheckoutBranch,
     setActiveScreen,
   } = useCommitGraphState();
 
@@ -54,6 +55,7 @@ export function CommitGraph(dialogComponents: GraphDialogComponents) {
           untrackedCount={untrackedCount}
           onShowChanges={() => setActiveScreen("changes")}
           onSelectCommit={handleSelectCommit}
+          onCheckoutBranch={handleCheckoutBranch}
           onCompare={(baseRev, targetRev) => setDialog({ type: "compare", baseRev, targetRev })}
           onContextMenu={setContextMenu}
         />

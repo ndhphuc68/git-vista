@@ -251,3 +251,38 @@ fn delete_branch_does_not_create_a_receipt_when_the_branch_is_locked() {
         .count();
     assert_eq!(after, before);
 }
+
+#[test]
+fn test_checkout_remote_branch_creates_local_tracking_branch() {
+    let fixture = TestRepoFixture::new();
+    let repo_path = fixture.path();
+    let repo = fixture.repo();
+
+    let head_commit = repo.head().unwrap().peel_to_commit().unwrap();
+    repo.remote("origin", "https://example.com/repo.git").unwrap();
+    repo.reference(
+        "refs/remotes/origin/feature-remote",
+        head_commit.id(),
+        true,
+        "create remote tracking ref",
+    )
+    .unwrap();
+
+    // Before: local branch does not exist
+    assert!(repo
+        .find_branch("feature-remote", git2::BranchType::Local)
+        .is_err());
+
+    // Calling checkout_branch with remote name should succeed
+    checkout_branch(repo_path, "origin/feature-remote")
+        .expect("checkout remote branch should succeed");
+
+    // After: local branch exists, is HEAD, and tracks upstream
+    let local = repo
+        .find_branch("feature-remote", git2::BranchType::Local)
+        .expect("local branch should have been created");
+    assert!(local.is_head());
+    let upstream = local.upstream().expect("upstream should be set");
+    assert_eq!(upstream.name().unwrap(), Some("origin/feature-remote"));
+}
+

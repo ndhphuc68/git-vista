@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { render, screen, within, fireEvent } from "@testing-library/react";
 import { CommitGraphBranchPills } from "../features/history/components/CommitGraphBranchPills";
 import { useSettingsStore } from "../store/useSettingsStore";
 import type { RefBadge } from "../ipc/bindings.generated";
@@ -61,4 +61,43 @@ describe("CommitGraphBranchPills", () => {
     expect(screen.getByText("tag")).toBeInTheDocument();
     expect(screen.getByText("remote")).toBeInTheDocument();
   });
+
+  it("calls onCheckout when double-clicking on a non-head primary branch pill", () => {
+    const onCheckout = vi.fn();
+    const refs: RefBadge[] = [{ name: "feature/login", ref_type: "local" }];
+    render(<CommitGraphBranchPills refs={refs} onCheckout={onCheckout} />);
+
+    const primaryPill = screen.getByTestId("commit-graph-primary-pill");
+    fireEvent.doubleClick(primaryPill);
+
+    expect(onCheckout).toHaveBeenCalledTimes(1);
+    expect(onCheckout).toHaveBeenCalledWith("feature/login");
+  });
+
+  it("does not call onCheckout when double-clicking on a HEAD branch pill", () => {
+    const onCheckout = vi.fn();
+    const refs: RefBadge[] = [{ name: "main", ref_type: "head" }];
+    render(<CommitGraphBranchPills refs={refs} onCheckout={onCheckout} />);
+
+    const primaryPill = screen.getByTestId("commit-graph-primary-pill");
+    fireEvent.doubleClick(primaryPill);
+
+    expect(onCheckout).not.toHaveBeenCalled();
+  });
+
+  it("calls onCheckout when double-clicking a branch row in the popover", () => {
+    const onCheckout = vi.fn();
+    const refs: RefBadge[] = [
+      { name: "main", ref_type: "head" },
+      { name: "feature/payment", ref_type: "local" },
+    ];
+    render(<CommitGraphBranchPills refs={refs} onCheckout={onCheckout} />);
+
+    const popoverBranch = screen.getByTestId("branch-pill-popover-feature/payment");
+    fireEvent.doubleClick(popoverBranch);
+
+    expect(onCheckout).toHaveBeenCalledTimes(1);
+    expect(onCheckout).toHaveBeenCalledWith("feature/payment");
+  });
 });
+

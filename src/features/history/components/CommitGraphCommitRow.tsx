@@ -16,6 +16,7 @@ interface CommitGraphCommitRowProps {
   nextCommitId: string | null;
   prevCommitId: string | null;
   onSelectCommit: (commitId: string) => void;
+  onCheckoutBranch?: (branchName: string) => void;
   onCompare: (baseRev: string, targetRev: string) => void;
   onContextMenu: (menu: GraphContextMenu) => void;
 }
@@ -31,6 +32,7 @@ export function CommitGraphCommitRow({
   nextCommitId,
   prevCommitId,
   onSelectCommit,
+  onCheckoutBranch,
   onCompare,
   onContextMenu,
 }: CommitGraphCommitRowProps) {
@@ -94,6 +96,7 @@ export function CommitGraphCommitRow({
         commit={commit}
         isSelected={isSelected}
         isFirstRow={isFirstRow}
+        onCheckoutBranch={onCheckoutBranch}
       />
     </div>
   );

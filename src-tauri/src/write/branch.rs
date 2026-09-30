@@ -70,12 +70,49 @@ pub fn create_branch<P: AsRef<Path>>(
     Ok(())
 }
 
-/// Chuyển sang nhánh chỉ định bằng cơ chế Safe Checkout của Git
+/// Chuyển sang nhánh chỉ định bằng cơ chế Safe Checkout của Git (hỗ trợ cả nhánh Local và Remote)
 pub fn checkout_branch<P: AsRef<Path>>(repo_path: P, branch_name: &str) -> Result<(), AppError> {
     let repo = Repository::open(repo_path.as_ref())?;
-    let branch = repo.find_branch(branch_name, BranchType::Local)?;
 
-    let commit = branch.get().peel_to_commit()?;
+    let (target_local_name, commit) = match repo.find_branch(branch_name, BranchType::Local) {
+        Ok(branch) => {
+            let commit = branch.get().peel_to_commit()?;
+            (branch_name.to_string(), commit)
+        }
+        Err(err) => {
+            if let Ok(remote_branch) = repo.find_branch(branch_name, BranchType::Remote) {
+                let remote_commit = remote_branch.get().peel_to_commit()?;
+                let local_name = if let Some((_remote, rest)) = branch_name.split_once('/') {
+                    rest
+                } else {
+                    branch_name
+                };
+
+                let target_commit = match repo.find_branch(local_name, BranchType::Local) {
+                    Ok(existing_local) => existing_local.get().peel_to_commit()?,
+                    Err(_) => {
+                        let mut new_branch = repo.branch(local_name, &remote_commit, false)?;
+                        if new_branch.set_upstream(Some(branch_name)).is_err() {
+                            if let Some((remote, _)) = branch_name.split_once('/') {
+                                if let Ok(mut config) = repo.config() {
+                                    let _ = config.set_str(&format!("branch.{local_name}.remote"), remote);
+                                    let _ = config.set_str(
+                                        &format!("branch.{local_name}.merge"),
+                                        &format!("refs/heads/{local_name}"),
+                                    );
+                                }
+                            }
+                        }
+                        remote_commit
+                    }
+                };
+                (local_name.to_string(), target_commit)
+            } else {
+                return Err(err.into());
+            }
+        }
+    };
+
     let tree = commit.tree()?;
 
     let mut checkout_opts = CheckoutBuilder::new();
@@ -85,13 +122,13 @@ pub fn checkout_branch<P: AsRef<Path>>(repo_path: P, branch_name: &str) -> Resul
         if e.code() == git2::ErrorCode::Conflict {
             return Err(AppError::InvalidOperation(format!(
                 "CHECKOUT_CONFLICT: Không thể chuyển sang nhánh '{}' vì có các thay đổi chưa commit bị xung đột với nhánh đích.",
-                branch_name
+                target_local_name
             )));
         }
         return Err(AppError::Git(e.message().to_string()));
     }
 
-    let ref_name = format!("refs/heads/{}", branch_name);
+    let ref_name = format!("refs/heads/{}", target_local_name);
     repo.set_head(&ref_name)?;
 
     Ok(())

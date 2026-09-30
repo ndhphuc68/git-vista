@@ -17,6 +17,7 @@ interface CommitGraphRowsProps {
   untrackedCount: number;
   onShowChanges: () => void;
   onSelectCommit: (commitId: string) => void;
+  onCheckoutBranch?: (branchName: string) => void;
   onCompare: (baseRev: string, targetRev: string) => void;
   onContextMenu: (menu: GraphContextMenu) => void;
 }
@@ -31,6 +32,7 @@ export function CommitGraphRows({
   untrackedCount,
   onShowChanges,
   onSelectCommit,
+  onCheckoutBranch,
   onCompare,
   onContextMenu,
 }: CommitGraphRowsProps) {
@@ -68,6 +70,7 @@ export function CommitGraphRows({
               nextCommitId={commits[virtualRow.index + 1]?.id ?? null}
               prevCommitId={commits[virtualRow.index - 1]?.id ?? null}
               onSelectCommit={onSelectCommit}
+              onCheckoutBranch={onCheckoutBranch}
               onCompare={onCompare}
               onContextMenu={onContextMenu}
             />

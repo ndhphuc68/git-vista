@@ -45,6 +45,7 @@ export const RemoteBranchRow: React.FC<RemoteBranchRowProps> = ({
         // Marks the row a right-click or "..." menu is acting on.
         isMenuOpen && "bg-surface-hover"
       )}
+      onDoubleClick={() => onCheckout(branchName)}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -69,7 +70,10 @@ export const RemoteBranchRow: React.FC<RemoteBranchRowProps> = ({
       </button>
 
       {/* Three dots action menu */}
-      <div className="relative shrink-0 flex items-center pr-1">
+      <div
+        className="relative shrink-0 flex items-center pr-1"
+        onDoubleClick={(e) => e.stopPropagation()}
+      >
         <button
           type="button"
           onClick={(e) => {

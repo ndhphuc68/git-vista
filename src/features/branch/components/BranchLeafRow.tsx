@@ -52,6 +52,9 @@ export const BranchLeafRow: React.FC<BranchLeafRowProps> = ({
         // Marks the row a right-click or "..." menu is acting on.
         isMenuOpen && "bg-surface-hover"
       )}
+      onDoubleClick={() => {
+        if (!branch.is_head) onCheckout(branch.name);
+      }}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -67,7 +70,10 @@ export const BranchLeafRow: React.FC<BranchLeafRowProps> = ({
       />
 
       {/* Three dots menu button */}
-      <div className="relative shrink-0 flex items-center pr-1">
+      <div
+        className="relative shrink-0 flex items-center pr-1"
+        onDoubleClick={(e) => e.stopPropagation()}
+      >
         <button
           type="button"
           onClick={(e) => {

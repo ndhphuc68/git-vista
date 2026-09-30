@@ -13,6 +13,7 @@ interface CommitGraphCommitRowSummaryProps {
   commit: GraphCommitNode;
   isSelected: boolean;
   isFirstRow?: boolean;
+  onCheckoutBranch?: (branchName: string) => void;
 }
 
 /** Columns 2-5 of a commit row: message (with inline branch pills), author, date and short SHA. */
@@ -20,6 +21,7 @@ export function CommitGraphCommitRowSummary({
   commit,
   isSelected,
   isFirstRow,
+  onCheckoutBranch,
 }: CommitGraphCommitRowSummaryProps) {
   const { t } = useTranslation();
   const avatarStyle = getAuthorAvatarStyle(commit.author_name);
@@ -27,7 +29,11 @@ export function CommitGraphCommitRowSummary({
     <>
       {/* Col 2: Commit Message + Inline Branch/Tag Badges */}
       <div className="flex-1 min-w-0 flex items-center gap-2 pl-2">
-        <CommitGraphBranchPills refs={commit.refs} isFirstRow={isFirstRow} />
+        <CommitGraphBranchPills
+          refs={commit.refs}
+          isFirstRow={isFirstRow}
+          onCheckout={onCheckoutBranch}
+        />
         <span
           className={clsx(
             "whitespace-nowrap overflow-hidden text-ellipsis flex-1 text-xs",

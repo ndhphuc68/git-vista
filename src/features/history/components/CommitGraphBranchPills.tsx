@@ -7,21 +7,38 @@ import { useTranslation } from "../../../i18n";
 export interface CommitGraphBranchPillsProps {
   refs: GraphCommitNode["refs"];
   isFirstRow?: boolean;
+  onCheckout?: (branchName: string) => void;
 }
 
 interface BranchPillPopoverRowProps {
   refBadge: RefBadge;
   headBadgeText: string;
+  onCheckout?: (branchName: string) => void;
 }
 
-function BranchPillPopoverRow({ refBadge, headBadgeText }: BranchPillPopoverRowProps) {
+function BranchPillPopoverRow({ refBadge, headBadgeText, onCheckout }: BranchPillPopoverRowProps) {
   const isHead = refBadge.ref_type === "head";
   const isTag = refBadge.ref_type === "tag";
   const isRemote = refBadge.ref_type === "remote";
   const style = getBranchPillStyle(refBadge.name, isHead, isTag);
+  const isBranch = !isTag;
+  const canCheckout = isBranch && !isHead;
 
   return (
-    <div className="flex items-center gap-2 px-2 py-1 rounded bg-white/5 min-w-0">
+    <div
+      data-testid={`branch-pill-popover-${refBadge.name}`}
+      onDoubleClick={(e) => {
+        if (canCheckout) {
+          e.stopPropagation();
+          onCheckout?.(refBadge.name);
+        }
+      }}
+      title={canCheckout ? `Nhấn đúp để chuyển sang nhánh ${refBadge.name}` : refBadge.name}
+      className={clsx(
+        "flex items-center gap-2 px-2 py-1 rounded bg-white/5 min-w-0 transition-colors",
+        canCheckout && "cursor-pointer hover:bg-white/10"
+      )}
+    >
       {isHead ? (
         <GitBranch size={11} className="shrink-0 text-accent" />
       ) : isTag ? (
@@ -56,6 +73,7 @@ interface BranchPillListPopoverProps {
   isFirstRow: boolean;
   title: string;
   headBadgeText: string;
+  onCheckout?: (branchName: string) => void;
 }
 
 function BranchPillListPopover({
@@ -63,11 +81,12 @@ function BranchPillListPopover({
   isFirstRow,
   title,
   headBadgeText,
+  onCheckout,
 }: BranchPillListPopoverProps) {
   return (
     <div
       className={clsx(
-        "absolute left-0 hidden group-hover/pills:flex flex-col gap-1 p-2 bg-slate-900/95 dark:bg-slate-800/95 text-white text-[11px] font-mono rounded-lg shadow-xl z-50 pointer-events-none border border-slate-700/60 animate-fade-in min-w-[180px] max-w-[320px] backdrop-blur-xs",
+        "absolute left-0 hidden group-hover/pills:flex flex-col gap-1 p-2 bg-slate-900/95 dark:bg-slate-800/95 text-white text-[11px] font-mono rounded-lg shadow-xl z-50 border border-slate-700/60 animate-fade-in min-w-[180px] max-w-[320px] backdrop-blur-xs",
         isFirstRow ? "top-full mt-1.5" : "bottom-full mb-1.5"
       )}
     >
@@ -77,7 +96,12 @@ function BranchPillListPopover({
       </div>
       <div className="flex flex-col gap-1 max-h-48 overflow-y-auto pt-0.5">
         {sortedRefs.map((r, idx) => (
-          <BranchPillPopoverRow key={idx} refBadge={r} headBadgeText={headBadgeText} />
+          <BranchPillPopoverRow
+            key={idx}
+            refBadge={r}
+            headBadgeText={headBadgeText}
+            onCheckout={onCheckout}
+          />
         ))}
       </div>
     </div>
@@ -97,7 +121,11 @@ function sortRefs(refs: RefBadge[]): RefBadge[] {
 }
 
 /** Inline branch/tag pill(s) and a vertical list popover for multi-ref commits. */
-export function CommitGraphBranchPills({ refs, isFirstRow = false }: CommitGraphBranchPillsProps) {
+export function CommitGraphBranchPills({
+  refs,
+  isFirstRow = false,
+  onCheckout,
+}: CommitGraphBranchPillsProps) {
   const { t } = useTranslation();
 
   if (!refs || refs.length === 0) {
@@ -111,11 +139,25 @@ export function CommitGraphBranchPills({ refs, isFirstRow = false }: CommitGraph
   const isPrimaryRemote = primaryRef.ref_type === "remote";
   const primaryStyle = getBranchPillStyle(primaryRef.name, isPrimaryHead, isPrimaryTag);
   const remainingCount = sortedRefs.length - 1;
+  const canCheckoutPrimary = !isPrimaryTag && !isPrimaryHead;
 
   return (
     <div className="relative group/pills inline-flex items-center gap-1.5 shrink-0 min-w-0">
       <div
-        title={primaryRef.name}
+        data-testid="commit-graph-primary-pill"
+        onDoubleClick={(e) => {
+          if (canCheckoutPrimary) {
+            e.stopPropagation();
+            onCheckout?.(primaryRef.name);
+          }
+        }}
+        title={
+          canCheckoutPrimary
+            ? `Nhấn đúp để chuyển sang nhánh ${primaryRef.name}`
+            : isPrimaryHead
+            ? `${primaryRef.name} (${t.graph.headBadge})`
+            : primaryRef.name
+        }
         className={clsx(
           "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-mono border shadow-2xs cursor-pointer transition-all hover:brightness-95 hover:shadow-xs min-w-0 max-w-[130px]",
           primaryStyle.container
@@ -152,6 +194,7 @@ export function CommitGraphBranchPills({ refs, isFirstRow = false }: CommitGraph
         isFirstRow={isFirstRow}
         title={t.graph.columns.branchTag}
         headBadgeText={t.graph.headBadge}
+        onCheckout={onCheckout}
       />
     </div>
   );
