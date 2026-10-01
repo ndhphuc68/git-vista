@@ -362,6 +362,8 @@ export const vi = {
     popStashTitle: "Áp dụng & Xoá stash (Pop)",
     dropStashTitle: "Xoá stash vĩnh viễn (Drop)",
     switchBranchSuccess: "Đã chuyển sang nhánh {name}",
+    checkedOutBehindRemote:
+      "Nhánh {name} đang chậm {count} commit so với {remote}. Hãy Pull để cập nhật.",
     toggleBranches: "Mở/đóng danh sách nhánh",
     toggleRemotes: "Mở/đóng danh sách máy chủ",
     toggleTags: "Mở/đóng danh sách tag",
@@ -941,6 +943,14 @@ export const vi = {
     checkoutConflictMessage: "Bạn đang có các thay đổi chưa lưu có thể bị ghi đè khi đổi nhánh.",
     checkoutConflictHint:
       "Hãy Commit các thay đổi hoặc bấm 'Lưu tạm (Stash)' trước khi chuyển nhánh.",
+    branchInWorktreeTitle: "Nhánh đang được dùng ở worktree khác",
+    branchInWorktreeMessage: "Nhánh này đang được checkout ở một worktree khác của kho lưu trữ.",
+    branchInWorktreeHint:
+      "Hãy chuyển worktree đó sang nhánh khác, hoặc mở worktree đó để làm việc trên nhánh này.",
+    repoLockedTitle: "Kho lưu trữ đang bị khoá",
+    repoLockedMessage: "Một tiến trình Git khác đang thao tác trên kho lưu trữ này.",
+    repoLockedHint:
+      "Hãy đợi tiến trình đó kết thúc rồi thử lại. Nếu không có tiến trình nào đang chạy, hãy xoá file .git/index.lock.",
     operationInProgressTitle: "Tiến trình Git đang dở dang",
     operationInProgressMessage:
       "Không thể chuyển nhánh khi kho lưu trữ đang có tiến trình Merge, Rebase, Cherry-pick hoặc Revert dở dang.",

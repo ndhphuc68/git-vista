@@ -48,6 +48,24 @@ describe("mapGitError utility", () => {
     expect(res.actionHint).toBeDefined();
   });
 
+  it("maps a branch held by another worktree", () => {
+    const res = mapGitError(
+      "BRANCH_IN_WORKTREE: Nhánh 'dev' đang được checkout ở một worktree khác"
+    );
+    expect(res.title).toBe("Nhánh đang được dùng ở worktree khác");
+    expect(res.actionHint).toContain("worktree");
+  });
+
+  it.each([
+    "failed to create locked file '/repo/.git/index.lock': File exists",
+    "the index is locked; this might be due to a concurrent or crashed process",
+    "failed to lock file '/repo/.git/refs/heads/dev.lock' for writing",
+  ])("maps a lock left by another Git process: %s", (raw) => {
+    const res = mapGitError(raw);
+    expect(res.title).toBe("Kho lưu trữ đang bị khoá");
+    expect(res.actionHint).toContain("index.lock");
+  });
+
   it("maps network connection failure", () => {
     const res = mapGitError("fatal: unable to access: Could not resolve host");
     expect(res.title).toContain("kết nối");

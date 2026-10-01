@@ -32,6 +32,44 @@ function errorDetails(error: unknown): string {
   return String(error);
 }
 
+type KnownErrorKind =
+  | "authFailed"
+  | "remoteNewCommits"
+  | "checkoutConflict"
+  | "branchInWorktree"
+  | "repoLocked"
+  | "operationInProgress"
+  | "networkError";
+
+/**
+ * Each known failure and the lowercase fragments that identify it, checked in
+ * order: the first rule with a matching fragment wins. A kind's texts live in
+ * `t.errors` as `<kind>Title`, `<kind>Message` and `<kind>Hint`.
+ */
+const KNOWN_ERRORS: ReadonlyArray<{ kind: KnownErrorKind; fragments: string[] }> = [
+  { kind: "authFailed", fragments: ["authentication failed", "permission denied"] },
+  { kind: "remoteNewCommits", fragments: ["rejected", "fetch first", "non-fast-forward"] },
+  {
+    kind: "checkoutConflict",
+    fragments: ["checkout_conflict", "local changes would be overwritten"],
+  },
+  { kind: "branchInWorktree", fragments: ["branch_in_worktree"] },
+  // A lock file left by another (or a crashed) Git process blocks the write.
+  { kind: "repoLocked", fragments: ["index.lock", "index is locked", "failed to lock file"] },
+  {
+    kind: "operationInProgress",
+    fragments: [
+      "operation_in_progress",
+      "operation is already in progress",
+      "cannot switch branch while",
+    ],
+  },
+  {
+    kind: "networkError",
+    fragments: ["could not resolve host", "connection timed out", "network is unreachable"],
+  },
+];
+
 export function mapGitError(
   error: unknown,
   tParam?: ReturnType<typeof getTranslation>
@@ -40,59 +78,14 @@ export function mapGitError(
   const raw = errorDetails(error);
   const lower = raw.toLowerCase();
 
-  if (lower.includes("authentication failed") || lower.includes("permission denied")) {
+  const known = KNOWN_ERRORS.find((rule) =>
+    rule.fragments.some((fragment) => lower.includes(fragment))
+  );
+  if (known) {
     return {
-      title: t.errors.authFailedTitle,
-      message: t.errors.authFailedMessage,
-      actionHint: t.errors.authFailedHint,
-      rawError: raw,
-    };
-  }
-
-  if (
-    lower.includes("rejected") ||
-    lower.includes("fetch first") ||
-    lower.includes("non-fast-forward")
-  ) {
-    return {
-      title: t.errors.remoteNewCommitsTitle,
-      message: t.errors.remoteNewCommitsMessage,
-      actionHint: t.errors.remoteNewCommitsHint,
-      rawError: raw,
-    };
-  }
-
-  if (lower.includes("checkout_conflict") || lower.includes("local changes would be overwritten")) {
-    return {
-      title: t.errors.checkoutConflictTitle,
-      message: t.errors.checkoutConflictMessage,
-      actionHint: t.errors.checkoutConflictHint,
-      rawError: raw,
-    };
-  }
-
-  if (
-    lower.includes("operation_in_progress") ||
-    lower.includes("operation is already in progress") ||
-    lower.includes("cannot switch branch while")
-  ) {
-    return {
-      title: t.errors.operationInProgressTitle,
-      message: t.errors.operationInProgressMessage,
-      actionHint: t.errors.operationInProgressHint,
-      rawError: raw,
-    };
-  }
-
-  if (
-    lower.includes("could not resolve host") ||
-    lower.includes("connection timed out") ||
-    lower.includes("network is unreachable")
-  ) {
-    return {
-      title: t.errors.networkErrorTitle,
-      message: t.errors.networkErrorMessage,
-      actionHint: t.errors.networkErrorHint,
+      title: t.errors[`${known.kind}Title`],
+      message: t.errors[`${known.kind}Message`],
+      actionHint: t.errors[`${known.kind}Hint`],
       rawError: raw,
     };
   }

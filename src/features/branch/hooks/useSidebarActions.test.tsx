@@ -87,6 +87,22 @@ describe("sidebar actions", () => {
     }
   );
 
+  it("ignores a second tag checkout while the first is still running", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    vi.spyOn(invokeCommand, "checkoutTag").mockReturnValue(gate);
+    const { result } = setup();
+
+    await act(async () => {
+      const first = result.current.checkoutTag(tag);
+      const second = result.current.checkoutTag(tag);
+      release();
+      await Promise.all([first, second]);
+    });
+
+    expect(invokeCommand.checkoutTag).toHaveBeenCalledTimes(1);
+  });
+
   it("keeps drop confirmation, receipt and undo refresh together", async () => {
     vi.spyOn(invokeCommand, "dropStash").mockResolvedValue("drop-receipt");
     vi.spyOn(invokeCommand, "undoDropStash").mockResolvedValue(undefined);
