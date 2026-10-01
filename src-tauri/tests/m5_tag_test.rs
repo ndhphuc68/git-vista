@@ -261,3 +261,79 @@ fn test_get_tags_command() {
     assert_eq!(tags.len(), 1);
     assert_eq!(tags[0].name, "v1.0.0-cmd");
 }
+
+/// A repo whose `v1.0.0` tag sits one commit behind HEAD. The later commit
+/// changes README.md and adds file2.txt, so a tag checkout has files to switch.
+fn repo_with_tag_behind_head() -> (tempfile::TempDir, git2::Repository, git2::Oid) {
+    let (dir, repo) = create_clean_repo().expect("Failed to create clean repo");
+    let c1_oid = repo.head().unwrap().peel_to_commit().unwrap().id();
+    create_tag(dir.path(), "v1.0.0", &c1_oid.to_string(), None).expect("Failed to create tag");
+
+    fs::write(dir.path().join("README.md"), "changed after the tag\n").unwrap();
+    fs::write(dir.path().join("file2.txt"), "second commit\n").unwrap();
+    let mut idx = repo.index().unwrap();
+    idx.add_path(Path::new("README.md")).unwrap();
+    idx.add_path(Path::new("file2.txt")).unwrap();
+    idx.write().unwrap();
+    {
+        let tree = repo.find_tree(idx.write_tree().unwrap()).unwrap();
+        let parent = repo.find_commit(c1_oid).unwrap();
+        let sig = test_signature();
+        repo.commit(Some("HEAD"), &sig, &sig, "Second commit", &tree, &[&parent])
+            .unwrap();
+    }
+    (dir, repo, c1_oid)
+}
+
+#[test]
+fn test_checkout_tag_switches_the_working_tree() {
+    let (dir, repo, _) = repo_with_tag_behind_head();
+
+    checkout_tag(dir.path(), "v1.0.0").expect("Failed to checkout tag");
+
+    assert!(!dir.path().join("file2.txt").exists());
+    assert_ne!(
+        fs::read_to_string(dir.path().join("README.md")).unwrap(),
+        "changed after the tag\n"
+    );
+    let statuses = repo.statuses(None).unwrap();
+    assert!(
+        statuses.is_empty(),
+        "working tree should be clean after a tag checkout"
+    );
+}
+
+#[test]
+fn test_checkout_tag_conflict_leaves_head_and_changes_alone() {
+    let (dir, repo, _) = repo_with_tag_behind_head();
+    let head_before = repo.head().unwrap().peel_to_commit().unwrap().id();
+    fs::write(dir.path().join("README.md"), "uncommitted local edit\n").unwrap();
+
+    let err = checkout_tag(dir.path(), "v1.0.0").unwrap_err();
+
+    assert!(err.to_string().contains("CHECKOUT_CONFLICT"), "got: {err}");
+    assert!(!repo.head_detached().unwrap());
+    assert_eq!(
+        repo.head().unwrap().peel_to_commit().unwrap().id(),
+        head_before
+    );
+    assert_eq!(
+        fs::read_to_string(dir.path().join("README.md")).unwrap(),
+        "uncommitted local edit\n"
+    );
+}
+
+#[test]
+fn test_checkout_tag_rejects_when_operation_in_progress() {
+    let (dir, repo, c1_oid) = repo_with_tag_behind_head();
+    fs::write(repo.path().join("MERGE_HEAD"), format!("{c1_oid}\n")).unwrap();
+    fs::write(repo.path().join("MERGE_MSG"), "Merge\n").unwrap();
+
+    let err = checkout_tag(dir.path(), "v1.0.0").unwrap_err();
+
+    assert!(
+        err.to_string().contains("OPERATION_IN_PROGRESS"),
+        "got: {err}"
+    );
+    assert!(!repo.head_detached().unwrap());
+}

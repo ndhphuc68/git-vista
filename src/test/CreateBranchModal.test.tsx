@@ -165,4 +165,20 @@ describe("CreateBranchModal", () => {
     expect(await screen.findByText(/branch already exists/i)).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
   });
+
+  it("explains a checkout conflict instead of showing the raw error code", async () => {
+    (invokeCommand.createBranch as ReturnType<typeof vi.fn>).mockRejectedValue({
+      type: "InvalidOperation",
+      message: "CHECKOUT_CONFLICT: Không thể chuyển sang nhánh 'feature/x'",
+    });
+
+    renderWithClient(<CreateBranchModal isOpen={true} onClose={vi.fn()} repoPath="/test/repo" />);
+    fireEvent.change(screen.getByLabelText("Tên nhánh mới"), { target: { value: "feature/x" } });
+    fireEvent.click(screen.getByRole("button", { name: /tạo nhánh/i }));
+
+    expect(
+      await screen.findByText(/thay đổi chưa lưu có thể bị ghi đè.*Stash/i)
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/CHECKOUT_CONFLICT/)).not.toBeInTheDocument();
+  });
 });
