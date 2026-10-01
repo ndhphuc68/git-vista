@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { type BranchListResult, type StashItem } from "../../../ipc/bindings.generated";
 import { NO_DIALOG, type SidebarDialog } from "../model/sidebarDialog";
-import { checkedOutBranchName } from "../model/checkoutTarget";
+import { checkedOutBranchName, commitsBehindRemote } from "../model/checkoutTarget";
 import { useToastStore } from "../../../store/useToastStore";
 import { useTranslation } from "../../../i18n";
 import { mapGitError } from "../../../utils/errorMapping";
@@ -29,6 +29,24 @@ interface PerformCheckoutOptions {
   t: ReturnType<typeof useTranslation>["t"];
 }
 
+/** Warns when checking out `origin/x` landed on a local `x` that lags behind it. */
+function notifyIfBehindRemote(
+  requested: string,
+  checkedOut: string,
+  branchData: BranchListResult | undefined,
+  t: ReturnType<typeof useTranslation>["t"]
+) {
+  const behind = commitsBehindRemote(requested, branchData);
+  if (behind === 0) return;
+  useToastStore.getState().showToast({
+    type: "info",
+    message: t.sidebar.checkedOutBehindRemote
+      .replace("{name}", checkedOut)
+      .replace("{count}", String(behind))
+      .replace("{remote}", requested),
+  });
+}
+
 async function performCheckout({
   branchName,
   isInProgress,
@@ -54,6 +72,7 @@ async function performCheckout({
     useToastStore
       .getState()
       .showSuccess(t.sidebar.switchBranchSuccess.replace("{name}", checkedOut));
+    notifyIfBehindRemote(branchName, checkedOut, branchData, t);
   } catch (err: unknown) {
     const msg = toErrorMessage(err);
     // Only the backend's own code: other errors can mention a "conflict" too.

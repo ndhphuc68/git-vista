@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import type { StashItem } from "../../../ipc/bindings.generated";
+import type { StashItem, TagItem } from "../../../ipc/bindings.generated";
 import { useTranslation } from "../../../i18n";
 import { qk } from "../../../domain/queryKeys";
 import { useCheckoutTag, usePushTag } from "../../tag";
@@ -7,6 +7,7 @@ import { useApplyStash, usePopStash, useDropStash } from "../../stash";
 import { useMergeBranch, useRebaseBranch } from "../../merge";
 import { useUndoDropStash } from "../../undo";
 import { createStashActionHandlers, createTagActionHandlers } from "./useSidebarActions.actions";
+import { useSingleFlight } from "../../../shared/hooks/useSingleFlight";
 
 interface SidebarActionsOptions {
   repoPath: string;
@@ -42,6 +43,8 @@ export function useSidebarActions({
     undoDrop,
   });
   const { checkoutTag, pushTag } = createTagActionHandlers({ t, closeMenu, checkout, push });
+  // A repeated click would only re-run the same tag checkout.
+  const runTagCheckout = useSingleFlight();
 
   // Existing branch dialogs also call this after completing their operation.
   const invalidateRepo = () => {
@@ -54,7 +57,7 @@ export function useSidebarActions({
     applyStash,
     popStash,
     dropStash,
-    checkoutTag,
+    checkoutTag: (tag: TagItem) => runTagCheckout(() => checkoutTag(tag)),
     pushTag,
     invalidateRepo,
     mergeBranch: (targetBranch: string, noFf: boolean) => merge.mutateAsync({ targetBranch, noFf }),

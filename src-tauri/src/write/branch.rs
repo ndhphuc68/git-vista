@@ -1,7 +1,7 @@
 use crate::error::AppError;
 use git2::{build::CheckoutBuilder, BranchType, Oid, Reference, Repository};
 use serde::{Deserialize, Serialize};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -92,6 +92,13 @@ pub fn checkout_branch<P: AsRef<Path>>(repo_path: P, branch_name: &str) -> Resul
     }
 
     let target = resolve_checkout_target(&repo, branch_name)?;
+    if let Some(path) = worktree_holding_branch(&repo, &target.local_name) {
+        return Err(AppError::InvalidOperation(format!(
+            "BRANCH_IN_WORKTREE: Nhánh '{}' đang được checkout ở một worktree khác ({}). Hãy chuyển worktree đó sang nhánh khác trước.",
+            target.local_name,
+            path.display()
+        )));
+    }
     let tree = target.commit.tree()?;
 
     let mut checkout_opts = CheckoutBuilder::new();
@@ -147,9 +154,7 @@ fn resolve_checkout_target<'r>(
     let Ok(remote_branch) = repo.find_branch(branch_name, BranchType::Remote) else {
         return Err(local_err.into());
     };
-    let local_name = branch_name
-        .split_once('/')
-        .map_or(branch_name, |(_remote, rest)| rest);
+    let local_name = local_name_of_remote_branch(repo, branch_name);
 
     if let Ok(existing_local) = repo.find_branch(local_name, BranchType::Local) {
         return Ok(CheckoutTarget {
@@ -173,6 +178,57 @@ fn resolve_checkout_target<'r>(
     })
 }
 
+/// The local name a remote-tracking branch checks out as: `origin/feature`
+/// becomes `feature`. The remote comes from Git's refspecs, so a remote whose
+/// own name holds a slash (`team/origin`) is stripped whole.
+fn local_name_of_remote_branch<'a>(repo: &Repository, branch_name: &'a str) -> &'a str {
+    repo.branch_remote_name(&format!("refs/remotes/{branch_name}"))
+        .ok()
+        .and_then(|remote| remote.as_str().ok().map(|remote| format!("{remote}/")))
+        .and_then(|prefix| branch_name.strip_prefix(prefix.as_str()))
+        .or_else(|| branch_name.split_once('/').map(|(_remote, rest)| rest))
+        .unwrap_or(branch_name)
+}
+
+/// The working directory of another worktree that has `local_name` checked out.
+/// Git refuses to check a branch out in two worktrees at once; libgit2's
+/// `set_head` does not, so the check is made here.
+fn worktree_holding_branch(repo: &Repository, local_name: &str) -> Option<PathBuf> {
+    let head_ref = format!("refs/heads/{local_name}");
+    let canonical =
+        |path: &Path| std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
+    let own_workdir = repo.workdir().map(canonical);
+
+    // The main worktree first, then every linked one.
+    let main = Repository::open(repo.commondir()).ok()?;
+    let linked = main.worktrees().ok()?;
+    let others: Vec<Repository> = linked
+        .iter()
+        .flatten()
+        .flatten()
+        .filter_map(|name| main.find_worktree(name).ok())
+        .filter_map(|worktree| Repository::open_from_worktree(&worktree).ok())
+        .collect();
+
+    std::iter::once(main)
+        .chain(others)
+        .filter(|other| other.workdir().map(canonical) != own_workdir)
+        .find(|other| {
+            // HEAD's symbolic target, so an unborn branch still counts.
+            other
+                .find_reference("HEAD")
+                .ok()
+                .and_then(|head| {
+                    head.symbolic_target()
+                        .ok()
+                        .flatten()
+                        .map(|target| target == head_ref)
+                })
+                .unwrap_or(false)
+        })
+        .and_then(|other| other.workdir().map(Path::to_path_buf))
+}
+
 /// Creates `local_name` at `commit` and makes it track `remote_name`.
 fn create_tracking_branch(
     repo: &Repository,
@@ -182,7 +238,7 @@ fn create_tracking_branch(
 ) -> Result<(), AppError> {
     let mut new_branch = repo.branch(local_name, commit, false)?;
     if new_branch.set_upstream(Some(remote_name)).is_err() {
-        if let Some((remote, _)) = remote_name.split_once('/') {
+        if let Some(remote) = remote_name.strip_suffix(&format!("/{local_name}")) {
             if let Ok(mut config) = repo.config() {
                 let _ = config.set_str(&format!("branch.{local_name}.remote"), remote);
                 let _ = config.set_str(

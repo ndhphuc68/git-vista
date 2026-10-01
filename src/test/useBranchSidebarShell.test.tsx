@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { invokeCommand } from "../ipc/client";
+import type { BranchItem } from "../ipc/bindings.generated";
 import { useToastStore } from "../store/useToastStore";
 import { useBranchSidebarShell } from "../features/branch/hooks/useBranchSidebarShell";
 
@@ -121,6 +122,43 @@ describe("useBranchSidebarShell - checkout guards and handling", () => {
 
     expect(checkoutSpy).toHaveBeenCalledWith(REPO, "origin/feature/login");
     expect(setSelectedBranch).toHaveBeenCalledWith("feature/login");
+  });
+
+  it("warns when checking out a remote branch lands on a local branch behind it", async () => {
+    const branch = (name: string, extra: Partial<BranchItem> = {}): BranchItem => ({
+      name,
+      is_head: false,
+      target_commit_id: "abc",
+      upstream: null,
+      ahead: 0,
+      behind: 0,
+      ...extra,
+    });
+    vi.spyOn(invokeCommand, "getBranches").mockResolvedValue({
+      current_branch: "main",
+      is_detached: false,
+      local: [branch("main"), branch("feature", { upstream: "origin/feature", behind: 2 })],
+      remote: [branch("origin/feature")],
+      tags: [],
+    });
+    vi.spyOn(invokeCommand, "checkoutBranch").mockResolvedValue(undefined);
+
+    const { hook, setSelectedBranch } = setup();
+    await waitFor(() => expect(hook.result.current.data.branchData).toBeDefined());
+
+    await act(async () => {
+      await hook.result.current.handleCheckout("origin/feature");
+    });
+
+    expect(setSelectedBranch).toHaveBeenCalledWith("feature");
+    expect(useToastStore.getState().toasts).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: "info",
+          message: "Nhánh feature đang chậm 2 commit so với origin/feature. Hãy Pull để cập nhật.",
+        }),
+      ])
+    );
   });
 
   it("opens checkoutConflict dialog when checkout fails with CHECKOUT_CONFLICT", async () => {

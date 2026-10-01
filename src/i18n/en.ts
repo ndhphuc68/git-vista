@@ -366,6 +366,8 @@ export const en: Translations = {
     popStashTitle: "Apply & Pop stash",
     dropStashTitle: "Drop stash permanently",
     switchBranchSuccess: "Switched to branch {name}",
+    checkedOutBehindRemote:
+      "Branch {name} is {count} commit(s) behind {remote}. Pull to update it.",
     toggleBranches: "Toggle branches list",
     toggleRemotes: "Toggle remotes list",
     toggleTags: "Toggle tags list",
@@ -946,6 +948,14 @@ export const en: Translations = {
     checkoutConflictTitle: "Checkout Conflict",
     checkoutConflictMessage: "You have uncommitted changes that would be overwritten.",
     checkoutConflictHint: "Commit or Stash your changes before switching branches.",
+    branchInWorktreeTitle: "Branch is used by another worktree",
+    branchInWorktreeMessage: "This branch is checked out in another worktree of this repository.",
+    branchInWorktreeHint:
+      "Switch that worktree to a different branch, or open that worktree to work on this branch.",
+    repoLockedTitle: "Repository is locked",
+    repoLockedMessage: "Another Git process is working on this repository.",
+    repoLockedHint:
+      "Wait for it to finish and try again. If no Git process is running, delete .git/index.lock.",
     operationInProgressTitle: "Operation in progress",
     operationInProgressMessage:
       "Cannot switch branches while a merge, rebase, cherry-pick, or revert is in progress.",

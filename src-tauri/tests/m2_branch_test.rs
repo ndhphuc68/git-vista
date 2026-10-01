@@ -355,3 +355,55 @@ fn test_create_branch_with_checkout_rolls_back_on_conflict() {
     );
     assert_eq!(repo.head().unwrap().shorthand().unwrap(), "master");
 }
+
+#[test]
+fn test_checkout_refuses_a_branch_checked_out_in_another_worktree() {
+    let fixture = TestRepoFixture::new();
+    let repo_path = fixture.path();
+    let repo = fixture.repo();
+    create_branch(repo_path, "feature/wt", None, false).unwrap();
+
+    let wt_parent = tempfile::TempDir::new().unwrap();
+    let wt_path = wt_parent.path().join("wt");
+    let branch_ref = repo.find_reference("refs/heads/feature/wt").unwrap();
+    let mut opts = git2::WorktreeAddOptions::new();
+    opts.reference(Some(&branch_ref));
+    repo.worktree("wt", &wt_path, Some(&opts)).unwrap();
+
+    let err = checkout_branch(repo_path, "feature/wt").unwrap_err();
+
+    assert!(err.to_string().contains("BRANCH_IN_WORKTREE"), "got: {err}");
+    assert_eq!(repo.head().unwrap().shorthand().unwrap(), "master");
+
+    // From inside the linked worktree, the main worktree's branch is held too.
+    let err = checkout_branch(&wt_path, "master").unwrap_err();
+    assert!(err.to_string().contains("BRANCH_IN_WORKTREE"), "got: {err}");
+}
+
+#[test]
+fn test_checkout_remote_branch_of_a_remote_whose_name_has_a_slash() {
+    let fixture = TestRepoFixture::new();
+    let repo_path = fixture.path();
+    let repo = fixture.repo();
+    let head_commit = repo.head().unwrap().peel_to_commit().unwrap();
+    repo.remote("team/origin", "https://example.com/repo.git")
+        .unwrap();
+    repo.reference(
+        "refs/remotes/team/origin/feature",
+        head_commit.id(),
+        true,
+        "create remote tracking ref",
+    )
+    .unwrap();
+
+    checkout_branch(repo_path, "team/origin/feature").expect("checkout should succeed");
+
+    let local = repo
+        .find_branch("feature", git2::BranchType::Local)
+        .expect("the local branch should drop the whole remote name");
+    assert!(local.is_head());
+    assert_eq!(
+        local.upstream().unwrap().name().unwrap(),
+        Some("team/origin/feature")
+    );
+}
