@@ -324,3 +324,34 @@ fn checkout_remote_branch_conflict_does_not_leave_a_local_branch() {
         .find_branch("feature-remote", git2::BranchType::Local)
         .is_err());
 }
+
+#[test]
+fn test_create_branch_with_checkout_rolls_back_on_conflict() {
+    let fixture = TestRepoFixture::new();
+    let repo_path = fixture.path();
+    let repo = fixture.repo();
+    let base = repo
+        .head()
+        .unwrap()
+        .peel_to_commit()
+        .unwrap()
+        .id()
+        .to_string();
+
+    // Move master past `base` with a change to file1.txt, then edit it locally
+    // so checking out a branch at `base` would overwrite the edit.
+    fs::write(repo_path.join("file1.txt"), "committed on master\n").unwrap();
+    visual_git_lib::write::staging::stage_all(repo_path).unwrap();
+    visual_git_lib::write::commit::create_commit(repo_path, "Change file1", None, false).unwrap();
+    fs::write(repo_path.join("file1.txt"), "uncommitted local edit\n").unwrap();
+
+    let err = create_branch(repo_path, "feature/at-base", Some(&base), true).unwrap_err();
+
+    assert!(err.to_string().contains("CHECKOUT_CONFLICT"), "got: {err}");
+    assert!(
+        repo.find_branch("feature/at-base", git2::BranchType::Local)
+            .is_err(),
+        "the branch must not survive a failed checkout"
+    );
+    assert_eq!(repo.head().unwrap().shorthand().unwrap(), "master");
+}

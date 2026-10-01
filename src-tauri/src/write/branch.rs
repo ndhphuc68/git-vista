@@ -67,10 +67,15 @@ pub fn create_branch<P: AsRef<Path>>(
         head.peel_to_commit()?
     };
 
-    repo.branch(trimmed, &target_commit, false)?;
+    let mut new_branch = repo.branch(trimmed, &target_commit, false)?;
 
     if checkout {
-        checkout_branch(repo_path, trimmed)?;
+        // A failed checkout must not leave behind a branch the user never got
+        // onto: retrying the same name would then fail with "already exists".
+        if let Err(err) = checkout_branch(repo_path, trimmed) {
+            let _ = new_branch.delete();
+            return Err(err);
+        }
     }
 
     Ok(())

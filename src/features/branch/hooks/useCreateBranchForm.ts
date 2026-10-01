@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useCreateBranch } from "../api";
 import { useTranslation } from "../../../i18n";
 import { sanitizeBranchName } from "../model/branchName";
-import { toErrorMessage } from "../../../shared/utils/toError";
+import { mapGitError } from "../../../utils/errorMapping";
 
 export interface CreateBranchFormOptions {
   isOpen: boolean;
@@ -60,8 +60,10 @@ export function useCreateBranchForm({
       if (onSuccess) onSuccess();
       onClose();
     } catch (err: unknown) {
-      const msg = toErrorMessage(err);
-      setError(msg || t.common.error);
+      // Known codes such as CHECKOUT_CONFLICT read as a sentence plus what to do;
+      // anything else falls through to the raw backend message.
+      const friendly = mapGitError(err, t);
+      setError([friendly.message, friendly.actionHint].filter(Boolean).join(" ") || t.common.error);
     }
   };
 

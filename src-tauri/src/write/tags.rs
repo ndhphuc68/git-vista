@@ -94,6 +94,12 @@ pub fn checkout_tag<P: AsRef<Path>>(repo_path: P, name: &str) -> Result<(), AppE
     let trimmed_name = name.trim();
     let repo = Repository::open(repo_path.as_ref())?;
 
+    if repo.state() != git2::RepositoryState::Clean {
+        return Err(AppError::InvalidOperation(
+            "OPERATION_IN_PROGRESS: Không thể chuyển sang tag khi kho lưu trữ đang có tiến trình dở dang (Merge, Rebase, Cherry-pick hoặc Revert). Vui lòng hoàn tất hoặc huỷ bỏ tiến trình trước.".to_string(),
+        ));
+    }
+
     // Check statuses for uncommitted conflicts or unsafe changes
     let mut status_opts = git2::StatusOptions::new();
     status_opts.include_untracked(false);
@@ -108,11 +114,25 @@ pub fn checkout_tag<P: AsRef<Path>>(repo_path: P, name: &str) -> Result<(), AppE
     let ref_name = format!("refs/tags/{}", trimmed_name);
     let reference = repo.find_reference(&ref_name)?;
     let commit = reference.peel_to_commit()?;
+    let tree = commit.tree()?;
 
     let mut checkout_opts = CheckoutBuilder::new();
     checkout_opts.safe();
+
+    // The working tree is switched before HEAD moves. With HEAD already on the
+    // tag, a checkout would compare the tag against itself and change nothing,
+    // and a conflict would leave HEAD moved over the old files.
+    if let Err(e) = repo.checkout_tree(tree.as_object(), Some(&mut checkout_opts)) {
+        if e.code() == git2::ErrorCode::Conflict {
+            return Err(AppError::InvalidOperation(format!(
+                "CHECKOUT_CONFLICT: Không thể chuyển sang tag '{}' vì có các thay đổi chưa commit bị xung đột.",
+                trimmed_name
+            )));
+        }
+        return Err(AppError::Git(e.message().to_string()));
+    }
+
     repo.set_head_detached(commit.id())?;
-    repo.checkout_head(Some(&mut checkout_opts))?;
 
     Ok(())
 }
