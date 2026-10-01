@@ -1,6 +1,6 @@
 ﻿import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { describe, it, expect, vi } from "vitest";
+import { beforeEach, describe, it, expect, vi } from "vitest";
 import { CheckoutConflictModal } from "../features/branch";
 import { invokeCommand } from "../ipc/client";
 import { useRepoStore } from "../store/useRepoStore";
@@ -198,5 +198,66 @@ describe("CheckoutConflictModal - after stash-and-checkout", () => {
     saveStashSpy.mockRestore();
     checkoutBranchSpy.mockRestore();
     vi.mocked(invokeCommand.getBranches).mockRestore();
+  });
+});
+
+describe("CheckoutConflictModal - checkout fails after the auto-stash", () => {
+  function renderModal(onClose = vi.fn()) {
+    renderWithClient(
+      <CheckoutConflictModal
+        isOpen={true}
+        onClose={onClose}
+        repoPath="/test/repo"
+        targetBranch="feature/next"
+        errorMessage="CHECKOUT_CONFLICT: file1.txt"
+        onNavigateToChanges={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: /lưu tạm \(stash\) rồi chuyển nhánh/i }));
+    return onClose;
+  }
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(invokeCommand, "saveStash").mockResolvedValue("stash123");
+    vi.spyOn(invokeCommand, "checkoutBranch").mockRejectedValue({
+      type: "Git",
+      message: "index is locked",
+    });
+  });
+
+  it("pops the auto-stash back and says the changes were restored", async () => {
+    const popSpy = vi.spyOn(invokeCommand, "popStash").mockResolvedValue(undefined);
+
+    const onClose = renderModal();
+
+    expect(
+      await screen.findByText(/index is locked.*đã được khôi phục từ Stash/i)
+    ).toBeInTheDocument();
+    expect(popSpy).toHaveBeenCalledWith("/test/repo", 0);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("names the stash holding the changes when the pop fails too", async () => {
+    vi.spyOn(invokeCommand, "popStash").mockRejectedValue({
+      type: "Git",
+      message: "pop conflict",
+    });
+
+    renderModal();
+
+    expect(
+      await screen.findByText(/vẫn được lưu an toàn trong Stash ".*feature\/next"/i)
+    ).toBeInTheDocument();
+  });
+
+  it("does not pop anything when the stash itself fails", async () => {
+    vi.mocked(invokeCommand.saveStash).mockRejectedValue({ type: "Git", message: "no space" });
+    const popSpy = vi.spyOn(invokeCommand, "popStash").mockResolvedValue(undefined);
+
+    renderModal();
+
+    expect(await screen.findByText(/Lỗi khi Stash & chuyển nhánh: no space/)).toBeInTheDocument();
+    expect(popSpy).not.toHaveBeenCalled();
   });
 });

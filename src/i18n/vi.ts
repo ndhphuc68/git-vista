@@ -587,6 +587,10 @@ export const vi = {
       toChanges: "Đến màn hình Thay đổi",
       autoStashMessage: "Tự động lưu trước khi chuyển sang {target}",
       stashError: "Lỗi khi Stash & chuyển nhánh: {msg}",
+      checkoutFailedRestored:
+        "Không thể chuyển nhánh: {msg}. Các thay đổi của bạn đã được khôi phục từ Stash.",
+      checkoutFailedKeptInStash:
+        'Không thể chuyển nhánh: {msg}. Các thay đổi của bạn vẫn được lưu an toàn trong Stash "{stash}".',
     },
     merge: {
       title: "Gộp nhánh (Merge)",

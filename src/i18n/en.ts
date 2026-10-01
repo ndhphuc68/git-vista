@@ -592,6 +592,10 @@ export const en: Translations = {
       toChanges: "Go to Changes",
       autoStashMessage: "Auto-stash before switching to {target}",
       stashError: "Error stashing & checking out: {msg}",
+      checkoutFailedRestored:
+        "Could not switch branch: {msg}. Your changes were restored from the stash.",
+      checkoutFailedKeptInStash:
+        'Could not switch branch: {msg}. Your changes are kept safe in the stash "{stash}".',
     },
     merge: {
       title: "Merge Branch",

@@ -178,6 +178,32 @@ describe("useCommitGraphState - checkout branch", () => {
   });
 });
 
+describe("useCommitGraphState - concurrent checkouts", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    useToastStore.setState({ toasts: [] });
+  });
+
+  it("ignores a commit checkout started while a branch checkout is running", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    const branchSpy = vi.spyOn(invokeCommand, "checkoutBranch").mockReturnValue(gate);
+    const commitSpy = vi.spyOn(invokeCommand, "checkoutCommit").mockResolvedValue(undefined);
+
+    const { hook } = setup();
+
+    await act(async () => {
+      const first = hook.result.current.handleCheckoutBranch("feature-a");
+      const second = hook.result.current.handleCheckoutCommit("commit1234567890");
+      release();
+      await Promise.all([first, second]);
+    });
+
+    expect(branchSpy).toHaveBeenCalledTimes(1);
+    expect(commitSpy).not.toHaveBeenCalled();
+  });
+});
+
 describe("useCommitGraphState - checkout commit", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
