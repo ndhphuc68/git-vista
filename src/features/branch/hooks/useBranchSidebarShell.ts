@@ -10,6 +10,7 @@ import { useSidebarData } from "./useSidebarData";
 import { useSidebarActions } from "./useSidebarActions";
 import { useActiveSidebarMenu } from "./useActiveSidebarMenu";
 import { toErrorMessage } from "../../../shared/utils/toError";
+import { useSingleFlight } from "../../../shared/hooks/useSingleFlight";
 
 export interface BranchSidebarShellOptions {
   repoPath: string;
@@ -77,6 +78,7 @@ export function useBranchSidebarShell({
   setSelectedBranch,
 }: BranchSidebarShellOptions) {
   const checkoutBranch = useCheckoutBranch(repoPath);
+  const runCheckout = useSingleFlight();
 
   const [search, setSearch] = useState("");
   const [openSections, setOpenSections] = useState({
@@ -111,17 +113,20 @@ export function useBranchSidebarShell({
     "main";
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
 
+  // A second checkout while one is running would just repeat the same switch.
   const handleCheckout = (branchName: string) =>
-    performCheckout({
-      branchName,
-      isInProgress: data.repoState?.is_in_progress,
-      branchData,
-      checkoutBranch: checkoutBranch.mutateAsync,
-      setSelectedBranch,
-      setDialog,
-      setActiveMenu,
-      t,
-    });
+    runCheckout(() =>
+      performCheckout({
+        branchName,
+        isInProgress: data.repoState?.is_in_progress,
+        branchData,
+        checkoutBranch: checkoutBranch.mutateAsync,
+        setSelectedBranch,
+        setDialog,
+        setActiveMenu,
+        t,
+      })
+    );
 
   const toggleFolder = (folderPath: string) => {
     setExpandedFolders((prev) => ({

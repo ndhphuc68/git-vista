@@ -173,6 +173,24 @@ describe("useBranchSidebarShell - checkout guards and handling", () => {
     expect(toasts[0]!.type).toBe("error");
   });
 
+  it("ignores a second checkout while the first is still running", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    const checkoutSpy = vi.spyOn(invokeCommand, "checkoutBranch").mockReturnValue(gate);
+
+    const { hook } = setup();
+
+    await act(async () => {
+      const first = hook.result.current.handleCheckout("feature-a");
+      const second = hook.result.current.handleCheckout("feature-b");
+      release();
+      await Promise.all([first, second]);
+    });
+
+    expect(checkoutSpy).toHaveBeenCalledTimes(1);
+    expect(checkoutSpy).toHaveBeenCalledWith(REPO, "feature-a");
+  });
+
   it("shows error toast without calling window.alert on non-conflict failure", async () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
     vi.spyOn(invokeCommand, "checkoutBranch").mockRejectedValue(

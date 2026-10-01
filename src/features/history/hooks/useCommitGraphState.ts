@@ -20,6 +20,7 @@ import type { GraphContextMenu, GraphDialog } from "../model/graphDialog";
 import { graphCheckedOutBranchName } from "../model/graphCheckout";
 import type { GraphCommitNode } from "../../../ipc/bindings.generated";
 import { toErrorMessage } from "../../../shared/utils/toError";
+import { useSingleFlight } from "../../../shared/hooks/useSingleFlight";
 
 function useContextMenuDismiss(
   isOpen: boolean,
@@ -82,8 +83,10 @@ function useGraphCheckout({
 }: UseGraphCheckoutParams) {
   const checkoutBranch = useCheckoutBranch(repoPath);
   const checkoutCommit = useCheckoutCommit(repoPath);
+  // Branch and commit checkouts share one guard: both move HEAD.
+  const runCheckout = useSingleFlight();
 
-  const handleCheckoutBranch = async (branchName: string) => {
+  const switchToBranch = async (branchName: string) => {
     if (repoState?.is_in_progress) {
       useToastStore
         .getState()
@@ -108,8 +111,7 @@ function useGraphCheckout({
     }
   };
 
-  const handleCheckoutCommit = async (commitId: string) => {
-    setContextMenu(null);
+  const switchToCommit = async (commitId: string) => {
     if (repoState?.is_in_progress) {
       useToastStore
         .getState()
@@ -127,7 +129,13 @@ function useGraphCheckout({
     }
   };
 
-  return { handleCheckoutBranch, handleCheckoutCommit };
+  return {
+    handleCheckoutBranch: (branchName: string) => runCheckout(() => switchToBranch(branchName)),
+    handleCheckoutCommit: (commitId: string) => {
+      setContextMenu(null);
+      return runCheckout(() => switchToCommit(commitId));
+    },
+  };
 }
 
 /** All state, effects and derived values CommitGraph's JSX reads. */
