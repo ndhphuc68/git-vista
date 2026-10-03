@@ -53,6 +53,7 @@ export const RenameBranchModal: React.FC<RenameBranchModalProps> = ({
               value={newName}
               onChange={handleNameChange}
               disabled={loading}
+              size="lg"
             />
           </div>
 

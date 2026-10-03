@@ -2,6 +2,7 @@ import React from "react";
 import clsx from "clsx";
 import { ChevronDown } from "lucide-react";
 import type { SelectOption } from "./selectOptions";
+import type { FieldSize } from "./fieldStyles";
 
 export interface SelectTriggerProps {
   ref: React.Ref<HTMLButtonElement>;
@@ -16,9 +17,16 @@ export interface SelectTriggerProps {
   placeholder?: React.ReactNode;
   disabled?: boolean;
   mono: boolean;
+  size?: FieldSize;
   onToggle: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
 }
+
+const TRIGGER_SIZE: Record<FieldSize, string> = {
+  sm: "px-3 py-1.5 text-xs",
+  md: "px-3 py-2 text-xs",
+  lg: "px-3.5 py-2.5 min-h-12 text-sm",
+};
 
 /** The `role="combobox"` button that shows the current value and opens the list. */
 export const SelectTrigger: React.FC<SelectTriggerProps> = ({
@@ -33,6 +41,7 @@ export const SelectTrigger: React.FC<SelectTriggerProps> = ({
   placeholder,
   disabled,
   mono,
+  size = "sm",
   onToggle,
   onKeyDown,
 }) => (
@@ -51,7 +60,8 @@ export const SelectTrigger: React.FC<SelectTriggerProps> = ({
     onClick={onToggle}
     onKeyDown={onKeyDown}
     className={clsx(
-      "w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-md text-xs",
+      "w-full flex items-center justify-between gap-2 rounded-md",
+      TRIGGER_SIZE[size],
       "bg-window text-primary border outline-none transition-colors cursor-pointer",
       "disabled:opacity-50 disabled:cursor-not-allowed",
       isOpen
@@ -68,7 +78,7 @@ export const SelectTrigger: React.FC<SelectTriggerProps> = ({
       {selected?.badge}
     </span>
     <ChevronDown
-      size={13}
+      size={size === "lg" ? 16 : 13}
       aria-hidden="true"
       className={clsx(
         "text-secondary shrink-0 transition-transform duration-150",

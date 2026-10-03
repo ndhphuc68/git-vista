@@ -46,6 +46,7 @@ export const BranchSelectionBar: React.FC<BranchSelectionBarProps> = ({
         onChange={onBaseBranchChange}
         options={toOptions(availableBaseBranches)}
         disabled={submitting}
+        size="lg"
         mono
         searchable
         searchPlaceholder={t.pullRequests.searchBranchPlaceholder}
@@ -71,6 +72,7 @@ export const BranchSelectionBar: React.FC<BranchSelectionBarProps> = ({
         onChange={onCompareBranchChange}
         options={toOptions(availableCompareBranches)}
         disabled={submitting}
+        size="lg"
         mono
         searchable
         searchPlaceholder={t.pullRequests.searchBranchPlaceholder}

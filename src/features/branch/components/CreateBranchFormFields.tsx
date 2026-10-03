@@ -41,6 +41,7 @@ export const CreateBranchFormFields: React.FC<CreateBranchFormFieldsProps> = ({
         value={branchName}
         onChange={onNameChange}
         disabled={loading}
+        size="lg"
       />
     </div>
 

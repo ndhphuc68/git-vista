@@ -68,6 +68,7 @@ export const CreateTagModal: React.FC<CreateTagModalProps> = ({
               value={name}
               onChange={handleNameChange}
               disabled={createTag.isPending}
+              size="lg"
             />
           </div>
 

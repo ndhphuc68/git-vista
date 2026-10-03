@@ -33,7 +33,7 @@ export const CreatePullRequestModalFields: React.FC<CreatePullRequestModalFields
         data-autofocus
         id="pr-title-input"
         aria-label={t.pullRequests.prTitle}
-        size="md"
+        size="lg"
         placeholder={t.pullRequests.prTitlePlaceholder}
         value={title}
         onChange={(e) => onTitleChange(e.target.value)}

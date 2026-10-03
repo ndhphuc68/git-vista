@@ -62,6 +62,7 @@ export const CreateStashModal: React.FC<CreateStashModalProps> = ({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             disabled={loading}
+            size="lg"
           />
         </div>
 

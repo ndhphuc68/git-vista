@@ -38,6 +38,12 @@ describe("Input", () => {
     expect(input).toHaveClass("py-2", "font-mono", "pl-7");
   });
 
+  it("applies size lg with 48px minimum height and text-sm", () => {
+    render(<Input aria-label="Branch" size="lg" />);
+    const input = screen.getByLabelText("Branch");
+    expect(input).toHaveClass("min-h-12", "text-sm");
+  });
+
   it("forwards its ref to the input element", () => {
     const ref = createRef<HTMLInputElement>();
     render(<Input aria-label="Name" ref={ref} />);

@@ -163,4 +163,9 @@ describe("Select", () => {
     );
     expect(screen.getByLabelText("Base")).toHaveAttribute("role", "combobox");
   });
+
+  it("applies size lg with 48px minimum height and text-sm on trigger", () => {
+    render(<Controlled size="lg" />);
+    expect(trigger()).toHaveClass("min-h-12", "text-sm");
+  });
 });

@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { GitBranch } from "lucide-react";
 import { type BranchItem } from "../../../ipc/bindings.generated";
-import { Select, type SelectGroup } from "../../../shared/ui";
+import { Select, type SelectGroup, type FieldSize } from "../../../shared/ui";
 import {
   baseBranchFallbackLabel,
   buildBaseBranchSections,
@@ -14,6 +14,7 @@ export interface BaseBranchSelectProps {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  size?: FieldSize;
   isCommitTarget?: boolean;
   targetCommit?: string | null;
   sourceBranch?: string;
@@ -103,6 +104,7 @@ export const BaseBranchSelect: React.FC<BaseBranchSelectProps> = (props) => {
         options={groups}
         placeholder={baseBranchFallbackLabel(props)}
         disabled={props.disabled}
+        size={props.size ?? "lg"}
         mono
         searchable
         searchPlaceholder={props.searchPlaceholder}

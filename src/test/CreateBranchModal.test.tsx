@@ -87,6 +87,8 @@ describe("CreateBranchModal", () => {
 
     const input = screen.getByLabelText("Tên nhánh mới");
     expect(input).toBeInTheDocument();
+    expect(input).toHaveClass("min-h-12");
+    expect(baseBranchCombo()).toHaveClass("min-h-12");
 
     // Type name with spaces
     fireEvent.change(input, { target: { value: "feature awesome login" } });

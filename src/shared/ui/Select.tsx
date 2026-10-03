@@ -4,6 +4,7 @@ import { useSelect } from "./useSelect";
 import { SelectTrigger } from "./SelectTrigger";
 import { SelectMenu } from "./SelectMenu";
 import type { SelectItems } from "./selectOptions";
+import type { FieldSize } from "./fieldStyles";
 
 export interface SelectProps {
   value: string;
@@ -17,6 +18,8 @@ export interface SelectProps {
   /** Shown in the trigger when `value` matches no option. */
   placeholder?: React.ReactNode;
   disabled?: boolean;
+  /** `sm` for dense dropdowns, `md` for settings forms, `lg` for roomy 48px modal forms. */
+  size?: FieldSize;
   /** Monospace text, for branch names, SHAs and paths. */
   mono?: boolean;
   /** Adds a filter box at the top of the list. */
@@ -45,6 +48,7 @@ export const Select: React.FC<SelectProps> = ({
   "data-testid": testId,
   placeholder,
   disabled,
+  size = "sm",
   mono = false,
   searchable = false,
   searchPlaceholder,
@@ -67,6 +71,7 @@ export const Select: React.FC<SelectProps> = ({
         placeholder={placeholder}
         disabled={disabled}
         mono={mono}
+        size={size}
         onToggle={select.toggle}
         onKeyDown={select.onKeyDown}
       />
