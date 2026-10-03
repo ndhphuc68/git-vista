@@ -1,5 +1,6 @@
 import React from "react";
 import type { CommitDetails } from "../../ipc/bindings.generated";
+import { Checkbox, Textarea } from "../../shared/ui";
 import { useCommitBox } from "./useCommitBox";
 import { CommitBoxHeader } from "./CommitBoxHeader";
 import { CommitSummaryInput } from "./CommitSummaryInput";
@@ -47,25 +48,18 @@ export const CommitBox: React.FC<CommitBoxProps> = (props) => {
         isOver72={isOver72}
       />
 
-      <textarea
+      <Textarea
         data-testid="commit-description-input"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={t.commit.descPlaceholder}
         rows={3}
-        className="w-full px-2 py-1.5 bg-window border border-border-subtle focus:border-accent rounded-sm text-xs text-primary resize-y outline-none font-inherit box-border transition-colors"
       />
 
       <div className="flex items-center justify-between mt-0.5">
         <label className="flex items-center gap-1.5 text-xs text-primary cursor-pointer select-none">
-          <input
-            type="checkbox"
-            data-testid="amend-checkbox"
-            checked={isAmend}
-            onChange={handleAmendToggle}
-            className="cursor-pointer"
-          />
+          <Checkbox data-testid="amend-checkbox" checked={isAmend} onChange={handleAmendToggle} />
           <span>{t.commit.amendAdvanced}</span>
         </label>
 

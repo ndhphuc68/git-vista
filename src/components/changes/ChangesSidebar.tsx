@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { Archive } from "lucide-react";
 import { type RepoStatusResult, type CommitDetails } from "../../ipc/bindings.generated";
 import { useTranslation } from "../../i18n";
+import { Button } from "../../shared/ui";
 import { StagingFileList, type SelectedWorkingFile } from "./StagingFileList";
 import { CommitBox } from "./CommitBox";
 
@@ -90,14 +91,10 @@ export const ChangesSidebar: React.FC<ChangesSidebarProps> = ({
 
       {/* Stash quick-save button */}
       <div className="shrink-0 px-3 py-2 border-t border-border-subtle">
-        <button
-          type="button"
-          onClick={onSaveStashClick}
-          className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-transparent border border-border-subtle rounded-sm text-xs text-secondary hover:text-primary hover:bg-surface-hover cursor-pointer transition-colors"
-        >
+        <Button variant="secondary" onClick={onSaveStashClick} className="w-full">
           <Archive size={12} />
           <span>{t.changes.saveStashBtn}</span>
-        </button>
+        </Button>
       </div>
     </section>
   );

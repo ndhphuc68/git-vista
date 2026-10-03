@@ -1,6 +1,7 @@
 import React from "react";
-import { AlertCircle, GitPullRequest, Loader2 } from "lucide-react";
+import { AlertCircle, GitPullRequest } from "lucide-react";
 import { type Translations } from "../../i18n/vi";
+import { Button, Checkbox } from "../../shared/ui";
 
 interface CreatePullRequestModalFooterProps {
   isDraft: boolean;
@@ -25,13 +26,11 @@ export const CreatePullRequestModalFooter: React.FC<CreatePullRequestModalFooter
   <>
     {/* Draft PR Toggle */}
     <label className="flex items-center gap-2 cursor-pointer text-xs text-primary select-none">
-      <input
-        type="checkbox"
+      <Checkbox
         checked={isDraft}
         onChange={(e) => onDraftChange(e.target.checked)}
         disabled={submitting}
         aria-label={t.pullRequests.isDraft}
-        className="accent-accent cursor-pointer rounded"
       />
       <span>{t.pullRequests.isDraft}</span>
     </label>
@@ -46,31 +45,19 @@ export const CreatePullRequestModalFooter: React.FC<CreatePullRequestModalFooter
 
     {/* Action Buttons */}
     <div className="flex items-center justify-end gap-2 pt-3 border-t border-border-subtle">
-      <button
-        type="button"
-        onClick={onClose}
-        disabled={submitting}
-        className="px-3.5 py-1.5 bg-transparent border border-border-subtle rounded-md text-xs font-medium text-primary cursor-pointer hover:bg-surface-hover transition-colors disabled:opacity-50"
-      >
+      <Button variant="secondary" onClick={onClose} disabled={submitting}>
         {t.common.cancel}
-      </button>
-      <button
-        type="submit"
-        disabled={submitting || !title.trim()}
-        className="flex items-center gap-1.5 px-4 py-1.5 bg-accent text-white border-none rounded-md text-xs font-semibold cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-      >
+      </Button>
+      <Button type="submit" loading={submitting} disabled={!title.trim()}>
         {submitting ? (
-          <>
-            <Loader2 size={13} className="animate-spin" />
-            <span>{t.pullRequests.creating}</span>
-          </>
+          <span>{t.pullRequests.creating}</span>
         ) : (
           <>
             <GitPullRequest size={13} />
             <span>{t.pullRequests.submitCreate}</span>
           </>
         )}
-      </button>
+      </Button>
     </div>
   </>
 );

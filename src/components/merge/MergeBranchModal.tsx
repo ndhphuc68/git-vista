@@ -1,6 +1,6 @@
 import React from "react";
 import { GitMerge, ArrowRight } from "lucide-react";
-import { Modal, Button, Alert } from "../../shared/ui";
+import { Modal, Button, Alert, Checkbox } from "../../shared/ui";
 import { useMergeBranchModal } from "./useMergeBranchModal";
 
 const TITLE_ID = "merge-branch-title";
@@ -46,9 +46,7 @@ export const MergeBranchModal: React.FC<MergeBranchModalProps> = ({
 
         <p className="text-xs text-secondary leading-normal m-0">{t.modals.merge.desc}</p>
 
-        {hasUncommittedChanges && (
-          <Alert variant="error">{t.modals.merge.uncommittedWarn}</Alert>
-        )}
+        {hasUncommittedChanges && <Alert variant="error">{t.modals.merge.uncommittedWarn}</Alert>}
 
         {error && (
           <Alert variant="error" showIcon={false}>
@@ -57,13 +55,11 @@ export const MergeBranchModal: React.FC<MergeBranchModalProps> = ({
         )}
 
         <div className="flex items-center gap-2 mt-1">
-          <input
+          <Checkbox
             id="merge-no-ff"
-            type="checkbox"
             checked={noFf}
             onChange={(e) => setNoFf(e.target.checked)}
             disabled={loading}
-            className="w-3 h-3 accent-accent cursor-pointer"
           />
           <label htmlFor="merge-no-ff" className="text-xs text-primary cursor-pointer select-none">
             {t.modals.merge.noFfLabel}

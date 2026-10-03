@@ -1,5 +1,6 @@
 import React, { type RefObject } from "react";
 import { type Translations } from "../../i18n/vi";
+import { Input, Textarea } from "../../shared/ui";
 
 interface CreatePullRequestModalFieldsProps {
   titleInputRef: RefObject<HTMLInputElement | null>;
@@ -27,17 +28,16 @@ export const CreatePullRequestModalFields: React.FC<CreatePullRequestModalFields
       <label htmlFor="pr-title-input" className="text-xs font-medium text-primary">
         {t.pullRequests.prTitle} <span className="text-red-500">*</span>
       </label>
-      <input
+      <Input
         ref={titleInputRef}
         data-autofocus
         id="pr-title-input"
         aria-label={t.pullRequests.prTitle}
-        type="text"
+        size="md"
         placeholder={t.pullRequests.prTitlePlaceholder}
         value={title}
         onChange={(e) => onTitleChange(e.target.value)}
         disabled={submitting}
-        className="bg-window text-primary border border-border-subtle rounded-md px-3 py-2 text-xs outline-none focus:border-accent transition-colors w-full"
       />
     </div>
 
@@ -46,15 +46,16 @@ export const CreatePullRequestModalFields: React.FC<CreatePullRequestModalFields
       <label htmlFor="pr-body-input" className="text-xs font-medium text-primary">
         {t.pullRequests.prBody}
       </label>
-      <textarea
+      <Textarea
         id="pr-body-input"
         aria-label={t.pullRequests.prBody}
         rows={5}
+        size="md"
         placeholder={t.pullRequests.prBodyPlaceholder}
         value={body}
         onChange={(e) => onBodyChange(e.target.value)}
         disabled={submitting}
-        className="bg-window text-primary border border-border-subtle rounded-md px-3 py-2 text-xs outline-none focus:border-accent transition-colors w-full resize-y font-sans leading-relaxed"
+        className="leading-relaxed"
       />
     </div>
   </>

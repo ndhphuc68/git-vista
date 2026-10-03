@@ -2,6 +2,7 @@ import React from "react";
 import { ArrowRight, RefreshCw, Download } from "lucide-react";
 import { type Translations } from "../../i18n/vi";
 import { type GitHubPullRequest } from "../../ipc/githubApi";
+import { Button } from "../../shared/ui";
 
 interface PullRequestActionToolbarProps {
   pr: GitHubPullRequest;
@@ -24,18 +25,9 @@ export const PullRequestActionToolbar: React.FC<PullRequestActionToolbarProps> =
       <span className="text-secondary truncate">{pr.base?.ref || "base"}</span>
     </div>
 
-    <button
-      type="button"
-      onClick={onCheckout}
-      disabled={isCheckingOut}
-      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-accent text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer shrink-0 shadow-xs"
-    >
-      {isCheckingOut ? (
-        <RefreshCw size={13} className="animate-spin" />
-      ) : (
-        <Download size={13} />
-      )}
+    <Button onClick={onCheckout} disabled={isCheckingOut} className="shrink-0">
+      {isCheckingOut ? <RefreshCw size={13} className="animate-spin" /> : <Download size={13} />}
       <span>{isCheckingOut ? t.pullRequests.checkingOut : t.pullRequests.checkout}</span>
-    </button>
+    </Button>
   </div>
 );

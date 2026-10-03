@@ -2,6 +2,7 @@ import React from "react";
 import { Cloud, Plus, Loader2 } from "lucide-react";
 import type { RemoteItem } from "../../../ipc/bindings.generated";
 import { useTranslation } from "../../../i18n";
+import { Button } from "../../../shared/ui";
 import { RemoteListItem } from "./RemoteListItem";
 
 export interface RemoteListContentProps {
@@ -58,14 +59,10 @@ export const RemoteListContent: React.FC<RemoteListContentProps> = ({
               {t.modals.remotes.emptyDesc}
             </span>
           </div>
-          <button
-            type="button"
-            onClick={onOpenAdd}
-            className="mt-2 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent text-accent-contrast text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer border-0 shadow-xs"
-          >
+          <Button variant="primary" onClick={onOpenAdd} className="mt-2">
             <Plus size={14} />
             <span>{t.modals.remotes.addRemoteBtn}</span>
-          </button>
+          </Button>
         </div>
       </div>
     );

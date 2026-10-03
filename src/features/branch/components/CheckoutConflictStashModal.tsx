@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Archive } from "lucide-react";
-import { Modal, Button, Alert } from "../../../shared/ui";
+import { Modal, Button, Alert, Checkbox, Input } from "../../../shared/ui";
 import { useTranslation } from "../../../i18n";
 
 const TITLE_ID = "checkout-conflict-stash-title";
@@ -34,17 +34,16 @@ function StashBody({
         <label htmlFor="stash-message-input" className="text-xs text-secondary font-medium">
           {t.modals.checkoutConflict.stashModalDescLabel}
         </label>
-        <input
+        <Input
+          size="md"
           ref={inputRef}
           id="stash-message-input"
           data-autofocus
-          type="text"
           value={message}
           placeholder={t.modals.checkoutConflict.stashModalPlaceholder}
           onChange={(e) => setMessage(e.target.value)}
           onFocus={(e) => e.target.select()}
           disabled={isStashing}
-          className="px-3 py-2 bg-window border border-border-subtle rounded-lg text-xs text-primary outline-none focus:border-accent transition-colors"
         />
       </div>
 
@@ -52,13 +51,11 @@ function StashBody({
         htmlFor="stash-untracked-checkbox"
         className="flex items-center gap-2 cursor-pointer select-none"
       >
-        <input
+        <Checkbox
           id="stash-untracked-checkbox"
-          type="checkbox"
           checked={includeUntracked}
           onChange={(e) => setIncludeUntracked(e.target.checked)}
           disabled={isStashing}
-          className="w-3.5 h-3.5 accent-accent cursor-pointer rounded"
         />
         <span className="text-xs text-secondary hover:text-primary transition-colors">
           {t.modals.checkoutConflict.stashModalUntrackedLabel}

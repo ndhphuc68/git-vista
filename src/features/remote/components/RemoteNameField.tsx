@@ -1,11 +1,7 @@
 import React from "react";
 import type { RefObject } from "react";
 import { useTranslation } from "../../../i18n";
-
-const INPUT_CLASS =
-  "px-3 py-2 text-xs bg-window border border-border-subtle rounded-lg text-primary " +
-  "placeholder:text-tertiary focus:outline-none focus:border-accent focus:ring-1 " +
-  "focus:ring-accent/20 transition-all font-mono";
+import { Input } from "../../../shared/ui";
 
 export interface RemoteNameFieldProps {
   name: string;
@@ -33,10 +29,11 @@ export const RemoteNameField: React.FC<RemoteNameFieldProps> = ({
       <label htmlFor="remote-name-input" className="text-xs font-semibold text-primary">
         {t.modals.remotes.addModal.nameLabel} <span className="text-red-500">*</span>
       </label>
-      <input
+      <Input
+        size="md"
+        mono
         id="remote-name-input"
         ref={nameInputRef}
-        type="text"
         // When editing, the name is already filled in, so focus starts
         // on the URL — the field the user actually came to change.
         {...(isEdit ? {} : { "data-autofocus": true })}
@@ -44,7 +41,6 @@ export const RemoteNameField: React.FC<RemoteNameFieldProps> = ({
         onChange={(e) => onNameChange(e.target.value)}
         placeholder={t.modals.remotes.addModal.namePlaceholder}
         disabled={loading}
-        className={INPUT_CLASS}
       />
     </div>
   );

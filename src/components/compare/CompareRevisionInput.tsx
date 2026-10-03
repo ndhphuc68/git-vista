@@ -1,4 +1,5 @@
 import React from "react";
+import { Input } from "../../shared/ui";
 
 interface CompareRevisionInputProps {
   label: string;
@@ -18,14 +19,14 @@ export const CompareRevisionInput: React.FC<CompareRevisionInputProps> = ({
 }) => (
   <div className="flex items-center gap-1.5 flex-1 min-w-[200px]">
     <span className="text-xs font-semibold text-secondary whitespace-nowrap">{label}:</span>
-    <input
-      type="text"
+    <Input
       list="compare-revision-options"
+      mono
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       aria-label={ariaLabel}
-      className="flex-1 px-2.5 py-1.5 text-xs font-mono rounded bg-window border border-border-subtle text-primary focus:outline-hidden focus:border-accent focus:ring-1 focus:ring-accent"
+      className="flex-1"
     />
   </div>
 );

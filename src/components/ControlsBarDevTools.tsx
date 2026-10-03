@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { Cpu } from "lucide-react";
 import { type RepoChangedPayload, type SystemInfo } from "../ipc/client";
 import { type Translations } from "../i18n/vi";
+import { Button } from "../shared/ui";
 
 interface ControlsBarDevToolsProps {
   t: Translations;
@@ -30,20 +31,13 @@ export const ControlsBarDevTools: React.FC<ControlsBarDevToolsProps> = ({
       className="flex items-center justify-between px-3 py-1 bg-window border-t border-border-subtle text-xs gap-3 flex-wrap"
     >
       <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
-        <button
-          onClick={onTestIpc}
-          disabled={loading}
-          className="px-2 py-0.5 bg-accent text-accent-contrast rounded-sm font-medium text-xs cursor-pointer shrink-0 disabled:opacity-50 hover:bg-accent-hover active:scale-[0.98] transition-all"
-        >
+        <Button onClick={onTestIpc} disabled={loading} className="shrink-0">
           {loading ? "Đang gọi..." : t.ipc.testButton}
-        </button>
+        </Button>
 
-        <button
-          onClick={onSimulateRepoChange}
-          className="px-2 py-0.5 bg-surface text-primary border border-border-subtle rounded-sm font-medium text-xs cursor-pointer shrink-0 hover:bg-surface-hover active:scale-[0.98] transition-all"
-        >
+        <Button variant="secondary" onClick={onSimulateRepoChange} className="shrink-0">
           {t.ipc.triggerEvent}
-        </button>
+        </Button>
 
         <span
           className={clsx(

@@ -1,6 +1,7 @@
 import React from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import type { Translations } from "../../i18n/vi";
+import { Button } from "../../shared/ui";
 
 export interface ConflictResolverNavActionsProps {
   t: Translations;
@@ -47,23 +48,21 @@ export const ConflictResolverNavActions: React.FC<ConflictResolverNavActionsProp
         </button>
       </div>
 
-      <button
-        type="button"
+      <Button
+        variant="secondary"
         aria-label={t.conflictResolver.takeAllOursAria}
         onClick={onTakeAllOurs}
-        className="px-2.5 py-1 text-xs text-secondary hover:text-primary hover:bg-surface-hover rounded-sm border border-border-subtle transition-colors cursor-pointer"
       >
         {t.conflictResolver.takeAllOurs}
-      </button>
+      </Button>
 
-      <button
-        type="button"
+      <Button
+        variant="secondary"
         aria-label={t.conflictResolver.takeAllTheirsAria}
         onClick={onTakeAllTheirs}
-        className="px-2.5 py-1 text-xs text-secondary hover:text-primary hover:bg-surface-hover rounded-sm border border-border-subtle transition-colors cursor-pointer"
       >
         {t.conflictResolver.takeAllTheirs}
-      </button>
+      </Button>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React from "react";
 import { Play, PlayCircle, Trash2 } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { Button } from "../../../shared/ui";
 
 export interface StashActionBarProps {
   stashIndex: number;
@@ -23,33 +24,30 @@ export const StashActionBar: React.FC<StashActionBarProps> = ({
 
   return (
     <div className="flex items-center gap-2 px-3 py-2 border-b border-border-subtle bg-surface shrink-0">
-      <button
-        type="button"
+      <Button
+        variant="secondary"
         onClick={() => onApply(stashIndex)}
-        className="flex items-center gap-1.5 px-2.5 py-1 bg-transparent border border-border-subtle rounded-sm text-xs text-primary hover:bg-surface-hover cursor-pointer transition-colors"
         title={t.modals.stashDiff.applyTitle}
       >
         <Play size={12} className="text-accent" />
         <span>{t.modals.stashDiff.applyBtn}</span>
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
+        variant="secondary"
         onClick={() => onPop(stashIndex)}
-        className="flex items-center gap-1.5 px-2.5 py-1 bg-transparent border border-border-subtle rounded-sm text-xs text-primary hover:bg-surface-hover cursor-pointer transition-colors"
         title={t.modals.stashDiff.popTitle}
       >
         <PlayCircle size={12} className="text-accent" />
         <span>{t.modals.stashDiff.popBtn}</span>
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
+        variant="danger"
         onClick={() => onDrop(stashIndex)}
-        className="flex items-center gap-1.5 px-2.5 py-1 bg-transparent border border-border-subtle rounded-sm text-xs text-diff-remove-text hover:bg-diff-remove-bg cursor-pointer transition-colors"
         title={t.modals.stashDiff.dropTitle}
       >
         <Trash2 size={12} />
         <span>{t.modals.stashDiff.dropBtn}</span>
-      </button>
+      </Button>
     </div>
   );
 };

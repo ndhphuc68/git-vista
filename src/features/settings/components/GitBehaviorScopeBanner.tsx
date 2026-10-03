@@ -1,6 +1,7 @@
 import React from "react";
 import { FolderGit2, Globe } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { Button } from "../../../shared/ui";
 
 export interface GitBehaviorScopeBannerProps {
   activeScope: "global" | "repo";
@@ -40,15 +41,15 @@ export const GitBehaviorScopeBanner: React.FC<GitBehaviorScopeBannerProps> = ({
           </div>
         </div>
         {hasLocalOverride && (
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             data-testid="reset-pull-to-global-btn"
             onClick={onResetToGlobal}
             disabled={saving || loading}
-            className="shrink-0 px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-hover border border-border-subtle text-secondary hover:text-primary text-[11px] font-medium transition-colors cursor-pointer"
+            className="shrink-0"
           >
             {t.settings.behavior.resetToGlobalBtn}
-          </button>
+          </Button>
         )}
       </div>
     );

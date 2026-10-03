@@ -1,6 +1,7 @@
 import React from "react";
 import { CheckCircle2, ExternalLink, Unlink } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { Button } from "../../../shared/ui";
 import { type GitHubUserSummary } from "../../../ipc/githubApi";
 
 export interface GitHubAccountCardProps {
@@ -46,14 +47,10 @@ export const GitHubAccountCard: React.FC<GitHubAccountCardProps> = ({
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={onDisconnect}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
-      >
+      <Button variant="danger" onClick={onDisconnect}>
         <Unlink size={13} />
         <span>{t.settings.github.disconnect}</span>
-      </button>
+      </Button>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React from "react";
 import { Edit3 } from "lucide-react";
 import { useTranslation } from "../../i18n";
+import { Textarea } from "../../shared/ui";
 
 export interface RebaseMessageEditorProps {
   isSquash: boolean;
@@ -26,12 +27,13 @@ export const RebaseMessageEditor: React.FC<RebaseMessageEditorProps> = ({
         </span>
         <span className="font-mono text-[10px] opacity-75">{currentMessage.length} chars</span>
       </div>
-      <textarea
+      <Textarea
         rows={3}
+        mono
         value={currentMessage}
         onChange={(e) => onMessageChange(e.target.value)}
         placeholder={t.modals.interactiveRebase.editMessagePlaceholder}
-        className="w-full text-xs font-mono p-2 rounded bg-surface-subtle border border-border-subtle focus:border-accent focus:ring-1 focus:ring-accent outline-none text-primary resize-y leading-relaxed"
+        className="leading-relaxed"
       />
     </div>
   );

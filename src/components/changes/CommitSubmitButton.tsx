@@ -1,7 +1,7 @@
 import React from "react";
-import clsx from "clsx";
 import { RefreshCw } from "lucide-react";
 import { useTranslation } from "../../i18n";
+import { Button } from "../../shared/ui";
 
 export interface CommitSubmitButtonProps {
   canCommit: boolean;
@@ -24,18 +24,7 @@ export const CommitSubmitButton: React.FC<CommitSubmitButtonProps> = ({
   const { t } = useTranslation();
 
   return (
-    <button
-      type="button"
-      data-testid="commit-button"
-      disabled={!canCommit}
-      onClick={onSubmit}
-      className={clsx(
-        "flex items-center justify-center gap-1.5 w-full py-2 px-3 border rounded-sm text-xs font-semibold transition-all duration-150 ease-macos btn-press",
-        canCommit
-          ? "bg-accent text-accent-contrast border-accent cursor-pointer hover:bg-accent-hover active:scale-[0.98]"
-          : "bg-window text-tertiary border-border-subtle cursor-not-allowed"
-      )}
-    >
+    <Button data-testid="commit-button" disabled={!canCommit} onClick={onSubmit} className="w-full">
       {submitting || isLoading ? (
         <>
           <RefreshCw size={13} className="animate-spin" />
@@ -46,6 +35,6 @@ export const CommitSubmitButton: React.FC<CommitSubmitButtonProps> = ({
       ) : (
         <span>{t.commit.commitAdvanced.replace("{count}", String(stagedCount))}</span>
       )}
-    </button>
+    </Button>
   );
 };

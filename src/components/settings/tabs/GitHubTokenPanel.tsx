@@ -1,6 +1,7 @@
 import React from "react";
 import { Key, CheckCircle2, ExternalLink, Eye, EyeOff, Terminal, RefreshCw } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { Button, Input } from "../../../shared/ui";
 import { GitHubTokenStatusAlerts } from "./GitHubTokenStatusAlerts";
 
 export interface GitHubTokenPanelProps {
@@ -48,12 +49,14 @@ export const GitHubTokenPanel: React.FC<GitHubTokenPanelProps> = ({
       </div>
 
       <div className="relative">
-        <input
+        <Input
+          size="md"
+          mono
           type={showToken ? "text" : "password"}
           value={token}
           onChange={(e) => onTokenChange(e.target.value)}
           placeholder={t.settings.github.tokenPlaceholder}
-          className="w-full text-xs font-mono px-3 py-2 pr-10 rounded-lg bg-surface border border-border-subtle focus:border-accent focus:outline-none text-primary"
+          className="pr-10"
         />
         <button
           type="button"
@@ -69,30 +72,24 @@ export const GitHubTokenPanel: React.FC<GitHubTokenPanelProps> = ({
 
       {/* Action Buttons */}
       <div className="flex items-center gap-2 pt-2">
-        <button
-          type="button"
-          onClick={onTestAndSave}
-          disabled={isTesting || !token.trim()}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-accent text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
-        >
+        <Button variant="primary" onClick={onTestAndSave} disabled={isTesting || !token.trim()}>
           {isTesting ? (
             <RefreshCw size={13} className="animate-spin" />
           ) : (
             <CheckCircle2 size={13} />
           )}
           <span>{isTesting ? t.settings.github.testing : t.settings.github.testConnection}</span>
-        </button>
+        </Button>
 
-        <button
-          type="button"
+        <Button
+          variant="secondary"
           onClick={onUseGhCli}
           disabled={isTesting}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-secondary hover:text-primary hover:bg-surface-hover rounded-lg transition-colors border border-border-subtle cursor-pointer disabled:opacity-50"
           title="Tự động lấy token từ `gh auth token`"
         >
           <Terminal size={13} />
           <span>{t.settings.github.useGhCli}</span>
-        </button>
+        </Button>
       </div>
 
       <GitHubTokenStatusAlerts errorMessage={errorMessage} successMessage={successMessage} />

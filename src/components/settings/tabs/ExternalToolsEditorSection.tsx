@@ -1,6 +1,7 @@
 import React from "react";
 import { Code2 } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { Input } from "../../../shared/ui";
 import { useSettingsStore, type DefaultEditor } from "../../../store/useSettingsStore";
 import { HelpTooltip } from "../HelpTooltip";
 
@@ -75,13 +76,13 @@ export const ExternalToolsEditorSection: React.FC = () => {
           <label className="text-xs font-medium text-secondary block mb-1.5">
             {t.settings.tools.editorCustom}
           </label>
-          <input
-            type="text"
+          <Input
+            size="md"
+            mono
             data-testid="custom-editor-input"
             value={customEditorCommand}
             onChange={(e) => setCustomEditorCommand(e.target.value)}
             placeholder={t.settings.tools.editorCustomPlaceholder}
-            className="w-full px-3 py-2 text-xs rounded-md bg-surface-input border border-border-subtle focus:border-accent focus:outline-none text-primary transition-colors font-mono"
           />
         </div>
       )}

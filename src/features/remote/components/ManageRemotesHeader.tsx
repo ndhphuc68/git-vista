@@ -1,6 +1,7 @@
 import React from "react";
 import { Cloud, X, Plus } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { Button } from "../../../shared/ui";
 
 export interface ManageRemotesHeaderProps {
   onClose: () => void;
@@ -39,14 +40,10 @@ export const ManageRemotesHeader: React.FC<ManageRemotesHeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onOpenAdd}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent text-accent-contrast text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer border-0 shadow-xs"
-        >
+        <Button variant="primary" onClick={onOpenAdd}>
           <Plus size={14} />
           <span>{t.modals.remotes.addRemoteBtn}</span>
-        </button>
+        </Button>
         <button
           type="button"
           onClick={onClose}

@@ -1,6 +1,7 @@
 import React from "react";
 import { Settings } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { Button } from "../../../shared/ui";
 
 export interface WelcomeHeaderProps {
   onOpenSettings: () => void;
@@ -42,26 +43,16 @@ export const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-2 self-start sm:self-center">
-        <button
-          onClick={onOpenSettings}
-          type="button"
-          className="px-3 py-1.5 rounded-xl bg-surface hover:bg-surface-hover border border-border-subtle text-xs font-medium text-secondary hover:text-primary transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-          title={`${t.settings.title} (Ctrl+,)`}
-        >
+        <Button variant="secondary" onClick={onOpenSettings} title={`${t.settings.title} (Ctrl+,)`}>
           <Settings size={13} className="text-secondary" />
           <span>{t.settings.title}</span>
-        </button>
-        <button
-          onClick={onOpenShortcuts}
-          type="button"
-          className="px-3 py-1.5 rounded-xl bg-surface hover:bg-surface-hover border border-border-subtle text-xs font-medium text-secondary hover:text-primary transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-          title={t.welcome.shortcuts}
-        >
+        </Button>
+        <Button variant="secondary" onClick={onOpenShortcuts} title={t.welcome.shortcuts}>
           <kbd className="font-mono text-[10px] bg-window px-1.5 py-0.2 rounded border border-border-subtle">
             ?
           </kbd>
           <span>{t.welcome.shortcuts}</span>
-        </button>
+        </Button>
       </div>
     </header>
   );

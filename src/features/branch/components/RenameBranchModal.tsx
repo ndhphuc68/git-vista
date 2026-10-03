@@ -1,6 +1,6 @@
 import React from "react";
 import { Edit3 } from "lucide-react";
-import { Modal, Button, Alert } from "../../../shared/ui";
+import { Modal, Button, Alert, Input } from "../../../shared/ui";
 import { useRenameBranchForm } from "../hooks/useRenameBranchForm";
 
 const TITLE_ID = "rename-branch-title";
@@ -45,16 +45,14 @@ export const RenameBranchModal: React.FC<RenameBranchModalProps> = ({
             <label htmlFor="rename-branch-input" className="text-xs font-medium text-primary">
               {t.modals.renameBranch.newLabel}
             </label>
-            <input
+            <Input
               id="rename-branch-input"
               ref={inputRef}
               data-autofocus
               aria-label={t.modals.renameBranch.newLabel}
-              type="text"
               value={newName}
               onChange={handleNameChange}
               disabled={loading}
-              className="bg-window text-primary border border-border-subtle rounded-sm px-3 py-1.5 text-xs outline-none focus:border-accent transition-colors w-full"
             />
           </div>
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { Check } from "lucide-react";
 import type { Translations } from "../../i18n/vi";
+import { Button } from "../../shared/ui";
 import { ConflictResolverFileInfo } from "./ConflictResolverFileInfo";
 import { ConflictResolverNavActions } from "./ConflictResolverNavActions";
 
@@ -55,15 +56,10 @@ export const ConflictResolverToolbar: React.FC<ConflictResolverToolbarProps> = (
 
       {/* Right: Save & Stage */}
       <div className="flex items-center gap-2 shrink-0">
-        <button
-          type="button"
-          onClick={onSave}
-          disabled={isSaving}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-sm bg-accent text-white hover:bg-accent-hover active:opacity-90 disabled:opacity-50 transition-colors shadow-sm cursor-pointer"
-        >
+        <Button onClick={onSave} disabled={isSaving}>
           <Check size={14} />
           <span>{isSaving ? t.conflictResolver.saving : t.conflictResolver.complete}</span>
-        </button>
+        </Button>
       </div>
     </header>
   );

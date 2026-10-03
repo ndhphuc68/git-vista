@@ -1,6 +1,7 @@
 import React from "react";
 import { ArrowLeft } from "lucide-react";
 import type { Translations } from "../../i18n/vi";
+import { Button } from "../../shared/ui";
 
 export interface ConflictResolverFileInfoProps {
   t: Translations;
@@ -19,14 +20,10 @@ export const ConflictResolverFileInfo: React.FC<ConflictResolverFileInfoProps> =
 }) => {
   return (
     <div className="flex items-center gap-3 min-w-0">
-      <button
-        type="button"
-        onClick={onBack}
-        className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-secondary hover:text-primary hover:bg-surface-hover rounded-sm border border-border-subtle transition-colors cursor-pointer"
-      >
+      <Button variant="secondary" onClick={onBack} className="shrink-0">
         <ArrowLeft size={14} />
         <span>{t.conflictResolver.back}</span>
-      </button>
+      </Button>
       <div className="flex items-center gap-2 truncate">
         <span className="font-semibold text-xs text-primary truncate" title={filePath}>
           {filePath}

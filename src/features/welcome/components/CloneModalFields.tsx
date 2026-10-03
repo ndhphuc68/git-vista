@@ -2,6 +2,7 @@ import React from "react";
 import type { ChangeEvent, RefObject } from "react";
 import { FolderOpen } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { Button, Input } from "../../../shared/ui";
 
 export interface CloneModalFieldsProps {
   url: string;
@@ -37,17 +38,17 @@ export const CloneModalFields: React.FC<CloneModalFieldsProps> = ({
         >
           {t.cloneModal.urlLabel}
         </label>
-        <input
+        <Input
+          size="md"
+          mono
           ref={urlInputRef}
           id="clone-url"
           data-autofocus
-          type="text"
           required
           disabled={isCloning}
           value={url}
           onChange={onUrlChange}
           placeholder={t.cloneModal.urlPlaceholder}
-          className="w-full px-3.5 py-2 text-xs sm:text-sm bg-window border border-border-subtle rounded-lg text-primary placeholder-tertiary focus:outline-none focus:border-accent disabled:opacity-50 font-mono"
         />
       </div>
 
@@ -59,25 +60,26 @@ export const CloneModalFields: React.FC<CloneModalFieldsProps> = ({
           {t.cloneModal.targetDirLabel}
         </label>
         <div className="flex gap-2">
-          <input
+          <Input
+            size="md"
+            mono
             id="clone-target-dir"
-            type="text"
             required
             disabled={isCloning}
             value={targetDir}
             onChange={(e) => onTargetDirChange(e.target.value)}
             placeholder={t.cloneModal.targetDirPlaceholder}
-            className="flex-1 px-3.5 py-2 text-xs sm:text-sm bg-window border border-border-subtle rounded-lg text-primary placeholder-tertiary focus:outline-none focus:border-accent disabled:opacity-50 font-mono"
+            className="flex-1"
           />
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             onClick={onSelectFolder}
             disabled={isCloning}
-            className="flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-medium text-secondary hover:text-primary bg-window border border-border-subtle hover:bg-surface-hover rounded-lg transition-colors disabled:opacity-50 cursor-pointer shrink-0"
+            className="shrink-0"
           >
             <FolderOpen size={16} />
             <span>{t.cloneModal.selectFolder}</span>
-          </button>
+          </Button>
         </div>
       </div>
     </>

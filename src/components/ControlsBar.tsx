@@ -3,6 +3,7 @@ import { RefreshCw } from "lucide-react";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { useLayoutStore } from "../store/useLayoutStore";
 import { useTranslation } from "../i18n";
+import { Button } from "../shared/ui";
 import { type RepoChangedPayload } from "../ipc/client";
 import { ControlsBarSwitchers } from "./ControlsBarSwitchers";
 import { ControlsBarDevTools } from "./ControlsBarDevTools";
@@ -14,8 +15,7 @@ interface ControlsBarProps {
 
 export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
   const { t, actions } = useTranslation();
-  const { theme, colorblind, locale, setTheme, setColorblind, setLocale } =
-    useSettingsStore();
+  const { theme, colorblind, locale, setTheme, setColorblind, setLocale } = useSettingsStore();
 
   const { devToolsOpen, toggleDevTools } = useLayoutStore();
 
@@ -31,16 +31,12 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
       <div className="flex items-center justify-between px-3 py-1 min-h-[36px] gap-2 overflow-x-auto whitespace-nowrap">
         {/* Left: Quick Actions */}
         <div className="flex items-center gap-1.5 shrink-0">
-          <button className="px-2.5 py-1 rounded-sm bg-accent text-accent-contrast text-xs font-medium flex items-center gap-1 cursor-pointer hover:bg-accent-hover active:scale-[0.98] transition-all">
+          <Button>
             <RefreshCw size={11} />
             <span>{actions.fetch}</span>
-          </button>
-          <button className="px-2.5 py-1 rounded-sm bg-surface text-primary border border-border-subtle text-xs font-medium cursor-pointer hover:bg-surface-hover active:scale-[0.98] transition-all">
-            ↓ {actions.pull}
-          </button>
-          <button className="px-2.5 py-1 rounded-sm bg-surface text-primary border border-border-subtle text-xs font-medium cursor-pointer hover:bg-surface-hover active:scale-[0.98] transition-all">
-            ↑ {actions.push}
-          </button>
+          </Button>
+          <Button variant="secondary">↓ {actions.pull}</Button>
+          <Button variant="secondary">↑ {actions.push}</Button>
         </div>
 
         {/* Right: Switchers & DevTools Toggle */}

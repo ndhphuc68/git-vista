@@ -1,6 +1,7 @@
 import React from "react";
 import { ShieldCheck, Key } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { Input } from "../../../shared/ui";
 import { HelpTooltip } from "../HelpTooltip";
 
 export interface GitProfileGpgSectionProps {
@@ -30,9 +31,7 @@ export const GitProfileGpgSection: React.FC<GitProfileGpgSectionProps> = ({
         <ShieldCheck size={16} className="text-accent mt-0.5 shrink-0" />
         <div>
           <div className="flex items-center gap-1.5">
-            <div className="text-xs font-semibold text-primary">
-              {t.settings.profile.gpgTitle}
-            </div>
+            <div className="text-xs font-semibold text-primary">{t.settings.profile.gpgTitle}</div>
             <HelpTooltip
               title={t.settings.help.profileGpgTitle}
               description={t.settings.help.profileGpgDesc}
@@ -74,14 +73,14 @@ export const GitProfileGpgSection: React.FC<GitProfileGpgSectionProps> = ({
             {t.settings.profile.gpgKeyLabel}
           </label>
         </div>
-        <input
+        <Input
           id="gpg-key"
-          type="text"
+          size="md"
+          mono
           disabled={disabled}
           value={gpgKey}
           onChange={(e) => onGpgKeyChange(e.target.value)}
           placeholder={t.settings.profile.gpgKeyPlaceholder}
-          className="w-full px-3 py-2 text-xs rounded-md bg-surface-input border border-border-subtle focus:border-accent focus:outline-none text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-mono"
         />
       </div>
     </div>

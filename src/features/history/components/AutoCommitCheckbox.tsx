@@ -1,3 +1,5 @@
+import { Checkbox } from "../../../shared/ui";
+
 interface AutoCommitCheckboxProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
@@ -17,13 +19,11 @@ export function AutoCommitCheckbox({
   return (
     <div className="flex flex-col gap-1 mt-1">
       <label className="flex items-center gap-2 cursor-pointer text-xs text-primary select-none">
-        <input
-          type="checkbox"
+        <Checkbox
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
           disabled={disabled}
           aria-label={label}
-          className="accent-accent cursor-pointer rounded-sm"
         />
         <span className="font-medium">{label}</span>
       </label>

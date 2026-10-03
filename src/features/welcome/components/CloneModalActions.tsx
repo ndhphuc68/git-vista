@@ -1,6 +1,7 @@
 import React from "react";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { Button } from "../../../shared/ui";
 
 export interface CloneModalActionsProps {
   onCancel: () => void;
@@ -21,18 +22,10 @@ export const CloneModalActions: React.FC<CloneModalActionsProps> = ({
 
   return (
     <div className="flex items-center justify-end gap-2.5 mt-2 pt-3 border-t border-border-subtle">
-      <button
-        type="button"
-        onClick={onCancel}
-        className="px-4 py-2 text-xs sm:text-sm font-medium text-secondary hover:text-primary bg-transparent hover:bg-surface-hover border border-border-subtle rounded-lg transition-colors cursor-pointer"
-      >
+      <Button variant="secondary" onClick={onCancel}>
         {t.cloneModal.cancel}
-      </button>
-      <button
-        type="submit"
-        disabled={isSubmitDisabled}
-        className="flex items-center gap-2 px-5 py-2 text-xs sm:text-sm font-semibold text-accent-contrast bg-accent hover:bg-accent-hover active:scale-[0.99] rounded-lg transition-all shadow-sm disabled:opacity-50 cursor-pointer"
-      >
+      </Button>
+      <Button type="submit" variant="primary" disabled={isSubmitDisabled}>
         {isCloning ? (
           <>
             <Loader2 size={15} className="animate-spin" />
@@ -41,7 +34,7 @@ export const CloneModalActions: React.FC<CloneModalActionsProps> = ({
         ) : (
           <span>{t.cloneModal.clone}</span>
         )}
-      </button>
+      </Button>
     </div>
   );
 };

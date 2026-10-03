@@ -1,10 +1,6 @@
 import React from "react";
 import { useTranslation } from "../../../i18n";
-
-const INPUT_CLASS =
-  "px-3 py-2 text-xs bg-window border border-border-subtle rounded-lg text-primary " +
-  "placeholder:text-tertiary focus:outline-none focus:border-accent focus:ring-1 " +
-  "focus:ring-accent/20 transition-all font-mono";
+import { Checkbox, Input } from "../../../shared/ui";
 
 export interface RemotePushUrlSectionProps {
   useSeparatePush: boolean;
@@ -31,12 +27,10 @@ export const RemotePushUrlSection: React.FC<RemotePushUrlSectionProps> = ({
   return (
     <div className="flex flex-col gap-2 pt-1 border-t border-border-subtle/50">
       <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-primary">
-        <input
-          type="checkbox"
+        <Checkbox
           checked={useSeparatePush}
           onChange={(e) => onUseSeparatePushChange(e.target.checked)}
           disabled={loading}
-          className="rounded border-border-subtle text-accent focus:ring-accent"
         />
         <span>{t.modals.remotes.addModal.separatePushUrl}</span>
       </label>
@@ -46,14 +40,14 @@ export const RemotePushUrlSection: React.FC<RemotePushUrlSectionProps> = ({
           <label htmlFor="remote-push-url-input" className="text-xs font-medium text-secondary">
             {t.modals.remotes.addModal.pushUrlLabel}
           </label>
-          <input
+          <Input
+            size="md"
+            mono
             id="remote-push-url-input"
-            type="text"
             value={pushUrl}
             onChange={(e) => onPushUrlChange(e.target.value)}
             placeholder={t.modals.remotes.addModal.pushUrlPlaceholder}
             disabled={loading}
-            className={INPUT_CLASS}
           />
         </div>
       )}

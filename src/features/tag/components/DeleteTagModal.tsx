@@ -1,7 +1,7 @@
 import React from "react";
 import { Trash2, AlertTriangle, Tag } from "lucide-react";
 import { useTranslation } from "../../../i18n";
-import { Modal, Button, Alert } from "../../../shared/ui";
+import { Modal, Button, Alert, Checkbox } from "../../../shared/ui";
 import { useDeleteTagAction } from "../hooks/useDeleteTagAction";
 
 const TITLE_ID = "delete-tag-title";
@@ -69,13 +69,11 @@ export const DeleteTagModal: React.FC<DeleteTagModalProps> = ({
 
         {hasRemote && (
           <label className="flex items-center gap-2 cursor-pointer text-xs text-primary select-none mt-1">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={deleteRemote}
               onChange={(e) => setDeleteRemote(e.target.checked)}
               disabled={deleteTag.isPending}
               aria-label={t.modals.deleteTag.deleteRemoteLabel}
-              className="accent-accent cursor-pointer rounded-sm"
             />
             <span>{t.modals.deleteTag.deleteRemoteLabel}</span>
           </label>

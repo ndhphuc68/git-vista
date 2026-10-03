@@ -1,7 +1,7 @@
 import React from "react";
 import { Tag } from "lucide-react";
 import { useTranslation } from "../../../i18n";
-import { Modal, Button, Alert } from "../../../shared/ui";
+import { Modal, Button, Alert, Input } from "../../../shared/ui";
 import { useCreateTagForm } from "../hooks/useCreateTagForm";
 import { TagTargetCommitInfo } from "./TagTargetCommitInfo";
 import { TagAnnotationFields } from "./TagAnnotationFields";
@@ -60,16 +60,14 @@ export const CreateTagModal: React.FC<CreateTagModalProps> = ({
             <label htmlFor="tag-name-input" className="text-xs font-medium text-primary">
               {t.modals.createTag.nameLabel}
             </label>
-            <input
+            <Input
               id="tag-name-input"
               data-autofocus
               aria-label={t.modals.createTag.nameLabel}
-              type="text"
               placeholder={t.modals.createTag.namePlaceholder}
               value={name}
               onChange={handleNameChange}
               disabled={createTag.isPending}
-              className="bg-window text-primary border border-border-subtle rounded-sm px-3 py-1.5 text-xs outline-none focus:border-accent transition-colors w-full"
             />
           </div>
 

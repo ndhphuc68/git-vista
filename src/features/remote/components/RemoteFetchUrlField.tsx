@@ -1,11 +1,7 @@
 import React from "react";
 import type { RefObject } from "react";
 import { useTranslation } from "../../../i18n";
-
-const INPUT_CLASS =
-  "px-3 py-2 text-xs bg-window border border-border-subtle rounded-lg text-primary " +
-  "placeholder:text-tertiary focus:outline-none focus:border-accent focus:ring-1 " +
-  "focus:ring-accent/20 transition-all font-mono";
+import { Input } from "../../../shared/ui";
 
 export interface RemoteFetchUrlFieldProps {
   fetchUrl: string;
@@ -33,16 +29,16 @@ export const RemoteFetchUrlField: React.FC<RemoteFetchUrlFieldProps> = ({
       <label htmlFor="remote-fetch-url-input" className="text-xs font-semibold text-primary">
         {t.modals.remotes.addModal.fetchUrlLabel} <span className="text-red-500">*</span>
       </label>
-      <input
+      <Input
+        size="md"
+        mono
         id="remote-fetch-url-input"
         ref={fetchUrlInputRef}
-        type="text"
         {...(isEdit ? { "data-autofocus": true } : {})}
         value={fetchUrl}
         onChange={(e) => onFetchUrlChange(e.target.value)}
         placeholder={t.modals.remotes.addModal.fetchUrlPlaceholder}
         disabled={loading}
-        className={INPUT_CLASS}
       />
     </div>
   );
