@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type ActiveScreen = "history" | "changes" | "conflict";
+export type ActiveScreen = "history" | "changes" | "conflict" | "pull-requests";
 
 export interface ViewState {
   activeScreen: ActiveScreen;

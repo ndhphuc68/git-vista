@@ -58,6 +58,7 @@ export interface PullRequestFileItem {
   additions: number;
   deletions: number;
   changes: number;
+  patch?: string;
 }
 
 export interface PullRequestDetail {

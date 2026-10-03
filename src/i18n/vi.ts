@@ -7,6 +7,7 @@ export const vi = {
     changes: "Thay đổi",
     history: "Lịch sử",
     conflict: "Xử lý Xung đột",
+    pullRequests: "Yêu cầu kéo",
   },
   gitActions: {
     advanced: {
@@ -1047,6 +1048,42 @@ export const vi = {
     unpushedWarning: "Nhánh này có commit chưa được đẩy lên máy chủ GitHub",
     pushFirst: "Đẩy lên GitHub trước",
     createSuccess: "Tạo Pull Request #{number} thành công!",
+  },
+  pullRequestsScreen: {
+    title: "Pull Requests",
+    newPr: "Tạo PR",
+    refresh: "Làm mới",
+    searchPlaceholder: "Tìm kiếm theo tiêu đề, #số PR, tác giả...",
+    emptySelection: "Chọn một Pull Request từ danh sách để xem chi tiết",
+    emptyList: "Không tìm thấy Pull Request nào",
+    openTab: "Đang mở",
+    closedTab: "Đã đóng",
+    allTab: "Tất cả",
+    tabs: {
+      conversation: "Thảo luận",
+      filesChanged: "Tệp thay đổi",
+    },
+    checks: {
+      title: "Kiểm tra tự động",
+      noChecks: "Không có kiểm tra nào",
+      passed: "Thành công",
+      failed: "Thất bại",
+      inProgress: "Đang chạy",
+      queued: "Đang chờ",
+      neutral: "Bỏ qua",
+    },
+    files: {
+      summary: "{count} tệp đã thay đổi (+{additions} / -{deletions})",
+      noDiff: "Không có nội dung diff cho tệp này",
+    },
+    meta: {
+      reviewers: "Người đánh giá",
+      assignees: "Người được giao",
+      labels: "Nhãn",
+      noReviewers: "Chưa có người đánh giá",
+      noAssignees: "Chưa có người được giao",
+      noLabels: "Không có nhãn",
+    },
   },
 };
 

@@ -93,8 +93,8 @@ export const qk = {
      * new PR).
      */
     pullRequestsAll: (repo: string) => ["repo", repo, "github", "pullRequests"] as const,
-    pullRequestDetail: (repo: string, number: number) =>
-      ["repo", repo, "github", "pullRequestDetail", number] as const,
+    pullRequestDetail: (repoPath: string, prNumber: number) =>
+      ["github", "pullRequestDetail", repoPath, prNumber] as const,
   },
 
   /** Not tied to any specific repo. */

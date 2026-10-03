@@ -162,6 +162,7 @@ describe("githubService mappers", () => {
           additions: 10,
           deletions: 2,
           changes: 12,
+          patch: "@@ -1,2 +1,3 @@",
         })
       ).toEqual({
         filename: "src/auth.ts",
@@ -169,16 +170,18 @@ describe("githubService mappers", () => {
         additions: 10,
         deletions: 2,
         changes: 12,
+        patch: "@@ -1,2 +1,3 @@",
       });
     });
 
-    it("falls back to zero counts when they are missing", () => {
+    it("falls back to zero counts and empty patch when they are missing", () => {
       expect(mapPullRequestFile({ filename: "src/new.ts", status: "added" })).toEqual({
         filename: "src/new.ts",
         status: "added",
         additions: 0,
         deletions: 0,
         changes: 0,
+        patch: "",
       });
     });
   });

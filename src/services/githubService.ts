@@ -50,6 +50,7 @@ interface RawPullRequestFile {
   additions?: number;
   deletions?: number;
   changes?: number;
+  patch?: string;
 }
 
 interface RawPullRequest {
@@ -139,6 +140,7 @@ export function mapPullRequestFile(f: RawPullRequestFile): PullRequestFileItem {
     additions: f.additions ?? 0,
     deletions: f.deletions ?? 0,
     changes: f.changes ?? 0,
+    patch: f.patch ?? "",
   };
 }
 

@@ -192,4 +192,14 @@ describe("queryKeys", () => {
   it("pullRequestsAll varies with repo", () => {
     expect(qk.github.pullRequestsAll("/a")).not.toEqual(qk.github.pullRequestsAll("/b"));
   });
+
+  it("builds pullRequestDetail query key", () => {
+    expect(qk.github.pullRequestDetail("/repo", 42)).toEqual([
+      "github",
+      "pullRequestDetail",
+      "/repo",
+      42,
+    ]);
+  });
 });
+

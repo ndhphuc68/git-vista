@@ -25,4 +25,9 @@ describe("useViewStore", () => {
     expect(useViewStore.getState().activeScreen).toBe("changes");
     expect(useViewStore.getState().activeConflictFile).toBeNull();
   });
+
+  it("can set activeScreen to pull-requests", () => {
+    useViewStore.getState().setActiveScreen("pull-requests");
+    expect(useViewStore.getState().activeScreen).toBe("pull-requests");
+  });
 });

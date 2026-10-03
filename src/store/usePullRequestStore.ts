@@ -9,6 +9,7 @@ interface PullRequestStoreState {
   closeDrawer: () => void;
   openCreateModal: () => void;
   closeCreateModal: () => void;
+  setSelectedPr: (pr: GitHubPullRequest | null) => void;
 }
 
 export const usePullRequestStore = create<PullRequestStoreState>((set) => ({
@@ -19,4 +20,5 @@ export const usePullRequestStore = create<PullRequestStoreState>((set) => ({
   closeDrawer: () => set({ isDrawerOpen: false, selectedPr: null }),
   openCreateModal: () => set({ isCreateModalOpen: true }),
   closeCreateModal: () => set({ isCreateModalOpen: false }),
+  setSelectedPr: (pr) => set({ selectedPr: pr }),
 }));

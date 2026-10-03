@@ -9,6 +9,7 @@ export const en: Translations = {
     changes: "Changes",
     history: "History",
     conflict: "Conflict Resolver",
+    pullRequests: "Pull Requests",
   },
   gitActions: {
     advanced: {
@@ -1049,5 +1050,41 @@ export const en: Translations = {
     unpushedWarning: "This branch has unpushed commits that are not yet on GitHub",
     pushFirst: "Push to GitHub first",
     createSuccess: "Pull Request #{number} created successfully!",
+  },
+  pullRequestsScreen: {
+    title: "Pull Requests",
+    newPr: "New PR",
+    refresh: "Refresh",
+    searchPlaceholder: "Search by title, #number, author...",
+    emptySelection: "Select a pull request from the list to view details",
+    emptyList: "No pull requests found",
+    openTab: "Open",
+    closedTab: "Closed",
+    allTab: "All",
+    tabs: {
+      conversation: "Conversation",
+      filesChanged: "Files Changed",
+    },
+    checks: {
+      title: "CI Checks",
+      noChecks: "No checks found",
+      passed: "Passed",
+      failed: "Failed",
+      inProgress: "In progress",
+      queued: "Queued",
+      neutral: "Neutral",
+    },
+    files: {
+      summary: "{count} files changed (+{additions} / -{deletions})",
+      noDiff: "No diff available for this file",
+    },
+    meta: {
+      reviewers: "Reviewers",
+      assignees: "Assignees",
+      labels: "Labels",
+      noReviewers: "No reviewers",
+      noAssignees: "No assignees",
+      noLabels: "No labels",
+    },
   },
 };
