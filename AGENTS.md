@@ -52,7 +52,10 @@ rules, most of which fail `pnpm check` when broken:
 - Put new domain UI in `features/`, new tests next to their module, and
   extracted handlers in `<owner>.actions.ts`. Use `clsx` for conditional
   classes and design tokens for colors (no hex or `bg-[#…]`).
-- Reuse `Modal`/`Button`/`Alert`, `useEscapeKey`, `toErrorMessage`, and
+- No hardcoded sizes such as `min-h-[320px]` or `w-[22px]`. Use the Tailwind
+  scale (`min-h-80`, `w-5.5`, `w-px`) or a constant in
+  `src/domain/constants/ui.ts` for sizes computed at runtime.
+- Reuse `Modal`/`Button`/`Alert`/`Input`/`Select`, `useEscapeKey`, `toErrorMessage`, and
   `domain/constants` instead of writing new ones.
 - A refactor is a mechanical replacement: pin behavior with a test first and
   do not change logic along the way.

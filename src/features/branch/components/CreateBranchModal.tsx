@@ -55,7 +55,7 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
       {/* The form wraps Body and Footer so Enter and the submit button both
           still submit across the two sections. */}
       <form onSubmit={handleSubmit} className="contents">
-        <Modal.Body className="overflow-visible min-h-[320px]">
+        <Modal.Body className="overflow-visible min-h-80">
           <CreateBranchFormFields
             selectProps={{
               label: t.modals.createBranch.fromBranch,

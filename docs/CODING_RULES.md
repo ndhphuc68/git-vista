@@ -37,7 +37,7 @@ cargo test --manifest-path src-tauri/Cargo.toml   # when src-tauri/ changes
 ```
 src/
 ├─ domain/        queryKeys, enums, constants — depends on nothing
-├─ shared/        ui/ (Modal, Button, Alert), hooks/, utils/ — meant to depend on domain only (not fully enforced, see rule 1)
+├─ shared/        ui/ (Modal, Button, Alert, Input, Textarea, Checkbox, Select), hooks/, utils/ — meant to depend on domain only (not fully enforced, see rule 1)
 ├─ ipc/           generated bindings + hand-written command wrappers + mocks
 ├─ features/<n>/  one business slice each (see section 3)
 ├─ components/, hooks/, store/, App.tsx — the app shell that composes features
@@ -218,6 +218,8 @@ Before writing new UI or helpers, check these:
 | --- | --- |
 | Dialog | `Modal` (compound) from `src/shared/ui`. Use `stacked` for nested modals and `size="full"` for viewport-sized ones. Mark the main input with `data-autofocus`. |
 | Buttons, inline errors | `Button`, `Alert` from `src/shared/ui` |
+| Dropdowns | `Select` from `src/shared/ui`: pass `options` (flat or grouped), `searchable` with `searchPlaceholder`/`emptyText` for long lists, `mono` for branch names. Do not build new popover dropdowns or style native `<select>`. |
+| Text fields, checkboxes | `Input`, `Textarea`, `Checkbox` from `src/shared/ui` (`size="md"` in settings forms, `mono` for SHAs/URLs, `invalid` for errors). Search boxes with an inline icon stay hand-built. |
 | Escape key | `useEscapeKey` (module registry: only the top-most instance reacts). Do not add `window` keydown listeners for Escape. |
 | Focus trap | `useFocusTrap` (already inside `Modal`) |
 | Copy to clipboard | `useCopyToClipboard` |
@@ -321,6 +323,17 @@ The app ships in two languages, Vietnamese (`vi`, the default) and English
    `stroke`. If no token fits, add one to the design system (light and dark)
    first. Existing offenders: `WindowTabBar.tsx` and `CommitGraphWipRow.tsx`.
    Run `pnpm check-contrast` after changing tokens.
+6. **No hardcoded sizes.** Do not write arbitrary pixel or rem values such as
+   `min-h-[320px]`, `w-[22px]`, or `max-w-[340px]` in `className`, and no
+   inline `style={{ width: 320 }}` for fixed sizes. Use
+   the Tailwind scale instead: Tailwind v4 accepts any multiple of 0.25rem
+   (`min-h-80` = 320px, `w-5.5` = 22px, `w-px` = 1px), plus named sizes
+   (`max-w-xs`, `max-w-sm`, …). When the IDE shows
+   `suggestCanonicalClasses`, apply the suggested class. A size that is
+   computed at runtime (virtualized rows, resizable panes, measured
+   positions) belongs in `src/domain/constants/ui.ts` and is applied
+   through `style`. There are about 36 files with arbitrary sizes today.
+   Convert one when you touch its line.
 
 ---
 
