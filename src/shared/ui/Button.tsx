@@ -20,7 +20,7 @@ const BASE =
 
 const BUTTON_SIZE: Record<ButtonSize, string> = {
   sm: "px-3 py-1.5 text-xs",
-  md: "px-3.5 py-2 text-xs",
+  md: "px-3.5 py-2 min-h-10 text-sm",
   lg: "px-4 py-2 min-h-10 text-sm",
 };
 
@@ -41,7 +41,7 @@ const VARIANT: Record<ButtonVariant, string> = {
  */
 export const Button: React.FC<ButtonProps> = ({
   variant = "primary",
-  size = "sm",
+  size = "md",
   loading = false,
   disabled,
   type = "button",
@@ -57,7 +57,7 @@ export const Button: React.FC<ButtonProps> = ({
       {...rest}
     >
       {loading && (
-        <Loader2 size={size === "lg" ? 16 : 13} className="animate-spin" aria-hidden="true" />
+        <Loader2 size={size === "sm" ? 13 : 16} className="animate-spin" aria-hidden="true" />
       )}
       {children}
     </button>

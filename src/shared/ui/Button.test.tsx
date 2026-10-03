@@ -72,4 +72,10 @@ describe("Button", () => {
     const btn = screen.getByRole("button", { name: "Gửi" });
     expect(btn).toHaveClass("min-h-10", "text-sm");
   });
+
+  it("defaults to a minimum height of 40px (min-h-10) and text-sm", () => {
+    render(<Button>Lưu</Button>);
+    const btn = screen.getByRole("button", { name: "Lưu" });
+    expect(btn).toHaveClass("min-h-10", "text-sm");
+  });
 });
