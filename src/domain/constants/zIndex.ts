@@ -12,6 +12,8 @@ export const Z_INDEX = {
   toast: 2000,
   /** A modal opened from within another modal (modal-in-modal). */
   modalStacked: 1100,
+  /** Fullscreen blocking overlay for app-wide async Git operations. */
+  globalLoading: 3000,
 } as const;
 
 export type ZIndexLayer = keyof typeof Z_INDEX;

@@ -320,6 +320,7 @@ export const en: Translations = {
     retry: "Retry",
     esc: "Esc",
     undo: "Undo",
+    pleaseWait: "Please wait a moment...",
   },
   sidebar: {
     branches: "BRANCHES",

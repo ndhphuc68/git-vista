@@ -317,6 +317,7 @@ export const vi = {
     retry: "Thử lại",
     esc: "Esc",
     undo: "Hoàn tác",
+    pleaseWait: "Vui lòng đợi trong giây lát...",
   },
   sidebar: {
     branches: "NHÁNH",
