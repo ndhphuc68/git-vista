@@ -3,6 +3,9 @@ import type { GraphCommitNode, RepoStatusResult } from "../../../ipc/bindings.ge
 /** Height in px of one virtualized commit row in the graph. */
 export const GRAPH_ROW_HEIGHT = 32;
 
+/** Width in px of one column / lane in the commit graph. */
+export const GRAPH_COL_WIDTH = 16;
+
 const BRANCH_PALETTES = [
   {
     bg: "bg-blue-50/95 dark:bg-blue-950/50",
@@ -90,12 +93,14 @@ export interface UncommittedSummary {
 }
 
 /** Working-tree WIP row summary derived from the repository status query. */
-export function getUncommittedSummary(repoStatus: RepoStatusResult | undefined): UncommittedSummary {
+export function getUncommittedSummary(
+  repoStatus: RepoStatusResult | undefined
+): UncommittedSummary {
   const hasUncommittedChanges = Boolean(
     repoStatus &&
-      (repoStatus.staged.length > 0 ||
-        repoStatus.unstaged.length > 0 ||
-        repoStatus.untracked.length > 0)
+    (repoStatus.staged.length > 0 ||
+      repoStatus.unstaged.length > 0 ||
+      repoStatus.untracked.length > 0)
   );
   const modifiedCount = (repoStatus?.staged.length || 0) + (repoStatus?.unstaged.length || 0);
   const untrackedCount = repoStatus?.untracked.length || 0;

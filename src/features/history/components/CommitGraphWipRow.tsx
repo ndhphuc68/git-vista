@@ -1,10 +1,14 @@
 import { useTranslation } from "../../../i18n";
+import { GRAPH_COL_WIDTH, GRAPH_ROW_HEIGHT } from "../model/graphPresentation";
 
 interface CommitGraphWipRowProps {
   modifiedCount: number;
   untrackedCount: number;
   onShowChanges: () => void;
 }
+
+const WIP_NODE_X = GRAPH_COL_WIDTH / 2;
+const WIP_NODE_Y = GRAPH_ROW_HEIGHT / 2;
 
 /** Row 0: working directory changes (WIP), shown above the commit list when present. */
 export function CommitGraphWipRow({
@@ -28,25 +32,25 @@ export function CommitGraphWipRow({
       className="flex items-center px-3 h-8 bg-amber-50/50 dark:bg-amber-950/25 hover:bg-amber-100/60 dark:hover:bg-amber-950/45 border-b border-border-subtle cursor-pointer transition-colors group shrink-0"
     >
       <div className="w-32 shrink-0 flex items-center">
-        <svg width="128" height="32" className="overflow-visible">
+        <svg width="128" height={GRAPH_ROW_HEIGHT} className="overflow-visible">
           <line
-            x1="16"
-            y1="16"
-            x2="16"
-            y2="32"
+            x1={WIP_NODE_X}
+            y1={WIP_NODE_Y}
+            x2={WIP_NODE_X}
+            y2={GRAPH_ROW_HEIGHT}
             stroke="#0284C7"
             strokeWidth="2"
             strokeDasharray="3,3"
           />
           <circle
-            cx="16"
-            cy="16"
+            cx={WIP_NODE_X}
+            cy={WIP_NODE_Y}
             r="6"
             className="fill-surface stroke-[#0284C7]"
             strokeWidth="2"
             strokeDasharray="2.5,2.5"
           />
-          <circle cx="16" cy="16" r="2.5" fill="#0284C7" />
+          <circle cx={WIP_NODE_X} cy={WIP_NODE_Y} r="2.5" fill="#0284C7" />
         </svg>
       </div>
 

@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { GraphCommitNode, RepoStatusResult } from "../../../ipc/bindings.generated";
-import { getBranchPillStyle, getMaxGraphColumns, getUncommittedSummary } from "./graphPresentation";
+import {
+  GRAPH_COL_WIDTH,
+  GRAPH_ROW_HEIGHT,
+  getBranchPillStyle,
+  getMaxGraphColumns,
+  getUncommittedSummary,
+} from "./graphPresentation";
 
 function commit(overrides: Partial<GraphCommitNode> = {}): GraphCommitNode {
   return {
@@ -114,5 +120,12 @@ describe("getUncommittedSummary", () => {
       untracked: [{ path: "c.ts", status: "New", is_staged: false, old_path: null }],
     });
     expect(getUncommittedSummary(status).hasUncommittedChanges).toBe(true);
+  });
+});
+
+describe("graph layout constants", () => {
+  it("defines standard row height and column width", () => {
+    expect(GRAPH_ROW_HEIGHT).toBe(32);
+    expect(GRAPH_COL_WIDTH).toBe(16);
   });
 });

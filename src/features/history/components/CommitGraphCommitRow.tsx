@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import type { GraphCommitNode } from "../../../ipc/bindings.generated";
 import { GraphSvgLane } from "../../../components/graph/GraphSvgLane";
 import type { GraphContextMenu } from "../model/graphDialog";
-import { GRAPH_ROW_HEIGHT } from "../model/graphPresentation";
+import { GRAPH_COL_WIDTH, GRAPH_ROW_HEIGHT } from "../model/graphPresentation";
 import { CommitGraphCommitRowSummary } from "./CommitGraphCommitRowSummary";
 
 interface CommitGraphCommitRowProps {
@@ -88,7 +88,7 @@ export function CommitGraphCommitRow({
           isHead={isHead}
           isMerge={isMerge}
           rowHeight={GRAPH_ROW_HEIGHT}
-          colWidth={16}
+          colWidth={GRAPH_COL_WIDTH}
         />
       </div>
 

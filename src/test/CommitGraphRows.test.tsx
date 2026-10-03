@@ -108,6 +108,20 @@ describe("CommitGraphRows (via CommitGraph)", () => {
     expect(screen.getByText(/1 modified/)).toBeInTheDocument();
     expect(screen.getByText(/2 new/)).toBeInTheDocument();
 
+    const svg = wipRow.querySelector("svg");
+    expect(svg).toBeInTheDocument();
+    const line = svg?.querySelector("line");
+    expect(line?.getAttribute("x1")).toBe("8");
+    expect(line?.getAttribute("x2")).toBe("8");
+    expect(line?.getAttribute("y1")).toBe("16");
+    expect(line?.getAttribute("y2")).toBe("32");
+
+    const circles = svg?.querySelectorAll("circle");
+    expect(circles?.[0]?.getAttribute("cx")).toBe("8");
+    expect(circles?.[0]?.getAttribute("cy")).toBe("16");
+    expect(circles?.[1]?.getAttribute("cx")).toBe("8");
+    expect(circles?.[1]?.getAttribute("cy")).toBe("16");
+
     fireEvent.click(wipRow);
     expect(useViewStore.getState().activeScreen).toBe("changes");
   });
