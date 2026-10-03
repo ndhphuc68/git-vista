@@ -1,8 +1,9 @@
 import React from "react";
 import { GitBranch } from "lucide-react";
-import { Modal, Button, Alert } from "../../../shared/ui";
+import { Modal, Button } from "../../../shared/ui";
 import { useCreateBranchForm } from "../hooks/useCreateBranchForm";
 import { CreateBranchFormFields } from "./CreateBranchFormFields";
+import { CreateBranchError } from "./CreateBranchError";
 
 const TITLE_ID = "create-branch-title";
 
@@ -37,6 +38,7 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
     handleNameChange,
     handleBaseRefChange,
     handleSubmit,
+    conflictActions,
   } = useCreateBranchForm({ isOpen, repoPath, targetCommit, sourceBranch, onClose, onSuccess });
 
   const isCommitTarget = Boolean(
@@ -85,7 +87,7 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
             loading={loading}
           />
 
-          {error && <Alert variant="error">{error}</Alert>}
+          {error && <CreateBranchError t={t} error={error} actions={conflictActions} />}
         </Modal.Body>
 
         <Modal.Footer>

@@ -539,6 +539,15 @@ export const en: Translations = {
       creating: "Creating...",
       submit: "Create Branch",
       errorEmpty: "Please enter a branch name",
+      conflictStashAndCreate: "Stash & Create Branch",
+      conflictCreateOnly: "Create Only",
+      autoStashMessage: "Auto-stash before creating branch {name}",
+      carriedChangesSuccess: "Switched to branch {name} and brought your changes along",
+      changesKeptInStash:
+        'Switched to branch {name}, but your changes conflict with it. The stash "{stash}" was kept; resolve the conflicts in the files.',
+      createFailedRestored: "{msg} Your changes were put back.",
+      createFailedKeptInStash:
+        '{msg} Your changes could not be put back; they are still in the stash "{stash}".',
     },
     renameBranch: {
       title: "Rename Branch",
@@ -933,6 +942,9 @@ export const en: Translations = {
     checkoutConflictTitle: "Checkout Conflict",
     checkoutConflictMessage: "You have uncommitted changes that would be overwritten.",
     checkoutConflictHint: "Commit or Stash your changes before switching branches.",
+    stashConflictTitle: "Stash Conflict",
+    stashConflictMessage: "The stashed changes conflict with the current branch.",
+    stashConflictHint: "The stash was kept. Resolve the conflicts in the files before continuing.",
     branchInWorktreeTitle: "Branch is used by another worktree",
     branchInWorktreeMessage: "This branch is checked out in another worktree of this repository.",
     branchInWorktreeHint:

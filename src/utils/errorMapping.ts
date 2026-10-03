@@ -1,6 +1,8 @@
 import { getTranslation } from "../i18n";
 
 export interface FriendlyError {
+  /** Set when the error matched a known failure, so callers can offer a fix for it. */
+  kind?: KnownErrorKind;
   title: string;
   message: string;
   actionHint?: string;
@@ -32,10 +34,11 @@ function errorDetails(error: unknown): string {
   return String(error);
 }
 
-type KnownErrorKind =
+export type KnownErrorKind =
   | "authFailed"
   | "remoteNewCommits"
   | "checkoutConflict"
+  | "stashConflict"
   | "branchInWorktree"
   | "repoLocked"
   | "operationInProgress"
@@ -53,6 +56,7 @@ const KNOWN_ERRORS: ReadonlyArray<{ kind: KnownErrorKind; fragments: string[] }>
     kind: "checkoutConflict",
     fragments: ["checkout_conflict", "local changes would be overwritten"],
   },
+  { kind: "stashConflict", fragments: ["stash_conflict"] },
   { kind: "branchInWorktree", fragments: ["branch_in_worktree"] },
   // A lock file left by another (or a crashed) Git process blocks the write.
   { kind: "repoLocked", fragments: ["index.lock", "index is locked", "failed to lock file"] },
@@ -83,6 +87,7 @@ export function mapGitError(
   );
   if (known) {
     return {
+      kind: known.kind,
       title: t.errors[`${known.kind}Title`],
       message: t.errors[`${known.kind}Message`],
       actionHint: t.errors[`${known.kind}Hint`],

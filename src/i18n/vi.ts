@@ -535,6 +535,15 @@ export const vi = {
       creating: "Đang tạo...",
       submit: "Tạo nhánh",
       errorEmpty: "Vui lòng nhập tên nhánh",
+      conflictStashAndCreate: "Stash & tạo nhánh",
+      conflictCreateOnly: "Chỉ tạo nhánh",
+      autoStashMessage: "Tự động stash trước khi tạo nhánh {name}",
+      carriedChangesSuccess: "Đã chuyển sang nhánh {name} và mang theo các thay đổi",
+      changesKeptInStash:
+        'Đã chuyển sang nhánh {name}, nhưng các thay đổi xung đột với nhánh này. Stash "{stash}" vẫn được giữ lại; hãy giải quyết xung đột trong các file.',
+      createFailedRestored: "{msg} Các thay đổi đã được trả về như cũ.",
+      createFailedKeptInStash:
+        '{msg} Không thể trả lại các thay đổi; chúng vẫn nằm trong Stash "{stash}".',
     },
     renameBranch: {
       title: "Đổi tên nhánh",
@@ -930,6 +939,10 @@ export const vi = {
     checkoutConflictMessage: "Bạn đang có các thay đổi chưa lưu có thể bị ghi đè khi đổi nhánh.",
     checkoutConflictHint:
       "Hãy Commit các thay đổi hoặc bấm 'Lưu tạm (Stash)' trước khi chuyển nhánh.",
+    stashConflictTitle: "Xung đột khi áp dụng Stash",
+    stashConflictMessage: "Thay đổi trong Stash xung đột với nhánh hiện tại.",
+    stashConflictHint:
+      "Stash vẫn được giữ lại. Hãy giải quyết xung đột trong các file trước khi tiếp tục.",
     branchInWorktreeTitle: "Nhánh đang được dùng ở worktree khác",
     branchInWorktreeMessage: "Nhánh này đang được checkout ở một worktree khác của kho lưu trữ.",
     branchInWorktreeHint:

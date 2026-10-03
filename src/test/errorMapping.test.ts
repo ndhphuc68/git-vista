@@ -42,6 +42,18 @@ describe("mapGitError utility", () => {
     expect(res.actionHint).toContain("Stash");
   });
 
+  it("tags known errors with their kind so callers can offer a fix", () => {
+    expect(mapGitError("CHECKOUT_CONFLICT: dirty").kind).toBe("checkoutConflict");
+    expect(mapGitError("something unexpected").kind).toBeUndefined();
+  });
+
+  it("maps a conflicting stash pop and says the stash was kept", () => {
+    const res = mapGitError("STASH_CONFLICT: conflict with current branch");
+    expect(res.kind).toBe("stashConflict");
+    expect(res.title).toContain("Xung đột khi áp dụng Stash");
+    expect(res.actionHint).toContain("Stash vẫn được giữ lại");
+  });
+
   it("maps operation in progress error", () => {
     const res = mapGitError("OPERATION_IN_PROGRESS: Cannot switch branch");
     expect(res.title).toContain("Tiến trình Git đang dở dang");
