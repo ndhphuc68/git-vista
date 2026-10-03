@@ -55,7 +55,6 @@ export function CommitGraphCommitRow({
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        onSelectCommit(commit.id);
         onContextMenu({ x: e.clientX, y: e.clientY, commit });
       }}
       onKeyDown={(e) => {
