@@ -45,10 +45,10 @@ export const CreatePullRequestModalFooter: React.FC<CreatePullRequestModalFooter
 
     {/* Action Buttons */}
     <div className="flex items-center justify-end gap-2 pt-3 border-t border-border-subtle">
-      <Button variant="secondary" onClick={onClose} disabled={submitting}>
+      <Button variant="secondary" onClick={onClose} disabled={submitting} size="lg">
         {t.common.cancel}
       </Button>
-      <Button type="submit" loading={submitting} disabled={!title.trim()}>
+      <Button type="submit" loading={submitting} disabled={!title.trim()} size="lg">
         {submitting ? (
           <span>{t.pullRequests.creating}</span>
         ) : (

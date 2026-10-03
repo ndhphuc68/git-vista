@@ -66,4 +66,10 @@ describe("Button", () => {
     render(<Button type="submit">Gửi</Button>);
     expect(screen.getByRole("button")).toHaveAttribute("type", "submit");
   });
+
+  it("applies size lg with 40px minimum height and text-sm", () => {
+    render(<Button size="lg">Gửi</Button>);
+    const btn = screen.getByRole("button", { name: "Gửi" });
+    expect(btn).toHaveClass("min-h-10", "text-sm");
+  });
 });

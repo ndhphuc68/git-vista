@@ -25,7 +25,7 @@ export interface SelectTriggerProps {
 const TRIGGER_SIZE: Record<FieldSize, string> = {
   sm: "px-3 py-1.5 text-xs",
   md: "px-3 py-2 text-xs",
-  lg: "px-3.5 py-2.5 min-h-12 text-sm",
+  lg: "px-3.5 py-2 min-h-10 text-sm",
 };
 
 /** The `role="combobox"` button that shows the current value and opens the list. */

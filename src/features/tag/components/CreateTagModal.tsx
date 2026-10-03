@@ -84,10 +84,10 @@ export const CreateTagModal: React.FC<CreateTagModalProps> = ({
         </Modal.Body>
 
         <Modal.Footer>
-          <Button variant="secondary" onClick={onClose} disabled={createTag.isPending}>
+          <Button variant="secondary" onClick={onClose} disabled={createTag.isPending} size="lg">
             {t.modals.createTag.cancel}
           </Button>
-          <Button type="submit" loading={createTag.isPending}>
+          <Button type="submit" loading={createTag.isPending} size="lg">
             {createTag.isPending ? t.modals.createTag.creating : t.modals.createTag.submit}
           </Button>
         </Modal.Footer>

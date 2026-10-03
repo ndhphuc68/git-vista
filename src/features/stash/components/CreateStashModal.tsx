@@ -83,10 +83,10 @@ export const CreateStashModal: React.FC<CreateStashModalProps> = ({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose} disabled={loading}>
+        <Button variant="secondary" onClick={onClose} disabled={loading} size="lg">
           {t.modals.createStash.cancel}
         </Button>
-        <Button onClick={handleSubmit} loading={loading}>
+        <Button onClick={handleSubmit} loading={loading} size="lg">
           {loading ? t.modals.createStash.saving : t.modals.createStash.submit}
         </Button>
       </Modal.Footer>

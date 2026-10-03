@@ -3,17 +3,26 @@ import clsx from "clsx";
 import { Loader2 } from "lucide-react";
 
 export type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
+export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "type"> {
   variant?: ButtonVariant;
+  /** `sm` for dense buttons, `md` for standard, `lg` for roomy 40px modal buttons. */
+  size?: ButtonSize;
   loading?: boolean;
   type?: "button" | "submit" | "reset";
 }
 
 const BASE =
-  "inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold " +
+  "inline-flex items-center justify-center gap-1.5 rounded-lg font-semibold " +
   "cursor-pointer transition-all active:scale-[0.98] " +
   "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
+
+const BUTTON_SIZE: Record<ButtonSize, string> = {
+  sm: "px-3 py-1.5 text-xs",
+  md: "px-3.5 py-2 text-xs",
+  lg: "px-4 py-2 min-h-10 text-sm",
+};
 
 const VARIANT: Record<ButtonVariant, string> = {
   primary: "bg-accent text-accent-contrast border-none hover:bg-accent-hover",
@@ -32,6 +41,7 @@ const VARIANT: Record<ButtonVariant, string> = {
  */
 export const Button: React.FC<ButtonProps> = ({
   variant = "primary",
+  size = "sm",
   loading = false,
   disabled,
   type = "button",
@@ -43,10 +53,12 @@ export const Button: React.FC<ButtonProps> = ({
     <button
       type={type}
       disabled={disabled || loading}
-      className={clsx(BASE, VARIANT[variant], className)}
+      className={clsx(BASE, BUTTON_SIZE[size], VARIANT[variant], className)}
       {...rest}
     >
-      {loading && <Loader2 size={13} className="animate-spin" aria-hidden="true" />}
+      {loading && (
+        <Loader2 size={size === "lg" ? 16 : 13} className="animate-spin" aria-hidden="true" />
+      )}
       {children}
     </button>
   );

@@ -89,10 +89,10 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
         </Modal.Body>
 
         <Modal.Footer>
-          <Button variant="secondary" onClick={onClose} disabled={loading}>
+          <Button variant="secondary" onClick={onClose} disabled={loading} size="lg">
             {t.modals.createBranch.cancel}
           </Button>
-          <Button type="submit" loading={loading} disabled={!branchName.trim()}>
+          <Button type="submit" loading={loading} disabled={!branchName.trim()} size="lg">
             {loading ? t.modals.createBranch.creating : t.modals.createBranch.submit}
           </Button>
         </Modal.Footer>

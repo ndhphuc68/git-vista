@@ -61,13 +61,14 @@ export const RenameBranchModal: React.FC<RenameBranchModalProps> = ({
         </Modal.Body>
 
         <Modal.Footer>
-          <Button variant="secondary" onClick={onClose} disabled={loading}>
+          <Button variant="secondary" onClick={onClose} disabled={loading} size="lg">
             {t.modals.renameBranch.cancel}
           </Button>
           <Button
             type="submit"
             loading={loading}
             disabled={!newName.trim() || newName.trim() === currentName}
+            size="lg"
           >
             {loading ? t.modals.renameBranch.renaming : t.modals.renameBranch.submit}
           </Button>

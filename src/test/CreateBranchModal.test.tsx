@@ -87,8 +87,8 @@ describe("CreateBranchModal", () => {
 
     const input = screen.getByLabelText("Tên nhánh mới");
     expect(input).toBeInTheDocument();
-    expect(input).toHaveClass("min-h-12");
-    expect(baseBranchCombo()).toHaveClass("min-h-12");
+    expect(input).toHaveClass("min-h-10");
+    expect(baseBranchCombo()).toHaveClass("min-h-10");
 
     // Type name with spaces
     fireEvent.change(input, { target: { value: "feature awesome login" } });
@@ -96,6 +96,7 @@ describe("CreateBranchModal", () => {
 
     const submitBtn = screen.getByRole("button", { name: /tạo nhánh/i });
     expect(submitBtn).toBeEnabled();
+    expect(submitBtn).toHaveClass("min-h-10");
 
     fireEvent.click(submitBtn);
 
