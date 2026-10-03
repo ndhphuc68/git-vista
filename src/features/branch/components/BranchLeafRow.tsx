@@ -22,6 +22,7 @@ export interface BranchLeafRowProps {
   onMerge: (name: string) => void;
   onRebase: (name: string) => void;
   onCompare: (name: string) => void;
+  onCreateBranchFrom: (name: string) => void;
   onRename: (name: string) => void;
   onDelete: (name: string) => void;
 }
@@ -39,6 +40,7 @@ export const BranchLeafRow: React.FC<BranchLeafRowProps> = ({
   onMerge,
   onRebase,
   onCompare,
+  onCreateBranchFrom,
   onRename,
   onDelete,
 }) => {
@@ -98,6 +100,7 @@ export const BranchLeafRow: React.FC<BranchLeafRowProps> = ({
             onMerge={onMerge}
             onRebase={onRebase}
             onCompare={onCompare}
+            onCreateBranchFrom={onCreateBranchFrom}
             onRename={onRename}
             onDelete={onDelete}
           />

@@ -20,9 +20,9 @@ export type ModalSize = "sm" | "md" | "lg" | "xl" | "full";
  * set their own dimensions on a wrapper instead of being clamped here.
  */
 export const MODAL_SIZE: Record<ModalSize, string> = {
-  sm: "max-w-sm",
-  md: "max-w-md",
-  lg: "max-w-2xl",
-  xl: "max-w-5xl",
+  sm: "max-w-md",
+  md: "max-w-xl",
+  lg: "max-w-3xl",
+  xl: "max-w-6xl",
   full: "max-w-none",
 };

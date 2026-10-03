@@ -5,7 +5,7 @@
  */
 import React from "react";
 import { type BranchTreeNode } from "../model/branchTree";
-import { type SidebarDialog } from "../model/sidebarDialog";
+import { createBranchFromDialog, type SidebarDialog } from "../model/sidebarDialog";
 import { BranchTreeNode as BranchTreeNodeView } from "./BranchTreeNode";
 
 export interface LocalBranchTreeListProps {
@@ -57,6 +57,7 @@ export const LocalBranchTreeList: React.FC<LocalBranchTreeListProps> = ({
         onCompare={(name) =>
           setDialog({ kind: "compare", baseRev: currentBranchName, targetRev: name })
         }
+        onCreateBranchFrom={(name) => setDialog(createBranchFromDialog(name, false))}
         onRename={(name) => setDialog({ kind: "renameBranch", name })}
         onDelete={(name) => setDialog({ kind: "deleteBranch", name })}
       />

@@ -113,6 +113,7 @@ const ModalRoot: React.FC<ModalProps> & ModalComposition = ({
             // The `full` tier sizes itself from its content, so it must not be
             // stretched to the available width the way the fixed tiers are.
             size === "full" ? "max-w-none" : "w-full",
+            size !== "full" && "min-w-[480px] min-h-[220px]",
             MODAL_SIZE[size]
           )}
           onClick={(e) => e.stopPropagation()}
@@ -131,12 +132,12 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
   icon: Icon,
   tone = "default",
 }) => (
-  <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle shrink-0">
-    <div className="flex items-center gap-2">
+  <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle shrink-0">
+    <div className="flex items-center gap-2.5">
       {Icon && (
-        <Icon size={16} className={tone === "danger" ? "text-diff-remove-text" : "text-accent"} />
+        <Icon size={18} className={tone === "danger" ? "text-diff-remove-text" : "text-accent"} />
       )}
-      <h3 id={titleId} className="text-xs font-semibold text-primary m-0">
+      <h3 id={titleId} className="text-base font-semibold text-primary m-0 tracking-tight">
         {title}
       </h3>
     </div>
@@ -144,9 +145,9 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
       type="button"
       onClick={onClose}
       aria-label="Đóng"
-      className="flex items-center justify-center bg-transparent border-none cursor-pointer text-secondary hover:text-primary hover:bg-surface-hover p-1 rounded-md transition-colors"
+      className="flex items-center justify-center bg-transparent border-none cursor-pointer text-secondary hover:text-primary hover:bg-surface-hover p-1.5 rounded-md transition-colors"
     >
-      <X size={16} />
+      <X size={18} />
     </button>
   </div>
 );
@@ -155,7 +156,13 @@ const ModalBody: React.FC<{ children: React.ReactNode; className?: string }> = (
   children,
   className,
 }) => (
-  <div className={clsx("p-4 flex flex-col gap-3 overflow-y-auto min-h-0", className)}>
+  <div
+    className={clsx(
+      "p-5 flex flex-col gap-4 min-h-0",
+      className?.includes("overflow-") ? undefined : "overflow-y-auto",
+      className
+    )}
+  >
     {children}
   </div>
 );
@@ -166,7 +173,7 @@ const ModalFooter: React.FC<{ children: React.ReactNode; className?: string }> =
 }) => (
   <div
     className={clsx(
-      "flex items-center justify-end gap-2 px-4 py-3 border-t border-border-subtle bg-surface shrink-0",
+      "flex items-center justify-end gap-2.5 px-5 py-3.5 border-t border-border-subtle bg-surface shrink-0",
       className
     )}
   >

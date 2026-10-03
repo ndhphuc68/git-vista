@@ -24,7 +24,7 @@ export const CreatePullRequestModalHeader: React.FC<CreatePullRequestModalHeader
         <GitPullRequest size={16} />
       </div>
       <div>
-        <h3 id={titleId} className="text-sm font-semibold text-primary m-0 leading-tight">
+        <h3 id={titleId} className="text-base font-semibold text-primary m-0 leading-tight">
           {t.pullRequests.createModalTitle}
         </h3>
         {repoInfo?.owner && repoInfo?.repo && (

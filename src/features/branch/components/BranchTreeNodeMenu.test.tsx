@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
 import { createRef } from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { BranchTreeNodeMenu } from "./BranchTreeNodeMenu";
 
 const longCurrentBranch = "feat/2-task-5-inventory-repository-and-usecases-with-a-very-long-name";
 
-function renderMenu() {
+function renderMenu(onCreateBranchFrom = vi.fn()) {
   return render(
     <BranchTreeNodeMenu
       branch={{
@@ -23,6 +23,7 @@ function renderMenu() {
       onMerge={vi.fn()}
       onRebase={vi.fn()}
       onCompare={vi.fn()}
+      onCreateBranchFrom={onCreateBranchFrom}
       onRename={vi.fn()}
       onDelete={vi.fn()}
     />
@@ -40,5 +41,12 @@ describe("BranchTreeNodeMenu", () => {
     const label = screen.getByText((text) => text.includes(longCurrentBranch));
     expect(label).toHaveClass("truncate");
     expect(label.closest("button")).toHaveAttribute("title", label.textContent ?? "");
+  });
+
+  it("creates a branch from the clicked branch, not the current one", () => {
+    const onCreateBranchFrom = vi.fn();
+    renderMenu(onCreateBranchFrom);
+    fireEvent.click(screen.getByRole("button", { name: "Tạo nhánh mới từ nhánh này" }));
+    expect(onCreateBranchFrom).toHaveBeenCalledWith("feature/other");
   });
 });

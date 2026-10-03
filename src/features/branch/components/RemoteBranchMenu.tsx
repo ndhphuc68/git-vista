@@ -1,12 +1,12 @@
 /**
- * The dropdown action menu for a remote branch leaf: checkout, merge, rebase
- * and compare.
+ * The dropdown action menu for a remote branch leaf: checkout, create a branch
+ * from it, merge, rebase and compare.
  */
 import React from "react";
-import { Check, GitMerge, GitCommit, GitCompare } from "lucide-react";
+import { Check, GitBranch, GitMerge, GitCommit, GitCompare } from "lucide-react";
 import { useTranslation } from "../../../i18n";
 import { useKeepInView } from "../../../shared/hooks/useKeepInView";
-import { type SidebarDialog } from "../model/sidebarDialog";
+import { createBranchFromDialog, type SidebarDialog } from "../model/sidebarDialog";
 
 export interface RemoteBranchMenuProps {
   branchName: string;
@@ -44,6 +44,18 @@ export const RemoteBranchMenu: React.FC<RemoteBranchMenuProps> = ({
       >
         <Check size={14} className="text-accent shrink-0" />
         <span>{t.sidebar.checkoutBranch}</span>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => {
+          onSetMenuBranch(null);
+          onOpenDialog(createBranchFromDialog(branchName, true));
+        }}
+        className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
+      >
+        <GitBranch size={14} className="text-secondary shrink-0" />
+        <span>{t.sidebar.createBranchFromBranch}</span>
       </button>
 
       <button

@@ -13,7 +13,7 @@ import { type TagItem, type RemoteItem } from "../../../ipc/bindings.generated";
 
 export type SidebarDialog =
   | { kind: "none" }
-  | { kind: "createBranch"; fromRef: string | null }
+  | { kind: "createBranch"; fromRef: string | null; fromBranch?: string }
   | { kind: "renameBranch"; name: string }
   | { kind: "deleteBranch"; name: string }
   | { kind: "createTag"; commitId: string; summary?: string }
@@ -30,6 +30,15 @@ export type SidebarDialog =
 
 /** The closed state. Shared so call sites don't re-spell the literal. */
 export const NO_DIALOG: SidebarDialog = { kind: "none" };
+
+/**
+ * The create-branch dialog starting at another branch's tip. The fully
+ * qualified ref keeps the backend from resolving a same-named tag instead.
+ */
+export function createBranchFromDialog(branchName: string, isRemote: boolean): SidebarDialog {
+  const namespace = isRemote ? "refs/remotes" : "refs/heads";
+  return { kind: "createBranch", fromRef: `${namespace}/${branchName}`, fromBranch: branchName };
+}
 
 /** Narrows a dialog to one variant, for use in render guards. */
 export function isDialog<K extends SidebarDialog["kind"]>(

@@ -19,6 +19,7 @@ function Harness() {
       onMerge={vi.fn()}
       onRebase={vi.fn()}
       onCompare={vi.fn()}
+      onCreateBranchFrom={vi.fn()}
       onRename={vi.fn()}
       onDelete={vi.fn()}
     />
@@ -52,6 +53,7 @@ describe("BranchLeafRow", () => {
         onMerge={vi.fn()}
         onRebase={vi.fn()}
         onCompare={vi.fn()}
+        onCreateBranchFrom={vi.fn()}
         onRename={vi.fn()}
         onDelete={vi.fn()}
       />
@@ -77,6 +79,7 @@ describe("BranchLeafRow", () => {
         onMerge={vi.fn()}
         onRebase={vi.fn()}
         onCompare={vi.fn()}
+        onCreateBranchFrom={vi.fn()}
         onRename={vi.fn()}
         onDelete={vi.fn()}
       />

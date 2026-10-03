@@ -25,6 +25,7 @@ export interface BranchTreeNodeProps {
   onMerge: (name: string) => void;
   onRebase: (name: string) => void;
   onCompare: (name: string) => void;
+  onCreateBranchFrom: (name: string) => void;
   onRename: (name: string) => void;
   onDelete: (name: string) => void;
 }
@@ -60,6 +61,7 @@ export const BranchTreeNode: React.FC<BranchTreeNodeProps> = (props) => {
     onMerge,
     onRebase,
     onCompare,
+    onCreateBranchFrom,
     onRename,
     onDelete,
   } = props;
@@ -78,6 +80,7 @@ export const BranchTreeNode: React.FC<BranchTreeNodeProps> = (props) => {
       onMerge={onMerge}
       onRebase={onRebase}
       onCompare={onCompare}
+      onCreateBranchFrom={onCreateBranchFrom}
       onRename={onRename}
       onDelete={onDelete}
     />

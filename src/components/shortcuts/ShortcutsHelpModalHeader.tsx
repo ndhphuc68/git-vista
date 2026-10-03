@@ -21,7 +21,7 @@ export const ShortcutsHelpModalHeader: React.FC<ShortcutsHelpModalHeaderProps> =
         <Keyboard size={18} />
       </div>
       <div>
-        <h2 id={titleId} className="text-sm font-semibold text-primary m-0">
+        <h2 id={titleId} className="text-base font-semibold text-primary m-0">
           {t.shortcuts.title}
         </h2>
         <p className="text-[11px] text-secondary m-0">{t.shortcuts.subtitle}</p>

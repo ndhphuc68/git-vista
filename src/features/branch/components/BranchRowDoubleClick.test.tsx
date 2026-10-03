@@ -30,6 +30,7 @@ describe("branch rows - double click", () => {
         onMerge={vi.fn()}
         onRebase={vi.fn()}
         onCompare={vi.fn()}
+        onCreateBranchFrom={vi.fn()}
         onRename={vi.fn()}
         onDelete={vi.fn()}
       />

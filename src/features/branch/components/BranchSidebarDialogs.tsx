@@ -51,6 +51,7 @@ export const BranchSidebarDialogs: React.FC<BranchSidebarDialogsProps> = ({
         onClose={closeDialog}
         repoPath={repoPath}
         targetCommit={dialog.fromRef}
+        sourceBranch={dialog.fromBranch}
         onSuccess={invalidateRepo}
       />
     )}

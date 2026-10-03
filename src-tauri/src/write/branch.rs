@@ -1,5 +1,5 @@
 use crate::error::AppError;
-use git2::{build::CheckoutBuilder, BranchType, Oid, Reference, Repository};
+use git2::{build::CheckoutBuilder, BranchType, Reference, Repository};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -41,7 +41,7 @@ pub fn validate_branch_name(name: &str) -> Result<(), AppError> {
     Ok(())
 }
 
-/// Tạo nhánh mới từ HEAD hoặc commit chỉ định; tuỳ chọn checkout ngay
+/// Creates a branch at HEAD or at the given revision (commit OID or ref), optionally checking it out.
 pub fn create_branch<P: AsRef<Path>>(
     repo_path: P,
     name: &str,
@@ -58,10 +58,15 @@ pub fn create_branch<P: AsRef<Path>>(
         ));
     }
 
-    let target_commit = if let Some(oid_str) = target_commit_id {
-        let oid = Oid::from_str(oid_str.trim())
-            .map_err(|e| AppError::InvalidOperation(format!("Commit OID không hợp lệ: {}", e)))?;
-        repo.find_commit(oid)?
+    // The start point is any revision: a commit OID, or a fully qualified ref
+    // such as refs/heads/x or refs/remotes/origin/x for "branch from branch".
+    let target_commit = if let Some(rev) = target_commit_id {
+        let rev = rev.trim();
+        repo.revparse_single(rev)
+            .and_then(|object| object.peel_to_commit())
+            .map_err(|e| {
+                AppError::InvalidOperation(format!("Điểm bắt đầu '{}' không hợp lệ: {}", rev, e))
+            })?
     } else {
         let head = repo.head()?;
         head.peel_to_commit()?

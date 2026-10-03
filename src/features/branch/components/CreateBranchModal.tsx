@@ -2,6 +2,7 @@ import React from "react";
 import { GitBranch } from "lucide-react";
 import { Modal, Button, Alert } from "../../../shared/ui";
 import { useCreateBranchForm } from "../hooks/useCreateBranchForm";
+import { CreateBranchFormFields } from "./CreateBranchFormFields";
 
 const TITLE_ID = "create-branch-title";
 
@@ -9,7 +10,10 @@ export interface CreateBranchModalProps {
   isOpen: boolean;
   onClose: () => void;
   repoPath: string;
+  /** Commit OID or ref the new branch starts at; HEAD when absent. */
   targetCommit?: string | null;
+  /** Branch name shown instead of the commit when targetCommit is that branch's ref. */
+  sourceBranch?: string;
   onSuccess?: () => void;
 }
 
@@ -18,10 +22,26 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
   onClose,
   repoPath,
   targetCommit,
+  sourceBranch,
   onSuccess,
 }) => {
-  const { t, branchName, checkout, setCheckout, error, loading, handleNameChange, handleSubmit } =
-    useCreateBranchForm({ isOpen, repoPath, targetCommit, onClose, onSuccess });
+  const {
+    t,
+    branchData,
+    branchName,
+    selectedBaseRef,
+    checkout,
+    setCheckout,
+    error,
+    loading,
+    handleNameChange,
+    handleBaseRefChange,
+    handleSubmit,
+  } = useCreateBranchForm({ isOpen, repoPath, targetCommit, sourceBranch, onClose, onSuccess });
+
+  const isCommitTarget = Boolean(
+    targetCommit && !sourceBranch && !targetCommit.startsWith("refs/")
+  );
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} labelledBy={TITLE_ID}>
@@ -35,44 +55,35 @@ export const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
       {/* The form wraps Body and Footer so Enter and the submit button both
           still submit across the two sections. */}
       <form onSubmit={handleSubmit} className="contents">
-        <Modal.Body>
-          {targetCommit && (
-            <div className="text-[11px] text-secondary flex items-center gap-1 bg-window px-2.5 py-1.5 rounded-sm border border-border-subtle">
-              <span>{t.modals.createBranch.fromCommit}</span>
-              <span className="font-mono text-primary font-semibold">
-                {targetCommit.substring(0, 7)}
-              </span>
-            </div>
-          )}
-
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="branch-name-input" className="text-xs font-medium text-primary">
-              {t.modals.createBranch.nameLabel}
-            </label>
-            <input
-              id="branch-name-input"
-              data-autofocus
-              aria-label={t.modals.createBranch.nameLabel}
-              type="text"
-              placeholder={t.modals.createBranch.namePlaceholder}
-              value={branchName}
-              onChange={handleNameChange}
-              disabled={loading}
-              className="bg-window text-primary border border-border-subtle rounded-sm px-3 py-1.5 text-xs outline-none focus:border-accent transition-colors w-full"
-            />
-          </div>
-
-          <label className="flex items-center gap-2 cursor-pointer text-xs text-primary select-none mt-1">
-            <input
-              type="checkbox"
-              checked={checkout}
-              onChange={(e) => setCheckout(e.target.checked)}
-              disabled={loading}
-              aria-label={t.modals.createBranch.checkoutLabel}
-              className="accent-accent cursor-pointer rounded-sm"
-            />
-            <span>{t.modals.createBranch.checkoutLabel}</span>
-          </label>
+        <Modal.Body className="overflow-visible min-h-[320px]">
+          <CreateBranchFormFields
+            selectProps={{
+              label: t.modals.createBranch.fromBranch,
+              ariaLabel: t.modals.createBranch.baseBranchLabel,
+              value: selectedBaseRef,
+              onChange: handleBaseRefChange,
+              disabled: loading,
+              isCommitTarget,
+              targetCommit,
+              sourceBranch,
+              commitPrefix: t.modals.createBranch.commitOptionPrefix,
+              localLabel: t.modals.createBranch.localBranchesGroup,
+              remoteLabel: t.modals.createBranch.remoteBranchesGroup,
+              localBranches: branchData?.local ?? [],
+              remoteBranches: branchData?.remote ?? [],
+              currentBranchName: branchData?.current_branch,
+              searchPlaceholder: t.modals.createBranch.searchBranchPlaceholder,
+              noBranchesFoundText: t.modals.createBranch.noBranchesFound,
+            }}
+            nameLabel={t.modals.createBranch.nameLabel}
+            namePlaceholder={t.modals.createBranch.namePlaceholder}
+            branchName={branchName}
+            onNameChange={handleNameChange}
+            checkoutLabel={t.modals.createBranch.checkoutLabel}
+            checkout={checkout}
+            onCheckoutChange={setCheckout}
+            loading={loading}
+          />
 
           {error && <Alert variant="error">{error}</Alert>}
         </Modal.Body>

@@ -1,23 +1,25 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { RemoteBranchRow } from "./RemoteBranchRow";
 
-function setup(selectedBranch: string | null = null) {
-  return render(
+function setup(selectedBranch: string | null = null, menuBranch: string | null = null) {
+  const onOpenDialog = vi.fn();
+  render(
     <RemoteBranchRow
       branchName="origin/feature"
       name="feature"
       selectedBranch={selectedBranch}
       onSelectBranch={vi.fn()}
-      menuBranch={null}
+      menuBranch={menuBranch}
       onSetMenuBranch={vi.fn()}
       menuRef={createRef<HTMLDivElement>()}
       currentBranchName="main"
       onCheckout={vi.fn()}
-      onOpenDialog={vi.fn()}
+      onOpenDialog={onOpenDialog}
     />
   );
+  return { onOpenDialog };
 }
 
 describe("RemoteBranchRow", () => {
@@ -37,5 +39,15 @@ describe("RemoteBranchRow", () => {
     expect(button).toHaveClass("text-primary");
     expect(button).not.toHaveClass("text-accent");
     expect(button).not.toHaveClass("bg-accent-subtle");
+  });
+
+  it("opens the create-branch dialog starting at the remote branch", () => {
+    const { onOpenDialog } = setup(null, "origin/feature");
+    fireEvent.click(screen.getByRole("button", { name: "Tạo nhánh mới từ nhánh này" }));
+    expect(onOpenDialog).toHaveBeenCalledWith({
+      kind: "createBranch",
+      fromRef: "refs/remotes/origin/feature",
+      fromBranch: "origin/feature",
+    });
   });
 });

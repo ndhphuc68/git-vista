@@ -50,6 +50,57 @@ fn test_create_branch_with_checkout() {
 }
 
 #[test]
+fn creates_and_checks_out_branch_from_another_branch_ref() {
+    let fixture = TestRepoFixture::new();
+    let repo_path = fixture.path();
+    let base = fixture
+        .repo()
+        .head()
+        .unwrap()
+        .shorthand()
+        .unwrap()
+        .to_string();
+
+    create_branch(repo_path, "source", None, true).unwrap();
+    fs::write(repo_path.join("file1.txt"), "only on source\n").unwrap();
+    visual_git_lib::write::staging::stage_all(repo_path).unwrap();
+    visual_git_lib::write::commit::create_commit(repo_path, "source commit", None, false).unwrap();
+    let source_tip = fixture.repo().head().unwrap().target().unwrap();
+    checkout_branch(repo_path, &base).unwrap();
+
+    create_branch(
+        repo_path,
+        "feature/from-source",
+        Some("refs/heads/source"),
+        true,
+    )
+    .expect("create_branch from a branch ref should succeed");
+
+    let repo = fixture.repo();
+    let head = repo.head().unwrap();
+    assert_eq!(head.shorthand().unwrap(), "feature/from-source");
+    assert_eq!(head.target().unwrap(), source_tip);
+}
+
+#[test]
+fn rejects_unknown_start_point() {
+    let fixture = TestRepoFixture::new();
+
+    let err = create_branch(
+        fixture.path(),
+        "feature/x",
+        Some("refs/heads/missing"),
+        false,
+    );
+
+    assert!(err.is_err());
+    assert!(fixture
+        .repo()
+        .find_branch("feature/x", git2::BranchType::Local)
+        .is_err());
+}
+
+#[test]
 fn test_safe_checkout_clean_and_conflict() {
     let fixture = TestRepoFixture::new();
     let repo_path = fixture.path();

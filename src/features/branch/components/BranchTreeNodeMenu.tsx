@@ -1,10 +1,10 @@
 /**
  * The dropdown action menu for one local branch row: checkout, merge, rebase,
- * compare, rename and delete. Checkout/merge/rebase/compare are hidden for
+ * compare, create a branch from it, rename and delete. Checkout/merge/rebase/compare are hidden for
  * the current HEAD branch.
  */
 import React from "react";
-import { Edit3, Trash2 } from "lucide-react";
+import { Edit3, GitBranch, Trash2 } from "lucide-react";
 import { useTranslation } from "../../../i18n";
 import { useKeepInView } from "../../../shared/hooks/useKeepInView";
 import { type BranchItem } from "../../../ipc/bindings.generated";
@@ -19,6 +19,7 @@ export interface BranchTreeNodeMenuProps {
   onMerge: (name: string) => void;
   onRebase: (name: string) => void;
   onCompare: (name: string) => void;
+  onCreateBranchFrom: (name: string) => void;
   onRename: (name: string) => void;
   onDelete: (name: string) => void;
 }
@@ -32,6 +33,7 @@ export const BranchTreeNodeMenu: React.FC<BranchTreeNodeMenuProps> = ({
   onMerge,
   onRebase,
   onCompare,
+  onCreateBranchFrom,
   onRename,
   onDelete,
 }) => {
@@ -55,6 +57,18 @@ export const BranchTreeNodeMenu: React.FC<BranchTreeNodeMenuProps> = ({
           onCompare={onCompare}
         />
       )}
+
+      <button
+        type="button"
+        onClick={() => {
+          onSetMenuBranch(null);
+          onCreateBranchFrom(branch.name);
+        }}
+        className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
+      >
+        <GitBranch size={14} className="text-secondary shrink-0" />
+        <span>{t.sidebar.createBranchFromBranch}</span>
+      </button>
 
       <button
         type="button"

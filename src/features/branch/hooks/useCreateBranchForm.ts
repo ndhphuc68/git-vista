@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { useCreateBranch } from "../api";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useCreateBranch, useBranches } from "../api";
 import { useTranslation } from "../../../i18n";
 import { sanitizeBranchName } from "../model/branchName";
-import { mapGitError } from "../../../utils/errorMapping";
+import { resolveInitialBaseRef, submitCreateBranch } from "./useCreateBranchForm.actions";
 
 export interface CreateBranchFormOptions {
   isOpen: boolean;
   repoPath: string;
   targetCommit?: string | null;
+  sourceBranch?: string;
   onClose: () => void;
   onSuccess?: () => void;
 }
@@ -17,28 +18,43 @@ export function useCreateBranchForm({
   isOpen,
   repoPath,
   targetCommit,
+  sourceBranch,
   onClose,
   onSuccess,
 }: CreateBranchFormOptions) {
   const { t } = useTranslation();
   const createBranch = useCreateBranch(repoPath);
+  const { data: branchData } = useBranches(repoPath, { enabled: isOpen && Boolean(repoPath) });
+
   const [branchName, setBranchName] = useState("");
+  const [selectedBaseRef, setSelectedBaseRef] = useState<string>("");
   const [checkout, setCheckout] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const loading = createBranch.isPending;
+
+  const initialBaseRef = useMemo(
+    () => resolveInitialBaseRef(sourceBranch, targetCommit, branchData?.remote),
+    [sourceBranch, targetCommit, branchData?.remote]
+  );
+
+  const initialRefSync = useRef(initialBaseRef);
+  initialRefSync.current = initialBaseRef;
 
   useEffect(() => {
     if (isOpen) {
       setBranchName("");
+      setSelectedBaseRef(initialRefSync.current);
       setCheckout(true);
       setError(null);
     }
   }, [isOpen]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const sanitized = sanitizeBranchName(e.target.value);
-    setBranchName(sanitized);
+    setBranchName(sanitizeBranchName(e.target.value));
     if (error) setError(null);
+  };
+
+  const handleBaseRefChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedBaseRef(e.target.value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,33 +64,31 @@ export function useCreateBranchForm({
       setError(t.modals.createBranch.errorEmpty);
       return;
     }
-
-    setError(null);
-
-    try {
-      await createBranch.mutateAsync({
-        name: trimmed,
-        targetCommit: targetCommit ?? undefined,
-        checkout,
-      });
-      if (onSuccess) onSuccess();
-      onClose();
-    } catch (err: unknown) {
-      // Known codes such as CHECKOUT_CONFLICT read as a sentence plus what to do;
-      // anything else falls through to the raw backend message.
-      const friendly = mapGitError(err, t);
-      setError([friendly.message, friendly.actionHint].filter(Boolean).join(" ") || t.common.error);
-    }
+    await submitCreateBranch({
+      trimmed,
+      selectedBaseRef,
+      targetCommit,
+      checkout,
+      createBranch,
+      t,
+      onSuccess,
+      onClose,
+      setError,
+    });
   };
 
   return {
     t,
+    branchData,
     branchName,
+    selectedBaseRef,
+    setSelectedBaseRef,
     checkout,
     setCheckout,
     error,
-    loading,
+    loading: createBranch.isPending,
     handleNameChange,
+    handleBaseRefChange,
     handleSubmit,
   };
 }
