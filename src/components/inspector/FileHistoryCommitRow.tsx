@@ -1,7 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 import { useTranslation } from "../../i18n";
-import { getAuthorAvatarStyle, getAuthorInitials, formatRelativeTime } from "../../features/history";
+import { AuthorAvatar, formatRelativeTime } from "../../features/history";
 import { getChangeTypeBadgeClass } from "./fileHistoryChangeTypeBadge";
 import type { FileHistoryItem } from "../../ipc/bindings.generated";
 
@@ -18,8 +18,6 @@ export const FileHistoryCommitRow: React.FC<FileHistoryCommitRowProps> = ({
   onSelect,
 }) => {
   const { t } = useTranslation();
-  const avatar = getAuthorAvatarStyle(commit.author_name);
-  const initials = getAuthorInitials(commit.author_name);
 
   const changeTypeBadge = getChangeTypeBadgeClass(commit.change_type);
   const changeTypeTitle =
@@ -72,14 +70,12 @@ export const FileHistoryCommitRow: React.FC<FileHistoryCommitRowProps> = ({
 
       {/* Author */}
       <div className="flex items-center gap-1.5 text-[10px] text-secondary mt-0.5">
-        <span
-          className={clsx(
-            "w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold shrink-0",
-            avatar.bg
-          )}
-        >
-          {initials}
-        </span>
+        <AuthorAvatar
+          name={commit.author_name}
+          email={commit.author_email}
+          size={14}
+          className="text-[8px]"
+        />
         <span className="truncate">{commit.author_name}</span>
       </div>
     </button>

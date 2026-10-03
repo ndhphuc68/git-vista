@@ -1,13 +1,10 @@
-import clsx from "clsx";
 import { Calendar, Clock, Mail, UserCheck } from "lucide-react";
 import { useTranslation } from "../../../i18n";
-import type { getAuthorAvatarStyle } from "../model/commitDetails";
+import { AuthorAvatar } from "./AuthorAvatar";
 
 interface CommitMetadataAuthorProps {
   authorName: string;
   authorEmail: string | null | undefined;
-  authorAvatarStyle: ReturnType<typeof getAuthorAvatarStyle>;
-  authorInitials: string;
   relativeTime: string;
   exactDateTime: string;
 }
@@ -16,8 +13,6 @@ interface CommitMetadataAuthorProps {
 export function CommitMetadataAuthor({
   authorName,
   authorEmail,
-  authorAvatarStyle,
-  authorInitials,
   relativeTime,
   exactDateTime,
 }: CommitMetadataAuthorProps) {
@@ -25,15 +20,13 @@ export function CommitMetadataAuthor({
   return (
     <div className="flex items-center gap-3 pt-2.5 border-t border-border-subtle/70">
       <div className="relative shrink-0">
-        <div
-          className={clsx(
-            "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-sm ring-2 select-none",
-            authorAvatarStyle.bg,
-            authorAvatarStyle.ring
-          )}
-        >
-          {authorInitials}
-        </div>
+        <AuthorAvatar
+          name={authorName}
+          email={authorEmail}
+          size={40}
+          withRing
+          className="text-sm shadow-sm"
+        />
         <div
           className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-surface flex items-center justify-center shadow-2xs"
           title={t.diff.authorTitle}

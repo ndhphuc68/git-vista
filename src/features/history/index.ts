@@ -8,6 +8,7 @@ export { CommitGraph } from "./components/CommitGraph";
 export type { GraphDialogComponents } from "./components/CommitGraphDialogs";
 export { CommitDetailPanel } from "./components/CommitDetailPanel";
 export { FileDiffViewer } from "./components/FileDiffViewer";
+export { AuthorAvatar } from "./components/AuthorAvatar";
 export {
   getAuthorAvatarStyle,
   getAuthorInitials,

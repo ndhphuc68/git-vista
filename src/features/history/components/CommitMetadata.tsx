@@ -3,8 +3,6 @@ import { useTranslation } from "../../../i18n";
 import type { CommitDetails } from "../api/useCommitDetails";
 import {
   parseCommitMessage,
-  getAuthorAvatarStyle,
-  getAuthorInitials,
   formatRelativeTime,
   formatExactDateTime,
 } from "../model/commitDetails";
@@ -17,14 +15,6 @@ export function CommitMetadata({ details }: { details: CommitDetails }) {
   const parsedMsg = useMemo(() => {
     return parseCommitMessage(details?.full_message || "");
   }, [details?.full_message]);
-
-  const authorAvatarStyle = useMemo(() => {
-    return getAuthorAvatarStyle(details?.author_name || "");
-  }, [details?.author_name]);
-
-  const authorInitials = useMemo(() => {
-    return getAuthorInitials(details?.author_name || "");
-  }, [details?.author_name]);
 
   const relativeTime = useMemo(() => {
     return details ? formatRelativeTime(details.author_timestamp_sec, t.diff.time) : "";
@@ -40,8 +30,6 @@ export function CommitMetadata({ details }: { details: CommitDetails }) {
       <CommitMetadataAuthor
         authorName={details.author_name}
         authorEmail={details.author_email}
-        authorAvatarStyle={authorAvatarStyle}
-        authorInitials={authorInitials}
         relativeTime={relativeTime}
         exactDateTime={exactDateTime}
       />

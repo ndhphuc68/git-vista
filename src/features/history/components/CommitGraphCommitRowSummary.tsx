@@ -1,12 +1,8 @@
 import clsx from "clsx";
 import { useTranslation } from "../../../i18n";
 import type { GraphCommitNode } from "../../../ipc/bindings.generated";
-import {
-  formatExactDateTime,
-  formatShortDateTime,
-  getAuthorAvatarStyle,
-  getAuthorInitials,
-} from "../model/commitDetails";
+import { formatExactDateTime, formatShortDateTime } from "../model/commitDetails";
+import { AuthorAvatar } from "./AuthorAvatar";
 import { CommitGraphBranchPills } from "./CommitGraphBranchPills";
 
 interface CommitGraphCommitRowSummaryProps {
@@ -24,7 +20,6 @@ export function CommitGraphCommitRowSummary({
   onCheckoutBranch,
 }: CommitGraphCommitRowSummaryProps) {
   const { t } = useTranslation();
-  const avatarStyle = getAuthorAvatarStyle(commit.author_name);
   return (
     <>
       {/* Col 2: Commit Message + Inline Branch/Tag Badges */}
@@ -52,15 +47,12 @@ export function CommitGraphCommitRowSummary({
         title={commit.author_email ? `${commit.author_name} <${commit.author_email}>` : undefined}
         className="w-64 shrink-0 min-w-0 flex items-center gap-2 pl-3 pr-2 text-xs whitespace-nowrap"
       >
-        <span
-          aria-hidden="true"
-          className={clsx(
-            "w-4.5 h-4.5 shrink-0 rounded-full flex items-center justify-center text-[8px] font-bold select-none",
-            avatarStyle.bg
-          )}
-        >
-          {getAuthorInitials(commit.author_name)}
-        </span>
+        <AuthorAvatar
+          name={commit.author_name}
+          email={commit.author_email}
+          size={18}
+          className="text-[8px]"
+        />
         <span className="shrink-0 max-w-[55%] truncate text-primary font-medium">
           {commit.author_name}
         </span>

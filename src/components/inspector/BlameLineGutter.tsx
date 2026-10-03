@@ -1,8 +1,7 @@
 import React from "react";
-import clsx from "clsx";
 import { Copy, Check, ExternalLink } from "lucide-react";
 import { useTranslation } from "../../i18n";
-import { getAuthorAvatarStyle, getAuthorInitials, formatRelativeTime } from "../../features/history";
+import { AuthorAvatar, formatRelativeTime } from "../../features/history";
 import type { BlameLine } from "../../ipc/bindings.generated";
 
 interface BlameLineGutterProps {
@@ -20,21 +19,16 @@ export const BlameLineGutter: React.FC<BlameLineGutterProps> = ({
   onCopySha,
 }) => {
   const { t } = useTranslation();
-  const avatar = getAuthorAvatarStyle(line.author_name);
-  const initials = getAuthorInitials(line.author_name);
 
   return (
     <>
       {/* Avatar */}
-      <span
-        className={clsx(
-          "w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ring-1",
-          avatar.bg,
-          avatar.ring
-        )}
-      >
-        {initials}
-      </span>
+      <AuthorAvatar
+        name={line.author_name}
+        email={line.author_email}
+        size={16}
+        className="text-[9px]"
+      />
 
       {/* Author Name */}
       <span className="truncate flex-1 text-primary font-medium text-[11px]">
