@@ -105,8 +105,16 @@ pub fn apply_stash<P: AsRef<Path>>(repo_path: P, index: usize) -> Result<(), App
 pub fn pop_stash<P: AsRef<Path>>(repo_path: P, index: usize) -> Result<(), AppError> {
     let mut repo = Repository::open(repo_path.as_ref())?;
     let mut options = git2::StashApplyOptions::new();
-    repo.stash_pop(index, Some(&mut options))
+    // libgit2's stash_pop drops the stash even when the apply left conflict
+    // markers behind. Like `git stash pop`, keep it unless the apply was clean.
+    repo.stash_apply(index, Some(&mut options))
         .map_err(|e| AppError::InvalidOperation(format!("Không thể Pop Stash: {}", e)))?;
+    if repo.index()?.has_conflicts() {
+        return Err(AppError::InvalidOperation(
+            "STASH_CONFLICT: Thay đổi trong Stash xung đột với nhánh hiện tại. Stash vẫn được giữ lại; hãy giải quyết xung đột trong các file.".to_string(),
+        ));
+    }
+    repo.stash_drop(index)?;
     Ok(())
 }
 

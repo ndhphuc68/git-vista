@@ -179,3 +179,30 @@ fn drop_stash_does_not_create_a_receipt_when_the_stash_ref_is_locked() {
         .count();
     assert_eq!(after, before);
 }
+
+#[test]
+fn pop_that_conflicts_with_head_keeps_the_stash() {
+    let (dir, repo) = create_temp_repo("stash_pop_conflict");
+    let repo_path = dir.path().to_str().unwrap();
+
+    // A second commit on another branch rewrites the same line the stash touches.
+    let initial = repo.head().unwrap().peel_to_commit().unwrap();
+    repo.branch("other", &initial, false).unwrap();
+    fs::write(dir.path().join("file.txt"), "local edit\n").unwrap();
+    save_stash(repo_path, Some("carry"), true).unwrap();
+
+    repo.set_head("refs/heads/other").unwrap();
+    fs::write(dir.path().join("file.txt"), "other branch edit\n").unwrap();
+    let mut index = repo.index().unwrap();
+    index.add_path(Path::new("file.txt")).unwrap();
+    index.write().unwrap();
+    let tree = repo.find_tree(index.write_tree().unwrap()).unwrap();
+    let sig = repo.signature().unwrap();
+    repo.commit(Some("HEAD"), &sig, &sig, "Other edit", &tree, &[&initial])
+        .unwrap();
+
+    let err = pop_stash(repo_path, 0).unwrap_err().to_string();
+
+    assert!(err.contains("STASH_CONFLICT"), "unexpected error: {err}");
+    assert_eq!(get_stashes(repo_path).unwrap().len(), 1);
+}
