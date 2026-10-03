@@ -27,7 +27,9 @@ export function useBranchSectionsView({
 
   const localBranches = filterBranchesByName(branchData?.local || [], search);
   const remoteBranches = filterBranchesByName(branchData?.remote || [], search);
-  const filteredTags = tagItems.filter((tag) => tag.name.toLowerCase().includes(search.toLowerCase()));
+  const filteredTags = tagItems.filter((tag) =>
+    tag.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   const branchTree = useMemo(() => buildBranchTree(localBranches), [localBranches]);
   const remoteBranchTree = useMemo(() => buildBranchTree(remoteBranches), [remoteBranches]);

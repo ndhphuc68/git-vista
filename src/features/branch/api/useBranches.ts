@@ -9,10 +9,7 @@ import { qk } from "../../../domain/queryKeys";
  * `CreatePullRequestModal`, which only wants this query while its modal is
  * open); every other call site keeps today's behavior via the defaults below.
  */
-export function useBranches(
-  repoPath: string,
-  options?: { enabled?: boolean; staleTime?: number }
-) {
+export function useBranches(repoPath: string, options?: { enabled?: boolean; staleTime?: number }) {
   return useQuery({
     queryKey: qk.branches(repoPath),
     queryFn: () => invokeCommand.getBranches(repoPath),

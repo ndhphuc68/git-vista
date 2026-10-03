@@ -71,8 +71,14 @@ export const RemoteTreeNode: React.FC<RemoteTreeNodeProps> = (props) => {
     );
   }
 
-  const { selectedBranch, onSelectBranch, menuBranch, onSetMenuBranch, currentBranchName, onCheckout } =
-    props;
+  const {
+    selectedBranch,
+    onSelectBranch,
+    menuBranch,
+    onSetMenuBranch,
+    currentBranchName,
+    onCheckout,
+  } = props;
 
   return (
     <RemoteBranchRow

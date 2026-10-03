@@ -17,6 +17,13 @@ export function useSidebarData(repoPath: string) {
     repoStatus &&
     (repoStatus.staged.length || repoStatus.unstaged.length || repoStatus.untracked.length)
   );
-  return { branchData, remotesList, repoStatus, stashes, tagItems, hasUncommittedChanges, repoState };
+  return {
+    branchData,
+    remotesList,
+    repoStatus,
+    stashes,
+    tagItems,
+    hasUncommittedChanges,
+    repoState,
+  };
 }
-

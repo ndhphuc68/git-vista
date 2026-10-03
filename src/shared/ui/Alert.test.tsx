@@ -14,11 +14,7 @@ describe("Alert", () => {
   });
 
   it("does not use role=alert for regular information", () => {
-    const variants: Array<"warning" | "info" | "success"> = [
-      "warning",
-      "info",
-      "success",
-    ];
+    const variants: Array<"warning" | "info" | "success"> = ["warning", "info", "success"];
     variants.forEach((variant) => {
       const { unmount } = render(<Alert variant={variant}>Thông tin</Alert>);
       expect(screen.queryByRole("alert")).not.toBeInTheDocument();

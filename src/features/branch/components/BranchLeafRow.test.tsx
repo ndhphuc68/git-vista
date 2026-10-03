@@ -7,7 +7,14 @@ function Harness() {
   const [menuBranch, setMenuBranch] = useState<string | null>(null);
   return (
     <BranchLeafRow
-      branch={{ name: "feature/x", is_head: false, target_commit_id: "c1", upstream: null, ahead: 0, behind: 0 }}
+      branch={{
+        name: "feature/x",
+        is_head: false,
+        target_commit_id: "c1",
+        upstream: null,
+        ahead: 0,
+        behind: 0,
+      }}
       name="x"
       selectedBranch={null}
       onSelectBranch={vi.fn()}
@@ -41,7 +48,14 @@ describe("BranchLeafRow", () => {
     const onCheckout = vi.fn();
     render(
       <BranchLeafRow
-        branch={{ name: "feature/beta", is_head: false, target_commit_id: "c2", upstream: null, ahead: 0, behind: 0 }}
+        branch={{
+          name: "feature/beta",
+          is_head: false,
+          target_commit_id: "c2",
+          upstream: null,
+          ahead: 0,
+          behind: 0,
+        }}
         name="beta"
         selectedBranch={null}
         onSelectBranch={vi.fn()}
@@ -67,7 +81,14 @@ describe("BranchLeafRow", () => {
     const onCheckout = vi.fn();
     render(
       <BranchLeafRow
-        branch={{ name: "main", is_head: true, target_commit_id: "c1", upstream: null, ahead: 0, behind: 0 }}
+        branch={{
+          name: "main",
+          is_head: true,
+          target_commit_id: "c1",
+          upstream: null,
+          ahead: 0,
+          behind: 0,
+        }}
         name="main"
         selectedBranch={null}
         onSelectBranch={vi.fn()}
