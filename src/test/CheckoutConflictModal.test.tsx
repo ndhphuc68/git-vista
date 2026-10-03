@@ -1,4 +1,4 @@
-﻿import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { beforeEach, describe, it, expect, vi } from "vitest";
 import { CheckoutConflictModal } from "../features/branch";
@@ -76,6 +76,11 @@ describe("CheckoutConflictModal", () => {
     expect(stashBtn).toBeInTheDocument();
     fireEvent.click(stashBtn);
 
+    const input = screen.getByRole("textbox");
+    expect(input).toHaveValue("Tự động lưu trước khi chuyển sang feature/next");
+    const confirmBtn = screen.getByRole("button", { name: /lưu & chuyển nhánh/i });
+    fireEvent.click(confirmBtn);
+
     await waitFor(() => {
       expect(saveStashSpy).toHaveBeenCalledWith(
         "/test/repo",
@@ -90,8 +95,67 @@ describe("CheckoutConflictModal", () => {
     saveStashSpy.mockRestore();
     checkoutBranchSpy.mockRestore();
   });
-  // Pinned before migrating onto the shared Modal: nothing covered the shell
-  // (Escape, the close button), which is what the migration replaces.
+
+  it("allows user to customize stash message and submit", async () => {
+    const saveStashSpy = vi.spyOn(invokeCommand, "saveStash").mockResolvedValue("stash123");
+    const checkoutBranchSpy = vi
+      .spyOn(invokeCommand, "checkoutBranch")
+      .mockResolvedValue(undefined);
+
+    renderWithClient(
+      <CheckoutConflictModal
+        isOpen={true}
+        onClose={vi.fn()}
+        repoPath="/test/repo"
+        targetBranch="feature/next"
+        errorMessage="CHECKOUT_CONFLICT: file1.txt"
+        onNavigateToChanges={vi.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /lưu tạm \(stash\) rồi chuyển nhánh/i }));
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "My custom stash message" } });
+    fireEvent.click(screen.getByRole("button", { name: /lưu & chuyển nhánh/i }));
+
+    await waitFor(() => {
+      expect(saveStashSpy).toHaveBeenCalledWith("/test/repo", "My custom stash message", true);
+    });
+
+    saveStashSpy.mockRestore();
+    checkoutBranchSpy.mockRestore();
+  });
+
+  it("cancels stash message modal on cancel button without saving", async () => {
+    const saveStashSpy = vi.spyOn(invokeCommand, "saveStash");
+
+    renderWithClient(
+      <CheckoutConflictModal
+        isOpen={true}
+        onClose={vi.fn()}
+        repoPath="/test/repo"
+        targetBranch="feature/next"
+        errorMessage="CHECKOUT_CONFLICT: file1.txt"
+        onNavigateToChanges={vi.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /lưu tạm \(stash\) rồi chuyển nhánh/i }));
+    expect(
+      screen.getByRole("heading", { name: /lưu tạm thay đổi \(stash\)/i })
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Hủy" }));
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("heading", { name: /lưu tạm thay đổi \(stash\)/i })
+      ).not.toBeInTheDocument();
+    });
+    expect(saveStashSpy).not.toHaveBeenCalled();
+
+    saveStashSpy.mockRestore();
+  });
+
   describe("closing", () => {
     const props = {
       isOpen: true,
@@ -187,6 +251,7 @@ describe("CheckoutConflictModal - after stash-and-checkout", () => {
 
     await waitFor(() => expect(client.getQueryData(qk.branches("/test/repo"))).toBeDefined());
     fireEvent.click(screen.getByRole("button", { name: /lưu tạm \(stash\) rồi chuyển nhánh/i }));
+    fireEvent.click(screen.getByRole("button", { name: /lưu & chuyển nhánh/i }));
 
     await waitFor(() => {
       expect(checkoutBranchSpy).toHaveBeenCalledWith("/test/repo", "origin/feature/next");
@@ -214,6 +279,7 @@ describe("CheckoutConflictModal - checkout fails after the auto-stash", () => {
       />
     );
     fireEvent.click(screen.getByRole("button", { name: /lưu tạm \(stash\) rồi chuyển nhánh/i }));
+    fireEvent.click(screen.getByRole("button", { name: /lưu & chuyển nhánh/i }));
     return onClose;
   }
 

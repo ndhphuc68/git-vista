@@ -555,10 +555,9 @@ export const vi = {
     },
     checkoutConflict: {
       title: "Xung đột khi chuyển nhánh",
-      description:
-        "Không thể chuyển sang nhánh {target} vì bạn đang có các file sửa đổi dở dang bị trùng lặp và có thể bị ghi đè.",
+      description: "Các thay đổi chưa commit của bạn bị xung đột với nhánh {target}.",
       advice:
-        "Để tiếp tục chuyển nhánh một cách an toàn, bạn có thể lưu tạm các thay đổi vào Stash hoặc chuyển sang màn hình Thay đổi để commit.",
+        "Lưu tạm thay đổi vào Stash để chuyển nhánh ngay, hoặc đến màn hình Thay đổi để commit.",
       close: "Đóng",
       stashAndCheckout: "Lưu tạm (Stash) rồi chuyển nhánh",
       stashingAndCheckout: "Đang lưu & chuyển...",
@@ -569,6 +568,12 @@ export const vi = {
         "Không thể chuyển nhánh: {msg}. Các thay đổi của bạn đã được khôi phục từ Stash.",
       checkoutFailedKeptInStash:
         'Không thể chuyển nhánh: {msg}. Các thay đổi của bạn vẫn được lưu an toàn trong Stash "{stash}".',
+      stashModalTitle: "Lưu tạm thay đổi (Stash)",
+      stashModalDescLabel: "Mô tả cho bản lưu tạm",
+      stashModalPlaceholder: "Nhập mô tả...",
+      stashModalUntrackedLabel: "Bao gồm các file chưa theo dõi (untracked)",
+      stashModalCancel: "Hủy",
+      stashModalSubmit: "Lưu & Chuyển nhánh",
     },
     merge: {
       title: "Gộp nhánh (Merge)",

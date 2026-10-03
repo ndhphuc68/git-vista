@@ -559,10 +559,8 @@ export const en: Translations = {
     },
     checkoutConflict: {
       title: "Checkout Conflict",
-      description:
-        "Cannot switch to branch {target} because you have uncommitted changes that would be overwritten.",
-      advice:
-        "To switch branches safely, stash your changes or switch to the Changes screen to commit them.",
+      description: "Your uncommitted changes conflict with branch {target}.",
+      advice: "Stash your changes to switch safely, or go to the Changes screen to commit them.",
       close: "Close",
       stashAndCheckout: "Stash & Checkout",
       stashingAndCheckout: "Stashing & switching...",
@@ -573,6 +571,12 @@ export const en: Translations = {
         "Could not switch branch: {msg}. Your changes were restored from the stash.",
       checkoutFailedKeptInStash:
         'Could not switch branch: {msg}. Your changes are kept safe in the stash "{stash}".',
+      stashModalTitle: "Stash Changes",
+      stashModalDescLabel: "Stash description",
+      stashModalPlaceholder: "Enter description...",
+      stashModalUntrackedLabel: "Include untracked files",
+      stashModalCancel: "Cancel",
+      stashModalSubmit: "Stash & Checkout",
     },
     merge: {
       title: "Merge Branch",

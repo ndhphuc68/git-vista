@@ -64,17 +64,21 @@ export function useCheckoutConflictForm({
     }
   }, [isOpen]);
 
-  const handleStashAndCheckout = async () => {
+  const handleStashAndCheckout = async (
+    customMessage?: string,
+    includeUntracked: boolean = true
+  ) => {
     if (!repoPath) return;
     setIsStashing(true);
     setActionError(null);
-    const stashMessage = t.modals.checkoutConflict.autoStashMessage.replace(
-      "{target}",
-      targetBranch
-    );
+    const trimmed = customMessage?.trim();
+    const stashMessage =
+      trimmed && trimmed.length > 0
+        ? trimmed
+        : t.modals.checkoutConflict.autoStashMessage.replace("{target}", targetBranch);
     let stashed = false;
     try {
-      await saveStash.mutateAsync({ message: stashMessage, includeUntracked: true });
+      await saveStash.mutateAsync({ message: stashMessage, includeUntracked });
       stashed = true;
       await checkoutBranch.mutateAsync({ name: targetBranch });
       // Same follow-up as a direct checkout: the selection and the toast name the
