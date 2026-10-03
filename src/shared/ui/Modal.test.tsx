@@ -146,11 +146,22 @@ describe("Modal", () => {
     expect(backdrop.style.zIndex).toBe(String(Z_INDEX.modal));
   });
 
+  it("applies the z-index layer to the outer transition container to elevate the stacking context", () => {
+    renderModal();
+    const backdrop = screen.getByTestId("modal-backdrop");
+    const transitionContainer = backdrop.parentElement;
+
+    expect(transitionContainer?.style.zIndex).toBe(String(Z_INDEX.modal));
+    expect(Z_INDEX.modal).toBeGreaterThan(100);
+  });
+
   it("with stacked=true, uses a z-index layer higher than the regular modal", () => {
     renderModal({ stacked: true });
     const backdrop = screen.getByTestId("modal-backdrop");
+    const transitionContainer = backdrop.parentElement;
 
     expect(backdrop.style.zIndex).toBe(String(Z_INDEX.modalStacked));
+    expect(transitionContainer?.style.zIndex).toBe(String(Z_INDEX.modalStacked));
     expect(Z_INDEX.modalStacked).toBeGreaterThan(Z_INDEX.modal);
   });
 
@@ -170,9 +181,7 @@ describe("Modal", () => {
     it("moves focus into the panel when opened", () => {
       renderModal();
 
-      expect(screen.getByTestId("modal-panel").contains(document.activeElement)).toBe(
-        true
-      );
+      expect(screen.getByTestId("modal-panel").contains(document.activeElement)).toBe(true);
     });
 
     it("keeps Tab inside the panel instead of reaching the page behind it", () => {

@@ -82,11 +82,14 @@ const ModalRoot: React.FC<ModalProps> & ModalComposition = ({
   useEscapeKey(isOpen && closeOnEscape, onClose);
   useFocusTrap(panelRef, isOpen);
 
+  const zIndex = stacked ? Z_INDEX.modalStacked : Z_INDEX.modal;
+
   return (
     <Transition
       show={isOpen}
       duration={MOTION.fast}
       className="fixed inset-0"
+      style={{ zIndex }}
       enterClass="animate-fade-in"
       exitClass="opacity-0 transition-opacity duration-150 ease-macos pointer-events-none"
       unmountOnExit={true}
@@ -94,7 +97,7 @@ const ModalRoot: React.FC<ModalProps> & ModalComposition = ({
       <div
         data-testid="modal-backdrop"
         className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-        style={{ zIndex: stacked ? Z_INDEX.modalStacked : Z_INDEX.modal }}
+        style={{ zIndex }}
         onClick={closeOnBackdrop ? onClose : undefined}
         role="dialog"
         aria-modal="true"
@@ -131,10 +134,7 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
   <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle shrink-0">
     <div className="flex items-center gap-2">
       {Icon && (
-        <Icon
-          size={16}
-          className={tone === "danger" ? "text-diff-remove-text" : "text-accent"}
-        />
+        <Icon size={16} className={tone === "danger" ? "text-diff-remove-text" : "text-accent"} />
       )}
       <h3 id={titleId} className="text-xs font-semibold text-primary m-0">
         {title}

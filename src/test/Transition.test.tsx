@@ -62,4 +62,15 @@ describe("Transition Component", () => {
 
     expect(screen.queryByTestId("content")).not.toBeInTheDocument();
   });
+
+  it("applies custom inline styles to the container element", () => {
+    render(
+      <Transition show={true} style={{ zIndex: 1000, pointerEvents: "auto" }}>
+        <div data-testid="content">Styled</div>
+      </Transition>
+    );
+
+    const container = screen.getByTestId("content").parentElement;
+    expect(container).toHaveStyle({ zIndex: "1000", pointerEvents: "auto" });
+  });
 });

@@ -42,7 +42,7 @@ export const ShellSidebar: React.FC<ShellSidebarProps> = ({
         data-testid="shell-sidebar-container"
         style={!isMobile ? { width: `${sidebarWidth}px` } : undefined}
         className={clsx(
-          isMobile ? "absolute inset-y-0 left-0 z-30 shadow-lg w-72" : "relative z-1",
+          isMobile ? "absolute inset-y-0 left-0 z-30 shadow-lg w-72" : "relative",
           "h-full shrink-0 flex border-r border-border-subtle"
         )}
       >

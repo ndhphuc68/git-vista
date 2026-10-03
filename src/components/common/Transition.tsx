@@ -9,6 +9,7 @@ export interface TransitionProps {
   duration?: number;
   unmountOnExit?: boolean;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export const Transition: React.FC<TransitionProps> = ({
@@ -19,6 +20,7 @@ export const Transition: React.FC<TransitionProps> = ({
   duration = 200,
   unmountOnExit = true,
   className,
+  style,
 }) => {
   const [mounted, setMounted] = useState(show);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
@@ -44,7 +46,10 @@ export const Transition: React.FC<TransitionProps> = ({
   }
 
   return (
-    <div className={clsx(className, show && !isAnimatingOut ? enterClass : exitClass)}>
+    <div
+      className={clsx(className, show && !isAnimatingOut ? enterClass : exitClass)}
+      style={style}
+    >
       {children}
     </div>
   );
