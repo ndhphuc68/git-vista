@@ -1022,6 +1022,8 @@ export const vi = {
     createModalTitle: "Tạo Pull Request mới",
     baseBranch: "Nhánh đích (Base)",
     compareBranch: "Nhánh nguồn (Compare)",
+    searchBranchPlaceholder: "Lọc nhánh...",
+    noBranchesFound: "Không tìm thấy nhánh phù hợp",
     prTitle: "Tiêu đề Pull Request",
     prTitlePlaceholder: "Nhập tiêu đề tóm tắt thay đổi...",
     prBody: "Nội dung mô tả (Hỗ trợ Markdown)",

@@ -53,8 +53,8 @@ export function useCreateBranchForm({
     if (error) setError(null);
   };
 
-  const handleBaseRefChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedBaseRef(e.target.value);
+  const handleBaseRefChange = (value: string) => {
+    setSelectedBaseRef(value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

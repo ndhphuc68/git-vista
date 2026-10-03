@@ -60,6 +60,15 @@ vi.mock("../ipc/client", () => ({
   },
 }));
 
+/** The branch shown in a branch dropdown's trigger. */
+const selectedBranch = (label: string) => screen.getByRole("combobox", { name: label }).textContent;
+
+/** Opens a branch dropdown and clicks the given branch. */
+function pickBranch(label: string, branch: string) {
+  fireEvent.click(screen.getByRole("combobox", { name: label }));
+  fireEvent.click(screen.getByRole("option", { name: branch }));
+}
+
 describe("CreatePullRequestModal", () => {
   let queryClient: QueryClient;
 
@@ -272,10 +281,8 @@ describe("CreatePullRequestModal", () => {
     await screen.findByText(t.pullRequests.createModalTitle);
 
     await waitFor(() => {
-      expect(screen.getByLabelText(t.pullRequests.baseBranch)).toHaveValue("main");
-      expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue(
-        "feature/login-page"
-      );
+      expect(selectedBranch(t.pullRequests.baseBranch)).toBe("main");
+      expect(selectedBranch(t.pullRequests.compareBranch)).toBe("feature/login-page");
     });
   });
 
@@ -288,15 +295,11 @@ describe("CreatePullRequestModal", () => {
 
     await screen.findByText(t.pullRequests.createModalTitle);
     await waitFor(() => {
-      expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue(
-        "feature/login-page"
-      );
+      expect(selectedBranch(t.pullRequests.compareBranch)).toBe("feature/login-page");
     });
 
-    fireEvent.change(screen.getByLabelText(t.pullRequests.compareBranch), {
-      target: { value: "main" },
-    });
-    expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue("main");
+    pickBranch(t.pullRequests.compareBranch, "main");
+    expect(selectedBranch(t.pullRequests.compareBranch)).toBe("main");
 
     // Close the modal and let it fully unmount (it animates out).
     usePullRequestStore.getState().closeCreateModal();
@@ -309,9 +312,7 @@ describe("CreatePullRequestModal", () => {
     usePullRequestStore.getState().openCreateModal();
     await screen.findByText(t.pullRequests.createModalTitle);
     await waitFor(() => {
-      expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue(
-        "feature/login-page"
-      );
+      expect(selectedBranch(t.pullRequests.compareBranch)).toBe("feature/login-page");
     });
   });
 
@@ -332,14 +333,12 @@ describe("CreatePullRequestModal", () => {
     await screen.findByText(t.pullRequests.createModalTitle);
 
     // Branch data hasn't resolved yet: the compare branch falls back to "main".
-    expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue("main");
+    expect(selectedBranch(t.pullRequests.compareBranch)).toBe("main");
 
     resolveBranches(RESOLVED_BRANCHES);
 
     await waitFor(() => {
-      expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue(
-        "feature/login-page"
-      );
+      expect(selectedBranch(t.pullRequests.compareBranch)).toBe("feature/login-page");
     });
   });
 
@@ -352,20 +351,16 @@ describe("CreatePullRequestModal", () => {
 
     await screen.findByText(t.pullRequests.createModalTitle);
     await waitFor(() => {
-      expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue(
-        "feature/login-page"
-      );
+      expect(selectedBranch(t.pullRequests.compareBranch)).toBe("feature/login-page");
     });
 
-    fireEvent.change(screen.getByLabelText(t.pullRequests.compareBranch), {
-      target: { value: "main" },
-    });
-    expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue("main");
+    pickBranch(t.pullRequests.compareBranch, "main");
+    expect(selectedBranch(t.pullRequests.compareBranch)).toBe("main");
 
     // Simulate branch data arriving again (e.g. a refetch) with the same
     // resolved current branch; the user's manual selection must survive it.
     await queryClient.refetchQueries({ queryKey: qk.branches("/mock/repo") });
 
-    expect(screen.getByLabelText(t.pullRequests.compareBranch)).toHaveValue("main");
+    expect(selectedBranch(t.pullRequests.compareBranch)).toBe("main");
   });
 });

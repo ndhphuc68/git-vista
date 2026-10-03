@@ -1025,6 +1025,8 @@ export const en: Translations = {
     createModalTitle: "Create Pull Request",
     baseBranch: "Base Branch",
     compareBranch: "Compare Branch",
+    searchBranchPlaceholder: "Filter branches...",
+    noBranchesFound: "No matching branches",
     prTitle: "Pull Request Title",
     prTitlePlaceholder: "Enter a concise summary of changes...",
     prBody: "Description (Markdown supported)",

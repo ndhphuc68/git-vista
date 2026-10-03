@@ -53,6 +53,14 @@ const mockBranches = {
   tags: [],
 };
 
+const baseBranchCombo = () => screen.getByRole("combobox", { name: "Xuất phát từ nhánh" });
+
+/** Opens the base branch dropdown and clicks the option matching name. */
+async function pickBaseBranch(name: RegExp | string) {
+  fireEvent.click(baseBranchCombo());
+  fireEvent.click(await screen.findByRole("option", { name }));
+}
+
 function renderWithClient(ui: React.ReactElement) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -193,7 +201,7 @@ describe("CreateBranchModal", () => {
       />
     );
 
-    expect(screen.getByRole("button", { name: /f1e2d3c/i })).toBeInTheDocument();
+    expect(baseBranchCombo()).toHaveTextContent("f1e2d3c");
   });
 
   it("surfaces the error and stays open when creating fails", async () => {
@@ -240,7 +248,7 @@ describe("CreateBranchModal", () => {
     );
 
     expect(screen.getByText("Xuất phát từ nhánh:")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /origin\/develop/i })).toBeInTheDocument();
+    expect(baseBranchCombo()).toHaveTextContent("origin/develop");
 
     fireEvent.change(screen.getByLabelText("Tên nhánh mới"), { target: { value: "feature/y" } });
     fireEvent.click(screen.getByRole("button", { name: /tạo nhánh/i }));
@@ -258,9 +266,11 @@ describe("CreateBranchModal", () => {
   it("renders base branch selector with local and remote branches and defaults to current branch", async () => {
     renderWithClient(<CreateBranchModal isOpen={true} onClose={vi.fn()} repoPath="/test/repo" />);
 
-    const select = await screen.findByLabelText("Xuất phát từ nhánh");
-    expect(select).toBeInTheDocument();
-    expect(await screen.findByRole("option", { name: /^main/i })).toBeInTheDocument();
+    fireEvent.click(baseBranchCombo());
+    expect(await screen.findByRole("option", { name: /^main/i })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
     expect(screen.getByRole("option", { name: /^feature\/existing/i })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: /^origin\/develop/i })).toBeInTheDocument();
   });
@@ -271,9 +281,7 @@ describe("CreateBranchModal", () => {
 
     renderWithClient(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
 
-    const select = await screen.findByLabelText("Xuất phát từ nhánh");
-    await screen.findByRole("option", { name: /feature\/existing/i });
-    fireEvent.change(select, { target: { value: "refs/heads/feature/existing" } });
+    await pickBaseBranch(/^feature\/existing/i);
 
     const input = screen.getByLabelText("Tên nhánh mới");
     fireEvent.change(input, { target: { value: "feature/from-other" } });
@@ -305,12 +313,10 @@ describe("CreateBranchModal", () => {
       />
     );
 
-    const select = await screen.findByLabelText("Xuất phát từ nhánh");
-    expect(screen.getByRole("option", { name: /f1e2d3c/i })).toBeInTheDocument();
+    expect(baseBranchCombo()).toHaveTextContent("f1e2d3c");
 
-    await screen.findByRole("option", { name: /origin\/develop/i });
     // Switch to remote branch
-    fireEvent.change(select, { target: { value: "refs/remotes/origin/develop" } });
+    await pickBaseBranch(/^origin\/develop/i);
 
     const input = screen.getByLabelText("Tên nhánh mới");
     fireEvent.change(input, { target: { value: "feature/from-remote" } });
@@ -334,27 +340,21 @@ describe("CreateBranchModal", () => {
 
     renderWithClient(<CreateBranchModal isOpen={true} onClose={onClose} repoPath="/test/repo" />);
 
-    // Wait for branches to load
-    await screen.findByRole("option", { name: /^feature\/existing/i });
-
-    // Click custom trigger button (which has aria-haspopup="listbox")
-    const triggerBtn = screen.getByRole("button", { name: /main.*HEAD/i });
-    expect(triggerBtn).toBeInTheDocument();
-    fireEvent.click(triggerBtn);
+    // The trigger shows the current branch with its HEAD badge once branches load
+    await waitFor(() => expect(baseBranchCombo()).toHaveTextContent(/main.*HEAD/));
+    fireEvent.click(baseBranchCombo());
 
     // Menu should be open with search input
-    const searchInput = screen.getByPlaceholderText("Lọc nhánh...");
-    expect(searchInput).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Lọc nhánh...")).toBeInTheDocument();
 
     // Click on feature/existing in the dropdown list
-    const branchItemBtn = screen.getByRole("button", { name: "feature/existing" });
-    fireEvent.click(branchItemBtn);
+    fireEvent.click(screen.getByRole("option", { name: "feature/existing" }));
 
     // Popover should close
     expect(screen.queryByPlaceholderText("Lọc nhánh...")).not.toBeInTheDocument();
 
-    // Trigger button now shows feature/existing
-    expect(screen.getByRole("button", { name: /feature\/existing/i })).toBeInTheDocument();
+    // Trigger now shows feature/existing
+    expect(baseBranchCombo()).toHaveTextContent("feature/existing");
 
     // Type branch name and submit
     fireEvent.change(screen.getByLabelText("Tên nhánh mới"), { target: { value: "test-new" } });
@@ -373,16 +373,14 @@ describe("CreateBranchModal", () => {
   it("filters branch list when typing into search input in custom dropdown", async () => {
     renderWithClient(<CreateBranchModal isOpen={true} onClose={vi.fn()} repoPath="/test/repo" />);
 
+    fireEvent.click(baseBranchCombo());
     await screen.findByRole("option", { name: /^origin\/develop/i });
-
-    const triggerBtn = screen.getByRole("button", { name: /main.*HEAD/i });
-    fireEvent.click(triggerBtn);
 
     const searchInput = screen.getByPlaceholderText("Lọc nhánh...");
     fireEvent.change(searchInput, { target: { value: "develop" } });
 
     // origin/develop should be visible, others filtered out
-    expect(screen.getByRole("button", { name: "origin/develop" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "feature/existing" })).not.toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "origin/develop" })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "feature/existing" })).not.toBeInTheDocument();
   });
 });

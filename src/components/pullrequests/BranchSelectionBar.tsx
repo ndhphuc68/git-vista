@@ -1,6 +1,13 @@
 import React from "react";
 import { GitBranch, ArrowRight } from "lucide-react";
 import { type Translations } from "../../i18n/vi";
+import { Select, type SelectOption } from "../../shared/ui";
+
+const BRANCH_ICON = <GitBranch size={13} className="text-secondary shrink-0" aria-hidden="true" />;
+
+function toOptions(branches: string[]): SelectOption[] {
+  return branches.map((name) => ({ value: name, label: name, icon: BRANCH_ICON }));
+}
 
 interface BranchSelectionBarProps {
   baseBranch: string;
@@ -32,26 +39,18 @@ export const BranchSelectionBar: React.FC<BranchSelectionBarProps> = ({
       >
         {t.pullRequests.baseBranch}
       </label>
-      <div className="relative">
-        <select
-          id="base-branch-select"
-          aria-label={t.pullRequests.baseBranch}
-          value={baseBranch}
-          onChange={(e) => onBaseBranchChange(e.target.value)}
-          disabled={submitting}
-          className="w-full bg-surface text-primary border border-border-subtle rounded-md px-2.5 py-1.5 text-xs font-mono outline-none focus:border-accent transition-colors cursor-pointer appearance-none pr-8"
-        >
-          {availableBaseBranches.map((b) => (
-            <option key={b} value={b}>
-              {b}
-            </option>
-          ))}
-        </select>
-        <GitBranch
-          size={13}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-secondary pointer-events-none"
-        />
-      </div>
+      <Select
+        id="base-branch-select"
+        aria-label={t.pullRequests.baseBranch}
+        value={baseBranch}
+        onChange={onBaseBranchChange}
+        options={toOptions(availableBaseBranches)}
+        disabled={submitting}
+        mono
+        searchable
+        searchPlaceholder={t.pullRequests.searchBranchPlaceholder}
+        emptyText={t.pullRequests.noBranchesFound}
+      />
     </div>
 
     <div className="flex items-center justify-center shrink-0 pt-3 sm:pt-4 text-secondary">
@@ -65,26 +64,18 @@ export const BranchSelectionBar: React.FC<BranchSelectionBarProps> = ({
       >
         {t.pullRequests.compareBranch}
       </label>
-      <div className="relative">
-        <select
-          id="compare-branch-select"
-          aria-label={t.pullRequests.compareBranch}
-          value={compareBranch}
-          onChange={(e) => onCompareBranchChange(e.target.value)}
-          disabled={submitting}
-          className="w-full bg-surface text-primary border border-border-subtle rounded-md px-2.5 py-1.5 text-xs font-mono outline-none focus:border-accent transition-colors cursor-pointer appearance-none pr-8"
-        >
-          {availableCompareBranches.map((b) => (
-            <option key={b} value={b}>
-              {b}
-            </option>
-          ))}
-        </select>
-        <GitBranch
-          size={13}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-secondary pointer-events-none"
-        />
-      </div>
+      <Select
+        id="compare-branch-select"
+        aria-label={t.pullRequests.compareBranch}
+        value={compareBranch}
+        onChange={onCompareBranchChange}
+        options={toOptions(availableCompareBranches)}
+        disabled={submitting}
+        mono
+        searchable
+        searchPlaceholder={t.pullRequests.searchBranchPlaceholder}
+        emptyText={t.pullRequests.noBranchesFound}
+      />
     </div>
   </div>
 );
