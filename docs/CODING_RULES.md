@@ -265,9 +265,8 @@ The app ships in two languages, Vietnamese (`vi`, the default) and English
    placeholders (`"{count} files changed"`) and fill them with
    `.replace("{count}", String(n))`. Use `formatRelativeTime` for relative
    dates.
-5. **Simple and advanced mode labels come from `actions`** (returned by
-   `useTranslation()`), not from `t.gitActions.simple`/`advanced` directly,
-   so the label follows the user's mode.
+5. **Git action labels come from `actions`** (returned by
+   `useTranslation()`), which always uses the advanced Git terminology.
 6. **`shared/ui/**` cannot import `i18n/`** (rule 2.3). It receives
    translated labels through props, and the caller passes `t.…` in.
 7. **Tests assert against the dictionary, not a copied literal.** Import

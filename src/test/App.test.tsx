@@ -14,7 +14,6 @@ describe("Visual Git Client - M1 App Shell", () => {
     settings.setTheme("light");
     settings.setColorblind(false);
     settings.setLocale("vi");
-    settings.setMode("simple");
     useRepoStore.getState().clearRepo();
     useTabStore.getState().reset();
     useViewStore.getState().setActiveScreen("history");
@@ -76,7 +75,7 @@ describe("Visual Git Client - M1 App Shell", () => {
       expect(document.documentElement.getAttribute("data-theme")).toBe("light");
     });
 
-    const settingsBtn = screen.getByTitle("Cài đặt (Theme, Ngôn ngữ, Chế độ Git)");
+    const settingsBtn = screen.getByTitle("Cài đặt (Theme, Ngôn ngữ)");
     fireEvent.click(settingsBtn);
 
     const darkBtn = screen.getByTitle("Theme: dark");

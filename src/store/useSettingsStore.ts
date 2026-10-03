@@ -2,7 +2,6 @@ import { create } from "zustand";
 
 export type Theme = "light" | "dark" | "system";
 export type Locale = "vi" | "en";
-export type AppMode = "simple" | "advanced";
 export type SettingsTab = "profile" | "appearance" | "diff" | "behavior" | "tools" | "github";
 
 export type DateFormat = "relative" | "absolute";
@@ -20,7 +19,6 @@ interface SettingsState {
   theme: Theme;
   colorblind: boolean;
   locale: Locale;
-  mode: AppMode;
   isSettingsOpen: boolean;
   activeTab: SettingsTab;
   resolvedTheme: "light" | "dark";
@@ -53,7 +51,6 @@ interface SettingsState {
   setTheme: (theme: Theme) => void;
   setColorblind: (enabled: boolean) => void;
   setLocale: (locale: Locale) => void;
-  setMode: (mode: AppMode) => void;
   openSettings: (tab?: SettingsTab) => void;
   closeSettings: () => void;
   setActiveTab: (tab: SettingsTab) => void;
@@ -97,7 +94,6 @@ function loadInitialSettingsState() {
   const savedTheme = getStorage("theme", "system") as Theme;
   const savedColorblind = getStorage("colorblind", "false") === "true";
   const savedLocale = getStorage("locale", "en") as Locale;
-  const savedMode = getStorage("mode", "simple") as AppMode;
 
   const savedDateFormat = getStorage("gitvista_date_format", "relative") as DateFormat;
   const savedAvatarStyle = getStorage("gitvista_avatar_style", "initials") as AvatarStyle;
@@ -131,7 +127,6 @@ function loadInitialSettingsState() {
     theme: savedTheme,
     colorblind: savedColorblind,
     locale: savedLocale,
-    mode: savedMode,
     resolvedTheme: resolved,
 
     dateFormat: savedDateFormat,
@@ -205,11 +200,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
       if (typeof localStorage !== "undefined") localStorage.setItem("locale", locale);
       if (typeof document !== "undefined") document.documentElement.setAttribute("lang", locale);
       set({ locale });
-    },
-
-    setMode: (mode: AppMode) => {
-      if (typeof localStorage !== "undefined") localStorage.setItem("mode", mode);
-      set({ mode });
     },
 
     isSettingsOpen: false,

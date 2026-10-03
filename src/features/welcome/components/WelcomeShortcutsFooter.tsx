@@ -22,12 +22,6 @@ export const WelcomeShortcutsFooter: React.FC = () => {
         </kbd>
         <span>{t.welcome.shortcuts}</span>
       </div>
-      <div className="flex items-center gap-1.5">
-        <kbd className="px-2 py-0.5 rounded bg-surface border border-border-subtle font-mono text-xs text-secondary">
-          Ctrl+T
-        </kbd>
-        <span>{t.welcome.gitMode}</span>
-      </div>
     </footer>
   );
 };

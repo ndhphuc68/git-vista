@@ -22,7 +22,6 @@ export const CommitBox: React.FC<CommitBoxProps> = (props) => {
   const { stagedCount, isLoading = false } = props;
   const {
     t,
-    mode,
     summary,
     setSummary,
     description,
@@ -67,7 +66,7 @@ export const CommitBox: React.FC<CommitBoxProps> = (props) => {
             onChange={handleAmendToggle}
             className="cursor-pointer"
           />
-          <span>{mode === "simple" ? t.commit.amendSimple : t.commit.amendAdvanced}</span>
+          <span>{t.commit.amendAdvanced}</span>
         </label>
 
         <span className="text-[10px] text-tertiary">{shortcutHint}</span>
@@ -78,7 +77,6 @@ export const CommitBox: React.FC<CommitBoxProps> = (props) => {
         submitting={submitting}
         isLoading={isLoading}
         isAmend={isAmend}
-        mode={mode}
         stagedCount={stagedCount}
         onSubmit={handleSubmit}
       />

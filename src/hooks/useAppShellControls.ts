@@ -1,7 +1,7 @@
 import { type QueryClient } from "@tanstack/react-query";
 import { type RepoSummary } from "../ipc/bindings.generated";
 import { type ActiveScreen } from "../store/useViewStore";
-import { type SettingsTab, type Theme, type AppMode } from "../store/useSettingsStore";
+import { type SettingsTab, type Theme } from "../store/useSettingsStore";
 import { qk } from "../domain/queryKeys";
 import { useGlobalShortcuts } from "./useGlobalShortcuts";
 import { buildGlobalShortcutsConfig, buildCommandContext } from "../appShellConfig";
@@ -17,8 +17,6 @@ export interface UseAppShellControlsDeps {
   setActiveScreen: (screen: ActiveScreen) => void;
   resolvedTheme: "light" | "dark";
   setTheme: (theme: Theme) => void;
-  mode: AppMode;
-  setMode: (mode: AppMode) => void;
   openSettings: (tab?: SettingsTab) => void;
   closeSettings: () => void;
   openCommandPalette: () => void;
@@ -32,17 +30,12 @@ export interface UseAppShellControlsDeps {
  * same state.
  */
 export function useAppShellControls(deps: UseAppShellControlsDeps) {
-  const { repoToDisplay, resolvedTheme, setTheme, mode, setMode, openSettings, queryClient } =
-    deps;
+  const { repoToDisplay, resolvedTheme, setTheme, openSettings, queryClient } = deps;
 
   const d = useAppDialogState();
 
   const handleToggleTheme = () => {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
-  };
-
-  const handleToggleMode = () => {
-    setMode(mode === "simple" ? "advanced" : "simple");
   };
 
   useGlobalShortcuts(
@@ -77,7 +70,6 @@ export function useAppShellControls(deps: UseAppShellControlsDeps) {
     setIsGlobalCompareOpen: d.setIsCompareOpen,
     setIsShortcutsHelpOpen: d.setIsShortcutsHelpOpen,
     handleToggleTheme,
-    handleToggleMode,
     openSettings,
   });
 

@@ -1,6 +1,6 @@
 import React from "react";
 import clsx from "clsx";
-import { Languages, Terminal, Cpu, ChevronDown, ChevronUp } from "lucide-react";
+import { Languages, Cpu, ChevronDown, ChevronUp } from "lucide-react";
 import { type Theme, type Locale } from "../store/useSettingsStore";
 import { type Translations } from "../i18n/vi";
 import { ControlsBarAppearanceSwitchers } from "./ControlsBarAppearanceSwitchers";
@@ -13,13 +13,11 @@ interface ControlsBarSwitchersProps {
   setColorblind: (colorblind: boolean) => void;
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  mode: "simple" | "advanced";
-  setMode: (mode: "simple" | "advanced") => void;
   devToolsOpen: boolean;
   toggleDevTools: () => void;
 }
 
-/** Theme, colorblind, language, git-mode and devtools switchers in the ControlsBar top row. */
+/** Theme, colorblind, language and devtools switchers in the ControlsBar top row. */
 export const ControlsBarSwitchers: React.FC<ControlsBarSwitchersProps> = ({
   t,
   theme,
@@ -28,8 +26,6 @@ export const ControlsBarSwitchers: React.FC<ControlsBarSwitchersProps> = ({
   setColorblind,
   locale,
   setLocale,
-  mode,
-  setMode,
   devToolsOpen,
   toggleDevTools,
 }) => {
@@ -61,15 +57,6 @@ export const ControlsBarSwitchers: React.FC<ControlsBarSwitchersProps> = ({
           </button>
         ))}
       </div>
-
-      {/* Git Mode Switcher */}
-      <button
-        onClick={() => setMode(mode === "simple" ? "advanced" : "simple")}
-        className="px-1.5 py-0.5 rounded-md text-xs flex items-center gap-1 border border-border-subtle bg-window text-primary cursor-pointer hover:bg-surface-hover transition-colors"
-      >
-        <Terminal size={11} />
-        <span>{mode === "simple" ? t.settings.modeSimple : t.settings.modeAdvanced}</span>
-      </button>
 
       {/* DevTools Toggle Button */}
       <button

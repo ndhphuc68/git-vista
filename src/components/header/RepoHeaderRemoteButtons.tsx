@@ -6,7 +6,7 @@ import { type useRemoteTask } from "../../features/remote/api";
 
 interface RepoHeaderRemoteButtonsProps {
   t: Translations;
-  actions: Translations["gitActions"]["simple"];
+  actions: Translations["gitActions"]["advanced"];
   remote: ReturnType<typeof useRemoteTask>;
   aheadCount: number;
   behindCount: number;

@@ -43,15 +43,13 @@ export function formatRelativeTime(
 
 export function useTranslation() {
   const locale = useSettingsStore((s) => s.locale);
-  const mode = useSettingsStore((s) => s.mode);
 
   const t = dictionaries[locale] || vi;
-  const actions = mode === "advanced" ? t.gitActions.advanced : t.gitActions.simple;
+  const actions = t.gitActions.advanced;
 
   return {
     t,
     actions,
     locale,
-    mode,
   };
 }

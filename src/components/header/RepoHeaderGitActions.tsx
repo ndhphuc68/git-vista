@@ -8,7 +8,7 @@ import { RepoHeaderRemoteButtons } from "./RepoHeaderRemoteButtons";
 
 interface RepoHeaderGitActionsProps {
   t: Translations;
-  actions: Translations["gitActions"]["simple"];
+  actions: Translations["gitActions"]["advanced"];
   repoPath: string | undefined;
   remote: ReturnType<typeof useRemoteTask>;
   aheadCount: number;

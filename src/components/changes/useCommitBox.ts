@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useSettingsStore } from "../../store/useSettingsStore";
 import { useTranslation } from "../../i18n";
 import type { CommitBoxProps } from "./CommitBox";
 import { createAmendToggleHandler, createSubmitHandler, createKeyDownHandler } from "./useCommitBox.actions";
@@ -40,7 +39,6 @@ export function useCommitBox({
   const [description, setDescription] = useState("");
   const [isAmend, setIsAmend] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const mode = useSettingsStore((s) => s.mode);
 
   const shortcutHint = getShortcutHint();
   const isOver72 = summary.length > 72;
@@ -73,7 +71,6 @@ export function useCommitBox({
 
   return {
     t,
-    mode,
     summary,
     setSummary,
     description,

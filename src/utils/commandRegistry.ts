@@ -18,7 +18,6 @@ export interface CommandContext {
   openCreateBranch?: () => void;
   openShortcutsHelp?: () => void;
   toggleTheme?: () => void;
-  toggleMode?: () => void;
   openSettings?: () => void;
   fetch?: () => void | Promise<void>;
   pull?: () => void | Promise<void>;
@@ -223,24 +222,6 @@ function buildSettingsCommands(t: Translation, context: CommandContext): Command
       shortcut: "Ctrl+T",
       keywords: ["theme", "giao dien", "giao diện", "dark", "light", "sang", "sáng", "toi", "tối"],
       action: () => context.toggleTheme?.(),
-    },
-    {
-      id: "settings-mode",
-      title: t.palette.commands.settingsModeTitle,
-      description: t.palette.commands.settingsModeDesc,
-      category: "settings",
-      keywords: [
-        "mode",
-        "simple",
-        "advanced",
-        "don gian",
-        "đơn giản",
-        "nang cao",
-        "nâng cao",
-        "che do",
-        "chế độ",
-      ],
-      action: () => context.toggleMode?.(),
     },
     {
       id: "settings-shortcuts",

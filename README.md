@@ -73,7 +73,7 @@
 
 #### ⌨️ Keyboard-Driven & Accessible
 - **Command Palette (`Ctrl + K` / `Cmd + K`)**: Fuzzy search and execute any command or switch branches rapidly.
-- **Simple & Advanced Modes**: Toggle between beginner-friendly terminology (with clear explanations) and standard Git terminology.
+- **Advanced Git Interface**: Use standard Git terminology and the full set of Git tools throughout the app.
 - **Themes & Accessibility**: Dark mode, Light mode, and High-Contrast colorblind-friendly themes.
 
 ---

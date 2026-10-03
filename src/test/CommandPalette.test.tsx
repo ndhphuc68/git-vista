@@ -9,7 +9,6 @@ describe("CommandPalette Component", () => {
   const mockCreateBranch = vi.fn();
   const mockShortcuts = vi.fn();
   const mockToggleTheme = vi.fn();
-  const mockToggleMode = vi.fn();
 
   const dummyContext: CommandContext = {
     repoPath: "/test/repo",
@@ -17,7 +16,6 @@ describe("CommandPalette Component", () => {
     openCreateBranch: mockCreateBranch,
     openShortcutsHelp: mockShortcuts,
     toggleTheme: mockToggleTheme,
-    toggleMode: mockToggleMode,
   };
 
   beforeEach(() => {

@@ -14,7 +14,7 @@ interface ControlsBarProps {
 
 export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
   const { t, actions } = useTranslation();
-  const { theme, colorblind, locale, mode, setTheme, setColorblind, setLocale, setMode } =
+  const { theme, colorblind, locale, setTheme, setColorblind, setLocale } =
     useSettingsStore();
 
   const { devToolsOpen, toggleDevTools } = useLayoutStore();
@@ -52,8 +52,6 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({ lastEvent }) => {
           setColorblind={setColorblind}
           locale={locale}
           setLocale={setLocale}
-          mode={mode}
-          setMode={setMode}
           devToolsOpen={devToolsOpen}
           toggleDevTools={toggleDevTools}
         />

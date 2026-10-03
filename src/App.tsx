@@ -101,14 +101,13 @@ export const App: React.FC<AppProps> = ({
   const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0];
   const repoToDisplay = activeTab?.type === "repo" ? activeTab.repo || currentRepo : null;
   const { setActiveScreen } = useViewStore();
-  const { resolvedTheme, setTheme, mode, setMode, openSettings, closeSettings } =
-    useSettingsStore();
+  const { resolvedTheme, setTheme, openSettings, closeSettings } = useSettingsStore();
   const { open: openCommandPalette, close: closeCommandPalette } = useCommandPaletteStore();
 
   useAppTabSync(tabs, activeTabId, setRepo, clearRepo, restoreSession);
 
-  const { handleSelectRepo, handleBackToWelcome, handleNextTab, handlePrevTab } =
-    useAppTabHandlers({
+  const { handleSelectRepo, handleBackToWelcome, handleNextTab, handlePrevTab } = useAppTabHandlers(
+    {
       tabs,
       activeTabId,
       setActiveTab,
@@ -116,7 +115,8 @@ export const App: React.FC<AppProps> = ({
       openHomeTab,
       setRepo,
       clearRepo,
-    });
+    }
+  );
 
   const shellControls = useAppShellControls({
     repoToDisplay,
@@ -128,8 +128,6 @@ export const App: React.FC<AppProps> = ({
     setActiveScreen,
     resolvedTheme,
     setTheme,
-    mode,
-    setMode,
     openSettings,
     closeSettings,
     openCommandPalette,

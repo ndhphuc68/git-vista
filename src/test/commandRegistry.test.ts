@@ -37,7 +37,6 @@ describe("Command Palette Store & Registry", () => {
     const mockCreateBranch = vi.fn();
     const mockShortcuts = vi.fn();
     const mockToggleTheme = vi.fn();
-    const mockToggleMode = vi.fn();
 
     const ctx: CommandContext = {
       repoPath: "/test/repo",
@@ -45,7 +44,6 @@ describe("Command Palette Store & Registry", () => {
       openCreateBranch: mockCreateBranch,
       openShortcutsHelp: mockShortcuts,
       toggleTheme: mockToggleTheme,
-      toggleMode: mockToggleMode,
     };
 
     const commands = getAppCommands(ctx);
@@ -73,7 +71,6 @@ describe("Command Palette Store & Registry", () => {
       openCreateBranch: vi.fn(),
       openShortcutsHelp: vi.fn(),
       toggleTheme: vi.fn(),
-      toggleMode: vi.fn(),
     };
 
     const commands = getAppCommands(ctx);

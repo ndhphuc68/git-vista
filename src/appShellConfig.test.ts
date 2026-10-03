@@ -85,7 +85,6 @@ function baseCommandContextDeps() {
     setIsGlobalCompareOpen: vi.fn(),
     setIsShortcutsHelpOpen: vi.fn(),
     handleToggleTheme: vi.fn(),
-    handleToggleMode: vi.fn(),
     openSettings: vi.fn(),
   };
 }
@@ -153,17 +152,15 @@ describe("buildCommandContext", () => {
     expect(deps.setCompareBaseRev).toHaveBeenCalledWith("main");
   });
 
-  it("wires theme/mode toggles and settings straight through", () => {
+  it("wires theme toggle and settings straight through", () => {
     const deps = baseCommandContextDeps();
     const context = buildCommandContext(deps);
 
     context.toggleTheme?.();
-    context.toggleMode?.();
     context.openSettings?.();
     context.openShortcutsHelp?.();
 
     expect(deps.handleToggleTheme).toHaveBeenCalled();
-    expect(deps.handleToggleMode).toHaveBeenCalled();
     expect(deps.openSettings).toHaveBeenCalledWith();
     expect(deps.setIsShortcutsHelpOpen).toHaveBeenCalledWith(true);
   });

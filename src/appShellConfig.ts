@@ -95,7 +95,6 @@ export interface BuildCommandContextDeps {
   setIsGlobalCompareOpen: (open: boolean) => void;
   setIsShortcutsHelpOpen: (open: boolean) => void;
   handleToggleTheme: () => void;
-  handleToggleMode: () => void;
   openSettings: (tab?: SettingsTab) => void;
 }
 
@@ -112,7 +111,6 @@ export function buildCommandContext(deps: BuildCommandContextDeps): CommandConte
     setIsGlobalCompareOpen,
     setIsShortcutsHelpOpen,
     handleToggleTheme,
-    handleToggleMode,
     openSettings,
   } = deps;
 
@@ -145,7 +143,6 @@ export function buildCommandContext(deps: BuildCommandContextDeps): CommandConte
     },
     openShortcutsHelp: () => setIsShortcutsHelpOpen(true),
     toggleTheme: handleToggleTheme,
-    toggleMode: handleToggleMode,
     openSettings: () => openSettings(),
   };
 }

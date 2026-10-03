@@ -2,25 +2,22 @@ import React from "react";
 import clsx from "clsx";
 import { RefreshCw } from "lucide-react";
 import { useTranslation } from "../../i18n";
-import type { AppMode } from "../../store/useSettingsStore";
 
 export interface CommitSubmitButtonProps {
   canCommit: boolean;
   submitting: boolean;
   isLoading: boolean;
   isAmend: boolean;
-  mode: AppMode;
   stagedCount: number;
   onSubmit: () => void;
 }
 
-/** The commit form's submit button, its label depending on amend/mode/loading state. */
+/** The commit form's submit button, its label depending on amend/loading state. */
 export const CommitSubmitButton: React.FC<CommitSubmitButtonProps> = ({
   canCommit,
   submitting,
   isLoading,
   isAmend,
-  mode,
   stagedCount,
   onSubmit,
 }) => {
@@ -45,13 +42,9 @@ export const CommitSubmitButton: React.FC<CommitSubmitButtonProps> = ({
           <span>{t.commit.saving}</span>
         </>
       ) : isAmend ? (
-        <span>{mode === "simple" ? t.commit.amendCommitSimple : t.commit.amendCommitAdvanced}</span>
+        <span>{t.commit.amendCommitAdvanced}</span>
       ) : (
-        <span>
-          {mode === "simple"
-            ? t.commit.commitSimple.replace("{count}", String(stagedCount))
-            : t.commit.commitAdvanced.replace("{count}", String(stagedCount))}
-        </span>
+        <span>{t.commit.commitAdvanced.replace("{count}", String(stagedCount))}</span>
       )}
     </button>
   );
