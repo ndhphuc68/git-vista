@@ -19,6 +19,10 @@ export const GraphSvgEdge: React.FC<GraphSvgEdgeProps> = ({ edge, colWidth, rowH
     return <line x1={x1} y1={0} x2={x2} y2={rowHeight} stroke={strokeColor} strokeWidth={2.2} />;
   }
 
+  if (edge.edge_type === "incoming") {
+    return <line x1={x1} y1={0} x2={x2} y2={nodeY} stroke={strokeColor} strokeWidth={2.2} />;
+  }
+
   if (edge.edge_type === "merge") {
     // Upper parent lane (at y=0) curves into the current node (at nodeY)
     return (

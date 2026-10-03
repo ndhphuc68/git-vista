@@ -111,19 +111,19 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
         let parent_oids: Vec<Oid> = commit.parent_ids().collect();
 
         // 1. Assign column for this commit
-        let col = match active_lanes
+        let (col, has_incoming) = match active_lanes
             .iter()
             .position(|slot| slot.as_ref() == Some(oid))
         {
-            Some(idx) => idx,
+            Some(idx) => (idx, true),
             None => match active_lanes.iter().position(|slot| slot.is_none()) {
                 Some(idx) => {
                     active_lanes[idx] = Some(*oid);
-                    idx
+                    (idx, false)
                 }
                 None => {
                     active_lanes.push(Some(*oid));
-                    active_lanes.len() - 1
+                    (active_lanes.len() - 1, false)
                 }
             },
         };
@@ -201,6 +201,14 @@ pub fn get_repo_commit_graph<P: AsRef<Path>>(
             }
         } else {
             // Root commit (no parents)
+            if has_incoming && idx >= offset {
+                edges.push(GraphEdge {
+                    from_col: col as u32,
+                    to_col: col as u32,
+                    edge_type: "incoming".to_string(),
+                    color_index: color_index as u32,
+                });
+            }
             active_lanes[col] = None;
         }
 

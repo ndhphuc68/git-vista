@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Shell } from "../components/Shell";
@@ -52,6 +52,23 @@ describe("Shell responsive layout", () => {
 
     expect(screen.queryByTestId("shell-sidebar-container")).not.toBeInTheDocument();
     expect(screen.getByTestId("shell-graph-container")).toBeInTheDocument();
+  });
+
+  it("keeps the sidebar width without a drag resize handle", () => {
+    useLayoutStore.setState({ sidebarWidth: 300 });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <Shell />
+      </QueryClientProvider>
+    );
+
+    const sidebar = screen.getByTestId("shell-sidebar-container");
+    expect(sidebar.querySelector(".cursor-col-resize")).toBeNull();
+    fireEvent.mouseDown(sidebar, { clientX: 300 });
+    fireEvent.mouseMove(window, { clientX: 420 });
+    fireEvent.mouseUp(window);
+    expect(sidebar).toHaveStyle({ width: "300px" });
+    expect(useLayoutStore.getState().sidebarWidth).toBe(300);
   });
 
   it("hides detail panel when detailPanelOpen is false", () => {

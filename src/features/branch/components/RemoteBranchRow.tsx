@@ -59,12 +59,15 @@ export const RemoteBranchRow: React.FC<RemoteBranchRowProps> = ({
         className={clsx(
           "flex-1 flex items-center gap-1.5 px-2 py-1 rounded-sm border-0 cursor-pointer text-left min-h-[26px] text-xs transition-colors overflow-hidden",
           isSelected
-            ? "bg-accent-subtle text-accent font-semibold"
+            ? "bg-surface-active text-primary font-normal"
             : "bg-transparent text-primary hover:bg-surface-hover font-normal"
         )}
         title={branchName}
       >
-        <Cloud size={11} className={clsx("shrink-0", isSelected ? "text-accent" : "text-tertiary")} />
+        <Cloud
+          size={11}
+          className={clsx("shrink-0", isSelected ? "text-secondary" : "text-tertiary")}
+        />
         <span className="overflow-hidden text-ellipsis whitespace-nowrap">{name}</span>
       </button>
 

@@ -961,9 +961,6 @@ export const vi = {
     networkErrorHint: "Vui lòng kiểm tra lại kết nối Internet của bạn và thử lại.",
     genericTitle: "Thao tác không thành công",
   },
-  shellExt: {
-    resizeTooltip: "Kéo để thay đổi chiều rộng sidebar (Nhấp đúp để đặt lại mặc định)",
-  },
   inspector: {
     title: "Kiểm tra tệp tin",
     blameTab: "Git Blame",

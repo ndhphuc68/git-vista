@@ -22,6 +22,26 @@ describe("GraphSvgLane", () => {
     expect(line?.getAttribute("stroke")).toBe("#2F6FEB");
   });
 
+  it("renders an incoming edge for root commit from top of row to node center", () => {
+    const incomingEdge: GraphEdge = {
+      from_col: 0,
+      to_col: 0,
+      edge_type: "incoming",
+      color_index: 0,
+    };
+    const { container } = render(
+      <GraphSvgLane col={0} colorIndex={0} lines={[incomingEdge]} isHead={false} isMerge={false} />
+    );
+
+    const line = container.querySelector("line");
+    expect(line).not.toBeNull();
+    expect(line?.getAttribute("x1")).toBe("8");
+    expect(line?.getAttribute("x2")).toBe("8");
+    expect(line?.getAttribute("y1")).toBe("0");
+    expect(line?.getAttribute("y2")).toBe("16");
+    expect(line?.getAttribute("stroke")).toBe("#2F6FEB");
+  });
+
   it("renders merge and fork edges as curved paths with the edge's own color", () => {
     const { container } = render(
       <GraphSvgLane

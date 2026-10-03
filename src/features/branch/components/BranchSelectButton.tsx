@@ -28,10 +28,15 @@ export const BranchSelectButton: React.FC<BranchSelectButtonProps> = ({
       aria-selected={isSelected}
       className={clsx(
         "flex-1 flex items-center gap-1.5 px-2 py-1 rounded-sm border-0 cursor-pointer text-left min-h-[26px] text-xs transition-colors overflow-hidden",
-        isSelected
-          ? "bg-accent-subtle text-accent font-semibold"
-          : "bg-transparent text-primary hover:bg-surface-hover font-normal",
-        branch.is_head && "font-semibold"
+        branch.is_head
+          ? clsx(
+              "text-accent font-semibold",
+              isSelected ? "bg-accent-subtle" : "bg-transparent hover:bg-surface-hover"
+            )
+          : clsx(
+              "text-primary font-normal",
+              isSelected ? "bg-surface-active" : "bg-transparent hover:bg-surface-hover"
+            )
       )}
       title={
         branch.is_head

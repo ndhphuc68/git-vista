@@ -1,5 +1,11 @@
 import "@testing-library/jest-dom/vitest";
 
+// The app defaults to English, but the existing suite asserts Vietnamese
+// copy. Seed the persisted locale before any test imports the settings store.
+if (typeof localStorage !== "undefined") {
+  localStorage.setItem("locale", "vi");
+}
+
 // jsdom reports offsetWidth/offsetHeight as 0 for every element because it has
 // no real layout engine. @tanstack/react-virtual measures the container with
 // those properties on mount, so without a stub the virtual list renders no items

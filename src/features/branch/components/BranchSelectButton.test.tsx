@@ -40,4 +40,53 @@ describe("BranchSelectButton", () => {
 
     expect(screen.getByRole("button")).toHaveAttribute("title", "main (HEAD)");
   });
+
+  it("styles the current branch (HEAD) in accent color even when unselected", () => {
+    render(
+      <BranchSelectButton
+        branch={branch("main", true)}
+        name="main"
+        isSelected={false}
+        onSelectBranch={vi.fn()}
+      />
+    );
+
+    const button = screen.getByRole("button");
+    expect(button).toHaveClass("text-accent");
+    expect(button).toHaveClass("font-semibold");
+    expect(button).not.toHaveClass("bg-accent-subtle");
+  });
+
+  it("styles the current branch (HEAD) with accent-subtle background when selected", () => {
+    render(
+      <BranchSelectButton
+        branch={branch("main", true)}
+        name="main"
+        isSelected={true}
+        onSelectBranch={vi.fn()}
+      />
+    );
+
+    const button = screen.getByRole("button");
+    expect(button).toHaveClass("text-accent");
+    expect(button).toHaveClass("bg-accent-subtle");
+    expect(button).toHaveClass("font-semibold");
+  });
+
+  it("styles a non-head branch with surface-active background and primary text when selected", () => {
+    render(
+      <BranchSelectButton
+        branch={branch("feature", false)}
+        name="feature"
+        isSelected={true}
+        onSelectBranch={vi.fn()}
+      />
+    );
+
+    const button = screen.getByRole("button");
+    expect(button).toHaveClass("bg-surface-active");
+    expect(button).toHaveClass("text-primary");
+    expect(button).not.toHaveClass("text-accent");
+    expect(button).not.toHaveClass("bg-accent-subtle");
+  });
 });

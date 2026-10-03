@@ -966,9 +966,6 @@ export const en: Translations = {
     networkErrorHint: "Please check your internet connection and try again.",
     genericTitle: "Operation Failed",
   },
-  shellExt: {
-    resizeTooltip: "Drag to resize sidebar (Double click to reset)",
-  },
   inspector: {
     title: "File Inspector",
     blameTab: "Git Blame",

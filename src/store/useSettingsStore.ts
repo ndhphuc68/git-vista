@@ -96,7 +96,7 @@ function getStorage(key: string, fallback: string) {
 function loadInitialSettingsState() {
   const savedTheme = getStorage("theme", "system") as Theme;
   const savedColorblind = getStorage("colorblind", "false") === "true";
-  const savedLocale = getStorage("locale", "vi") as Locale;
+  const savedLocale = getStorage("locale", "en") as Locale;
   const savedMode = getStorage("mode", "simple") as AppMode;
 
   const savedDateFormat = getStorage("gitvista_date_format", "relative") as DateFormat;

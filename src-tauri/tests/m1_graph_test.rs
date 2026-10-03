@@ -131,11 +131,31 @@ fn test_get_commit_graph_merge_topology() {
         "Expected at least one merge edge when converging branches"
     );
 
-    // Root commit (c1) must not have zombie lines passing through
+    // Root commit (c1) connects to incoming child but has no forward/pass-through lines
     let root_node = result.commits.last().unwrap();
     assert_eq!(
         root_node.lines.len(),
+        1,
+        "Root commit must connect to the incoming child lane"
+    );
+    assert_eq!(root_node.lines[0].edge_type, "incoming");
+    assert_eq!(root_node.lines[0].from_col, 0);
+    assert_eq!(root_node.lines[0].to_col, 0);
+}
+
+#[test]
+fn test_get_commit_graph_single_root_commit_has_no_lines() {
+    use common::fixtures::create_clean_repo;
+
+    let (dir, _repo) = create_clean_repo().expect("Failed to create clean repo");
+    let path_str = dir.path().to_str().unwrap().to_string();
+    let result = get_commit_graph(path_str, 0, 10).expect("Failed to fetch graph");
+
+    assert_eq!(result.commits.len(), 1);
+    let single_node = &result.commits[0];
+    assert_eq!(
+        single_node.lines.len(),
         0,
-        "Root commit must have no forward/pass-through lines"
+        "A single root commit with no children should have no incoming or outgoing lines"
     );
 }

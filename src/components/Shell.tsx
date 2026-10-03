@@ -6,22 +6,13 @@ import { CommitGraph } from "../features/history";
 import { useLayoutStore } from "../store/useLayoutStore";
 import { useRepoStore } from "../store/useRepoStore";
 import { useWindowDimensions } from "../hooks/useWindowDimensions";
-import { useTranslation } from "../i18n";
 import { qk } from "../domain/queryKeys";
 import { ShellSidebar } from "./ShellSidebar";
 import { ShellDetailDrawer } from "./ShellDetailDrawer";
-import { useSidebarResize } from "./useSidebarResize";
 
 export const Shell: React.FC = () => {
-  const { t } = useTranslation();
-  const {
-    sidebarOpen,
-    sidebarWidth,
-    setSidebarWidth,
-    detailPanelOpen,
-    toggleSidebar,
-    setDetailPanelOpen,
-  } = useLayoutStore();
+  const { sidebarOpen, sidebarWidth, detailPanelOpen, toggleSidebar, setDetailPanelOpen } =
+    useLayoutStore();
   // Shell is not a feature, so it may read the repo store directly — the same
   // way BranchSidebar does. This avoids drilling repoPath down from App.
   const { setSelectedCommit, currentRepo } = useRepoStore();
@@ -51,8 +42,6 @@ export const Shell: React.FC = () => {
     setSelectedCommit(null);
   };
 
-  const handleResizeMouseDown = useSidebarResize(sidebarWidth, setSidebarWidth);
-
   return (
     <main
       data-testid="shell-main"
@@ -64,13 +53,10 @@ export const Shell: React.FC = () => {
         isMobile={isMobile}
         toggleSidebar={toggleSidebar}
         sidebarWidth={sidebarWidth}
-        setSidebarWidth={setSidebarWidth}
         repoPath={repoPath}
         branchData={branchData}
         invalidateRepo={invalidateRepo}
         invalidateRemotes={invalidateRemotes}
-        onResizeMouseDown={handleResizeMouseDown}
-        t={t}
       />
 
       {/* Center: Commit Graph */}

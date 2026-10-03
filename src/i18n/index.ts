@@ -8,8 +8,8 @@ const dictionaries: Record<"vi" | "en", Translations> = {
 };
 
 export function getTranslation(locale?: "vi" | "en"): Translations {
-  const currentLocale = locale || useSettingsStore.getState().locale || "vi";
-  return dictionaries[currentLocale] || vi;
+  const currentLocale = locale || useSettingsStore.getState().locale || "en";
+  return dictionaries[currentLocale] || en;
 }
 
 export function formatRelativeTime(
