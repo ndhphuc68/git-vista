@@ -1,18 +1,23 @@
 import React from "react";
+import { useTranslation } from "../../../i18n";
+import type { GitConfigDto } from "../../../ipc/client";
 import { useSettingsStore } from "../../../store/useSettingsStore";
+import { SettingsInheritRow, SettingsPage, SettingsSaveBar } from "../ui";
 import { useGitProfileForm } from "./useGitProfileForm";
-import { GitProfileScopeBanner } from "./GitProfileScopeBanner";
-import { GitProfileInheritToggle } from "./GitProfileInheritToggle";
-import { GitProfileIdentityFields } from "./GitProfileIdentityFields";
-import { GitProfileGpgSection } from "./GitProfileGpgSection";
-import { GitProfileCommitConventionsSection } from "./GitProfileCommitConventionsSection";
-import { GitProfileSaveButton } from "./GitProfileSaveButton";
+import { GitProfileIdentitySection } from "./GitProfileIdentitySection";
+import { GitProfileSigningSection } from "./GitProfileSigningSection";
+import { GitProfileCommitSection } from "./GitProfileCommitSection";
 
 interface GitProfileTabProps {
   currentRepoPath: string | null;
   scope?: "global" | "repo";
-  /** Scope selector rendered above the form. */
+  /** Scope selector rendered under the page header. */
   toolbar?: React.ReactNode;
+}
+
+function formatIdentity(config: GitConfigDto | null): string {
+  if (!config?.userName) return "";
+  return config.userEmail ? `${config.userName} <${config.userEmail}>` : config.userName;
 }
 
 export const GitProfileTab: React.FC<GitProfileTabProps> = ({
@@ -20,84 +25,61 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
   scope: propScope,
   toolbar,
 }) => {
+  const { t } = useTranslation();
   const { commitMessageLimit, setCommitMessageLimit } = useSettingsStore();
-
   const activeScope = propScope || (currentRepoPath ? "repo" : "global");
-
-  const {
-    userName,
-    setUserName,
-    userEmail,
-    setUserEmail,
-    defaultBranch,
-    setDefaultBranch,
-    gpgSign,
-    setGpgSign,
-    gpgKey,
-    setGpgKey,
-    globalConfig,
-    isOverride,
-    loading,
-    saving,
-    hasLocalOverride,
-    handleSave,
-    handleResetToGlobal,
-    handleSelectInherit,
-    handleSelectOverride,
-  } = useGitProfileForm({ currentRepoPath, activeScope });
+  const form = useGitProfileForm({ currentRepoPath, activeScope });
+  const isRepoScope = activeScope === "repo" && Boolean(currentRepoPath);
+  const locked = isRepoScope && !form.isOverride;
 
   return (
-    <div className="space-y-6">
-      {toolbar}
-      <GitProfileScopeBanner
-        activeScope={activeScope}
-        currentRepoPath={currentRepoPath}
-        hasLocalOverride={hasLocalOverride}
-        saving={saving}
-        loading={loading}
-        onResetToGlobal={handleResetToGlobal}
-      />
-
-      {activeScope === "repo" && currentRepoPath && (
-        <GitProfileInheritToggle
-          isOverride={isOverride}
-          globalConfig={globalConfig}
-          onSelectInherit={handleSelectInherit}
-          onSelectOverride={handleSelectOverride}
+    <form onSubmit={form.handleSave}>
+      <SettingsPage
+        title={t.settings.profile.title}
+        description={t.settings.profile.subtitle}
+        toolbar={toolbar}
+      >
+        {isRepoScope && (
+          <SettingsInheritRow
+            inheriting={!form.isOverride}
+            onInheritChange={(inherit) =>
+              inherit ? form.handleSelectInherit() : form.handleSelectOverride()
+            }
+            description={formatIdentity(form.globalConfig)}
+            disabled={form.saving || form.loading}
+            canReset={form.hasLocalOverride}
+            onReset={form.handleResetToGlobal}
+          />
+        )}
+        <GitProfileIdentitySection
+          showDefaultBranch={activeScope === "global"}
+          locked={locked}
+          userName={form.userName}
+          onUserNameChange={form.setUserName}
+          userEmail={form.userEmail}
+          onUserEmailChange={form.setUserEmail}
+          defaultBranch={form.defaultBranch}
+          onDefaultBranchChange={form.setDefaultBranch}
         />
-      )}
-
-      <form onSubmit={handleSave} className="space-y-4 pt-1">
-        <GitProfileIdentityFields
-          activeScope={activeScope}
-          isOverride={isOverride}
-          userName={userName}
-          onUserNameChange={setUserName}
-          userEmail={userEmail}
-          onUserEmailChange={setUserEmail}
-          defaultBranch={defaultBranch}
-          onDefaultBranchChange={setDefaultBranch}
+        <GitProfileSigningSection
+          locked={locked}
+          gpgSign={form.gpgSign}
+          onGpgSignChange={form.setGpgSign}
+          gpgKey={form.gpgKey}
+          onGpgKeyChange={form.setGpgKey}
         />
-
-        <GitProfileGpgSection
-          activeScope={activeScope}
-          isOverride={isOverride}
-          gpgSign={gpgSign}
-          onToggleGpgSign={() => setGpgSign(!gpgSign)}
-          gpgKey={gpgKey}
-          onGpgKeyChange={setGpgKey}
-        />
-
-        <GitProfileCommitConventionsSection
+        <GitProfileCommitSection
           commitMessageLimit={commitMessageLimit}
           onCommitMessageLimitChange={setCommitMessageLimit}
         />
-
-        <GitProfileSaveButton
-          saving={saving}
-          disabled={saving || loading || (activeScope === "repo" && !isOverride)}
-        />
-      </form>
-    </div>
+      </SettingsPage>
+      <SettingsSaveBar
+        visible={form.isDirty && !form.loading}
+        saving={form.saving}
+        saveDisabled={form.saving || form.loading}
+        saveLabel={t.settings.profile.saveBtn}
+        onDiscard={form.handleDiscard}
+      />
+    </form>
   );
 };

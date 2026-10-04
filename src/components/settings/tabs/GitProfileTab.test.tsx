@@ -46,9 +46,7 @@ describe("GitProfileTab", () => {
 
     render(<GitProfileTab currentRepoPath={null} />);
 
-    await waitFor(() => expect(screen.getByTestId("save-profile-btn")).not.toBeDisabled());
-
-    const nameInput = screen.getByLabelText(/user\.name/i);
+    const nameInput = await screen.findByDisplayValue("Global User");
     fireEvent.change(nameInput, { target: { value: "  Jane Doe  " } });
 
     const emailInput = screen.getByLabelText(/user\.email/i);
@@ -62,8 +60,7 @@ describe("GitProfileTab", () => {
     expect(setSpy).toHaveBeenCalledWith(null, "global", "user.email", "jane@example.com");
   });
 
-  // Enabled in the next task, which renders SettingsSaveBar.
-  it.skip("shows the save bar only after an edit and discards back to the loaded values", async () => {
+  it("shows the save bar only after an edit and discards back to the loaded values", async () => {
     vi.spyOn(invokeCommand, "getGitConfig").mockResolvedValue(GLOBAL_CONFIG);
 
     render(<GitProfileTab currentRepoPath={null} />);

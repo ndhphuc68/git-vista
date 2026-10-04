@@ -39,10 +39,10 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
 
     expect(screen.queryByTestId("scope-switcher")).not.toBeInTheDocument();
     expect(screen.queryByTestId("scope-btn-repo")).not.toBeInTheDocument();
-    expect((await screen.findAllByText(/Toàn hệ thống \(Global\)/i)).length).toBeGreaterThan(0);
+    expect(await screen.findByText(/Toàn hệ thống \(Global\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Nhánh mặc định/i)).toBeInTheDocument();
     expect(screen.queryByText(/Cài đặt riêng cho repository/i)).not.toBeInTheDocument();
-    expect(screen.queryByTestId("inherit-toggle-inherit")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("toggle-use-global")).not.toBeInTheDocument();
   });
 
   it("ngay cả khi có repo tab mở trong nền, nếu mở từ màn Welcome (currentRepoPath là null) thì vẫn chỉ mở cài đặt chung và không có phần setting riêng cho repo", async () => {
@@ -52,10 +52,10 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
 
     expect(screen.queryByTestId("scope-switcher")).not.toBeInTheDocument();
     expect(screen.queryByTestId("scope-btn-repo")).not.toBeInTheDocument();
-    expect((await screen.findAllByText(/Toàn hệ thống \(Global\)/i)).length).toBeGreaterThan(0);
+    expect(await screen.findByText(/Toàn hệ thống \(Global\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Nhánh mặc định/i)).toBeInTheDocument();
     expect(screen.queryByText(/Cài đặt riêng cho repository/i)).not.toBeInTheDocument();
-    expect(screen.queryByTestId("inherit-toggle-inherit")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("toggle-use-global")).not.toBeInTheDocument();
   });
 
   it("khi có repo mở, cho phép chuyển đổi giữa Global và Repository scope", async () => {
@@ -98,12 +98,11 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
 
     // By default in mock, local config inherits from global
     await waitFor(() => {
-      expect(screen.getByTestId("inherit-toggle-inherit")).toBeInTheDocument();
-      expect(screen.getByTestId("inherit-toggle-override")).toBeInTheDocument();
+      expect(screen.getByTestId("toggle-use-global")).toHaveAttribute("aria-checked", "true");
     });
 
-    // Click override
-    fireEvent.click(screen.getByTestId("inherit-toggle-override"));
+    // Turn inheritance off to override for this repo
+    fireEvent.click(screen.getByTestId("toggle-use-global"));
 
     const nameInput = screen.getByLabelText(/Tên tác giả/i);
     expect(nameInput).not.toBeDisabled();
@@ -118,10 +117,10 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
     render(<SettingsModal currentRepoPath={mockRepo1.path} />);
 
     await waitFor(() => {
-      expect(screen.getByTestId("inherit-toggle-override")).toBeInTheDocument();
+      expect(screen.getByTestId("toggle-use-global")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId("inherit-toggle-override"));
+    fireEvent.click(screen.getByTestId("toggle-use-global"));
     const nameInput = screen.getByLabelText(/Tên tác giả/i);
     fireEvent.change(nameInput, { target: { value: "Custom Name" } });
 
@@ -136,7 +135,7 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
 
     // Verify it returned to inherit
     await waitFor(() => {
-      expect(screen.getByTestId("inherit-toggle-inherit")).toBeChecked();
+      expect(screen.getByTestId("toggle-use-global")).toHaveAttribute("aria-checked", "true");
     });
   });
 
