@@ -10,7 +10,6 @@ import { BranchTreePanels } from "./BranchTreePanels";
 import { BranchSidebarExtraSections } from "./BranchSidebarExtraSections";
 
 interface BranchSidebarSectionsProps {
-  repoPath: string;
   data: ReturnType<typeof useSidebarData>;
   actions: ReturnType<typeof useSidebarActions>;
   search: string;
@@ -33,7 +32,6 @@ interface BranchSidebarSectionsProps {
 
 /** Section markup and display derivations; the sidebar retains UI state. */
 export function BranchSidebarSections({
-  repoPath,
   data,
   actions,
   search,
@@ -80,7 +78,6 @@ export function BranchSidebarSections({
         />
 
         <BranchSidebarExtraSections
-          repoPath={repoPath}
           openSections={openSections}
           toggleSection={toggleSection}
           view={view}

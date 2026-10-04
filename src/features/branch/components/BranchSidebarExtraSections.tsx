@@ -1,5 +1,5 @@
 /**
- * The TAGS, pull-requests and STASHES sections together. Split out of
+ * The TAGS and STASHES sections together. Split out of
  * BranchSidebarSections to keep that component's own function under the
  * line limit.
  */
@@ -11,10 +11,8 @@ import type { useBranchSectionsView } from "../hooks/useBranchSectionsView";
 import { type SidebarDialog } from "../model/sidebarDialog";
 import { TagSection } from "./TagSection";
 import { StashSection } from "./StashSection";
-import { PullRequestsSection } from "../../../components/sidebar/PullRequestsSection";
 
 export interface BranchSidebarExtraSectionsProps {
-  repoPath: string;
   openSections: { tags: boolean; stash: boolean };
   toggleSection: (section: "tags" | "stash") => void;
   view: ReturnType<typeof useBranchSectionsView>;
@@ -27,7 +25,6 @@ export interface BranchSidebarExtraSectionsProps {
 }
 
 export const BranchSidebarExtraSections: React.FC<BranchSidebarExtraSectionsProps> = ({
-  repoPath,
   openSections,
   toggleSection,
   view,
@@ -53,9 +50,6 @@ export const BranchSidebarExtraSections: React.FC<BranchSidebarExtraSectionsProp
       onPushTag={actions.pushTag}
       onOpenDialog={onOpenDialog}
     />
-
-    {/* PULL REQUESTS */}
-    <PullRequestsSection repoPath={repoPath} />
 
     {/* STASHES */}
     <StashSection

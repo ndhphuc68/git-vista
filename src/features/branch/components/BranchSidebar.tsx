@@ -51,7 +51,6 @@ export const BranchSidebar: React.FC<BranchSidebarProps> = ({
   return (
     <>
       <BranchSidebarSections
-        repoPath={currentRepo.path}
         data={data}
         actions={actions}
         search={shell.search}
