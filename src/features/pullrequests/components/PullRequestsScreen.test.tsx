@@ -214,6 +214,19 @@ describe("PullRequestsScreen", () => {
     expect(openMock).toHaveBeenCalledWith(mockPr1.html_url, "_blank");
   });
 
+  it("opens PR in browser when clicking PR number link", () => {
+    usePullRequestStore.setState({ selectedPr: mockPr1 });
+    const openMock = vi.fn();
+    vi.stubGlobal("open", openMock);
+
+    renderWithClient(<PullRequestsScreen repoPath="/test/repo" />);
+
+    const prNumberLink = screen.getByRole("link", { name: new RegExp(`#${mockPr1.number}`) });
+    fireEvent.click(prNumberLink);
+
+    expect(openMock).toHaveBeenCalledWith(mockPr1.html_url, "_blank");
+  });
+
   it("opens create PR modal when New PR button is clicked", () => {
     renderWithClient(<PullRequestsScreen repoPath="/test/repo" />);
 
@@ -223,3 +236,4 @@ describe("PullRequestsScreen", () => {
     expect(usePullRequestStore.getState().isCreateModalOpen).toBe(true);
   });
 });
+

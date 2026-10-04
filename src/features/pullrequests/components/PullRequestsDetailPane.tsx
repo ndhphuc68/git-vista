@@ -75,7 +75,25 @@ const DetailPaneHeader: React.FC<DetailPaneHeaderProps> = ({
     <div className="space-y-2 min-w-0">
       <div className="flex flex-wrap items-center gap-2.5">
         <PullRequestStatusBadge pr={pr} size="md" />
-        <span className="font-mono text-base font-bold text-accent">#{pr.number}</span>
+        <a
+          href={pr.html_url}
+          target="_blank"
+          rel="noreferrer"
+          onClick={(e) => {
+            e.preventDefault();
+            onOpenBrowser(pr);
+          }}
+          title={`${openInBrowserLabel} #${pr.number}`}
+          aria-label={`${openInBrowserLabel} #${pr.number}`}
+          className="font-mono text-base font-bold text-accent hover:underline cursor-pointer inline-flex items-center gap-1 group"
+        >
+          <span>#{pr.number}</span>
+          <ExternalLink
+            size={13}
+            className="opacity-60 group-hover:opacity-100 transition-opacity"
+            aria-hidden="true"
+          />
+        </a>
         <h1 className="text-lg font-bold text-primary break-words">{pr.title}</h1>
       </div>
 
