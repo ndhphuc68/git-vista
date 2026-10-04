@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "../../../i18n";
 import type { GitConfigDto } from "../../../ipc/client";
 import { useSettingsStore } from "../../../store/useSettingsStore";
-import { SettingsInheritRow, SettingsPage, SettingsSaveBar } from "../ui";
+import { SettingsInheritRow, SettingsPage, SettingsSaveBar } from "../../../features/settings";
 import { useGitProfileForm } from "./useGitProfileForm";
 import { GitProfileIdentitySection } from "./GitProfileIdentitySection";
 import { GitProfileSigningSection } from "./GitProfileSigningSection";

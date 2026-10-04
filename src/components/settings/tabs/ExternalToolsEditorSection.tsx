@@ -3,7 +3,7 @@ import { useTranslation } from "../../../i18n";
 import { Input, Select } from "../../../shared/ui";
 import { useSettingsStore, type DefaultEditor } from "../../../store/useSettingsStore";
 import { HelpTooltip } from "../HelpTooltip";
-import { SettingsRow, SettingsSection } from "../ui";
+import { SettingsRow, SettingsSection } from "../../../features/settings";
 
 /** Default editor picker plus the custom command field. */
 export const ExternalToolsEditorSection: React.FC = () => {

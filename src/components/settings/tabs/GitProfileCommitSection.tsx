@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "../../../i18n";
 import { SegmentedControl } from "../../../shared/ui";
-import { SettingsRow, SettingsSection } from "../ui";
+import { SettingsRow, SettingsSection } from "../../../features/settings";
 
 export interface GitProfileCommitSectionProps {
   commitMessageLimit: number;

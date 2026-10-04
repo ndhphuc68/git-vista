@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "../../../i18n";
-import { SettingsInheritRow, SettingsPage } from "../../../components/settings/ui";
+import { SettingsInheritRow, SettingsPage } from "./ui";
 import { useGitBehaviorSettings } from "../hooks/useGitBehaviorSettings";
 import { GitBehaviorOptions } from "./GitBehaviorOptions";
 

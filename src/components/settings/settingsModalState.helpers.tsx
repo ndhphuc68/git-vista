@@ -3,6 +3,7 @@ import { User, Palette, Sliders, FileCode, Terminal, GitPullRequest } from "luci
 import type { Translations } from "../../i18n/vi";
 import type { SettingsTab } from "../../store/useSettingsStore";
 import type { TabItem } from "../../types/tab";
+import type { RepoChoice } from "../../features/settings";
 
 export interface NavItem {
   id: SettingsTab;
@@ -14,11 +15,6 @@ export interface NavGroup {
   id: "git" | "app";
   label: string;
   items: NavItem[];
-}
-
-export interface RepoChoice {
-  path: string;
-  label: string;
 }
 
 const GIT_CONFIG_TABS: readonly SettingsTab[] = ["profile", "behavior"];

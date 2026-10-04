@@ -3,7 +3,7 @@ import { useTranslation } from "../../../i18n";
 import { SegmentedControl, Switch } from "../../../shared/ui";
 import { useSettingsStore, type Theme } from "../../../store/useSettingsStore";
 import { HelpTooltip } from "../HelpTooltip";
-import { SettingsRow, SettingsSection } from "../ui";
+import { SettingsRow, SettingsSection } from "../../../features/settings";
 
 const THEME_LABEL_ID = "appearance-theme-label";
 const COLORBLIND_LABEL_ID = "appearance-colorblind-label";

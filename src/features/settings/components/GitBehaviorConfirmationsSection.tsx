@@ -4,7 +4,7 @@ import { Switch } from "../../../shared/ui";
 import { useSettingsStore } from "../../../store/useSettingsStore";
 import { HelpTooltip } from "../../../components/settings/HelpTooltip";
 import { ConfirmationsDiagram } from "../../../components/settings/helpDiagrams";
-import { SettingsRow, SettingsSection } from "../../../components/settings/ui";
+import { SettingsRow, SettingsSection } from "./ui";
 
 /** Safety confirmation switches: discard, delete branch, and force-push warnings. */
 export const GitBehaviorConfirmationsSection: React.FC = () => {

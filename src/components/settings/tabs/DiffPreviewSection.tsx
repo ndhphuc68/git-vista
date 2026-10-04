@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "../../../i18n";
 import { useSettingsStore } from "../../../store/useSettingsStore";
-import { SettingsSection } from "../ui";
+import { SettingsSection } from "../../../features/settings";
 
 export const DiffPreviewSection: React.FC = () => {
   const { t } = useTranslation();

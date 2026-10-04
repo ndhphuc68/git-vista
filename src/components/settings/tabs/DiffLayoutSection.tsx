@@ -9,7 +9,7 @@ import {
 } from "../../../store/useSettingsStore";
 import { HelpTooltip } from "../HelpTooltip";
 import { DiffModeDiagram } from "../helpDiagrams";
-import { SettingsRow, SettingsSection } from "../ui";
+import { SettingsRow, SettingsSection } from "../../../features/settings";
 
 const FONT_SIZES: DiffFontSize[] = [12, 13, 14, 16];
 const TAB_SIZES: DiffTabSize[] = [2, 4, 8];

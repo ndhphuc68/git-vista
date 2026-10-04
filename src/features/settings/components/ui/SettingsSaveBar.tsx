@@ -1,7 +1,7 @@
 import React from "react";
 import { Check } from "lucide-react";
-import { useTranslation } from "../../../i18n";
-import { Button } from "../../../shared/ui";
+import { useTranslation } from "../../../../i18n";
+import { Button } from "../../../../shared/ui";
 
 export interface SettingsSaveBarProps {
   visible: boolean;

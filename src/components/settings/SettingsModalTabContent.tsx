@@ -2,11 +2,14 @@ import React from "react";
 import { type SettingsTab } from "../../store/useSettingsStore";
 import { GitProfileTab } from "./tabs/GitProfileTab";
 import { AppearanceTab } from "./tabs/AppearanceTab";
-import { GitBehaviorTab } from "../../features/settings";
 import { DiffViewerTab } from "./tabs/DiffViewerTab";
 import { ExternalToolsTab } from "./tabs/ExternalToolsTab";
 import { GitHubSettingsTab } from "./tabs/GitHubSettingsTab";
-import { SettingsScopeSelector, type SettingsScopeSelectorProps } from "./ui";
+import {
+  GitBehaviorTab,
+  SettingsScopeSelector,
+  type SettingsScopeSelectorProps,
+} from "../../features/settings";
 
 export interface SettingsModalTabContentProps {
   activeTab: SettingsTab;

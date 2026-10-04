@@ -1,8 +1,13 @@
 import React from "react";
 import { Globe, FolderGit2 } from "lucide-react";
-import { useTranslation } from "../../../i18n";
-import { SegmentedControl, Select } from "../../../shared/ui";
-import type { RepoChoice } from "../settingsModalState.helpers";
+import { useTranslation } from "../../../../i18n";
+import { SegmentedControl, Select } from "../../../../shared/ui";
+
+/** A repository the settings scope can target. */
+export interface RepoChoice {
+  path: string;
+  label: string;
+}
 
 export interface SettingsScopeSelectorProps {
   hasRepo: boolean;

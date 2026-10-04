@@ -7,7 +7,7 @@ import {
   type DateFormat,
   type Locale,
 } from "../../../store/useSettingsStore";
-import { SettingsRow, SettingsSection } from "../ui";
+import { SettingsRow, SettingsSection } from "../../../features/settings";
 
 const LOCALE_LABEL_ID = "appearance-locale-label";
 

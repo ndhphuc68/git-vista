@@ -3,7 +3,7 @@ import { useTranslation } from "../../../i18n";
 import { Select } from "../../../shared/ui";
 import { useSettingsStore, type DefaultTerminal } from "../../../store/useSettingsStore";
 import { HelpTooltip } from "../HelpTooltip";
-import { SettingsRow, SettingsSection } from "../ui";
+import { SettingsRow, SettingsSection } from "../../../features/settings";
 
 /** Default terminal picker. */
 export const ExternalToolsTerminalSection: React.FC = () => {

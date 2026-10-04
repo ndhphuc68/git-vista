@@ -2,7 +2,7 @@ import React from "react";
 import { Lock } from "lucide-react";
 import { useTranslation } from "../../../i18n";
 import { Input, type InputProps } from "../../../shared/ui";
-import { SettingsRow, SettingsSection } from "../ui";
+import { SettingsRow, SettingsSection } from "../../../features/settings";
 
 export interface GitProfileIdentitySectionProps {
   showDefaultBranch: boolean;

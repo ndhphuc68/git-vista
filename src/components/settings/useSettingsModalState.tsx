@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "../../i18n";
 import { useTabStore } from "../../store/useTabStore";
-import type { SettingsScopeSelectorProps } from "./ui";
+import type { SettingsScopeSelectorProps } from "../../features/settings";
 import { buildNavGroups, buildRepoChoices, type NavGroup } from "./settingsModalState.helpers";
 
 export interface UseSettingsModalStateOptions {

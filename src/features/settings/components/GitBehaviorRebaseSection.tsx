@@ -3,7 +3,7 @@ import { useTranslation } from "../../../i18n";
 import { Switch } from "../../../shared/ui";
 import { HelpTooltip } from "../../../components/settings/HelpTooltip";
 import { AutostashDiagram } from "../../../components/settings/helpDiagrams";
-import { SettingsRow, SettingsSection } from "../../../components/settings/ui";
+import { SettingsRow, SettingsSection } from "./ui";
 
 export interface GitBehaviorRebaseSectionProps {
   rebaseAutostash: boolean;

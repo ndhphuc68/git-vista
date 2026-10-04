@@ -1,6 +1,6 @@
 import React from "react";
-import { useTranslation } from "../../../i18n";
-import { Button, Switch } from "../../../shared/ui";
+import { useTranslation } from "../../../../i18n";
+import { Button, Switch } from "../../../../shared/ui";
 import { SettingsRow } from "./SettingsRow";
 
 export interface SettingsInheritRowProps {

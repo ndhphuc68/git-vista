@@ -4,7 +4,7 @@ import { Switch } from "../../../shared/ui";
 import { useSettingsStore } from "../../../store/useSettingsStore";
 import { HelpTooltip } from "../HelpTooltip";
 import { WhitespaceDiagram } from "../helpDiagrams";
-import { SettingsRow, SettingsSection } from "../ui";
+import { SettingsRow, SettingsSection } from "../../../features/settings";
 
 /** Ignore-whitespace and line-number switches. */
 export const DiffOptionsSection: React.FC = () => {

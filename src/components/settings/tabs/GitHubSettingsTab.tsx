@@ -1,7 +1,7 @@
 import React from "react";
 import { RefreshCw } from "lucide-react";
 import { useTranslation } from "../../../i18n";
-import { SettingsPage, SettingsSection } from "../ui";
+import { SettingsPage, SettingsSection } from "../../../features/settings";
 import { useGitHubSettings } from "./useGitHubSettings";
 import { GitHubAccountCard } from "./GitHubAccountCard";
 import { GitHubTokenPanel } from "./GitHubTokenPanel";

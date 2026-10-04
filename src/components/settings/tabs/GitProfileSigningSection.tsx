@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "../../../i18n";
 import { Input, Switch } from "../../../shared/ui";
 import { HelpTooltip } from "../HelpTooltip";
-import { SettingsRow, SettingsSection } from "../ui";
+import { SettingsRow, SettingsSection } from "../../../features/settings";
 
 export interface GitProfileSigningSectionProps {
   locked: boolean;
