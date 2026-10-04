@@ -85,6 +85,7 @@ export function useGitProfileForm({
     setIsOverride: status.setIsOverride,
     setUserName: fields.setUserName,
     setUserEmail: fields.setUserEmail,
+    setDefaultBranch: fields.setDefaultBranch,
     setGpgSign: fields.setGpgSign,
     setGpgKey: fields.setGpgKey,
     showSuccess,

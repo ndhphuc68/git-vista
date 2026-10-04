@@ -2,6 +2,7 @@ import type { FormEvent } from "react";
 import { getGitConfig, setGitConfig } from "../../../features/settings";
 import type { GitConfigDto } from "../../../ipc/client";
 import type { Translations } from "../../../i18n/vi";
+import { applyProfileFields } from "./useGitProfileForm.load";
 
 export interface GitProfileActionsContext {
   activeScope: "global" | "repo";
@@ -20,6 +21,7 @@ export interface GitProfileActionsContext {
   setIsOverride: (value: boolean) => void;
   setUserName: (value: string) => void;
   setUserEmail: (value: string) => void;
+  setDefaultBranch: (value: string) => void;
   setGpgSign: (value: boolean) => void;
   setGpgKey: (value: string) => void;
   showSuccess: (message: string) => void;
@@ -65,25 +67,22 @@ export function createSaveHandler(context: GitProfileActionsContext) {
       } else {
         await setGitConfig(null, "global", "user.name", userName.trim());
         await setGitConfig(null, "global", "user.email", userEmail.trim());
-        await setGitConfig(
-          null,
-          "global",
-          "init.defaultBranch",
-          defaultBranch.trim() || "main"
-        );
+        await setGitConfig(null, "global", "init.defaultBranch", defaultBranch.trim() || "main");
         await setGitConfig(null, "global", "commit.gpgsign", String(gpgSign));
         await setGitConfig(null, "global", "user.signingkey", gpgKey.trim());
       }
 
       showSuccess(t.settings.profile.savedSuccess);
 
-      // Reload config
+      // Reload config and re-seed the fields so the form matches what was stored
       const updatedGlobal = await getGitConfig(null);
       setGlobalConfig(updatedGlobal);
+      let updatedLocal: GitConfigDto | null = null;
       if (currentRepoPath) {
-        const updatedLocal = await getGitConfig(currentRepoPath);
+        updatedLocal = await getGitConfig(currentRepoPath);
         setLocalConfig(updatedLocal);
       }
+      applyProfileFields(context, activeScope, updatedGlobal, updatedLocal);
     } catch (err) {
       console.error("Failed to save git config:", err);
       showError(String(err));
@@ -149,8 +148,7 @@ export interface GitProfileSelectInheritContext {
 
 /** Switches the repo scope back to inheriting the global identity (without saving yet). */
 export function createSelectInheritHandler(context: GitProfileSelectInheritContext) {
-  const { globalConfig, setIsOverride, setUserName, setUserEmail, setGpgSign, setGpgKey } =
-    context;
+  const { globalConfig, setIsOverride, setUserName, setUserEmail, setGpgSign, setGpgKey } = context;
   return () => {
     setIsOverride(false);
     if (globalConfig) {

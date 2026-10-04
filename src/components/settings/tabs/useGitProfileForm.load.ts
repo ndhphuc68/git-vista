@@ -17,22 +17,44 @@ export interface GitProfileLoadContext {
   setLoading: (value: boolean) => void;
 }
 
+export interface GitProfileFieldSetters {
+  setIsOverride: (value: boolean) => void;
+  setUserName: (value: string) => void;
+  setUserEmail: (value: string) => void;
+  setDefaultBranch: (value: string) => void;
+  setGpgSign: (value: boolean) => void;
+  setGpgKey: (value: string) => void;
+}
+
+/** Seeds the form fields from the loaded config, the same way for initial load and after save. */
+export function applyProfileFields(
+  setters: GitProfileFieldSetters,
+  activeScope: "global" | "repo",
+  globalCfg: GitConfigDto,
+  localCfg: GitConfigDto | null
+): void {
+  if (activeScope === "repo" && localCfg) {
+    const fields = deriveRepoScopeFields(localCfg, globalCfg);
+    setters.setIsOverride(fields.isOverride);
+    setters.setUserName(fields.userName);
+    setters.setUserEmail(fields.userEmail);
+    setters.setGpgSign(fields.gpgSign);
+    setters.setGpgKey(fields.gpgKey);
+    return;
+  }
+  const fields = deriveGlobalScopeFields(globalCfg);
+  setters.setIsOverride(fields.isOverride);
+  setters.setUserName(fields.userName);
+  setters.setUserEmail(fields.userEmail);
+  setters.setDefaultBranch(fields.defaultBranch);
+  setters.setGpgSign(fields.gpgSign);
+  setters.setGpgKey(fields.gpgKey);
+}
+
 /** Loads the global (and, in repo scope, local) git config and seeds the form fields. */
 export function createLoadConfigHandler(context: GitProfileLoadContext) {
-  const {
-    currentRepoPath,
-    activeScope,
-    isMounted,
-    setGlobalConfig,
-    setLocalConfig,
-    setIsOverride,
-    setUserName,
-    setUserEmail,
-    setDefaultBranch,
-    setGpgSign,
-    setGpgKey,
-    setLoading,
-  } = context;
+  const { currentRepoPath, activeScope, isMounted, setGlobalConfig, setLocalConfig, setLoading } =
+    context;
 
   return async () => {
     setLoading(true);
@@ -48,22 +70,7 @@ export function createLoadConfigHandler(context: GitProfileLoadContext) {
         setLocalConfig(localCfg);
       }
 
-      if (activeScope === "repo" && localCfg) {
-        const fields = deriveRepoScopeFields(localCfg, globalCfg);
-        setIsOverride(fields.isOverride);
-        setUserName(fields.userName);
-        setUserEmail(fields.userEmail);
-        setGpgSign(fields.gpgSign);
-        setGpgKey(fields.gpgKey);
-      } else {
-        const fields = deriveGlobalScopeFields(globalCfg);
-        setIsOverride(fields.isOverride);
-        setUserName(fields.userName);
-        setUserEmail(fields.userEmail);
-        setDefaultBranch(fields.defaultBranch);
-        setGpgSign(fields.gpgSign);
-        setGpgKey(fields.gpgKey);
-      }
+      applyProfileFields(context, activeScope, globalCfg, localCfg);
     } catch (err) {
       console.error("Failed to load git config:", err);
     } finally {
