@@ -17,3 +17,10 @@ export const TOAST_PROGRESS_CLASS: Record<ToastType, string> = {
   error: "bg-rose-500",
   info: "bg-sky-500",
 };
+
+/** Left-edge accent indicator color, keyed by toast type. */
+export const TOAST_ACCENT_CLASS: Record<ToastType, string> = {
+  success: "bg-emerald-400",
+  error: "bg-rose-400",
+  info: "bg-sky-400",
+};
