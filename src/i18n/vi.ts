@@ -32,9 +32,6 @@ export const vi = {
     language: "Ngôn ngữ",
     title: "Cài đặt",
     description: "Tùy chỉnh hồ sơ Git, giao diện và hành vi ứng dụng",
-    scopeSwitcher: {
-      selectRepo: "Chọn Repository",
-    },
     tabs: {
       profile: "Hồ sơ Git",
       appearance: "Giao diện & Hiển thị",
@@ -50,6 +47,8 @@ export const vi = {
     },
     scope: {
       applyTo: "Áp dụng cho",
+      repoOnlyHint: "Chỉ áp dụng cho repository đang mở: {repo}",
+      globalHint: "Áp dụng cho mọi repository không ghi đè cấu hình riêng",
       useGlobal: "Dùng cấu hình Global",
       appWide: "Áp dụng cho toàn ứng dụng",
       lockedHint: 'Đang kế thừa từ Global. Tắt "Dùng cấu hình Global" để chỉnh sửa.',

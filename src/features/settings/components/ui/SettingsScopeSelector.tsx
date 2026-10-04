@@ -1,33 +1,24 @@
 import React from "react";
 import { Globe, FolderGit2 } from "lucide-react";
 import { useTranslation } from "../../../../i18n";
-import { SegmentedControl, Select } from "../../../../shared/ui";
-
-/** A repository the settings scope can target. */
-export interface RepoChoice {
-  path: string;
-  label: string;
-}
+import { SegmentedControl } from "../../../../shared/ui";
 
 export interface SettingsScopeSelectorProps {
   hasRepo: boolean;
   scope: "global" | "repo";
   onScopeChange: (scope: "global" | "repo") => void;
-  repos: RepoChoice[];
-  selectedRepoPath: string;
-  onRepoChange: (path: string) => void;
+  /** Display name of the repository open in the current tab. */
+  repoLabel: string;
 }
 
 const LABEL_ID = "settings-scope-label";
 
-/** "Apply to: Global | repo" picker shown at the top of the Git config tabs. */
+/** "Apply to: Global | current repo" picker shown at the top of the Git config tabs. */
 export const SettingsScopeSelector: React.FC<SettingsScopeSelectorProps> = ({
   hasRepo,
   scope,
   onScopeChange,
-  repos,
-  selectedRepoPath,
-  onRepoChange,
+  repoLabel,
 }) => {
   const { t } = useTranslation();
   const globalLabel = (
@@ -48,42 +39,39 @@ export const SettingsScopeSelector: React.FC<SettingsScopeSelectorProps> = ({
     );
   }
 
-  const repoLabel = repos.find((repo) => repo.path === selectedRepoPath)?.label ?? "";
+  const hint =
+    scope === "repo"
+      ? t.settings.scope.repoOnlyHint.replace("{repo}", repoLabel)
+      : t.settings.scope.globalHint;
 
   return (
-    <div data-testid="scope-switcher" className="flex flex-wrap items-center gap-3">
-      <span id={LABEL_ID} className="text-xs text-secondary">
-        {t.settings.scope.applyTo}
-      </span>
-      <SegmentedControl
-        aria-labelledby={LABEL_ID}
-        value={scope}
-        onChange={onScopeChange}
-        options={[
-          { value: "global", label: globalLabel, testId: "scope-btn-global" },
-          {
-            value: "repo",
-            label: (
-              <>
-                <FolderGit2 size={14} />
-                <span className="font-mono">{repoLabel}</span>
-              </>
-            ),
-            testId: "scope-btn-repo",
-          },
-        ]}
-      />
-      {scope === "repo" && repos.length > 1 && (
-        <Select
-          data-testid="scope-repo-select"
-          aria-label={t.settings.scopeSwitcher.selectRepo}
-          value={selectedRepoPath}
-          onChange={onRepoChange}
-          options={repos.map((repo) => ({ value: repo.path, label: repo.label }))}
-          mono
-          className="w-48"
+    <div data-testid="scope-switcher" className="flex flex-col gap-1.5">
+      <div className="flex flex-wrap items-center gap-3">
+        <span id={LABEL_ID} className="text-xs text-secondary">
+          {t.settings.scope.applyTo}
+        </span>
+        <SegmentedControl
+          aria-labelledby={LABEL_ID}
+          value={scope}
+          onChange={onScopeChange}
+          options={[
+            { value: "global", label: globalLabel, testId: "scope-btn-global" },
+            {
+              value: "repo",
+              label: (
+                <>
+                  <FolderGit2 size={14} />
+                  <span className="font-mono">{repoLabel}</span>
+                </>
+              ),
+              testId: "scope-btn-repo",
+            },
+          ]}
         />
-      )}
+      </div>
+      <p data-testid="scope-hint" className="m-0 text-xs text-secondary">
+        {hint}
+      </p>
     </div>
   );
 };

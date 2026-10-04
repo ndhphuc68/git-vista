@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "../../i18n";
 import { useTabStore } from "../../store/useTabStore";
 import type { SettingsScopeSelectorProps } from "../../features/settings";
-import { buildNavGroups, buildRepoChoices, type NavGroup } from "./settingsModalState.helpers";
+import { buildNavGroups, currentRepoLabel, type NavGroup } from "./settingsModalState.helpers";
 
 export interface UseSettingsModalStateOptions {
   currentRepoPath: string | null;
@@ -16,7 +16,7 @@ export interface UseSettingsModalStateResult {
   effectiveRepoPath: string | null;
 }
 
-/** Owns the scope/repo-selection state and derived values for the settings modal. */
+/** Owns the global/repo scope state for the settings modal; repo scope always targets the current repo. */
 export function useSettingsModalState({
   currentRepoPath,
   isSettingsOpen,
@@ -27,17 +27,14 @@ export function useSettingsModalState({
   const [scope, setScope] = useState<"global" | "repo">(() =>
     currentRepoPath ? "repo" : "global"
   );
-  const [selectedRepoPath, setSelectedRepoPath] = useState<string>(currentRepoPath || "");
 
   useEffect(() => {
     if (!isSettingsOpen) return;
-    setSelectedRepoPath(currentRepoPath || "");
     setScope(currentRepoPath ? "repo" : "global");
   }, [currentRepoPath, isSettingsOpen]);
 
   const effectiveScope = currentRepoPath ? scope : "global";
-  const repoPath = selectedRepoPath || currentRepoPath || "";
-  const effectiveRepoPath = effectiveScope === "repo" ? repoPath : null;
+  const effectiveRepoPath = effectiveScope === "repo" ? currentRepoPath : null;
 
   return {
     navGroups: buildNavGroups(t),
@@ -45,9 +42,7 @@ export function useSettingsModalState({
       hasRepo: Boolean(currentRepoPath),
       scope: effectiveScope,
       onScopeChange: setScope,
-      repos: buildRepoChoices(tabs, currentRepoPath),
-      selectedRepoPath: repoPath,
-      onRepoChange: setSelectedRepoPath,
+      repoLabel: currentRepoPath ? currentRepoLabel(tabs, currentRepoPath) : "",
     },
     effectiveScope,
     effectiveRepoPath,

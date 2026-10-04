@@ -6,14 +6,12 @@ const base: SettingsScopeSelectorProps = {
   hasRepo: true,
   scope: "repo",
   onScopeChange: () => {},
-  repos: [{ path: "d:/a", label: "alpha" }],
-  selectedRepoPath: "d:/a",
-  onRepoChange: () => {},
+  repoLabel: "alpha",
 };
 
 describe("SettingsScopeSelector", () => {
   it("shows a static global line without a repo", () => {
-    render(<SettingsScopeSelector {...base} hasRepo={false} scope="global" repos={[]} />);
+    render(<SettingsScopeSelector {...base} hasRepo={false} scope="global" repoLabel="" />);
     expect(screen.queryByTestId("scope-switcher")).not.toBeInTheDocument();
     expect(screen.queryByTestId("scope-btn-repo")).not.toBeInTheDocument();
   });
@@ -27,18 +25,17 @@ describe("SettingsScopeSelector", () => {
     expect(onScopeChange).toHaveBeenCalledWith("global");
   });
 
-  it("shows the repo picker only in repo scope with more than one repo", () => {
-    const repos = [...base.repos, { path: "d:/b", label: "beta" }];
-    const onRepoChange = vi.fn();
+  it("never offers a picker for other repositories", () => {
+    render(<SettingsScopeSelector {...base} />);
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("scope-repo-select")).not.toBeInTheDocument();
+  });
+
+  it("explains which repositories the current scope affects", () => {
     const { rerender } = render(<SettingsScopeSelector {...base} />);
-    expect(screen.queryByTestId("scope-repo-select")).not.toBeInTheDocument();
+    expect(screen.getByTestId("scope-hint")).toHaveTextContent("alpha");
 
-    rerender(<SettingsScopeSelector {...base} repos={repos} onRepoChange={onRepoChange} />);
-    fireEvent.click(screen.getByTestId("scope-repo-select"));
-    fireEvent.click(screen.getByRole("option", { name: "beta" }));
-    expect(onRepoChange).toHaveBeenCalledWith("d:/b");
-
-    rerender(<SettingsScopeSelector {...base} scope="global" repos={repos} />);
-    expect(screen.queryByTestId("scope-repo-select")).not.toBeInTheDocument();
+    rerender(<SettingsScopeSelector {...base} scope="global" />);
+    expect(screen.getByTestId("scope-hint")).not.toHaveTextContent("alpha");
   });
 });

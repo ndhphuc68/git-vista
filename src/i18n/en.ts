@@ -34,9 +34,6 @@ export const en: Translations = {
     language: "Language",
     title: "Settings",
     description: "Customize your Git profile, appearance, and application behavior",
-    scopeSwitcher: {
-      selectRepo: "Select Repository",
-    },
     tabs: {
       profile: "Git Profile",
       appearance: "Appearance & UX",
@@ -52,6 +49,8 @@ export const en: Translations = {
     },
     scope: {
       applyTo: "Apply to",
+      repoOnlyHint: "Applies only to the open repository: {repo}",
+      globalHint: "Applies to every repository without its own override",
       useGlobal: "Use global configuration",
       appWide: "Applies app-wide",
       lockedHint: 'Inherited from Global. Turn off "Use global configuration" to edit.',

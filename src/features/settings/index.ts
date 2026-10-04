@@ -13,5 +13,4 @@ export {
   SettingsInheritRow,
   SettingsScopeSelector,
   type SettingsScopeSelectorProps,
-  type RepoChoice,
 } from "./components/ui";

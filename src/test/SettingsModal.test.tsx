@@ -76,19 +76,16 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
     expect(screen.getByTestId("scope-btn-repo")).toHaveAttribute("aria-checked", "false");
   });
 
-  it("cho phép chọn giữa các repository khác nhau khi có nhiều repo mở", async () => {
+  it("limits repo scope to the open repository even when several repos are open", async () => {
     useTabStore.getState().openRepoTab(mockRepo1);
     useTabStore.getState().openRepoTab(mockRepo2);
 
     render(<SettingsModal currentRepoPath={mockRepo1.path} />);
 
-    const select = screen.getByTestId("scope-repo-select");
-    expect(select).toBeInTheDocument();
-
-    // Select project-beta
-    fireEvent.click(select);
-    fireEvent.click(screen.getByRole("option", { name: "project-beta" }));
-    expect(screen.getByTestId("scope-repo-select")).toHaveTextContent("project-beta");
+    expect(await screen.findByTestId("scope-btn-repo")).toHaveTextContent("project-alpha");
+    expect(screen.queryByTestId("scope-repo-select")).not.toBeInTheDocument();
+    expect(screen.queryByText("project-beta")).not.toBeInTheDocument();
+    expect(screen.getByTestId("scope-hint")).toHaveTextContent("project-alpha");
   });
 
   it("hỗ trợ toggle Kế thừa từ Global / Ghi đè cho repo này trong GitProfileTab", async () => {

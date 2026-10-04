@@ -3,7 +3,6 @@ import { User, Palette, Sliders, FileCode, Terminal, GitPullRequest } from "luci
 import type { Translations } from "../../i18n/vi";
 import type { SettingsTab } from "../../store/useSettingsStore";
 import type { TabItem } from "../../types/tab";
-import type { RepoChoice } from "../../features/settings";
 
 export interface NavItem {
   id: SettingsTab;
@@ -54,16 +53,8 @@ export function repoDisplayName(path: string): string {
   return path.split(/[/\\]/).filter(Boolean).pop() || path;
 }
 
-/** Open repo tabs as scope choices; always includes the current repo. */
-export function buildRepoChoices(tabs: TabItem[], currentRepoPath: string | null): RepoChoice[] {
-  const choices = tabs
-    .filter((tab) => tab.type === "repo" && tab.repo)
-    .map((tab) => ({
-      path: tab.id,
-      label: tab.alias || tab.repo?.name || repoDisplayName(tab.id),
-    }));
-  if (currentRepoPath && !choices.some((choice) => choice.path === currentRepoPath)) {
-    choices.unshift({ path: currentRepoPath, label: repoDisplayName(currentRepoPath) });
-  }
-  return choices;
+/** Label for the current repo: its tab alias, then repo name, then the last path segment. */
+export function currentRepoLabel(tabs: TabItem[], currentRepoPath: string): string {
+  const tab = tabs.find((item) => item.type === "repo" && item.id === currentRepoPath);
+  return tab?.alias || tab?.repo?.name || repoDisplayName(currentRepoPath);
 }

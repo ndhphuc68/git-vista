@@ -3,8 +3,4 @@ export { SettingsSection, type SettingsSectionProps } from "./SettingsSection";
 export { SettingsRow, type SettingsRowProps } from "./SettingsRow";
 export { SettingsSaveBar, type SettingsSaveBarProps } from "./SettingsSaveBar";
 export { SettingsInheritRow, type SettingsInheritRowProps } from "./SettingsInheritRow";
-export {
-  SettingsScopeSelector,
-  type SettingsScopeSelectorProps,
-  type RepoChoice,
-} from "./SettingsScopeSelector";
+export { SettingsScopeSelector, type SettingsScopeSelectorProps } from "./SettingsScopeSelector";

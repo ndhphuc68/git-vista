@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   buildNavGroups,
-  buildRepoChoices,
+  currentRepoLabel,
   isGitConfigTab,
   repoDisplayName,
 } from "./settingsModalState.helpers";
@@ -30,21 +30,14 @@ describe("settingsModalState helpers", () => {
     expect(isGitConfigTab("appearance")).toBe(false);
   });
 
-  it("uses alias, then repo name, for repo choices", () => {
-    const choices = buildRepoChoices(
-      [repoTab("d:/a", "alpha", "Work"), repoTab("d:/b", "beta")],
-      "d:/a"
-    );
-    expect(choices).toEqual([
-      { path: "d:/a", label: "Work" },
-      { path: "d:/b", label: "beta" },
-    ]);
+  it("labels the current repo by alias, then repo name", () => {
+    const tabs = [repoTab("d:/a", "alpha", "Work"), repoTab("d:/b", "beta")];
+    expect(currentRepoLabel(tabs, "d:/a")).toBe("Work");
+    expect(currentRepoLabel(tabs, "d:/b")).toBe("beta");
   });
 
-  it("adds the current repo when no tab matches it", () => {
-    expect(buildRepoChoices([], "d:/work/gamma")).toEqual([
-      { path: "d:/work/gamma", label: "gamma" },
-    ]);
+  it("falls back to the path when no tab matches the current repo", () => {
+    expect(currentRepoLabel([], "d:/work/gamma")).toBe("gamma");
   });
 
   it("derives a display name from the last path segment", () => {
