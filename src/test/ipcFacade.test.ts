@@ -13,7 +13,7 @@ import { invokeCommand } from "../ipc/client";
  */
 describe("invokeCommand facade", () => {
   it("exposes every command from the Rust surface", () => {
-    expect(Object.keys(invokeCommand)).toHaveLength(78);
+    expect(Object.keys(invokeCommand)).toHaveLength(79);
   });
 
   it("exposes at least one command from each domain module", () => {
@@ -35,6 +35,7 @@ describe("invokeCommand facade", () => {
       "getGitConfig", // config
       "getGitHubToken", // github
       "undoCommit", // undo
+      "openInEditor", // editor
     ];
 
     for (const name of representatives) {

@@ -89,7 +89,8 @@ pub fn create_specta_builder() -> Builder<tauri::Wry> {
             get_github_token,
             save_github_token,
             remove_github_token,
-            checkout_pull_request
+            checkout_pull_request,
+            open_in_editor
         ])
         // Registered for their types only. `collect_events!` would also emit a
         // listener helper whose name is derived from the struct

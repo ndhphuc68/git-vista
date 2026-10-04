@@ -17,6 +17,7 @@ import { commitActionCommands } from "./commitActions";
 import { compareCommands } from "./compare";
 import { configCommands } from "./config";
 import { conflictCommands } from "./conflict";
+import { editorCommands } from "./editor";
 import { githubCommands } from "./github";
 import { historyCommands } from "./history";
 import { mergeCommands } from "./merge";
@@ -55,6 +56,7 @@ export const invokeCommand = withGlobalLoading({
   ...configCommands,
   ...githubCommands,
   ...undoCommands,
+  ...editorCommands,
 });
 
 export async function listenToRepoChanged(

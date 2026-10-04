@@ -11,7 +11,7 @@ use specta_typescript::{semantic::Configuration, Typescript};
 /// Commands registered in `create_specta_builder`. Kept here so a command that
 /// silently drops out of the builder fails this test instead of quietly
 /// disappearing from the bindings.
-const EXPECTED_COMMAND_COUNT: usize = 78;
+const EXPECTED_COMMAND_COUNT: usize = 79;
 
 fn output_path() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))

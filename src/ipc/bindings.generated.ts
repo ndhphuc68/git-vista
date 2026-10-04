@@ -82,6 +82,8 @@ export const commands = {
 	saveGithubToken: (token: string) => typedError<null, AppError>(__TAURI_INVOKE("save_github_token", { token })),
 	removeGithubToken: () => typedError<null, AppError>(__TAURI_INVOKE("remove_github_token")),
 	checkoutPullRequest: (repoPath: string, prNumber: number) => typedError<CheckoutPrResult, AppError>(__TAURI_INVOKE("checkout_pull_request", { repoPath, prNumber })),
+	/**  Opens the repository folder in the user's external editor. */
+	openInEditor: (repoPath: string, editor: string, customCommand: string | null) => typedError<null, AppError>(__TAURI_INVOKE("open_in_editor", { repoPath, editor, customCommand })),
 };
 
 /* Types */

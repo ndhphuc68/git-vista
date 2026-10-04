@@ -850,6 +850,8 @@ export const en: Translations = {
     pushNormal: "Push commits to remote",
     fetchTitle: "Fetch from remote",
     pullTitle: "Pull latest commits from remote",
+    openInEditor: "Open repository in editor",
+    editorNotFound: "{program} was not found. Check your PATH or Settings › Tools.",
   },
   palette: {
     categories: {
