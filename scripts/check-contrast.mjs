@@ -35,24 +35,42 @@ function getContrastRatio(hex1, hex2) {
   return (brightest + 0.05) / (darkest + 0.05);
 }
 
-// Color palettes from tokens.css (Studio Graphite unified theme & Colorblind mode)
+// Color palettes from tokens.css (VS Code Dark Modern, Light Modern & Colorblind modes)
 const testSuites = [
   {
-    theme: "Studio Graphite (Unified Theme)",
+    theme: "VS Code Dark Modern (Default Dark)",
     checks: [
-      { name: "Chữ chính trên Nền cửa sổ", fg: "#E5E8EC", bg: "#21252B", minRatio: 4.5 },
-      { name: "Chữ chính trên Bề mặt nổi", fg: "#E5E8EC", bg: "#282C34", minRatio: 4.5 },
-      { name: "Chữ phụ trên Bề mặt nổi", fg: "#9DA5B4", bg: "#282C34", minRatio: 4.5 },
-      { name: "Accent trên Bề mặt nổi", fg: "#409EFF", bg: "#282C34", minRatio: 4.5 },
-      { name: "Chữ Diff Thêm trên Nền Diff Thêm", fg: "#49D184", bg: "#1C3328", minRatio: 4.5 },
-      { name: "Chữ Diff Xoá trên Nền Diff Xoá", fg: "#F56C6C", bg: "#3B1D22", minRatio: 4.5 },
+      { name: "Primary text on window bg", fg: "#cccccc", bg: "#181818", minRatio: 4.5 },
+      { name: "Primary text on surface bg", fg: "#cccccc", bg: "#1f1f1f", minRatio: 4.5 },
+      { name: "Secondary text on surface bg", fg: "#9d9d9d", bg: "#1f1f1f", minRatio: 4.5 },
+      { name: "Accent on surface bg", fg: "#3794ff", bg: "#1f1f1f", minRatio: 4.5 },
+      { name: "Diff add text on diff add bg", fg: "#49d184", bg: "#1e382b", minRatio: 4.5 },
+      { name: "Diff remove text on diff remove bg", fg: "#ff7b72", bg: "#421d23", minRatio: 4.5 },
     ],
   },
   {
-    theme: "Colorblind Mode",
+    theme: "VS Code Light Modern",
     checks: [
-      { name: "Diff Thêm (Xanh dương)", fg: "#38BDF8", bg: "#0C283E", minRatio: 4.5 },
-      { name: "Diff Xoá (Cam)", fg: "#FBBF24", bg: "#3E240C", minRatio: 4.5 },
+      { name: "Primary text on window bg", fg: "#1f1f1f", bg: "#f8f8f8", minRatio: 4.5 },
+      { name: "Primary text on surface bg", fg: "#1f1f1f", bg: "#ffffff", minRatio: 4.5 },
+      { name: "Secondary text on surface bg", fg: "#616161", bg: "#ffffff", minRatio: 4.5 },
+      { name: "Accent on surface bg", fg: "#005fb8", bg: "#ffffff", minRatio: 4.5 },
+      { name: "Diff add text on diff add bg", fg: "#1a7f37", bg: "#e6ffec", minRatio: 4.5 },
+      { name: "Diff remove text on diff remove bg", fg: "#cf222e", bg: "#ffebe9", minRatio: 4.5 },
+    ],
+  },
+  {
+    theme: "Colorblind Mode (Dark)",
+    checks: [
+      { name: "Diff add (Sky blue)", fg: "#38bdf8", bg: "#0c283e", minRatio: 4.5 },
+      { name: "Diff remove (Amber)", fg: "#fbbf24", bg: "#3e240c", minRatio: 4.5 },
+    ],
+  },
+  {
+    theme: "Colorblind Mode (Light)",
+    checks: [
+      { name: "Diff add (Blue)", fg: "#0969da", bg: "#ddf4ff", minRatio: 4.5 },
+      { name: "Diff remove (Gold/Brown)", fg: "#9a6700", bg: "#fff8c5", minRatio: 4.5 },
     ],
   },
 ];
