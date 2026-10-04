@@ -35,37 +35,24 @@ function getContrastRatio(hex1, hex2) {
   return (brightest + 0.05) / (darkest + 0.05);
 }
 
-// Bảng màu từ spec & tokens.css
+// Color palettes from tokens.css (Studio Graphite unified theme & Colorblind mode)
 const testSuites = [
   {
-    theme: "Light Theme",
+    theme: "Studio Graphite (Unified Theme)",
     checks: [
-      { name: "Chữ chính trên Nền cửa sổ", fg: "#1A1918", bg: "#F5F3F1", minRatio: 4.5 },
-      { name: "Chữ chính trên Bề mặt nổi", fg: "#1A1918", bg: "#FFFFFF", minRatio: 4.5 },
-      { name: "Chữ phụ trên Bề mặt nổi", fg: "#6B6764", bg: "#FFFFFF", minRatio: 4.5 },
-      { name: "Accent trên Bề mặt nổi", fg: "#2F6FEB", bg: "#FFFFFF", minRatio: 4.5 },
-      { name: "Chữ Diff Thêm trên Nền Diff Thêm", fg: "#0E4429", bg: "#DAFBE1", minRatio: 4.5 },
-      { name: "Chữ Diff Xoá trên Nền Diff Xoá", fg: "#82071E", bg: "#FFEBE9", minRatio: 4.5 },
+      { name: "Chữ chính trên Nền cửa sổ", fg: "#E5E8EC", bg: "#21252B", minRatio: 4.5 },
+      { name: "Chữ chính trên Bề mặt nổi", fg: "#E5E8EC", bg: "#282C34", minRatio: 4.5 },
+      { name: "Chữ phụ trên Bề mặt nổi", fg: "#9DA5B4", bg: "#282C34", minRatio: 4.5 },
+      { name: "Accent trên Bề mặt nổi", fg: "#409EFF", bg: "#282C34", minRatio: 4.5 },
+      { name: "Chữ Diff Thêm trên Nền Diff Thêm", fg: "#49D184", bg: "#1C3328", minRatio: 4.5 },
+      { name: "Chữ Diff Xoá trên Nền Diff Xoá", fg: "#F56C6C", bg: "#3B1D22", minRatio: 4.5 },
     ],
   },
   {
-    theme: "Dark Theme",
+    theme: "Colorblind Mode",
     checks: [
-      { name: "Chữ chính trên Nền cửa sổ", fg: "#EDEBE9", bg: "#1C1B1A", minRatio: 4.5 },
-      { name: "Chữ chính trên Bề mặt nổi", fg: "#EDEBE9", bg: "#252423", minRatio: 4.5 },
-      { name: "Chữ phụ trên Bề mặt nổi", fg: "#98938E", bg: "#252423", minRatio: 4.5 },
-      { name: "Accent trên Bề mặt nổi", fg: "#4D8DFF", bg: "#252423", minRatio: 4.5 },
-      { name: "Chữ Diff Thêm trên Nền Diff Thêm", fg: "#3FB950", bg: "#12261E", minRatio: 4.5 },
-      { name: "Chữ Diff Xoá trên Nền Diff Xoá", fg: "#F85149", bg: "#2D1416", minRatio: 4.5 },
-    ],
-  },
-  {
-    theme: "Colorblind Mode (Light & Dark)",
-    checks: [
-      { name: "Light: Diff Thêm (Xanh dương)", fg: "#0369A1", bg: "#E0F2FE", minRatio: 4.5 },
-      { name: "Light: Diff Xoá (Cam)", fg: "#B45309", bg: "#FEF3C7", minRatio: 4.5 },
-      { name: "Dark: Diff Thêm (Xanh dương)", fg: "#38BDF8", bg: "#0C283E", minRatio: 4.5 },
-      { name: "Dark: Diff Xoá (Cam)", fg: "#FBBF24", bg: "#3E240C", minRatio: 4.5 },
+      { name: "Diff Thêm (Xanh dương)", fg: "#38BDF8", bg: "#0C283E", minRatio: 4.5 },
+      { name: "Diff Xoá (Cam)", fg: "#FBBF24", bg: "#3E240C", minRatio: 4.5 },
     ],
   },
 ];

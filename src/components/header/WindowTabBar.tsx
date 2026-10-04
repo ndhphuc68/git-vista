@@ -25,7 +25,7 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
   return (
     <div
       data-testid="window-tab-bar"
-      className="flex items-end justify-between px-2 h-[40px] min-h-[40px] max-h-[40px] bg-[#ebf0f5] dark:bg-[#121722] border-b border-[#d2dbe4] dark:border-[#1e2533] select-none z-30 shrink-0 gap-2 pt-1.5"
+      className="flex items-end justify-between px-2 h-10 min-h-10 max-h-10 bg-window border-b border-border-subtle select-none z-30 shrink-0 gap-2 pt-1.5"
     >
       {/* Scrollable Tabs Container (100% hidden scrollbar across all platforms) */}
       <div className="flex items-end h-full gap-0 flex-1 min-w-0 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden no-scrollbar">
@@ -52,7 +52,7 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
           type="button"
           data-testid="btn-new-tab"
           onClick={handleNewTab}
-          className="flex items-center justify-center w-7 h-[30px] rounded-md text-secondary hover:text-primary hover:bg-surface/60 dark:hover:bg-white/[0.06] transition-colors ml-1 cursor-pointer shrink-0 mb-0.5 outline-none focus:outline-none focus-visible:outline-none"
+          className="flex items-center justify-center w-7 h-7 rounded-md text-secondary hover:text-primary hover:bg-surface-hover transition-colors ml-1 cursor-pointer shrink-0 mb-1 outline-none focus:outline-none focus-visible:outline-none"
           title="Mở tab mới (Home: Mở / Clone) (Ctrl+T)"
           aria-label="New tab"
         >
@@ -66,7 +66,7 @@ export const WindowTabBar: React.FC<WindowTabBarProps> = ({ onNewTab }) => {
           type="button"
           data-testid="btn-top-settings"
           onClick={() => openSettings()}
-          className="flex items-center justify-center w-7 h-7 rounded-md text-secondary hover:text-primary hover:bg-surface/60 dark:hover:bg-white/[0.06] transition-colors cursor-pointer outline-none focus:outline-none focus-visible:outline-none"
+          className="flex items-center justify-center w-7 h-7 rounded-md text-secondary hover:text-primary hover:bg-surface-hover transition-colors cursor-pointer outline-none focus:outline-none focus-visible:outline-none"
           title={`${t.settings.title} (Ctrl+,)`}
           aria-label={t.settings.title}
         >

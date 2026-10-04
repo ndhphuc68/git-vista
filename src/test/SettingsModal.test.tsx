@@ -151,8 +151,8 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
 
     // Switch to Appearance tab
     fireEvent.click(screen.getByRole("button", { name: /Giao diện & Hiển thị/i }));
-    expect(screen.getByText(/Chủ đề màu sắc/i)).toBeInTheDocument();
     expect(screen.getByText(/Định dạng thời gian/i)).toBeInTheDocument();
+    expect(screen.getByText(/Ảnh đại diện tác giả/i)).toBeInTheDocument();
 
     // Switch to Diff tab
     fireEvent.click(screen.getByRole("button", { name: /Trình xem Diff/i }));

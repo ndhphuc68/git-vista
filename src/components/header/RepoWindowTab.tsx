@@ -32,34 +32,34 @@ export const RepoWindowTab: React.FC<RepoWindowTabProps> = ({
         data-testid={`tab-${tab.id}`}
         onClick={onSelect}
         className={clsx(
-          "group relative flex items-center gap-2 px-3 h-[34px] rounded-t-lg text-[13px] cursor-pointer transition-colors shrink-0 min-w-[150px] max-w-[240px] select-none outline-none focus:outline-none focus-visible:outline-none ring-0",
+          "group relative flex items-center gap-2 px-3.5 h-[34px] rounded-t-lg text-[13px] cursor-pointer transition-colors shrink-0 min-w-[150px] max-w-[260px] select-none outline-none focus:outline-none focus-visible:outline-none ring-0",
           isActive
-            ? "bg-surface text-primary font-medium after:absolute after:-bottom-[1px] after:left-0 after:right-0 after:h-[2px] after:bg-surface"
-            : "text-secondary hover:text-primary hover:bg-surface/50 dark:hover:bg-white/[0.04] font-normal"
+            ? "bg-surface text-primary font-medium after:absolute after:-bottom-[1px] after:left-0 after:right-0 after:h-[2px] after:bg-surface border-t border-x border-border-subtle"
+            : "text-secondary hover:text-primary hover:bg-surface-hover/50 font-normal border-t border-x border-transparent"
         )}
         title={`${repoName} - ${tab.id}`}
       >
         <FolderGit2
-          size={15}
+          size={14}
           className={clsx(
-            "shrink-0",
+            "shrink-0 transition-colors",
             isActive ? "text-accent" : "text-secondary group-hover:text-primary"
           )}
         />
-        <span className="truncate">{repoName}</span>
+        <span className="truncate font-semibold">{repoName}</span>
 
         {branchName && (
           <span
             className={clsx(
-              "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono shrink-0 max-w-[85px] truncate border",
+              "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono shrink-0 max-w-[120px] truncate border",
               isActive
-                ? "bg-accent-subtle text-accent border-accent/25 font-semibold"
-                : "bg-surface-header/40 text-secondary border-border-subtle/50"
+                ? "bg-accent-subtle text-accent border-accent/30 font-medium"
+                : "bg-surface-active/70 text-secondary border-border-subtle/60"
             )}
             title={`Branch: ${branchName}`}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-            <GitBranch size={9} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+            <GitBranch size={10} className="shrink-0 text-emerald-400" />
             <span className="truncate">{branchName}</span>
           </span>
         )}
@@ -71,15 +71,13 @@ export const RepoWindowTab: React.FC<RepoWindowTabProps> = ({
             e.stopPropagation();
             onClose();
           }}
-          className="ml-auto flex items-center justify-center w-5 h-5 rounded hover:bg-surface-hover dark:hover:bg-white/10 text-secondary hover:text-primary transition-colors shrink-0 outline-none focus:outline-none"
+          className="ml-auto flex items-center justify-center w-5 h-5 rounded hover:bg-surface-hover text-secondary hover:text-primary transition-colors shrink-0 outline-none focus:outline-none"
           aria-label={`Close tab ${repoName}`}
         >
-          <X size={12} strokeWidth={1.75} />
+          <X size={12} strokeWidth={2} />
         </button>
       </div>
-      {showSeparator && (
-        <div className="h-4 w-[1px] bg-border-subtle/80 dark:bg-slate-700/60 my-auto shrink-0 mx-0.5" />
-      )}
+      {showSeparator && <div className="h-4 w-px bg-border-subtle/80 my-auto shrink-0 mx-0.5" />}
     </>
   );
 };

@@ -63,7 +63,7 @@ describe("Visual Git Client - M1 App Shell", () => {
     });
   });
 
-  it("cho phép chuyển đổi theme Light -> Dark và cập nhật data-theme vào HTML", async () => {
+  it("không còn nút chuyển đổi theme Light/Dark do ứng dụng sử dụng bộ khung màu thống nhất", async () => {
     render(<App />);
 
     await waitFor(() => {
@@ -72,17 +72,19 @@ describe("Visual Git Client - M1 App Shell", () => {
     fireEvent.click(screen.getByText("project-v3"));
 
     await waitFor(() => {
-      expect(document.documentElement.getAttribute("data-theme")).toBe("light");
+      expect(useRepoStore.getState().currentRepo).not.toBeNull();
     });
+
+    // Theme switcher buttons in ControlsBar no longer appear
+    expect(screen.queryByTitle("Theme: dark")).not.toBeInTheDocument();
+    expect(screen.queryByTitle("Theme: light")).not.toBeInTheDocument();
 
     const settingsBtn = screen.getByTitle("Cài đặt (Theme, Ngôn ngữ)");
     fireEvent.click(settingsBtn);
 
-    const darkBtn = screen.getByTitle("Theme: dark");
-    fireEvent.click(darkBtn);
-
-    expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
-    expect(useSettingsStore.getState().theme).toBe("dark");
+    // Theme switcher buttons in Settings > Appearance modal no longer appear
+    expect(screen.queryByTitle("Theme: dark")).not.toBeInTheDocument();
+    expect(screen.queryByTitle("Theme: light")).not.toBeInTheDocument();
   });
 
   it("hiển thị ConflictResolverScreen khi activeScreen là conflict và activeConflictFile được chọn", async () => {

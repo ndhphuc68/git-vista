@@ -1,6 +1,5 @@
 import React from "react";
 import { useTranslation } from "../../../i18n";
-import { AppearanceThemeSection } from "./AppearanceThemeSection";
 import { AppearanceLocaleSection } from "./AppearanceLocaleSection";
 import { AppearanceDateFormatSection } from "./AppearanceDateFormatSection";
 import { AppearanceAvatarSection } from "./AppearanceAvatarSection";
@@ -16,7 +15,6 @@ export const AppearanceTab: React.FC = () => {
         <p className="text-xs text-secondary">{t.settings.appearance.subtitle}</p>
       </div>
 
-      <AppearanceThemeSection />
       <AppearanceLocaleSection />
       <AppearanceDateFormatSection />
       <AppearanceAvatarSection />

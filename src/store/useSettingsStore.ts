@@ -80,6 +80,7 @@ function applyThemeAttributes(theme: "light" | "dark", colorblind: boolean) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
   root.setAttribute("data-theme", theme);
+  root.classList.add("dark");
   root.setAttribute("data-colorblind", colorblind ? "true" : "false");
 }
 
