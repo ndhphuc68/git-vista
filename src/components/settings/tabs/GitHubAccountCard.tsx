@@ -17,22 +17,22 @@ export const GitHubAccountCard: React.FC<GitHubAccountCardProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-between">
+    <div className="p-4 rounded-xl border border-border-subtle bg-surface-header/30 flex items-center justify-between">
       <div className="flex items-center gap-3">
         {connectedUser.avatar_url ? (
           <img
             src={connectedUser.avatar_url}
             alt={connectedUser.login}
-            className="w-10 h-10 rounded-full border border-emerald-500/30"
+            className="w-10 h-10 rounded-full border border-border-subtle"
           />
         ) : (
-          <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center font-bold text-emerald-600">
+          <div className="w-10 h-10 rounded-full bg-accent-subtle flex items-center justify-center font-bold text-accent">
             {connectedUser.login.charAt(0).toUpperCase()}
           </div>
         )}
         <div>
           <div className="text-xs text-secondary flex items-center gap-1.5">
-            <CheckCircle2 size={13} className="text-emerald-500" />
+            <CheckCircle2 size={13} className="text-diff-add-text" />
             <span>{t.settings.github.connectedAs}</span>
           </div>
           <a

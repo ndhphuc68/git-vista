@@ -1,58 +1,42 @@
 import React from "react";
 import { RefreshCw } from "lucide-react";
 import { useTranslation } from "../../../i18n";
+import { SettingsPage, SettingsSection } from "../ui";
 import { useGitHubSettings } from "./useGitHubSettings";
 import { GitHubAccountCard } from "./GitHubAccountCard";
 import { GitHubTokenPanel } from "./GitHubTokenPanel";
 
 export const GitHubSettingsTab: React.FC = () => {
   const { t } = useTranslation();
-  const {
-    token,
-    setToken,
-    showToken,
-    setShowToken,
-    isLoading,
-    isTesting,
-    connectedUser,
-    errorMessage,
-    successMessage,
-    handleTestAndSave,
-    handleUseGhCli,
-    handleDisconnect,
-  } = useGitHubSettings();
+  const gh = useGitHubSettings();
 
-  if (isLoading) {
+  if (gh.isLoading) {
     return (
-      <div className="flex items-center justify-center p-12 text-secondary text-xs">
-        <RefreshCw size={16} className="animate-spin mr-2" />
-        <span>Đang tải cấu hình GitHub...</span>
+      <div className="flex items-center justify-center p-12 text-xs text-secondary">
+        <RefreshCw size={16} className="mr-2 animate-spin" />
+        <span>{t.settings.github.loading}</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-base font-semibold text-primary mb-1">{t.settings.github.title}</h3>
-        <p className="text-xs text-secondary">{t.settings.github.description}</p>
-      </div>
-
-      {connectedUser && (
-        <GitHubAccountCard connectedUser={connectedUser} onDisconnect={handleDisconnect} />
+    <SettingsPage title={t.settings.github.title} description={t.settings.github.description}>
+      {gh.connectedUser && (
+        <GitHubAccountCard connectedUser={gh.connectedUser} onDisconnect={gh.handleDisconnect} />
       )}
-
-      <GitHubTokenPanel
-        token={token}
-        onTokenChange={setToken}
-        showToken={showToken}
-        onToggleShowToken={() => setShowToken(!showToken)}
-        isTesting={isTesting}
-        onTestAndSave={handleTestAndSave}
-        onUseGhCli={handleUseGhCli}
-        errorMessage={errorMessage}
-        successMessage={successMessage}
-      />
-    </div>
+      <SettingsSection title={t.settings.sections.auth}>
+        <GitHubTokenPanel
+          token={gh.token}
+          onTokenChange={gh.setToken}
+          showToken={gh.showToken}
+          onToggleShowToken={() => gh.setShowToken(!gh.showToken)}
+          isTesting={gh.isTesting}
+          onTestAndSave={gh.handleTestAndSave}
+          onUseGhCli={gh.handleUseGhCli}
+          errorMessage={gh.errorMessage}
+          successMessage={gh.successMessage}
+        />
+      </SettingsSection>
+    </SettingsPage>
   );
 };

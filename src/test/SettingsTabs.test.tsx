@@ -72,11 +72,11 @@ describe("Settings Tabs Components", () => {
       expect(screen.getByText(/Tích hợp Công cụ Ngoài/i)).toBeInTheDocument();
 
       // Choose Cursor
-      fireEvent.click(screen.getByTestId("editor-option-cursor"));
+      pickOption("editor-select", /Cursor/);
       expect(useSettingsStore.getState().defaultEditor).toBe("cursor");
 
       // Choose Custom editor
-      fireEvent.click(screen.getByTestId("editor-option-custom"));
+      pickOption("editor-select", /Lệnh tùy chỉnh/);
       expect(useSettingsStore.getState().defaultEditor).toBe("custom");
 
       const customInput = screen.getByTestId("custom-editor-input");
@@ -85,7 +85,7 @@ describe("Settings Tabs Components", () => {
       expect(useSettingsStore.getState().customEditorCommand).toBe("nvim");
 
       // Choose PowerShell terminal
-      fireEvent.click(screen.getByTestId("terminal-option-powershell"));
+      pickOption("terminal-select", /PowerShell/);
       expect(useSettingsStore.getState().defaultTerminal).toBe("powershell");
     });
   });
