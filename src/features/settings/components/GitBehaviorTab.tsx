@@ -11,18 +11,15 @@ export interface GitBehaviorTabProps {
   toolbar?: React.ReactNode;
 }
 
-/**
- * Git behavior settings tab: pull strategy, fetch/rebase flags, safety
- * confirmations, and auto-fetch interval. Scope state lives in
- * `useSettingsModalState`; the scope selector arrives through `toolbar`.
- */
-export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
-  currentRepoPath,
-  scope: propScope,
-  toolbar,
-}) => {
+interface GitBehaviorTabBodyProps {
+  currentRepoPath: string | null;
+  scope?: "global" | "repo";
+}
+
+/** Inherit row and options of the behavior tab; remounted when the scope or repository changes. */
+const GitBehaviorTabBody: React.FC<GitBehaviorTabBodyProps> = ({ currentRepoPath, scope }) => {
   const { t } = useTranslation();
-  const s = useGitBehaviorSettings({ currentRepoPath, scope: propScope });
+  const s = useGitBehaviorSettings({ currentRepoPath, scope });
   const b = t.settings.behavior;
   const isRepoScope = s.activeScope === "repo" && Boolean(currentRepoPath);
   const inheriting = s.localPullRebase === null || s.localPullRebase === undefined;
@@ -36,7 +33,7 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
   };
 
   return (
-    <SettingsPage title={b.title} description={b.subtitle} toolbar={toolbar}>
+    <div className="space-y-6">
       {isRepoScope && (
         <SettingsInheritRow
           inheriting={inheriting}
@@ -61,6 +58,30 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
         onAutoFetchChange={s.handleAutoFetchChange}
         rebaseAutostash={s.rebaseAutostash}
         onToggleRebaseAutostash={s.handleToggleRebaseAutostash}
+      />
+    </div>
+  );
+};
+
+/**
+ * Git behavior settings tab: pull strategy, fetch/rebase flags, safety
+ * confirmations, and auto-fetch interval. Scope state lives in
+ * `useSettingsModalState`; the scope selector arrives through `toolbar`.
+ */
+export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
+  currentRepoPath,
+  scope,
+  toolbar,
+}) => {
+  const { t } = useTranslation();
+  const b = t.settings.behavior;
+
+  return (
+    <SettingsPage title={b.title} description={b.subtitle} toolbar={toolbar}>
+      <GitBehaviorTabBody
+        key={`${scope || (currentRepoPath ? "repo" : "global")}-${currentRepoPath}`}
+        currentRepoPath={currentRepoPath}
+        scope={scope}
       />
     </SettingsPage>
   );

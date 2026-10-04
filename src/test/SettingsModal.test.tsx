@@ -169,4 +169,28 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
     expect(screen.getByText(/Trình soạn thảo mã \/ IDE mặc định/i)).toBeInTheDocument();
     expect(screen.getByText(/Cửa sổ dòng lệnh \(Terminal\) mặc định/i)).toBeInTheDocument();
   });
+
+  it.each(["profile", "behavior"] as const)(
+    "keeps keyboard focus on the scope radio when switching scope with arrow keys (%s tab)",
+    async (tab) => {
+      useSettingsStore.getState().setActiveTab(tab);
+      useTabStore.getState().openRepoTab(mockRepo1);
+
+      render(<SettingsModal currentRepoPath={mockRepo1.path} />);
+
+      const repoBtn = await screen.findByTestId("scope-btn-repo");
+      repoBtn.focus();
+      fireEvent.keyDown(repoBtn, { key: "ArrowLeft" });
+
+      const globalBtn = screen.getByTestId("scope-btn-global");
+      expect(globalBtn).toHaveAttribute("aria-checked", "true");
+      expect(document.activeElement).toBe(globalBtn);
+
+      fireEvent.keyDown(globalBtn, { key: "ArrowRight" });
+
+      const repoBtnAfter = screen.getByTestId("scope-btn-repo");
+      expect(repoBtnAfter).toHaveAttribute("aria-checked", "true");
+      expect(document.activeElement).toBe(repoBtnAfter);
+    }
+  );
 });

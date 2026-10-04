@@ -28,10 +28,7 @@ export const SettingsModalTabContent: React.FC<SettingsModalTabContentProps> = (
   const toolbar = <SettingsScopeSelector {...scopeSelector} />;
 
   return (
-    <div
-      key={`${activeTab}-${effectiveScope}-${effectiveRepoPath}`}
-      className="mx-auto max-w-3xl animate-fade-in pb-8"
-    >
+    <div key={activeTab} className="mx-auto max-w-3xl animate-fade-in pb-8">
       {activeTab === "profile" && (
         <GitProfileTab
           scope={effectiveScope}

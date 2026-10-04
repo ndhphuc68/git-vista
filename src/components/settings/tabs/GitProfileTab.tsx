@@ -20,25 +20,22 @@ function formatIdentity(config: GitConfigDto | null): string {
   return config.userEmail ? `${config.userName} <${config.userEmail}>` : config.userName;
 }
 
-export const GitProfileTab: React.FC<GitProfileTabProps> = ({
-  currentRepoPath,
-  scope: propScope,
-  toolbar,
-}) => {
+interface GitProfileTabBodyProps {
+  currentRepoPath: string | null;
+  activeScope: "global" | "repo";
+}
+
+/** Form and sections of the profile tab; remounted when the scope or repository changes. */
+const GitProfileTabBody: React.FC<GitProfileTabBodyProps> = ({ currentRepoPath, activeScope }) => {
   const { t } = useTranslation();
   const { commitMessageLimit, setCommitMessageLimit } = useSettingsStore();
-  const activeScope = propScope || (currentRepoPath ? "repo" : "global");
   const form = useGitProfileForm({ currentRepoPath, activeScope });
   const isRepoScope = activeScope === "repo" && Boolean(currentRepoPath);
   const locked = isRepoScope && !form.isOverride;
 
   return (
     <form onSubmit={form.handleSave}>
-      <SettingsPage
-        title={t.settings.profile.title}
-        description={t.settings.profile.subtitle}
-        toolbar={toolbar}
-      >
+      <div className="space-y-6">
         {isRepoScope && (
           <SettingsInheritRow
             inheriting={!form.isOverride}
@@ -72,7 +69,7 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
           commitMessageLimit={commitMessageLimit}
           onCommitMessageLimitChange={setCommitMessageLimit}
         />
-      </SettingsPage>
+      </div>
       <SettingsSaveBar
         visible={form.isDirty && !form.loading}
         saving={form.saving}
@@ -81,5 +78,28 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
         onDiscard={form.handleDiscard}
       />
     </form>
+  );
+};
+
+export const GitProfileTab: React.FC<GitProfileTabProps> = ({
+  currentRepoPath,
+  scope: propScope,
+  toolbar,
+}) => {
+  const { t } = useTranslation();
+  const activeScope = propScope || (currentRepoPath ? "repo" : "global");
+
+  return (
+    <SettingsPage
+      title={t.settings.profile.title}
+      description={t.settings.profile.subtitle}
+      toolbar={toolbar}
+    >
+      <GitProfileTabBody
+        key={`${activeScope}-${currentRepoPath}`}
+        currentRepoPath={currentRepoPath}
+        activeScope={activeScope}
+      />
+    </SettingsPage>
   );
 };
