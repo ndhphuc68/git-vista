@@ -7,6 +7,7 @@ describe("getShortcutLabels", () => {
     expect(getShortcutLabels(true)).toEqual({
       shortcutLabel1: "Cmd+1",
       shortcutLabel2: "Cmd+2",
+      shortcutLabel3: "Cmd+3",
       shortcutSidebar: "Cmd+B",
     });
   });
@@ -15,6 +16,7 @@ describe("getShortcutLabels", () => {
     expect(getShortcutLabels(false)).toEqual({
       shortcutLabel1: "Ctrl+1",
       shortcutLabel2: "Ctrl+2",
+      shortcutLabel3: "Ctrl+3",
       shortcutSidebar: "Ctrl+B",
     });
   });

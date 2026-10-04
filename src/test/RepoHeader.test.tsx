@@ -330,4 +330,64 @@ describe("RepoHeader - Screen Switcher & View Store", () => {
     });
     expect(pushSpy).toHaveBeenCalled();
   });
+
+  it("renders pull requests tab and supports Cmd/Ctrl+3 when repo is on GitHub", async () => {
+    vi.spyOn(invokeCommand, "getRepoStatus").mockResolvedValue({
+      staged: [],
+      unstaged: [],
+      untracked: [],
+      conflicted: [],
+    });
+    vi.spyOn(invokeCommand, "getGitHubRepoInfo").mockResolvedValue({
+      is_github: true,
+      owner: "test-org",
+      repo: "test-repo",
+      default_branch: "main",
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <RepoHeader onBackToWelcome={mockOnBackToWelcome} />
+      </QueryClientProvider>
+    );
+
+    const prTab = await screen.findByTestId("tab-pull-requests");
+    expect(prTab).toBeInTheDocument();
+
+    const eventCmd3 = new KeyboardEvent("keydown", {
+      key: "3",
+      metaKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    fireEvent(window, eventCmd3);
+    expect(useViewStore.getState().activeScreen).toBe("pull-requests");
+    expect(eventCmd3.defaultPrevented).toBe(true);
+  });
+
+  it("guard effect redirects pull-requests screen to history when repo is not on GitHub", async () => {
+    useViewStore.getState().setActiveScreen("pull-requests");
+    vi.spyOn(invokeCommand, "getRepoStatus").mockResolvedValue({
+      staged: [],
+      unstaged: [],
+      untracked: [],
+      conflicted: [],
+    });
+    vi.spyOn(invokeCommand, "getGitHubRepoInfo").mockResolvedValue({
+      is_github: false,
+      owner: "",
+      repo: "",
+      default_branch: "main",
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <RepoHeader onBackToWelcome={mockOnBackToWelcome} />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => {
+      expect(useViewStore.getState().activeScreen).toBe("history");
+    });
+  });
 });

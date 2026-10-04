@@ -14,10 +14,13 @@ interface RepoHeaderScreenSwitcherProps {
   setActiveScreen: (screen: ActiveScreen) => void;
   shortcutLabel1: string;
   shortcutLabel2: string;
+  shortcutLabel3?: string;
   totalChanges: number;
+  isGitHub?: boolean;
+  openPrCount?: number;
 }
 
-/** Left cluster of the repo header: sidebar toggle and the history/changes screen tabs. */
+/** Left cluster of the repo header: sidebar toggle and the history/changes/pull-requests screen tabs. */
 export const RepoHeaderScreenSwitcher: React.FC<RepoHeaderScreenSwitcherProps> = ({
   t,
   sidebarOpen,
@@ -27,7 +30,10 @@ export const RepoHeaderScreenSwitcher: React.FC<RepoHeaderScreenSwitcherProps> =
   setActiveScreen,
   shortcutLabel1,
   shortcutLabel2,
+  shortcutLabel3,
   totalChanges,
+  isGitHub,
+  openPrCount,
 }) => {
   return (
     <div className="flex items-center gap-2.5 min-w-0 shrink">
@@ -52,7 +58,10 @@ export const RepoHeaderScreenSwitcher: React.FC<RepoHeaderScreenSwitcherProps> =
         setActiveScreen={setActiveScreen}
         shortcutLabel1={shortcutLabel1}
         shortcutLabel2={shortcutLabel2}
+        shortcutLabel3={shortcutLabel3}
         totalChanges={totalChanges}
+        isGitHub={isGitHub}
+        openPrCount={openPrCount}
       />
     </div>
   );

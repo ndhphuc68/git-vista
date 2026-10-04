@@ -3,13 +3,14 @@ import { type RepoSummary } from "../../ipc/bindings.generated";
 import { type ActiveScreen } from "../../store/useViewStore";
 
 /**
- * Cmd/Ctrl+1 (history), Cmd/Ctrl+2 (changes) and Cmd/Ctrl+B (toggle sidebar)
+ * Cmd/Ctrl+1 (history), Cmd/Ctrl+2 (changes), Cmd/Ctrl+3 (pull-requests) and Cmd/Ctrl+B (toggle sidebar)
  * keyboard shortcuts for the repo header, active only while a repo is open.
  */
 export function useRepoHeaderShortcuts(
   currentRepo: RepoSummary | null,
   setActiveScreen: (screen: ActiveScreen) => void,
-  toggleSidebar: () => void
+  toggleSidebar: () => void,
+  isGitHub?: boolean
 ) {
   useEffect(() => {
     if (!currentRepo) return;
@@ -21,6 +22,9 @@ export function useRepoHeaderShortcuts(
       } else if ((e.metaKey || e.ctrlKey) && e.key === "2") {
         e.preventDefault();
         setActiveScreen("changes");
+      } else if ((e.metaKey || e.ctrlKey) && e.key === "3" && isGitHub) {
+        e.preventDefault();
+        setActiveScreen("pull-requests");
       } else if ((e.metaKey || e.ctrlKey) && (e.key === "b" || e.key === "B")) {
         e.preventDefault();
         toggleSidebar();
@@ -31,5 +35,5 @@ export function useRepoHeaderShortcuts(
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [currentRepo, setActiveScreen, toggleSidebar]);
+  }, [currentRepo, setActiveScreen, toggleSidebar, isGitHub]);
 }

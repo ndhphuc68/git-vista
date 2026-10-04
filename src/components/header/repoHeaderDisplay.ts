@@ -11,6 +11,7 @@ export function detectIsMac(): boolean {
 export interface RepoHeaderShortcutLabels {
   shortcutLabel1: string;
   shortcutLabel2: string;
+  shortcutLabel3: string;
   shortcutSidebar: string;
 }
 
@@ -19,6 +20,7 @@ export function getShortcutLabels(isMac: boolean): RepoHeaderShortcutLabels {
   return {
     shortcutLabel1: isMac ? "Cmd+1" : "Ctrl+1",
     shortcutLabel2: isMac ? "Cmd+2" : "Ctrl+2",
+    shortcutLabel3: isMac ? "Cmd+3" : "Ctrl+3",
     shortcutSidebar: isMac ? "Cmd+B" : "Ctrl+B",
   };
 }

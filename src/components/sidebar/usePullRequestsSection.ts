@@ -4,8 +4,10 @@ import { useTranslation } from "../../i18n";
 import { useGitHubRepoInfo, useGitHubToken } from "../../features/github";
 import { fetchPullRequests } from "../../services/githubService";
 import { usePullRequestStore } from "../../store/usePullRequestStore";
+import { useViewStore } from "../../store/useViewStore";
 import { useToastStore } from "../../store/useToastStore";
 import { qk } from "../../domain/queryKeys";
+import { type GitHubPullRequest } from "../../ipc/githubApi";
 import { createPullRequestMenuActions } from "./usePullRequestsSection.actions";
 
 export type PullRequestsFilterTab = "open" | "mine" | "closed";
@@ -21,7 +23,7 @@ export function usePullRequestsSection(repoPath: string) {
   const [filterTab, setFilterTab] = useState<PullRequestsFilterTab>("open");
   const [activeMenuPr, setActiveMenuPr] = useState<number | null>(null);
 
-  const { openDrawer, openCreateModal } = usePullRequestStore();
+  const { openDrawer, openCreateModal, setSelectedPr } = usePullRequestStore();
   const { showToast, showSuccess, showError } = useToastStore();
 
   const { data: repoInfo } = useGitHubRepoInfo(repoPath);
@@ -55,6 +57,12 @@ export function usePullRequestsSection(repoPath: string) {
     openCreateModal();
   };
 
+  const handleOpenPr = (pr: GitHubPullRequest) => {
+    setSelectedPr(pr);
+    openDrawer(pr);
+    useViewStore.getState().setActiveScreen("pull-requests");
+  };
+
   const { handleCheckoutPr, handleOpenBrowser, handleCopyLink } = createPullRequestMenuActions({
     repoPath,
     t,
@@ -75,7 +83,7 @@ export function usePullRequestsSection(repoPath: string) {
     setFilterTab,
     activeMenuPr,
     setActiveMenuPr,
-    openDrawer,
+    openDrawer: handleOpenPr,
     repoInfo,
     prList,
     isLoading,

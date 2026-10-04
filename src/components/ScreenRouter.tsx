@@ -2,6 +2,7 @@ import React from "react";
 import { Shell } from "./Shell";
 import { ChangesScreen } from "./changes/ChangesScreen";
 import { ConflictResolverScreen } from "./conflict/ConflictResolverScreen";
+import { PullRequestsScreen } from "../features/pullrequests";
 import { type ActiveScreen } from "../store/useViewStore";
 
 interface ScreenRouterProps {
@@ -12,7 +13,7 @@ interface ScreenRouterProps {
   onResolveAndStage: (filePath: string, content: string, onResolved: () => void) => Promise<void>;
 }
 
-/** Picks the History, Changes or Conflict-resolver screen for the active repo. */
+/** Picks the History, Changes, Pull Requests or Conflict-resolver screen for the active repo. */
 export const ScreenRouter: React.FC<ScreenRouterProps> = ({
   activeScreen,
   activeConflictFile,
@@ -35,6 +36,10 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
         }
       />
     );
+  }
+
+  if (activeScreen === "pull-requests") {
+    return <PullRequestsScreen repoPath={repoPath} />;
   }
 
   return <ChangesScreen />;

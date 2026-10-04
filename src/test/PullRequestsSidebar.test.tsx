@@ -5,6 +5,7 @@ import { PullRequestsSection } from "../components/sidebar/PullRequestsSection";
 import * as githubService from "../services/githubService";
 import { invokeCommand } from "../ipc/client";
 import { usePullRequestStore } from "../store/usePullRequestStore";
+import { useViewStore } from "../store/useViewStore";
 import { vi as viTranslations } from "../i18n/vi";
 
 const t = viTranslations;
@@ -50,6 +51,9 @@ describe("PullRequestsSection", () => {
       selectedPr: null,
       isCreateModalOpen: false,
     });
+    useViewStore.setState({
+      activeScreen: "history",
+    });
   });
 
   it("renders PR items and triggers drawer on click", async () => {
@@ -89,10 +93,11 @@ describe("PullRequestsSection", () => {
     expect(await screen.findByText("Awesome Feature")).toBeInTheDocument();
     expect(screen.getByText("#101")).toBeInTheDocument();
 
-    // Click PR to open drawer
+    // Click PR to open drawer and switch screen
     fireEvent.click(screen.getByText("Awesome Feature"));
     expect(usePullRequestStore.getState().isDrawerOpen).toBe(true);
     expect(usePullRequestStore.getState().selectedPr?.number).toBe(101);
+    expect(useViewStore.getState().activeScreen).toBe("pull-requests");
   });
 
   it("opens create PR modal when clicking + button", async () => {

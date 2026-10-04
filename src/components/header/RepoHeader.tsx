@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
@@ -9,10 +9,17 @@ import { RemoteProgressBanner } from "../common/RemoteProgressBanner";
 import { useRemoteTask } from "../../features/remote/api";
 import { useRepoStatus } from "../../features/history";
 import { useRepoHeadInfo } from "../../features/repo";
+import { useGitHubRepoInfo } from "../../features/github";
+import { usePullRequests } from "../../features/pullrequests";
 import { useRepoHeaderShortcuts } from "./useRepoHeaderShortcuts";
 import { RepoHeaderScreenSwitcher } from "./RepoHeaderScreenSwitcher";
 import { RepoHeaderGitActions } from "./RepoHeaderGitActions";
-import { detectIsMac, getShortcutLabels, countTotalChanges, countAheadBehind } from "./repoHeaderDisplay";
+import {
+  detectIsMac,
+  getShortcutLabels,
+  countTotalChanges,
+  countAheadBehind,
+} from "./repoHeaderDisplay";
 
 interface RepoHeaderProps {
   onBackToWelcome?: () => void;
@@ -26,14 +33,23 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
   const { t, actions } = useTranslation();
 
   const { data: repoStatus } = useRepoStatus(currentRepo?.path ?? "");
-
   const { data: headInfo } = useRepoHeadInfo(currentRepo?.path);
+  const { data: repoInfo } = useGitHubRepoInfo(currentRepo?.path ?? "");
+  const { data: openPrs } = usePullRequests(currentRepo?.path ?? "");
 
   const remote = useRemoteTask(currentRepo?.path, Boolean(headInfo?.upstream));
+  const isGitHub = Boolean(repoInfo?.is_github);
 
-  const { shortcutLabel1, shortcutLabel2, shortcutSidebar } = getShortcutLabels(detectIsMac());
+  const { shortcutLabel1, shortcutLabel2, shortcutLabel3, shortcutSidebar } =
+    getShortcutLabels(detectIsMac());
 
-  useRepoHeaderShortcuts(currentRepo, setActiveScreen, toggleSidebar);
+  useRepoHeaderShortcuts(currentRepo, setActiveScreen, toggleSidebar, isGitHub);
+
+  useEffect(() => {
+    if (repoInfo && !repoInfo.is_github && activeScreen === "pull-requests") {
+      setActiveScreen("history");
+    }
+  }, [repoInfo, activeScreen, setActiveScreen]);
 
   if (!currentRepo) return null;
 
@@ -55,7 +71,10 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
           setActiveScreen={setActiveScreen}
           shortcutLabel1={shortcutLabel1}
           shortcutLabel2={shortcutLabel2}
+          shortcutLabel3={shortcutLabel3}
           totalChanges={totalChanges}
+          isGitHub={isGitHub}
+          openPrCount={openPrs?.length}
         />
 
         <RepoHeaderGitActions
