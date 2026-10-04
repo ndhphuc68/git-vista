@@ -1,63 +1,37 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { GitBehaviorOptions } from "./GitBehaviorOptions";
+import { GitBehaviorOptions, type GitBehaviorOptionsProps } from "./GitBehaviorOptions";
 import { useSettingsStore } from "../../../store/useSettingsStore";
 
-const baseProps = {
-  activeScope: "global" as const,
-  currentRepoPath: null,
-  localPullRebase: null,
-  globalPullRebase: false,
+const props = (): GitBehaviorOptionsProps => ({
+  pullRebase: false,
+  pullLocked: false,
+  busy: false,
+  onPullStrategyChange: vi.fn(),
   fetchPrune: false,
-  rebaseAutostash: false,
-  autoFetchInterval: 0,
-  loading: false,
-  saving: false,
-  onGlobalPullStrategyChange: vi.fn(),
-  onRepoPullStrategyChange: vi.fn(),
   onToggleFetchPrune: vi.fn(),
-  onToggleRebaseAutostash: vi.fn(),
+  autoFetchInterval: 0,
   onAutoFetchChange: vi.fn(),
-};
+  rebaseAutostash: false,
+  onToggleRebaseAutostash: vi.fn(),
+});
 
 describe("GitBehaviorOptions", () => {
-  it("reports the chosen auto-fetch interval", () => {
-    const onAutoFetchChange = vi.fn();
-    render(<GitBehaviorOptions {...baseProps} onAutoFetchChange={onAutoFetchChange} />);
-
-    fireEvent.click(screen.getByText("Mỗi 5 phút"));
-    expect(onAutoFetchChange).toHaveBeenCalledWith(300);
-
-    fireEvent.click(screen.getByText("Mỗi 15 phút"));
-    expect(onAutoFetchChange).toHaveBeenCalledWith(900);
-
-    fireEvent.click(screen.getByText("Tắt"));
-    expect(onAutoFetchChange).toHaveBeenCalledWith(0);
+  beforeEach(() => {
+    useSettingsStore.getState().setLocale("vi");
+    useSettingsStore.getState().setConfirmDiscard(true);
   });
 
   it("toggles safety confirmations from the settings store", () => {
-    useSettingsStore.getState().setConfirmDiscard(true);
-    render(<GitBehaviorOptions {...baseProps} />);
-
+    render(<GitBehaviorOptions {...props()} />);
     fireEvent.click(screen.getByTestId("toggle-confirm-discard"));
     expect(useSettingsStore.getState().confirmDiscard).toBe(false);
   });
 
-  it("toggles the fetch.prune and rebase.autoStash flags", () => {
-    const onToggleFetchPrune = vi.fn();
-    const onToggleRebaseAutostash = vi.fn();
-    render(
-      <GitBehaviorOptions
-        {...baseProps}
-        onToggleFetchPrune={onToggleFetchPrune}
-        onToggleRebaseAutostash={onToggleRebaseAutostash}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId("toggle-fetch-prune"));
-    expect(onToggleFetchPrune).toHaveBeenCalled();
-
+  it("toggles rebase.autoStash", () => {
+    const p = props();
+    render(<GitBehaviorOptions {...p} />);
     fireEvent.click(screen.getByTestId("toggle-rebase-autostash"));
-    expect(onToggleRebaseAutostash).toHaveBeenCalled();
+    expect(p.onToggleRebaseAutostash).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,12 +1,13 @@
 import React from "react";
+import { useTranslation } from "../../../i18n";
+import { SettingsInheritRow, SettingsPage } from "../../../components/settings/ui";
 import { useGitBehaviorSettings } from "../hooks/useGitBehaviorSettings";
-import { GitBehaviorScopeBanner } from "./GitBehaviorScopeBanner";
 import { GitBehaviorOptions } from "./GitBehaviorOptions";
 
 export interface GitBehaviorTabProps {
   currentRepoPath: string | null;
   scope?: "global" | "repo";
-  /** Scope selector rendered above the options. */
+  /** Scope selector rendered under the page header. */
   toolbar?: React.ReactNode;
 }
 
@@ -20,53 +21,47 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
   scope: propScope,
   toolbar,
 }) => {
-  const {
-    activeScope,
-    localPullRebase,
-    globalPullRebase,
-    fetchPrune,
-    rebaseAutostash,
-    autoFetchInterval,
-    loading,
-    saving,
-    handleGlobalPullStrategyChange,
-    handleRepoPullStrategyChange,
-    handleToggleFetchPrune,
-    handleToggleRebaseAutostash,
-    handleAutoFetchChange,
-  } = useGitBehaviorSettings({ currentRepoPath, scope: propScope });
+  const { t } = useTranslation();
+  const s = useGitBehaviorSettings({ currentRepoPath, scope: propScope });
+  const b = t.settings.behavior;
+  const isRepoScope = s.activeScope === "repo" && Boolean(currentRepoPath);
+  const inheriting = s.localPullRebase === null || s.localPullRebase === undefined;
+  const globalMode = s.globalPullRebase ? "rebase" : "merge";
+  const pullRebase = isRepoScope && !inheriting ? Boolean(s.localPullRebase) : s.globalPullRebase;
+  const busy = s.loading || s.saving;
 
-  const hasLocalOverride =
-    activeScope === "repo" && localPullRebase !== null && localPullRebase !== undefined;
+  const handlePullStrategyChange = (isRebase: boolean) => {
+    if (isRepoScope) s.handleRepoPullStrategyChange(isRebase ? "rebase" : "merge");
+    else s.handleGlobalPullStrategyChange(isRebase);
+  };
 
   return (
-    <div className="space-y-6">
-      {toolbar}
-      <GitBehaviorScopeBanner
-        activeScope={activeScope}
-        currentRepoPath={currentRepoPath}
-        hasLocalOverride={hasLocalOverride}
-        loading={loading}
-        saving={saving}
-        onResetToGlobal={() => handleRepoPullStrategyChange("inherit")}
-      />
-
+    <SettingsPage title={b.title} description={b.subtitle} toolbar={toolbar}>
+      {isRepoScope && (
+        <SettingsInheritRow
+          inheriting={inheriting}
+          onInheritChange={(inherit) =>
+            s.handleRepoPullStrategyChange(inherit ? "inherit" : globalMode)
+          }
+          description={b.inheritGlobalPullDesc.replace(
+            "{strategy}",
+            s.globalPullRebase ? b.pullRebaseShort : b.pullMergeShort
+          )}
+          disabled={busy}
+        />
+      )}
       <GitBehaviorOptions
-        activeScope={activeScope}
-        currentRepoPath={currentRepoPath}
-        localPullRebase={localPullRebase}
-        globalPullRebase={globalPullRebase}
-        fetchPrune={fetchPrune}
-        rebaseAutostash={rebaseAutostash}
-        autoFetchInterval={autoFetchInterval}
-        loading={loading}
-        saving={saving}
-        onGlobalPullStrategyChange={handleGlobalPullStrategyChange}
-        onRepoPullStrategyChange={handleRepoPullStrategyChange}
-        onToggleFetchPrune={handleToggleFetchPrune}
-        onToggleRebaseAutostash={handleToggleRebaseAutostash}
-        onAutoFetchChange={handleAutoFetchChange}
+        pullRebase={pullRebase}
+        pullLocked={isRepoScope && inheriting}
+        busy={busy}
+        onPullStrategyChange={handlePullStrategyChange}
+        fetchPrune={s.fetchPrune}
+        onToggleFetchPrune={s.handleToggleFetchPrune}
+        autoFetchInterval={s.autoFetchInterval}
+        onAutoFetchChange={s.handleAutoFetchChange}
+        rebaseAutostash={s.rebaseAutostash}
+        onToggleRebaseAutostash={s.handleToggleRebaseAutostash}
       />
-    </div>
+    </SettingsPage>
   );
 };
