@@ -4,6 +4,7 @@ import type { GitConfigDto } from "../../../ipc/client";
 import { useToastStore } from "../../../store/useToastStore";
 import { useGitProfileFormFields } from "./useGitProfileFormFields";
 import { useGitProfileFormStatus } from "./useGitProfileFormStatus";
+import { useGitProfileDirtyState } from "./useGitProfileDirtyState";
 import { useGitProfileFormLoadEffect } from "./useGitProfileFormLoadEffect";
 import {
   createSaveHandler,
@@ -34,6 +35,8 @@ export interface UseGitProfileFormResult {
   loading: boolean;
   saving: boolean;
   hasLocalOverride: boolean;
+  isDirty: boolean;
+  handleDiscard: () => void;
   handleSave: (e: FormEvent) => Promise<void>;
   handleResetToGlobal: () => Promise<void>;
   handleSelectInherit: () => void;
@@ -49,6 +52,7 @@ export function useGitProfileForm({
   const { showSuccess, showError } = useToastStore();
   const fields = useGitProfileFormFields();
   const status = useGitProfileFormStatus();
+  const dirty = useGitProfileDirtyState(fields, status, activeScope);
 
   useGitProfileFormLoadEffect({
     currentRepoPath,
@@ -95,6 +99,7 @@ export function useGitProfileForm({
     ...fields,
     ...status,
     hasLocalOverride,
+    ...dirty,
     handleSave: createSaveHandler(actionsContext),
     handleResetToGlobal: createResetToGlobalHandler(actionsContext),
     handleSelectInherit: createSelectInheritHandler(actionsContext),

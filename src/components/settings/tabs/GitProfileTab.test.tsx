@@ -61,4 +61,21 @@ describe("GitProfileTab", () => {
     );
     expect(setSpy).toHaveBeenCalledWith(null, "global", "user.email", "jane@example.com");
   });
+
+  // Enabled in the next task, which renders SettingsSaveBar.
+  it.skip("shows the save bar only after an edit and discards back to the loaded values", async () => {
+    vi.spyOn(invokeCommand, "getGitConfig").mockResolvedValue(GLOBAL_CONFIG);
+
+    render(<GitProfileTab currentRepoPath={null} />);
+
+    const nameInput = await screen.findByDisplayValue("Global User");
+    expect(screen.queryByTestId("save-profile-btn")).not.toBeInTheDocument();
+
+    fireEvent.change(nameInput, { target: { value: "Someone Else" } });
+    expect(screen.getByTestId("save-profile-btn")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("discard-profile-btn"));
+    expect(nameInput).toHaveValue("Global User");
+    expect(screen.queryByTestId("save-profile-btn")).not.toBeInTheDocument();
+  });
 });
