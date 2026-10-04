@@ -1,4 +1,5 @@
 import React from "react";
+import clsx from "clsx";
 import type { CommandItem } from "../../utils/commandRegistry";
 import type { CommandCategoryGroup } from "./commandPaletteHelpers";
 import type { UseCommandPaletteResult } from "./useCommandPalette";
@@ -46,11 +47,12 @@ export const CommandPaletteList: React.FC<CommandPaletteListProps> = ({
                 type="button"
                 onClick={() => onExecute(command)}
                 onMouseEnter={() => setSelectedIndex(flatIndex)}
-                className={`w-full flex items-center justify-between px-3 py-2 text-left rounded-md transition-colors cursor-pointer ${
+                className={clsx(
+                  "flex w-full cursor-pointer items-center justify-between rounded-md px-3 py-2 text-left transition-colors duration-fast ease-macos",
                   isSelected
-                    ? "bg-accent-subtle/40 border-l-2 border-accent text-primary"
-                    : "border-l-2 border-transparent text-secondary hover:bg-surface-hover hover:text-primary"
-                }`}
+                    ? "border border-accent/20 bg-accent-subtle font-medium text-primary shadow-2xs"
+                    : "border border-transparent text-secondary hover:bg-surface-hover hover:text-primary"
+                )}
               >
                 <div className="flex flex-col min-w-0 pr-2">
                   <span className="text-sm font-medium truncate">{command.title}</span>

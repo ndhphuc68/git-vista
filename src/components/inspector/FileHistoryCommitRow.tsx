@@ -32,15 +32,12 @@ export const FileHistoryCommitRow: React.FC<FileHistoryCommitRowProps> = ({
       type="button"
       onClick={() => onSelect(commit.commit_id)}
       className={clsx(
-        "group flex flex-col p-2 rounded-md text-xs cursor-pointer transition-all text-left w-full border relative gap-1",
+        "group flex w-full cursor-pointer flex-col gap-1 rounded-md border p-2 text-left text-xs transition-colors",
         isSelected
-          ? "bg-accent-subtle/80 border-accent/80 text-primary font-semibold shadow-2xs ring-1 ring-accent/30"
-          : "bg-surface border-border-subtle hover:bg-surface-hover text-primary font-normal"
+          ? "border-accent bg-accent-subtle font-semibold text-primary shadow-2xs ring-1 ring-accent/30"
+          : "border-border-subtle bg-surface font-normal text-primary hover:bg-surface-hover"
       )}
     >
-      {/* Left Active Indicator Bar */}
-      {isSelected && <div className="absolute left-0 top-1 bottom-1 w-1 bg-accent rounded-r" />}
-
       {/* Top row: Change badge, Short SHA, Date */}
       <div className="flex items-center justify-between gap-1 select-none">
         <div className="flex items-center gap-1.5 min-w-0">

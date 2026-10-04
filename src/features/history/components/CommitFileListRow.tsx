@@ -30,15 +30,12 @@ export function CommitFileListRow({
       onClick={() => setSelectedFile(file.path)}
       title={file.path}
       className={clsx(
-        "group flex items-center justify-between p-2 rounded-md text-xs cursor-pointer transition-all text-left w-full border relative",
+        "group flex w-full cursor-pointer items-center justify-between rounded-md border p-2 text-left text-xs transition-colors",
         isSelected
-          ? "bg-accent-subtle/80 border-accent/80 text-primary font-semibold shadow-2xs ring-1 ring-accent/30"
-          : "bg-surface border-border-subtle hover:bg-surface-hover text-primary font-normal"
+          ? "border-accent bg-accent-subtle font-semibold text-primary shadow-2xs ring-1 ring-accent/30"
+          : "border-border-subtle bg-surface font-normal text-primary hover:bg-surface-hover"
       )}
     >
-      {/* Left Active Indicator Bar */}
-      {isSelected && <div className="absolute left-0 top-1 bottom-1 w-1 bg-accent rounded-r" />}
-
       <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
         {/* Status Badge */}
         <span

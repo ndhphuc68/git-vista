@@ -76,7 +76,9 @@ const FileListItem: React.FC<{
       onClick={onSelect}
       className={clsx(
         "w-full text-left flex items-center justify-between p-2.5 transition-colors border-l-2",
-        isActive ? "bg-surface-hover border-accent" : "border-transparent hover:bg-surface-hover/50"
+        isActive
+          ? "border-accent bg-accent-subtle/50"
+          : "border-transparent hover:bg-surface-hover/50"
       )}
     >
       <div className="flex items-center gap-2 min-w-0">

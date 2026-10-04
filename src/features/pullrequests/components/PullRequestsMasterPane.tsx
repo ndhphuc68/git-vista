@@ -155,7 +155,7 @@ const MasterPaneItem: React.FC<{
     className={clsx(
       "w-full text-left p-3.5 flex flex-col gap-2 transition-colors cursor-pointer border-l-2",
       isSelected
-        ? "bg-surface-hover border-accent"
+        ? "border-accent bg-accent-subtle/50"
         : "border-transparent hover:bg-surface-hover/50"
     )}
   >
@@ -193,10 +193,7 @@ export const PullRequestsMasterPane: React.FC<PullRequestsMasterPaneProps> = ({
   className,
 }) => {
   const { t } = useTranslation();
-  const filteredPrs = useMemo(
-    () => filterPullRequests(prs, searchQuery),
-    [prs, searchQuery]
-  );
+  const filteredPrs = useMemo(() => filterPullRequests(prs, searchQuery), [prs, searchQuery]);
 
   return (
     <aside
