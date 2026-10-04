@@ -1,30 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { User, Palette, Sliders, FileCode, Terminal, GitPullRequest } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "../../i18n";
-import { type SettingsTab } from "../../store/useSettingsStore";
 import { useTabStore } from "../../store/useTabStore";
-import { type TabItem } from "../../types/tab";
+import type { SettingsScopeSelectorProps } from "./ui";
+import { buildNavGroups, buildRepoChoices, type NavGroup } from "./settingsModalState.helpers";
 
 export interface UseSettingsModalStateOptions {
   currentRepoPath: string | null;
   isSettingsOpen: boolean;
 }
 
-export interface NavItem {
-  id: SettingsTab;
-  label: string;
-  icon: React.ReactNode;
-}
-
 export interface UseSettingsModalStateResult {
-  scope: "global" | "repo";
-  setScope: (scope: "global" | "repo") => void;
-  selectedRepoPath: string;
-  setSelectedRepoPath: (path: string) => void;
-  openRepoTabs: TabItem[];
-  activeRepo: TabItem | null | undefined;
-  navItems: NavItem[];
-  getRepoDisplayName: (path: string) => string;
+  navGroups: NavGroup[];
+  scopeSelector: SettingsScopeSelectorProps;
   effectiveScope: "global" | "repo";
   effectiveRepoPath: string | null;
 }
@@ -37,52 +24,31 @@ export function useSettingsModalState({
   const { t } = useTranslation();
   const { tabs } = useTabStore();
 
-  const openRepoTabs = tabs.filter((tab) => tab.type === "repo" && tab.repo);
-  const activeRepo = currentRepoPath ? openRepoTabs.find((tab) => tab.id === currentRepoPath) : null;
-
-  const [scope, setScope] = useState<"global" | "repo">(() => {
-    return currentRepoPath ? "repo" : "global";
-  });
-
+  const [scope, setScope] = useState<"global" | "repo">(() =>
+    currentRepoPath ? "repo" : "global"
+  );
   const [selectedRepoPath, setSelectedRepoPath] = useState<string>(currentRepoPath || "");
 
   useEffect(() => {
     if (!isSettingsOpen) return;
-
-    if (currentRepoPath) {
-      setSelectedRepoPath(currentRepoPath);
-      setScope("repo");
-    } else {
-      setSelectedRepoPath("");
-      setScope("global");
-    }
+    setSelectedRepoPath(currentRepoPath || "");
+    setScope(currentRepoPath ? "repo" : "global");
   }, [currentRepoPath, isSettingsOpen]);
 
-  const navItems: NavItem[] = [
-    { id: "profile", label: t.settings.tabs.profile, icon: <User size={16} /> },
-    { id: "appearance", label: t.settings.tabs.appearance, icon: <Palette size={16} /> },
-    { id: "diff", label: t.settings.tabs.diff, icon: <FileCode size={16} /> },
-    { id: "behavior", label: t.settings.tabs.behavior, icon: <Sliders size={16} /> },
-    { id: "tools", label: t.settings.tabs.tools, icon: <Terminal size={16} /> },
-    { id: "github", label: t.settings.tabs.github, icon: <GitPullRequest size={16} /> },
-  ];
-
-  const getRepoDisplayName = (path: string) => {
-    return path.split(/[/\\]/).filter(Boolean).pop() || path;
-  };
-
   const effectiveScope = currentRepoPath ? scope : "global";
-  const effectiveRepoPath = effectiveScope === "repo" ? selectedRepoPath || currentRepoPath : null;
+  const repoPath = selectedRepoPath || currentRepoPath || "";
+  const effectiveRepoPath = effectiveScope === "repo" ? repoPath : null;
 
   return {
-    scope,
-    setScope,
-    selectedRepoPath,
-    setSelectedRepoPath,
-    openRepoTabs,
-    activeRepo,
-    navItems,
-    getRepoDisplayName,
+    navGroups: buildNavGroups(t),
+    scopeSelector: {
+      hasRepo: Boolean(currentRepoPath),
+      scope: effectiveScope,
+      onScopeChange: setScope,
+      repos: buildRepoChoices(tabs, currentRepoPath),
+      selectedRepoPath: repoPath,
+      onRepoChange: setSelectedRepoPath,
+    },
     effectiveScope,
     effectiveRepoPath,
   };

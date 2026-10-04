@@ -14,7 +14,9 @@ describe("SettingsModal", () => {
     render(<SettingsModal currentRepoPath={null} />);
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByText(/Cài đặt|Settings/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: /Cài đặt|Settings/i })
+    ).toBeInTheDocument();
 
     const closeBtn = screen.getByLabelText(/Đóng|Close/i);
     fireEvent.click(closeBtn);

@@ -39,7 +39,7 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
 
     expect(screen.queryByTestId("scope-switcher")).not.toBeInTheDocument();
     expect(screen.queryByTestId("scope-btn-repo")).not.toBeInTheDocument();
-    expect(await screen.findByText(/Toàn hệ thống \(Global\)/i)).toBeInTheDocument();
+    expect((await screen.findAllByText(/Toàn hệ thống \(Global\)/i)).length).toBeGreaterThan(0);
     expect(screen.getByText(/Nhánh mặc định/i)).toBeInTheDocument();
     expect(screen.queryByText(/Cài đặt riêng cho repository/i)).not.toBeInTheDocument();
     expect(screen.queryByTestId("inherit-toggle-inherit")).not.toBeInTheDocument();
@@ -52,7 +52,7 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
 
     expect(screen.queryByTestId("scope-switcher")).not.toBeInTheDocument();
     expect(screen.queryByTestId("scope-btn-repo")).not.toBeInTheDocument();
-    expect(await screen.findByText(/Toàn hệ thống \(Global\)/i)).toBeInTheDocument();
+    expect((await screen.findAllByText(/Toàn hệ thống \(Global\)/i)).length).toBeGreaterThan(0);
     expect(screen.getByText(/Nhánh mặc định/i)).toBeInTheDocument();
     expect(screen.queryByText(/Cài đặt riêng cho repository/i)).not.toBeInTheDocument();
     expect(screen.queryByTestId("inherit-toggle-inherit")).not.toBeInTheDocument();
@@ -68,12 +68,12 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
 
     expect(repoBtn).not.toBeDisabled();
     // Default to repo scope when currentRepoPath is provided
-    expect(repoBtn).toHaveAttribute("data-active", "true");
+    expect(repoBtn).toHaveAttribute("aria-checked", "true");
 
     // Switch to global scope
     fireEvent.click(globalBtn);
-    expect(globalBtn).toHaveAttribute("data-active", "true");
-    expect(repoBtn).toHaveAttribute("data-active", "false");
+    expect(screen.getByTestId("scope-btn-global")).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByTestId("scope-btn-repo")).toHaveAttribute("aria-checked", "false");
   });
 
   it("cho phép chọn giữa các repository khác nhau khi có nhiều repo mở", async () => {
@@ -86,8 +86,9 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
     expect(select).toBeInTheDocument();
 
     // Select project-beta
-    fireEvent.change(select, { target: { value: mockRepo2.path } });
-    expect(select).toHaveValue(mockRepo2.path);
+    fireEvent.click(select);
+    fireEvent.click(screen.getByRole("option", { name: "project-beta" }));
+    expect(screen.getByTestId("scope-repo-select")).toHaveTextContent("project-beta");
   });
 
   it("hỗ trợ toggle Kế thừa từ Global / Ghi đè cho repo này trong GitProfileTab", async () => {

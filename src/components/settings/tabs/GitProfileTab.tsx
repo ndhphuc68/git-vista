@@ -11,12 +11,14 @@ import { GitProfileSaveButton } from "./GitProfileSaveButton";
 interface GitProfileTabProps {
   currentRepoPath: string | null;
   scope?: "global" | "repo";
-  onScopeChange?: (scope: "global" | "repo") => void;
+  /** Scope selector rendered above the form. */
+  toolbar?: React.ReactNode;
 }
 
 export const GitProfileTab: React.FC<GitProfileTabProps> = ({
   currentRepoPath,
   scope: propScope,
+  toolbar,
 }) => {
   const { commitMessageLimit, setCommitMessageLimit } = useSettingsStore();
 
@@ -46,6 +48,7 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
 
   return (
     <div className="space-y-6">
+      {toolbar}
       <GitProfileScopeBanner
         activeScope={activeScope}
         currentRepoPath={currentRepoPath}

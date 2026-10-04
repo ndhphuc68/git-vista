@@ -6,18 +6,19 @@ import { GitBehaviorOptions } from "./GitBehaviorOptions";
 export interface GitBehaviorTabProps {
   currentRepoPath: string | null;
   scope?: "global" | "repo";
-  onScopeChange?: (scope: "global" | "repo") => void;
+  /** Scope selector rendered above the options. */
+  toolbar?: React.ReactNode;
 }
 
 /**
  * Git behavior settings tab: pull strategy, fetch/rebase flags, safety
- * confirmations, and auto-fetch interval. Scope ownership (global vs. repo)
- * still lives in `SettingsModal`, which supplies `scope` and
- * `currentRepoPath`.
+ * confirmations, and auto-fetch interval. Scope state lives in
+ * `useSettingsModalState`; the scope selector arrives through `toolbar`.
  */
 export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
   currentRepoPath,
   scope: propScope,
+  toolbar,
 }) => {
   const {
     activeScope,
@@ -40,6 +41,7 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
 
   return (
     <div className="space-y-6">
+      {toolbar}
       <GitBehaviorScopeBanner
         activeScope={activeScope}
         currentRepoPath={currentRepoPath}
