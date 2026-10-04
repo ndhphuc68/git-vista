@@ -8,6 +8,11 @@ import { GitProfileTab } from "../components/settings/tabs/GitProfileTab";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { resetMockGitConfig } from "../ipc/client";
 
+function pickOption(triggerTestId: string, optionName: RegExp | string) {
+  fireEvent.click(screen.getByTestId(triggerTestId));
+  fireEvent.click(screen.getByRole("option", { name: optionName }));
+}
+
 describe("Settings Tabs Components", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -15,6 +20,7 @@ describe("Settings Tabs Components", () => {
     const settings = useSettingsStore.getState();
     settings.setLocale("vi");
     settings.setTheme("light");
+    settings.setColorblind(false);
     settings.setDiffViewMode("unified");
     settings.setDiffFontSize(13);
     settings.setDiffIgnoreWhitespace(false);
@@ -88,13 +94,17 @@ describe("Settings Tabs Components", () => {
     it("updates date format and avatar style", () => {
       render(<AppearanceTab />);
 
-      // Update date format
-      fireEvent.click(screen.getByTestId("date-format-absolute"));
+      pickOption("date-format-select", /Thời gian tuyệt đối/i);
       expect(useSettingsStore.getState().dateFormat).toBe("absolute");
 
-      // Update avatar style
-      fireEvent.click(screen.getByTestId("avatar-style-gravatar"));
+      pickOption("avatar-style-select", /Gravatar/i);
       expect(useSettingsStore.getState().avatarStyle).toBe("gravatar");
+
+      fireEvent.click(screen.getByTestId("theme-dark"));
+      expect(useSettingsStore.getState().theme).toBe("dark");
+
+      fireEvent.click(screen.getByTestId("toggle-colorblind"));
+      expect(useSettingsStore.getState().colorblind).toBe(true);
     });
   });
 
