@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { type RepoSummary } from "../ipc/bindings.generated";
+import { usePullRequestStore } from "./usePullRequestStore";
 
 interface RepoState {
   currentRepo: RepoSummary | null;
@@ -20,13 +21,16 @@ export const useRepoStore = create<RepoState>((set) => ({
   selectedFilePath: null,
   selectedBranch: null,
 
-  setRepo: (repo) =>
+  setRepo: (repo) => {
+    usePullRequestStore.getState().closeDrawer();
+    usePullRequestStore.getState().setSelectedPr(null, repo.path);
     set({
       currentRepo: repo,
       selectedCommitId: null,
       selectedFilePath: null,
       selectedBranch: repo.head_branch,
-    }),
+    });
+  },
 
   setSelectedCommit: (commitId) =>
     set({
@@ -37,11 +41,14 @@ export const useRepoStore = create<RepoState>((set) => ({
   setSelectedFile: (filePath) => set({ selectedFilePath: filePath }),
   setSelectedBranch: (branch) => set({ selectedBranch: branch }),
 
-  clearRepo: () =>
+  clearRepo: () => {
+    usePullRequestStore.getState().closeDrawer();
+    usePullRequestStore.getState().setSelectedPr(null, null);
     set({
       currentRepo: null,
       selectedCommitId: null,
       selectedFilePath: null,
       selectedBranch: null,
-    }),
+    });
+  },
 }));

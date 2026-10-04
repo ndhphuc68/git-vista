@@ -39,7 +39,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
   }
 
   if (activeScreen === "pull-requests") {
-    return <PullRequestsScreen repoPath={repoPath} />;
+    return <PullRequestsScreen key={repoPath} repoPath={repoPath} />;
   }
 
   return <ChangesScreen />;

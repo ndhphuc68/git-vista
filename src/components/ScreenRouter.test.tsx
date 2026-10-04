@@ -51,4 +51,18 @@ describe("ScreenRouter", () => {
     expect(screen.queryByTestId("mock-shell")).not.toBeInTheDocument();
     expect(screen.queryByTestId("mock-changes-screen")).not.toBeInTheDocument();
   });
+
+  it("updates PullRequestsScreen when repoPath changes", () => {
+    const { rerender } = render(<ScreenRouter {...dummyProps} activeScreen="pull-requests" />);
+    expect(screen.getByText("Pull Requests Screen: /path/to/repo")).toBeInTheDocument();
+
+    rerender(
+      <ScreenRouter
+        {...dummyProps}
+        repoPath="/path/to/other-repo"
+        activeScreen="pull-requests"
+      />
+    );
+    expect(screen.getByText("Pull Requests Screen: /path/to/other-repo")).toBeInTheDocument();
+  });
 });

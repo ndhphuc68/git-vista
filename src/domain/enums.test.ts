@@ -26,6 +26,8 @@ describe("enums", () => {
   });
 
   it("SCREEN_TYPE matches ScreenType in types/tab.ts", () => {
-    expect(Object.values(SCREEN_TYPE).sort()).toEqual(["changes", "conflict", "history"].sort());
+    expect(Object.values(SCREEN_TYPE).sort()).toEqual(
+      ["changes", "conflict", "history", "pull-requests"].sort()
+    );
   });
 });

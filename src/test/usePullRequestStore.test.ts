@@ -19,14 +19,35 @@ const dummyPr: GitHubPullRequest = {
 
 describe("usePullRequestStore", () => {
   beforeEach(() => {
-    usePullRequestStore.setState({ selectedPr: null });
+    usePullRequestStore.setState({
+      selectedPr: null,
+      selectedRepoPath: null,
+      isDrawerOpen: false,
+    });
   });
 
   it("sets and clears selectedPr via setSelectedPr", () => {
     expect(usePullRequestStore.getState().selectedPr).toBeNull();
-    usePullRequestStore.getState().setSelectedPr(dummyPr);
+    expect(usePullRequestStore.getState().selectedRepoPath).toBeNull();
+
+    usePullRequestStore.getState().setSelectedPr(dummyPr, "/repo/a");
     expect(usePullRequestStore.getState().selectedPr).toEqual(dummyPr);
+    expect(usePullRequestStore.getState().selectedRepoPath).toBe("/repo/a");
+
     usePullRequestStore.getState().setSelectedPr(null);
     expect(usePullRequestStore.getState().selectedPr).toBeNull();
+    expect(usePullRequestStore.getState().selectedRepoPath).toBeNull();
+  });
+
+  it("sets and clears selectedRepoPath via openDrawer and closeDrawer", () => {
+    usePullRequestStore.getState().openDrawer(dummyPr, "/repo/b");
+    expect(usePullRequestStore.getState().isDrawerOpen).toBe(true);
+    expect(usePullRequestStore.getState().selectedPr).toEqual(dummyPr);
+    expect(usePullRequestStore.getState().selectedRepoPath).toBe("/repo/b");
+
+    usePullRequestStore.getState().closeDrawer();
+    expect(usePullRequestStore.getState().isDrawerOpen).toBe(false);
+    expect(usePullRequestStore.getState().selectedPr).toBeNull();
+    expect(usePullRequestStore.getState().selectedRepoPath).toBeNull();
   });
 });

@@ -58,8 +58,8 @@ export function usePullRequestsSection(repoPath: string) {
   };
 
   const handleOpenPr = (pr: GitHubPullRequest) => {
-    setSelectedPr(pr);
-    openDrawer(pr);
+    setSelectedPr(pr, repoPath);
+    openDrawer(pr, repoPath);
     useViewStore.getState().setActiveScreen("pull-requests");
   };
 

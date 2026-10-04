@@ -235,5 +235,42 @@ describe("PullRequestsScreen", () => {
 
     expect(usePullRequestStore.getState().isCreateModalOpen).toBe(true);
   });
+
+  it("ignores selectedPr from a different repo", () => {
+    usePullRequestStore.setState({
+      selectedPr: mockPr1,
+      selectedRepoPath: "/different/repo",
+    });
+
+    renderWithClient(<PullRequestsScreen repoPath="/test/repo" />);
+
+    expect(
+      screen.getByText("Select a pull request from the list to view details")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Implements fuzzy search across files.")).not.toBeInTheDocument();
+  });
+
+  it("clears search query when switching repoPath", () => {
+    const { rerender } = renderWithClient(<PullRequestsScreen repoPath="/test/repo1" />);
+
+    const searchInput = screen.getByPlaceholderText("Search by title, #number, author...");
+    fireEvent.change(searchInput, { target: { value: "search" } });
+    expect(searchInput).toHaveValue("search");
+
+    rerender(
+      <QueryClientProvider
+        client={
+          new QueryClient({
+            defaultOptions: { queries: { retry: false } },
+          })
+        }
+      >
+        <PullRequestsScreen key="/test/repo2" repoPath="/test/repo2" />
+      </QueryClientProvider>
+    );
+
+    const newSearchInput = screen.getByPlaceholderText("Search by title, #number, author...");
+    expect(newSearchInput).toHaveValue("");
+  });
 });
 

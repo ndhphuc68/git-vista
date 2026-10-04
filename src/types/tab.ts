@@ -1,6 +1,6 @@
 import { type RepoSummary } from "../ipc/bindings.generated";
 
-export type ScreenType = "history" | "changes" | "conflict";
+export type ScreenType = "history" | "changes" | "conflict" | "pull-requests";
 
 export interface TabItem {
   id: string; // 'home' or canonical repo path
