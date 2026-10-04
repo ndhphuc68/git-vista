@@ -60,7 +60,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
     <>
       <header
         data-testid="repo-header"
-        className="flex items-center justify-between px-3 bg-surface border-b border-border-subtle h-[40px] min-h-[40px] max-h-[40px] shrink-0 gap-3 select-none z-20"
+        className="flex items-center justify-between px-3 bg-surface border-b border-border-subtle h-11 min-h-11 max-h-11 shrink-0 gap-3 select-none z-20"
       >
         <RepoHeaderScreenSwitcher
           t={t}

@@ -42,7 +42,7 @@ const TabButton: React.FC<TabButtonProps> = ({
     data-testid={testId}
     onClick={onClick}
     className={clsx(
-      "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs cursor-pointer transition-all duration-150 btn-press outline-none focus:outline-none",
+      "flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs cursor-pointer transition-all duration-150 btn-press outline-none focus:outline-none",
       active
         ? "bg-surface text-primary shadow-xs border border-border-subtle font-bold"
         : "bg-transparent text-secondary hover:text-primary font-medium"
@@ -67,7 +67,7 @@ const ChangesTabButton: React.FC<{
     testId="tab-changes"
     onClick={onClick}
     title={title}
-    icon={<FileDiff size={13} className={active ? "text-accent" : "text-secondary"} />}
+    icon={<FileDiff size={15} className={active ? "text-accent" : "text-secondary"} />}
     label={label}
     badge={
       totalChanges > 0 ? (
@@ -94,7 +94,7 @@ const PullRequestsTabButton: React.FC<{
     testId="tab-pull-requests"
     onClick={onClick}
     title={title}
-    icon={<GitPullRequest size={13} className={active ? "text-accent" : "text-secondary"} />}
+    icon={<GitPullRequest size={15} className={active ? "text-accent" : "text-secondary"} />}
     label={label}
     badge={
       openPrCount !== undefined && openPrCount > 0 ? (
@@ -138,7 +138,7 @@ export const RepoHeaderScreenTabs: React.FC<RepoHeaderScreenTabsProps> = ({
         title={`History (${shortcutLabel1})`}
         icon={
           <History
-            size={13}
+            size={15}
             className={activeScreen === "history" ? "text-accent" : "text-secondary"}
           />
         }
