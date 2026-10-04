@@ -1071,10 +1071,12 @@ export const vi = {
       inProgress: "Đang chạy",
       queued: "Đang chờ",
       neutral: "Bỏ qua",
+      details: "Chi tiết",
     },
     files: {
       summary: "{count} tệp đã thay đổi (+{additions} / -{deletions})",
       noDiff: "Không có nội dung diff cho tệp này",
+      noFiles: "Không có tệp nào thay đổi",
     },
     meta: {
       reviewers: "Người đánh giá",

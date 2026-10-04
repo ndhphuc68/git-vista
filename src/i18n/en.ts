@@ -1073,10 +1073,12 @@ export const en: Translations = {
       inProgress: "In progress",
       queued: "Queued",
       neutral: "Neutral",
+      details: "Details",
     },
     files: {
       summary: "{count} files changed (+{additions} / -{deletions})",
       noDiff: "No diff available for this file",
+      noFiles: "No changed files",
     },
     meta: {
       reviewers: "Reviewers",
