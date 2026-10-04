@@ -65,7 +65,8 @@ Settings-specific layout lives in `src/components/settings/ui/`:
 | `SettingsSection` | Uppercase group label + rounded card; children rows separated by dividers |
 | `SettingsRow` | Left: label, optional description, optional `HelpTooltip`. Right: control slot. Props for `htmlFor` and `disabled` (dims row) |
 | `SettingsSaveBar` | Sticky bar at the bottom of the content column: "Unsaved changes" + Discard + Save. Rendered only while dirty |
-| `SettingsScopeBar` | "Apply to: [Global \| repo ▾]" segmented control plus, in repo scope, a "Use global configuration" row |
+| `SettingsScopeSelector` | "Apply to: [Global \| repo]" segmented control, plus a repo `Select` when more than one repo is open. Rendered by `SettingsModalTabContent` and passed to the two Git config tabs through the `toolbar` slot of `SettingsPage` |
+| `SettingsInheritRow` | Card with a "Use global configuration" row: description, `Switch`, optional "Reset to global" button. Each Git config tab wires its own inherit semantics |
 
 Generic controls go to `src/shared/ui/` (no imports from `ipc/`, `store/`,
 `i18n/`) and are exported from its index:
@@ -80,18 +81,21 @@ Tailwind scale.
 
 ## 3. Git config tabs
 
-### Scope bar (shared by Profile and Behavior)
+### Scope selector and inherit row (Profile and Behavior)
 
-- "Apply to" segmented control: Global / current repo. Repo segment only when
-  a repository is open; a repo `Select` appears only when more than one repo
-  tab is open. Scope state stays in `useSettingsModalState`; the bar receives
-  it via `SettingsModalTabContent`.
-- In repo scope, a `SettingsRow` "Use global configuration" with a `Switch`.
-  The description shows the global `name <email>`. This replaces
-  `GitProfileInheritToggle`, `GitProfileScopeBanner` and
-  `GitBehaviorScopeBanner`.
-- When the repo has a local override, the row shows a small
-  "Reset to global" link button (keeps `data-testid="reset-to-global-btn"`).
+- "Apply to" segmented control: Global / current repo. Without an open repo it
+  is a static "Apply to: Global" line. A repo `Select` appears only in repo
+  scope with more than one repo tab open. Scope state stays in
+  `useSettingsModalState`; the selector receives it via
+  `SettingsModalTabContent`.
+- In repo scope, a `SettingsInheritRow` "Use global configuration" with a
+  `Switch`. Profile: the description shows the global `name <email>`, and
+  toggling only changes form state. Behavior: the description names the global
+  pull strategy; toggling on saves "inherit", toggling off saves the global
+  strategy as a local override. This replaces `GitProfileInheritToggle`,
+  `GitProfileScopeBanner` and `GitBehaviorScopeBanner`.
+- Profile only: when the repo has a saved local override, the row shows a
+  "Reset to global" button (keeps `data-testid="reset-to-global-btn"`).
 - Existing test ids kept on the new elements: `scope-switcher`,
   `scope-btn-global`, `scope-btn-repo`, `scope-repo-select`. The
   "Use global configuration" switch gets `data-testid="toggle-use-global"`
@@ -117,7 +121,15 @@ Sections:
 - `handleDiscard`: restore the last loaded values.
 
 The save bar is hidden when not dirty, and Save is disabled while saving or
-while inheriting in repo scope (same rule as today).
+loading. Unlike today, Save is allowed while inheriting in repo scope: the
+existing save handler already clears the local identity keys in that case, so
+switching a repo back to "use global" can be saved from the bar. "Reset to
+global" still persists it immediately.
+
+The `isDirty` baseline is derived from `globalConfig` / `localConfig` with the
+existing `deriveRepoScopeFields` / `deriveGlobalScopeFields` helpers, so it
+refreshes on its own when save or reset reloads the config. String fields are
+compared trimmed; `defaultBranch` is ignored in repo scope.
 
 ### Git Behavior
 
@@ -160,8 +172,9 @@ Tests (Vitest, next to their module):
 - `Switch.test.tsx`, `SegmentedControl.test.tsx`: roles, aria state, click,
   keyboard, disabled.
 - `SettingsRow.test.tsx`: label association, disabled dimming.
-- `SettingsScopeBar.test.tsx`: repo segment visibility, repo select only with
-  more than one repo, inherit switch callbacks, reset link visibility.
+- `SettingsScopeSelector.test.tsx`: repo segment visibility, repo select only
+  with more than one repo.
+- `SettingsInheritRow.test.tsx`: switch callbacks, reset button visibility.
 - `useGitProfileForm` dirty/discard tests.
 - Update `src/components/settings/tabs/GitProfileTab.test.tsx` and
   `src/test/SettingsTabs.test.tsx` for the new structure.
@@ -171,7 +184,7 @@ Rollout: one commit per step, `pnpm check` green after each:
 1. `Switch`, `SegmentedControl` in `shared/ui` + tests.
 2. `SettingsPage`, `SettingsSection`, `SettingsRow`, `SettingsSaveBar` + tests.
 3. Modal shell and grouped sidebar; remove header scope switcher.
-4. `SettingsScopeBar`, wired into the Git config tabs.
+4. `SettingsScopeSelector` wired through `SettingsModalTabContent`.
 5. Git Profile on the new primitives; `isDirty` / `handleDiscard`.
 6. Git Behavior on the new primitives.
 7. Appearance, Diff viewer, Tools, GitHub on the new primitives.
