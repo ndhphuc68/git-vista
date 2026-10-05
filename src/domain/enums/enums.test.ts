@@ -1,5 +1,13 @@
-import { describe, it, expect } from "vitest";
-import { CHANGE_TYPE, PR_STATE, CHECK_STATUS, CONFIG_SCOPE, SCREEN_TYPE } from "./enums";
+import { describe, it, expect, expectTypeOf } from "vitest";
+import {
+  CHANGE_TYPE,
+  PR_STATE,
+  CHECK_STATUS,
+  CONFIG_SCOPE,
+  SCREEN_TYPE,
+  type ConfigScope,
+} from ".";
+import type { ConfigScope as BindingConfigScope } from "../../ipc/bindings.generated";
 
 describe("enums", () => {
   it("CHANGE_TYPE matches the exact strings returned by the Rust backend", () => {
@@ -29,5 +37,13 @@ describe("enums", () => {
     expect(Object.values(SCREEN_TYPE).sort()).toEqual(
       ["changes", "conflict", "history", "pull-requests"].sort()
     );
+  });
+});
+
+describe("enums stay in sync with generated bindings", () => {
+  // These are compile-time checks: `pnpm build` runs tsc over test files, so a
+  // variant added or removed in Rust fails the build once bindings regenerate.
+  it("CONFIG_SCOPE matches ConfigScope", () => {
+    expectTypeOf<ConfigScope>().toEqualTypeOf<BindingConfigScope>();
   });
 });
