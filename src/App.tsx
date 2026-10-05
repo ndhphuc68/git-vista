@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { SCREEN_TYPE, TAB_TYPE } from "./domain/enums";
 import { RepoHeader } from "./components/header/RepoHeader";
 import { InProgressOperationBanner } from "./components/banner/InProgressOperationBanner";
 import { type RepoSummary } from "./ipc/bindings.generated";
@@ -9,6 +10,7 @@ import { useTabStore } from "./store/useTabStore";
 import { useViewStore } from "./store/useViewStore";
 import { useSettingsStore } from "./store/useSettingsStore";
 import { useRepoChangedListener } from "./hooks/useRepoChangedListener";
+import { useExternalLinks } from "./hooks/useExternalLinks";
 import { useInProgressActions } from "./hooks/useInProgressActions";
 import { useAppTabSync } from "./hooks/useAppTabSync";
 import { useAppTabHandlers } from "./hooks/useAppTabHandlers";
@@ -60,7 +62,7 @@ const RepoContent: React.FC<RepoContentProps> = ({
         repoState={repoState}
         onAbort={handleAbort}
         onContinue={handleContinue}
-        onNavigateToChanges={() => setActiveScreen("changes")}
+        onNavigateToChanges={() => setActiveScreen(SCREEN_TYPE.CHANGES)}
       />
       <div className="flex-1 min-h-0 h-full w-full overflow-hidden flex flex-col">
         <ScreenRouter
@@ -99,7 +101,7 @@ export const App: React.FC<AppProps> = ({
   const { tabs, activeTabId, setActiveTab, openRepoTab, openHomeTab, closeTab, restoreSession } =
     useTabStore();
   const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0];
-  const repoToDisplay = activeTab?.type === "repo" ? activeTab.repo || currentRepo : null;
+  const repoToDisplay = activeTab?.type === TAB_TYPE.REPO ? activeTab.repo || currentRepo : null;
   const { setActiveScreen } = useViewStore();
   const { resolvedTheme, setTheme, openSettings, closeSettings } = useSettingsStore();
   const { open: openCommandPalette, close: closeCommandPalette } = useCommandPaletteStore();
@@ -136,6 +138,7 @@ export const App: React.FC<AppProps> = ({
   });
 
   useRepoChangedListener(queryClient);
+  useExternalLinks();
 
   return (
     <QueryClientProvider client={queryClient}>

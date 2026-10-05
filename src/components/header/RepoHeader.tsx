@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { SCREEN_TYPE } from "../../domain/enums";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { useLayoutStore } from "../../store/useLayoutStore";
@@ -6,7 +7,7 @@ import { useSettingsStore } from "../../store/useSettingsStore";
 import { useTranslation } from "../../i18n";
 import { RemoteProgressBanner } from "../common/RemoteProgressBanner";
 
-import { useRemoteTask } from "../../features/remote/api";
+import { useAutoFetch, useRemoteTask } from "../../features/remote/api";
 import { useRepoStatus } from "../../features/history";
 import { useRepoHeadInfo } from "../../features/repo";
 import { useGitHubRepoInfo } from "../../features/github";
@@ -32,12 +33,17 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
   const { openSettings } = useSettingsStore();
   const { t, actions } = useTranslation();
 
-  const { data: repoStatus } = useRepoStatus(currentRepo?.path ?? "");
-  const { data: headInfo } = useRepoHeadInfo(currentRepo?.path);
-  const { data: repoInfo } = useGitHubRepoInfo(currentRepo?.path ?? "");
-  const { data: openPrs } = usePullRequests(currentRepo?.path ?? "");
+  const repoPath = currentRepo?.path;
+  const repoPathOrEmpty = repoPath ?? "";
 
-  const remote = useRemoteTask(currentRepo?.path, Boolean(headInfo?.upstream));
+  const { data: repoStatus } = useRepoStatus(repoPathOrEmpty);
+  const { data: headInfo } = useRepoHeadInfo(repoPath);
+  const { data: repoInfo } = useGitHubRepoInfo(repoPathOrEmpty);
+  const { data: openPrs } = usePullRequests(repoPathOrEmpty);
+
+  const hasUpstream = Boolean(headInfo?.upstream);
+  const remote = useRemoteTask(repoPath, hasUpstream);
+  useAutoFetch(repoPath, remote.isPending);
   const isGitHub = Boolean(repoInfo?.is_github);
 
   const { shortcutLabel1, shortcutLabel2, shortcutLabel3, shortcutSidebar } =
@@ -46,8 +52,8 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
   useRepoHeaderShortcuts(currentRepo, setActiveScreen, toggleSidebar, isGitHub);
 
   useEffect(() => {
-    if (repoInfo && !repoInfo.is_github && activeScreen === "pull-requests") {
-      setActiveScreen("history");
+    if (repoInfo && !repoInfo.is_github && activeScreen === SCREEN_TYPE.PULL_REQUESTS) {
+      setActiveScreen(SCREEN_TYPE.HISTORY);
     }
   }, [repoInfo, activeScreen, setActiveScreen]);
 
@@ -60,7 +66,7 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
     <>
       <header
         data-testid="repo-header"
-        className="flex items-center justify-between px-3 bg-surface border-b border-border-subtle h-[40px] min-h-[40px] max-h-[40px] shrink-0 gap-3 select-none z-20"
+        className="flex items-center justify-between px-3 bg-surface border-b border-border-subtle h-11 min-h-11 max-h-11 shrink-0 gap-3 select-none z-20"
       >
         <RepoHeaderScreenSwitcher
           t={t}
@@ -80,11 +86,11 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
         <RepoHeaderGitActions
           t={t}
           actions={actions}
-          repoPath={currentRepo?.path}
+          repoPath={repoPath}
           remote={remote}
           aheadCount={aheadCount}
           behindCount={behindCount}
-          hasUpstream={Boolean(headInfo?.upstream)}
+          hasUpstream={hasUpstream}
           onOpenSettings={() => openSettings("appearance")}
         />
       </header>

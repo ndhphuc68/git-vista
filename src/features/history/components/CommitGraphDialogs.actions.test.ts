@@ -6,7 +6,9 @@ import { qk } from "../../../domain/queryKeys";
 
 const REPO_PATH = "/repo/path";
 
-function makeContext(overrides: Partial<Parameters<typeof createCommitActionSuccessHandler>[0]> = {}) {
+function makeContext(
+  overrides: Partial<Parameters<typeof createCommitActionSuccessHandler>[0]> = {}
+) {
   const queryClient = new QueryClient();
   const onClose = vi.fn();
   const setActiveScreen = vi.fn();

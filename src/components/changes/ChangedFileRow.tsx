@@ -1,7 +1,11 @@
 import React from "react";
 import clsx from "clsx";
 import { useTranslation } from "../../i18n";
-import { getStatusBadge, type ChangedFileItem, type SelectedWorkingFile } from "./stagingFileListHelpers";
+import {
+  getStatusBadge,
+  type ChangedFileItem,
+  type SelectedWorkingFile,
+} from "./stagingFileListHelpers";
 import { ChangedFileRowActions } from "./ChangedFileRowActions";
 
 export interface ChangedFileRowProps {
@@ -29,8 +33,8 @@ export const ChangedFileRow: React.FC<ChangedFileRowProps> = ({
       className={clsx(
         "flex items-center justify-between px-3 py-1.5 cursor-pointer transition-colors duration-fast ease-macos",
         isSelected
-          ? "bg-accent-subtle border-l-[3px] border-accent"
-          : "bg-transparent border-l-[3px] border-transparent hover:bg-surface-hover"
+          ? "bg-accent-subtle border-l-2 border-accent"
+          : "bg-transparent border-l-2 border-transparent hover:bg-surface-hover"
       )}
     >
       <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap flex-1 min-w-0">

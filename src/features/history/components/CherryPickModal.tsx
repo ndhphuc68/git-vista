@@ -10,6 +10,7 @@ import { CommitActionTargetCard } from "./CommitActionTargetCard";
 import { AutoCommitCheckbox } from "./AutoCommitCheckbox";
 import { CherryPickDestinationBranch } from "./CherryPickDestinationBranch";
 import { toErrorMessage } from "../../../shared/utils/toError";
+import { OPERATION_STATUS } from "../../../domain/enums";
 
 const TITLE_ID = "cherry-pick-title";
 
@@ -57,7 +58,7 @@ export const CherryPickModal: React.FC<CherryPickModalProps> = ({
     try {
       const res = await cherryPickCommit(repoPath, targetCommit.id, autoCommit);
 
-      if (res.success || res.status === "Conflict") {
+      if (res.success || res.status === OPERATION_STATUS.CONFLICT) {
         if (onSuccess) onSuccess(res);
         onClose();
       } else {
@@ -87,7 +88,10 @@ export const CherryPickModal: React.FC<CherryPickModalProps> = ({
           still submit across the two sections. */}
       <form onSubmit={handleSubmit} className="contents">
         <Modal.Body>
-          <CommitActionTargetCard label={t.modals.cherryPick.targetCommit} targetCommit={targetCommit} />
+          <CommitActionTargetCard
+            label={t.modals.cherryPick.targetCommit}
+            targetCommit={targetCommit}
+          />
 
           {currentBranch && <CherryPickDestinationBranch currentBranch={currentBranch} />}
 

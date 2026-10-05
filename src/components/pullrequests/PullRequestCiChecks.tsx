@@ -1,6 +1,7 @@
 import React from "react";
 import { CheckCircle2, XCircle, Clock } from "lucide-react";
 import { type Translations } from "../../i18n/vi";
+import { CHECK_STATUS } from "../../domain/enums";
 import { type CheckRunItem } from "../../ipc/githubApi";
 
 interface PullRequestCiChecksProps {
@@ -24,11 +25,13 @@ export const PullRequestCiChecks: React.FC<PullRequestCiChecksProps> = ({ checkR
             className="flex items-center justify-between text-xs py-1 px-2 rounded bg-surface border border-border-subtle"
           >
             <div className="flex items-center gap-2 min-w-0">
-              {c.status === "success" && (
+              {c.status === CHECK_STATUS.SUCCESS && (
                 <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
               )}
-              {c.status === "failure" && <XCircle size={13} className="text-red-500 shrink-0" />}
-              {(c.status === "in_progress" || c.status === "queued") && (
+              {c.status === CHECK_STATUS.FAILURE && (
+                <XCircle size={13} className="text-red-500 shrink-0" />
+              )}
+              {(c.status === CHECK_STATUS.IN_PROGRESS || c.status === CHECK_STATUS.QUEUED) && (
                 <Clock size={13} className="text-amber-500 shrink-0" />
               )}
               <span className="truncate text-secondary font-mono text-[11px]">{c.name}</span>

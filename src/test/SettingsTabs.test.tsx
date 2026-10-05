@@ -8,6 +8,11 @@ import { GitProfileTab } from "../components/settings/tabs/GitProfileTab";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { resetMockGitConfig } from "../ipc/client";
 
+function pickOption(triggerTestId: string, optionName: RegExp | string) {
+  fireEvent.click(screen.getByTestId(triggerTestId));
+  fireEvent.click(screen.getByRole("option", { name: optionName }));
+}
+
 describe("Settings Tabs Components", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -15,6 +20,7 @@ describe("Settings Tabs Components", () => {
     const settings = useSettingsStore.getState();
     settings.setLocale("vi");
     settings.setTheme("light");
+    settings.setColorblind(false);
     settings.setDiffViewMode("unified");
     settings.setDiffFontSize(13);
     settings.setDiffIgnoreWhitespace(false);
@@ -27,7 +33,6 @@ describe("Settings Tabs Components", () => {
     settings.setDefaultTerminal("wt");
     settings.setConfirmDiscard(true);
     settings.setConfirmDeleteBranch(true);
-    settings.setConfirmForcePush(true);
     settings.setCommitMessageLimit(50);
   });
 
@@ -66,11 +71,11 @@ describe("Settings Tabs Components", () => {
       expect(screen.getByText(/Tích hợp Công cụ Ngoài/i)).toBeInTheDocument();
 
       // Choose Cursor
-      fireEvent.click(screen.getByTestId("editor-option-cursor"));
+      pickOption("editor-select", /Cursor/);
       expect(useSettingsStore.getState().defaultEditor).toBe("cursor");
 
       // Choose Custom editor
-      fireEvent.click(screen.getByTestId("editor-option-custom"));
+      pickOption("editor-select", /Lệnh tùy chỉnh/);
       expect(useSettingsStore.getState().defaultEditor).toBe("custom");
 
       const customInput = screen.getByTestId("custom-editor-input");
@@ -79,7 +84,7 @@ describe("Settings Tabs Components", () => {
       expect(useSettingsStore.getState().customEditorCommand).toBe("nvim");
 
       // Choose PowerShell terminal
-      fireEvent.click(screen.getByTestId("terminal-option-powershell"));
+      pickOption("terminal-select", /PowerShell/);
       expect(useSettingsStore.getState().defaultTerminal).toBe("powershell");
     });
   });
@@ -88,13 +93,17 @@ describe("Settings Tabs Components", () => {
     it("updates date format and avatar style", () => {
       render(<AppearanceTab />);
 
-      // Update date format
-      fireEvent.click(screen.getByTestId("date-format-absolute"));
+      pickOption("date-format-select", /Thời gian tuyệt đối/i);
       expect(useSettingsStore.getState().dateFormat).toBe("absolute");
 
-      // Update avatar style
-      fireEvent.click(screen.getByTestId("avatar-style-gravatar"));
+      pickOption("avatar-style-select", /Gravatar/i);
       expect(useSettingsStore.getState().avatarStyle).toBe("gravatar");
+
+      fireEvent.click(screen.getByTestId("theme-dark"));
+      expect(useSettingsStore.getState().theme).toBe("dark");
+
+      fireEvent.click(screen.getByTestId("toggle-colorblind"));
+      expect(useSettingsStore.getState().colorblind).toBe(true);
     });
   });
 
@@ -113,8 +122,7 @@ describe("Settings Tabs Components", () => {
       fireEvent.click(screen.getByTestId("toggle-confirm-delete-branch"));
       expect(useSettingsStore.getState().confirmDeleteBranch).toBe(false);
 
-      fireEvent.click(screen.getByTestId("toggle-confirm-force-push"));
-      expect(useSettingsStore.getState().confirmForcePush).toBe(false);
+      expect(screen.queryByTestId("toggle-confirm-force-push")).not.toBeInTheDocument();
 
       // Toggle fetch.prune & rebase.autoStash
       const pruneToggle = screen.getByTestId("toggle-fetch-prune");

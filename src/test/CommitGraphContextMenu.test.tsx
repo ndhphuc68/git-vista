@@ -75,7 +75,9 @@ describe("CommitGraph Context Menu", () => {
   });
 
   it("verifies clicking 'Checkout this commit' invokes checkoutCommit and clears selectedBranch", async () => {
-    const checkoutCommitSpy = vi.spyOn(invokeCommand, "checkoutCommit").mockResolvedValue(undefined);
+    const checkoutCommitSpy = vi
+      .spyOn(invokeCommand, "checkoutCommit")
+      .mockResolvedValue(undefined);
     useRepoStore.getState().setSelectedBranch("main");
 
     render(

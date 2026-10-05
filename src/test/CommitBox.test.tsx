@@ -1,12 +1,14 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { CommitBox } from "../components/changes/CommitBox";
+import { useSettingsStore } from "../store/useSettingsStore";
 
 describe("CommitBox", () => {
   const mockOnCommit = vi.fn().mockResolvedValue(undefined);
 
   beforeEach(() => {
     vi.clearAllMocks();
+    useSettingsStore.getState().setCommitMessageLimit(72);
   });
 
   it("renders summary input, description textarea, character counter, and commit button", () => {
@@ -114,5 +116,29 @@ describe("CommitBox", () => {
     await waitFor(() => {
       expect(mockOnCommit).toHaveBeenCalledWith("feat: shortcut commit", undefined, false);
     });
+  });
+
+  it("uses the subject limit chosen in settings", () => {
+    useSettingsStore.getState().setCommitMessageLimit(50);
+    render(<CommitBox repoPath="/test/repo" stagedCount={1} onCommit={mockOnCommit} />);
+
+    fireEvent.change(screen.getByTestId("commit-summary-input"), {
+      target: { value: "a".repeat(51) },
+    });
+
+    expect(screen.getByText("51/50")).toBeInTheDocument();
+    expect(screen.getByText(/Vượt quá 50 ký tự khuyến nghị/i)).toBeInTheDocument();
+  });
+
+  it("never warns when the limit is off", () => {
+    useSettingsStore.getState().setCommitMessageLimit(0);
+    render(<CommitBox repoPath="/test/repo" stagedCount={1} onCommit={mockOnCommit} />);
+
+    fireEvent.change(screen.getByTestId("commit-summary-input"), {
+      target: { value: "a".repeat(120) },
+    });
+
+    expect(screen.getByText("120")).toBeInTheDocument();
+    expect(screen.queryByText(/Vượt quá/i)).not.toBeInTheDocument();
   });
 });

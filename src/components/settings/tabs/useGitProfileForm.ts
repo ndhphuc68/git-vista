@@ -4,16 +4,18 @@ import type { GitConfigDto } from "../../../ipc/client";
 import { useToastStore } from "../../../store/useToastStore";
 import { useGitProfileFormFields } from "./useGitProfileFormFields";
 import { useGitProfileFormStatus } from "./useGitProfileFormStatus";
+import { useGitProfileDirtyState } from "./useGitProfileDirtyState";
 import { useGitProfileFormLoadEffect } from "./useGitProfileFormLoadEffect";
 import {
   createSaveHandler,
   createResetToGlobalHandler,
   createSelectInheritHandler,
 } from "./useGitProfileForm.actions";
+import { CONFIG_SCOPE, SETTINGS_SCOPE, type SettingsScope } from "../../../domain/enums";
 
 export interface UseGitProfileFormOptions {
   currentRepoPath: string | null;
-  activeScope: "global" | "repo";
+  activeScope: SettingsScope;
 }
 
 export interface UseGitProfileFormResult {
@@ -34,6 +36,8 @@ export interface UseGitProfileFormResult {
   loading: boolean;
   saving: boolean;
   hasLocalOverride: boolean;
+  isDirty: boolean;
+  handleDiscard: () => void;
   handleSave: (e: FormEvent) => Promise<void>;
   handleResetToGlobal: () => Promise<void>;
   handleSelectInherit: () => void;
@@ -49,6 +53,7 @@ export function useGitProfileForm({
   const { showSuccess, showError } = useToastStore();
   const fields = useGitProfileFormFields();
   const status = useGitProfileFormStatus();
+  const dirty = useGitProfileDirtyState(fields, status, activeScope);
 
   useGitProfileFormLoadEffect({
     currentRepoPath,
@@ -81,6 +86,7 @@ export function useGitProfileForm({
     setIsOverride: status.setIsOverride,
     setUserName: fields.setUserName,
     setUserEmail: fields.setUserEmail,
+    setDefaultBranch: fields.setDefaultBranch,
     setGpgSign: fields.setGpgSign,
     setGpgKey: fields.setGpgKey,
     showSuccess,
@@ -88,13 +94,16 @@ export function useGitProfileForm({
   };
 
   const hasLocalOverride =
-    activeScope === "repo" &&
-    Boolean(status.localConfig?.userNameSource === "local" && status.localConfig?.userName);
+    activeScope === SETTINGS_SCOPE.REPO &&
+    Boolean(
+      status.localConfig?.userNameSource === CONFIG_SCOPE.LOCAL && status.localConfig?.userName
+    );
 
   return {
     ...fields,
     ...status,
     hasLocalOverride,
+    ...dirty,
     handleSave: createSaveHandler(actionsContext),
     handleResetToGlobal: createResetToGlobalHandler(actionsContext),
     handleSelectInherit: createSelectInheritHandler(actionsContext),

@@ -11,6 +11,7 @@ pub mod remote;
 pub mod repo;
 pub mod stash;
 pub mod tag;
+pub mod terminal;
 pub mod undo;
 
 pub use app::*;
@@ -26,4 +27,5 @@ pub use remote::*;
 pub use repo::*;
 pub use stash::*;
 pub use tag::*;
+pub use terminal::*;
 pub use undo::*;

@@ -66,4 +66,23 @@ describe("FileDiffViewer", () => {
     await screen.findByText("src/example.ts");
     expect(document.body.textContent).toContain("const a = 2;");
   });
+
+  it("renders the hunk header, line numbers, signs and contents", async () => {
+    renderView();
+
+    expect(await screen.findByText("@@ -1,2 +1,2 @@")).toBeInTheDocument();
+    expect(screen.getByText("+")).toBeInTheDocument();
+    expect(screen.getByText("-")).toBeInTheDocument();
+    expect(screen.getAllByText("1")).toHaveLength(3);
+  });
+
+  it("applies the diff font size and hides line numbers when turned off", async () => {
+    useSettingsStore.setState({ diffFontSize: 16, diffShowLineNumbers: false });
+    const { container } = renderView();
+
+    await screen.findByText("@@ -1,2 +1,2 @@");
+    expect(container.querySelector('[style*="font-size: 16px"]')).not.toBeNull();
+    expect(screen.queryByTestId("diff-line-numbers")).not.toBeInTheDocument();
+    useSettingsStore.setState({ diffFontSize: 13, diffShowLineNumbers: true });
+  });
 });

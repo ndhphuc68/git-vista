@@ -4,7 +4,14 @@ import { CompareFileList } from "./CompareFileList";
 import type { CompareFileItem } from "../../ipc/bindings.generated";
 
 const files: CompareFileItem[] = [
-  { path: "src/added.ts", old_path: null, status: "Added", additions: 3, deletions: 0, is_binary: false },
+  {
+    path: "src/added.ts",
+    old_path: null,
+    status: "Added",
+    additions: 3,
+    deletions: 0,
+    is_binary: false,
+  },
   {
     path: "src/renamed.ts",
     old_path: "src/old.ts",

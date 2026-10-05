@@ -22,9 +22,7 @@ export const ConflictHunkMergedColumn: React.FC<ConflictHunkMergedColumnProps> =
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-border-subtle bg-surface-subtle">
         <span className="text-[11px] font-semibold text-primary flex items-center gap-1.5">
           {isResolved ? (
-            <span className="text-diff-add-text font-bold">
-              {t.conflictResolver.selectedBadge}
-            </span>
+            <span className="text-diff-add-text font-bold">{t.conflictResolver.selectedBadge}</span>
           ) : (
             <span className="text-secondary font-normal italic">
               {t.conflictResolver.unselectedBadge}

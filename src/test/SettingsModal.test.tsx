@@ -42,7 +42,7 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
     expect(await screen.findByText(/Toàn hệ thống \(Global\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Nhánh mặc định/i)).toBeInTheDocument();
     expect(screen.queryByText(/Cài đặt riêng cho repository/i)).not.toBeInTheDocument();
-    expect(screen.queryByTestId("inherit-toggle-inherit")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("toggle-use-global")).not.toBeInTheDocument();
   });
 
   it("ngay cả khi có repo tab mở trong nền, nếu mở từ màn Welcome (currentRepoPath là null) thì vẫn chỉ mở cài đặt chung và không có phần setting riêng cho repo", async () => {
@@ -55,7 +55,7 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
     expect(await screen.findByText(/Toàn hệ thống \(Global\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Nhánh mặc định/i)).toBeInTheDocument();
     expect(screen.queryByText(/Cài đặt riêng cho repository/i)).not.toBeInTheDocument();
-    expect(screen.queryByTestId("inherit-toggle-inherit")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("toggle-use-global")).not.toBeInTheDocument();
   });
 
   it("khi có repo mở, cho phép chuyển đổi giữa Global và Repository scope", async () => {
@@ -68,26 +68,24 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
 
     expect(repoBtn).not.toBeDisabled();
     // Default to repo scope when currentRepoPath is provided
-    expect(repoBtn).toHaveAttribute("data-active", "true");
+    expect(repoBtn).toHaveAttribute("aria-checked", "true");
 
     // Switch to global scope
     fireEvent.click(globalBtn);
-    expect(globalBtn).toHaveAttribute("data-active", "true");
-    expect(repoBtn).toHaveAttribute("data-active", "false");
+    expect(screen.getByTestId("scope-btn-global")).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByTestId("scope-btn-repo")).toHaveAttribute("aria-checked", "false");
   });
 
-  it("cho phép chọn giữa các repository khác nhau khi có nhiều repo mở", async () => {
+  it("limits repo scope to the open repository even when several repos are open", async () => {
     useTabStore.getState().openRepoTab(mockRepo1);
     useTabStore.getState().openRepoTab(mockRepo2);
 
     render(<SettingsModal currentRepoPath={mockRepo1.path} />);
 
-    const select = screen.getByTestId("scope-repo-select");
-    expect(select).toBeInTheDocument();
-
-    // Select project-beta
-    fireEvent.change(select, { target: { value: mockRepo2.path } });
-    expect(select).toHaveValue(mockRepo2.path);
+    expect(await screen.findByTestId("scope-btn-repo")).toHaveTextContent("project-alpha");
+    expect(screen.queryByTestId("scope-repo-select")).not.toBeInTheDocument();
+    expect(screen.queryByText("project-beta")).not.toBeInTheDocument();
+    expect(screen.getByTestId("scope-hint")).toHaveTextContent("project-alpha");
   });
 
   it("hỗ trợ toggle Kế thừa từ Global / Ghi đè cho repo này trong GitProfileTab", async () => {
@@ -97,12 +95,11 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
 
     // By default in mock, local config inherits from global
     await waitFor(() => {
-      expect(screen.getByTestId("inherit-toggle-inherit")).toBeInTheDocument();
-      expect(screen.getByTestId("inherit-toggle-override")).toBeInTheDocument();
+      expect(screen.getByTestId("toggle-use-global")).toHaveAttribute("aria-checked", "true");
     });
 
-    // Click override
-    fireEvent.click(screen.getByTestId("inherit-toggle-override"));
+    // Turn inheritance off to override for this repo
+    fireEvent.click(screen.getByTestId("toggle-use-global"));
 
     const nameInput = screen.getByLabelText(/Tên tác giả/i);
     expect(nameInput).not.toBeDisabled();
@@ -117,10 +114,10 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
     render(<SettingsModal currentRepoPath={mockRepo1.path} />);
 
     await waitFor(() => {
-      expect(screen.getByTestId("inherit-toggle-override")).toBeInTheDocument();
+      expect(screen.getByTestId("toggle-use-global")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId("inherit-toggle-override"));
+    fireEvent.click(screen.getByTestId("toggle-use-global"));
     const nameInput = screen.getByLabelText(/Tên tác giả/i);
     fireEvent.change(nameInput, { target: { value: "Custom Name" } });
 
@@ -135,7 +132,7 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
 
     // Verify it returned to inherit
     await waitFor(() => {
-      expect(screen.getByTestId("inherit-toggle-inherit")).toBeChecked();
+      expect(screen.getByTestId("toggle-use-global")).toHaveAttribute("aria-checked", "true");
     });
   });
 
@@ -169,4 +166,28 @@ describe("SettingsModal - 2-Tier Settings Architecture", () => {
     expect(screen.getByText(/Trình soạn thảo mã \/ IDE mặc định/i)).toBeInTheDocument();
     expect(screen.getByText(/Cửa sổ dòng lệnh \(Terminal\) mặc định/i)).toBeInTheDocument();
   });
+
+  it.each(["profile", "behavior"] as const)(
+    "keeps keyboard focus on the scope radio when switching scope with arrow keys (%s tab)",
+    async (tab) => {
+      useSettingsStore.getState().setActiveTab(tab);
+      useTabStore.getState().openRepoTab(mockRepo1);
+
+      render(<SettingsModal currentRepoPath={mockRepo1.path} />);
+
+      const repoBtn = await screen.findByTestId("scope-btn-repo");
+      repoBtn.focus();
+      fireEvent.keyDown(repoBtn, { key: "ArrowLeft" });
+
+      const globalBtn = screen.getByTestId("scope-btn-global");
+      expect(globalBtn).toHaveAttribute("aria-checked", "true");
+      expect(document.activeElement).toBe(globalBtn);
+
+      fireEvent.keyDown(globalBtn, { key: "ArrowRight" });
+
+      const repoBtnAfter = screen.getByTestId("scope-btn-repo");
+      expect(repoBtnAfter).toHaveAttribute("aria-checked", "true");
+      expect(document.activeElement).toBe(repoBtnAfter);
+    }
+  );
 });

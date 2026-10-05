@@ -16,11 +16,11 @@ describe("useSettingsStore", () => {
     store.setDiffShowLineNumbers(true);
     store.setConfirmDiscard(true);
     store.setConfirmDeleteBranch(true);
-    store.setConfirmForcePush(true);
     store.setCommitMessageLimit(50);
     store.setDefaultEditor("code");
     store.setCustomEditorCommand("");
     store.setDefaultTerminal("wt");
+    store.setAutoFetchInterval(300);
   });
 
   it("opens settings with default or specified tab", () => {
@@ -82,18 +82,15 @@ describe("useSettingsStore", () => {
     const store = useSettingsStore.getState();
     expect(store.confirmDiscard).toBe(true);
     expect(store.confirmDeleteBranch).toBe(true);
-    expect(store.confirmForcePush).toBe(true);
     expect(store.commitMessageLimit).toBe(50);
 
     store.setConfirmDiscard(false);
     store.setConfirmDeleteBranch(false);
-    store.setConfirmForcePush(false);
     store.setCommitMessageLimit(72);
 
     const updated = useSettingsStore.getState();
     expect(updated.confirmDiscard).toBe(false);
     expect(updated.confirmDeleteBranch).toBe(false);
-    expect(updated.confirmForcePush).toBe(false);
     expect(updated.commitMessageLimit).toBe(72);
   });
 
@@ -111,5 +108,16 @@ describe("useSettingsStore", () => {
     expect(updated.defaultEditor).toBe("custom");
     expect(updated.customEditorCommand).toBe("nvim");
     expect(updated.defaultTerminal).toBe("powershell");
+  });
+
+  it("updates background auto-fetch interval", () => {
+    const store = useSettingsStore.getState();
+    expect(store.autoFetchInterval).toBe(300);
+
+    store.setAutoFetchInterval(600);
+
+    const updated = useSettingsStore.getState();
+    expect(updated.autoFetchInterval).toBe(600);
+    expect(localStorage.getItem("gitvista_autofetch_interval")).toBe("600");
   });
 });

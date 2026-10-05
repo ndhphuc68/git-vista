@@ -1,9 +1,11 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { checkoutPullRequest } from "../../github";
+import { openExternalUrl } from "../../repo";
 import { qk } from "../../../domain/queryKeys";
 import { usePullRequestStore } from "../../../store/usePullRequestStore";
 import { toErrorMessage } from "../../../shared/utils/toError";
 import type { GitHubPullRequest } from "../../../ipc/githubApi";
+import type { PullRequestState } from "../../../domain/enums";
 import type { Translations } from "../../../i18n/vi";
 
 export interface PullRequestsScreenActionsContext {
@@ -42,8 +44,8 @@ export function createPullRequestsScreenActions(context: PullRequestsScreenActio
   };
 
   const handleOpenBrowser = (pr: GitHubPullRequest) => {
-    if (pr.html_url && typeof window !== "undefined") {
-      window.open(pr.html_url, "_blank");
+    if (pr.html_url) {
+      openExternalUrl(pr.html_url).catch((err: unknown) => showError(toErrorMessage(err)));
     }
   };
 
@@ -51,10 +53,7 @@ export function createPullRequestsScreenActions(context: PullRequestsScreenActio
     usePullRequestStore.getState().openCreateModal();
   };
 
-  const handleRefresh = async (
-    filterState: "open" | "closed" | "all",
-    selectedPrNumber?: number | null
-  ) => {
+  const handleRefresh = async (filterState: PullRequestState, selectedPrNumber?: number | null) => {
     await queryClient.invalidateQueries({
       queryKey: qk.github.pullRequests(repoPath, filterState),
     });

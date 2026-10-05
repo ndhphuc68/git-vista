@@ -1,3 +1,5 @@
+import { SCREEN_TYPE } from "./domain/enums";
+import { HOME_TAB_ID } from "./domain/constants/app";
 import { type RepoSummary } from "./ipc/bindings.generated";
 import { type UseGlobalShortcutsOptions } from "./hooks/useGlobalShortcuts";
 import { type CommandContext } from "./utils/commandRegistry";
@@ -63,7 +65,7 @@ export function buildGlobalShortcutsConfig(
     },
     onNewTab: handleBackToWelcome,
     onCloseTab: () => {
-      if (activeTabId !== "home") {
+      if (activeTabId !== HOME_TAB_ID) {
         closeTab(activeTabId);
       }
     },
@@ -138,7 +140,7 @@ export function buildCommandContext(deps: BuildCommandContextDeps): CommandConte
     },
     openPullRequests: () => {
       if (repoToDisplay) {
-        setActiveScreen("history");
+        setActiveScreen(SCREEN_TYPE.HISTORY);
       }
     },
     openShortcutsHelp: () => setIsShortcutsHelpOpen(true),

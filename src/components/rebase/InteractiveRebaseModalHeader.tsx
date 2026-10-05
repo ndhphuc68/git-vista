@@ -31,7 +31,10 @@ export const InteractiveRebaseModalHeader: React.FC<InteractiveRebaseModalHeader
             <GitBranch size={16} />
           </div>
           <div>
-            <h2 id={titleId} className="text-base font-semibold text-primary flex items-center gap-2">
+            <h2
+              id={titleId}
+              className="text-base font-semibold text-primary flex items-center gap-2"
+            >
               {t.modals.interactiveRebase.title}
             </h2>
             <p className="text-xs text-secondary mt-0.5">

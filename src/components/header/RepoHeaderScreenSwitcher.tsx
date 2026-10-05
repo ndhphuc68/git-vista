@@ -42,14 +42,14 @@ export const RepoHeaderScreenSwitcher: React.FC<RepoHeaderScreenSwitcherProps> =
         data-testid="toggle-sidebar"
         onClick={toggleSidebar}
         className={clsx(
-          "flex items-center justify-center w-7 h-7 border border-border-subtle rounded-md cursor-pointer shrink-0 transition-colors shadow-2xs",
+          "flex items-center justify-center w-8 h-8 border border-border-subtle rounded-md cursor-pointer shrink-0 transition-colors shadow-2xs",
           sidebarOpen
             ? "bg-accent-subtle text-accent font-semibold"
             : "bg-transparent text-secondary hover:bg-surface-hover hover:text-primary"
         )}
         title={t.header.toggleSidebar.replace("{shortcut}", shortcutSidebar)}
       >
-        <PanelLeft size={14} />
+        <PanelLeft size={16} />
       </button>
 
       <RepoHeaderScreenTabs

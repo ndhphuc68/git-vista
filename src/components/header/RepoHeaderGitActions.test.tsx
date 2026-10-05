@@ -87,3 +87,46 @@ describe("RepoHeaderGitActions - open in editor", () => {
     expect(screen.getByTestId("btn-open-in-editor")).toBeDisabled();
   });
 });
+
+describe("RepoHeaderGitActions - open in terminal", () => {
+  beforeEach(() => {
+    useSettingsStore.getState().setDefaultTerminal("powershell");
+    useToastStore.getState().clearToasts();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("opens the repo in the terminal chosen in settings", async () => {
+    const spy = vi.spyOn(invokeCommand, "openInTerminal").mockResolvedValue(undefined);
+    renderActions();
+
+    fireEvent.click(screen.getByTestId("btn-open-in-terminal"));
+
+    await waitFor(() => expect(spy).toHaveBeenCalledWith("D:/repos/demo", "powershell"));
+  });
+
+  it("shows a toast when the terminal is not installed", async () => {
+    vi.spyOn(invokeCommand, "openInTerminal").mockRejectedValue({
+      type: "NotFound",
+      message: "git-bash.exe",
+    });
+    renderActions();
+
+    fireEvent.click(screen.getByTestId("btn-open-in-terminal"));
+
+    await waitFor(() => {
+      const [toast] = useToastStore.getState().toasts;
+      expect(toast?.type).toBe("error");
+      expect(JSON.stringify(toast)).toContain(
+        viTranslations.header.editorNotFound.replace("{program}", "git-bash.exe")
+      );
+    });
+  });
+
+  it("disables the button when no repo is open", () => {
+    renderActions({});
+    expect(screen.getByTestId("btn-open-in-terminal")).toBeDisabled();
+  });
+});

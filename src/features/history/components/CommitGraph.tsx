@@ -1,3 +1,4 @@
+import { SCREEN_TYPE } from "../../../domain/enums";
 import { useCommitGraphState } from "../hooks/useCommitGraphState";
 import { CommitGraphHeader } from "./CommitGraphHeader";
 import { CommitGraphRows } from "./CommitGraphRows";
@@ -54,7 +55,7 @@ export function CommitGraph(dialogComponents: GraphDialogComponents) {
           hasUncommittedChanges={hasUncommittedChanges}
           modifiedCount={modifiedCount}
           untrackedCount={untrackedCount}
-          onShowChanges={() => setActiveScreen("changes")}
+          onShowChanges={() => setActiveScreen(SCREEN_TYPE.CHANGES)}
           onSelectCommit={handleSelectCommit}
           onCheckoutBranch={handleCheckoutBranch}
           onCompare={(baseRev, targetRev) => setDialog({ type: "compare", baseRev, targetRev })}

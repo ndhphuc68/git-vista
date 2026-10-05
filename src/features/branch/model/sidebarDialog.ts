@@ -15,7 +15,7 @@ export type SidebarDialog =
   | { kind: "none" }
   | { kind: "createBranch"; fromRef: string | null; fromBranch?: string }
   | { kind: "renameBranch"; name: string }
-  | { kind: "deleteBranch"; name: string }
+  | { kind: "deleteBranch"; name: string; unmerged?: boolean }
   | { kind: "createTag"; commitId: string; summary?: string }
   | { kind: "deleteTag"; tag: TagItem }
   | { kind: "merge"; targetBranch: string }

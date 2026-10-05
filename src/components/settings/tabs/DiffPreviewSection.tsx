@@ -1,14 +1,16 @@
 import React from "react";
+import { useTranslation } from "../../../i18n";
 import { useSettingsStore } from "../../../store/useSettingsStore";
+import { SettingsSection } from "../../../features/settings";
 
 export const DiffPreviewSection: React.FC = () => {
+  const { t } = useTranslation();
   const { diffFontSize, diffTabSize, diffShowLineNumbers } = useSettingsStore();
 
   return (
-    <div className="pt-2">
-      <label className="text-xs font-medium text-secondary block mb-2">Preview</label>
+    <SettingsSection title={t.settings.sections.preview}>
       <div
-        className="rounded-lg border border-border-subtle bg-surface-header/40 p-3 font-mono overflow-x-auto leading-relaxed select-none"
+        className="rounded-xl p-4 font-mono overflow-x-auto leading-relaxed select-none"
         style={{ fontSize: `${diffFontSize}px`, tabSize: diffTabSize }}
       >
         {diffShowLineNumbers ? (
@@ -34,6 +36,6 @@ export const DiffPreviewSection: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+    </SettingsSection>
   );
 };

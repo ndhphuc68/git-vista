@@ -151,4 +151,3 @@ describe("BranchSidebar", () => {
     expect(aside.className).not.toContain("overflow-y-auto");
   });
 });
-

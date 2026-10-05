@@ -1,7 +1,4 @@
-export {
-  PullRequestsScreen,
-  type PullRequestsScreenProps,
-} from "./components/PullRequestsScreen";
+export { PullRequestsScreen, type PullRequestsScreenProps } from "./components/PullRequestsScreen";
 export {
   PullRequestStatusBadge,
   type PullRequestStatusBadgeProps,

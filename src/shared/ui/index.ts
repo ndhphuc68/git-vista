@@ -7,3 +7,9 @@ export { Textarea, type TextareaProps } from "./Textarea";
 export { Checkbox, type CheckboxProps } from "./Checkbox";
 export { Select, type SelectProps } from "./Select";
 export type { SelectOption, SelectGroup, SelectItems } from "./selectOptions";
+export { Switch, type SwitchProps } from "./Switch";
+export {
+  SegmentedControl,
+  type SegmentedControlProps,
+  type SegmentedOption,
+} from "./SegmentedControl";

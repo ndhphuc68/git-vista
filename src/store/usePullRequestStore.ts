@@ -30,7 +30,6 @@ export const usePullRequestStore = create<PullRequestStoreState>((set) => ({
   setSelectedPr: (pr, repoPath) =>
     set((state) => ({
       selectedPr: pr,
-      selectedRepoPath:
-        repoPath !== undefined ? repoPath : pr ? state.selectedRepoPath : null,
+      selectedRepoPath: repoPath !== undefined ? repoPath : pr ? state.selectedRepoPath : null,
     })),
 }));

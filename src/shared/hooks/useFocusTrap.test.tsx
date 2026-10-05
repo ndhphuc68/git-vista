@@ -7,13 +7,7 @@ import { useFocusTrap } from "./useFocusTrap";
  * Minimal harness: a container that traps focus while `enabled` is true.
  * Kept deliberately dumb so the tests exercise the hook, not a component.
  */
-function Trapped({
-  enabled,
-  children,
-}: {
-  enabled: boolean;
-  children?: React.ReactNode;
-}) {
+function Trapped({ enabled, children }: { enabled: boolean; children?: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   useFocusTrap(ref, enabled);
   return (

@@ -19,9 +19,9 @@ describe("resolveTargetDirOnUrlChange", () => {
   });
 
   it("fills the empty target dir with just the repo name when no folder was picked", () => {
-    expect(
-      resolveTargetDirOnUrlChange("https://github.com/owner/cool-project.git", "", "")
-    ).toBe("cool-project");
+    expect(resolveTargetDirOnUrlChange("https://github.com/owner/cool-project.git", "", "")).toBe(
+      "cool-project"
+    );
   });
 
   it("replaces a target dir that already ends with the previous repo name", () => {

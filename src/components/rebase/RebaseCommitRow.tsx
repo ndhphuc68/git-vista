@@ -1,6 +1,11 @@
 import React from "react";
 import clsx from "clsx";
-import type { RebasePlanStep, RebaseCommitItem, RebaseActionKind } from "../../ipc/bindings.generated";
+import type {
+  RebasePlanStep,
+  RebaseCommitItem,
+  RebaseActionKind,
+} from "../../ipc/bindings.generated";
+import { REBASE_ACTION } from "../../domain/enums";
 import { RebaseRowHeader } from "./RebaseRowHeader";
 import { RebaseActionPills } from "./RebaseActionPills";
 import { RebaseMessageEditor } from "./RebaseMessageEditor";
@@ -38,9 +43,9 @@ export const RebaseCommitRow: React.FC<RebaseCommitRowProps> = ({
 }) => {
   const isFirst = index === 0;
   const isLast = index === total - 1;
-  const isDropped = step.action === "Drop";
-  const isReword = step.action === "Reword";
-  const isSquash = step.action === "Squash";
+  const isDropped = step.action === REBASE_ACTION.DROP;
+  const isReword = step.action === REBASE_ACTION.REWORD;
+  const isSquash = step.action === REBASE_ACTION.SQUASH;
   const hasInlineEditor = isReword || isSquash;
 
   const currentMessage = step.new_message ?? commit.message ?? commit.summary;

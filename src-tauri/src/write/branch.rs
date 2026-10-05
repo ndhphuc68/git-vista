@@ -420,18 +420,17 @@ mod tests {
 
         // Simulate in-progress merge
         let git_dir = repo.path();
-        fs::write(
-            git_dir.join("MERGE_HEAD"),
-            format!("{}\n", commit),
-        )
-        .unwrap();
+        fs::write(git_dir.join("MERGE_HEAD"), format!("{}\n", commit)).unwrap();
         fs::write(git_dir.join("MERGE_MSG"), "Merge commit\n").unwrap();
 
         assert_eq!(repo.state(), git2::RepositoryState::Merge);
 
         // Attempt checkout branch-b
         let result = checkout_branch(temp.path(), "branch-b");
-        assert!(result.is_err(), "Checkout should fail when merge is in progress");
+        assert!(
+            result.is_err(),
+            "Checkout should fail when merge is in progress"
+        );
         let err_str = result.unwrap_err().to_string();
         assert!(
             err_str.contains("OPERATION_IN_PROGRESS"),
@@ -492,4 +491,3 @@ mod tests {
         assert_eq!(fs::read_to_string(&file_path).unwrap().trim(), "c1");
     }
 }
-

@@ -16,7 +16,7 @@ export const CompareFileRow: React.FC<CompareFileRowProps> = ({ file, isSelected
     className={clsx(
       "w-full flex items-center justify-between px-3 py-2 text-left text-xs gap-2 cursor-pointer transition-colors border-l-2",
       isSelected
-        ? "bg-accent/15 border-accent text-primary font-medium"
+        ? "border-accent bg-accent-subtle font-medium text-primary"
         : "border-transparent text-secondary hover:bg-surface-hover hover:text-primary"
     )}
   >

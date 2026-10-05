@@ -5,6 +5,7 @@ import { GraphSvgLane } from "../../../components/graph/GraphSvgLane";
 import type { GraphContextMenu } from "../model/graphDialog";
 import { GRAPH_COL_WIDTH, GRAPH_ROW_HEIGHT } from "../model/graphPresentation";
 import { CommitGraphCommitRowSummary } from "./CommitGraphCommitRowSummary";
+import { REF_TYPE } from "../../../domain/enums";
 
 interface CommitGraphCommitRowProps {
   commit: GraphCommitNode;
@@ -36,7 +37,7 @@ export function CommitGraphCommitRow({
   onCompare,
   onContextMenu,
 }: CommitGraphCommitRowProps) {
-  const isHead = commit.refs.some((r) => r.ref_type === "head");
+  const isHead = commit.refs.some((r) => r.ref_type === REF_TYPE.HEAD);
   const isMerge = commit.lines.some((l) => l.edge_type === "merge");
 
   return (

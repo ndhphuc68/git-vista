@@ -1,24 +1,18 @@
 import { useMemo } from "react";
-import { useTranslation } from "../../../i18n";
+import { useFormatDate } from "../../../i18n";
 import type { CommitDetails } from "../api/useCommitDetails";
-import {
-  parseCommitMessage,
-  formatRelativeTime,
-  formatExactDateTime,
-} from "../model/commitDetails";
+import { parseCommitMessage, formatExactDateTime } from "../model/commitDetails";
 import { CommitMetadataSubject } from "./CommitMetadataSubject";
 import { CommitMetadataAuthor } from "./CommitMetadataAuthor";
 
 export function CommitMetadata({ details }: { details: CommitDetails }) {
-  const { t } = useTranslation();
+  const formatDate = useFormatDate();
+  const displayTime = details ? formatDate(details.author_timestamp_sec) : "";
+
   // Commit message parsed with conventional commits & body
   const parsedMsg = useMemo(() => {
     return parseCommitMessage(details?.full_message || "");
   }, [details?.full_message]);
-
-  const relativeTime = useMemo(() => {
-    return details ? formatRelativeTime(details.author_timestamp_sec, t.diff.time) : "";
-  }, [details, t.diff.time]);
 
   const exactDateTime = useMemo(() => {
     return details ? formatExactDateTime(details.author_timestamp_sec) : "";
@@ -30,7 +24,7 @@ export function CommitMetadata({ details }: { details: CommitDetails }) {
       <CommitMetadataAuthor
         authorName={details.author_name}
         authorEmail={details.author_email}
-        relativeTime={relativeTime}
+        displayTime={displayTime}
         exactDateTime={exactDateTime}
       />
     </div>

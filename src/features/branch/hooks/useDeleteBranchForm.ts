@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { undoDeleteBranch } from "../../undo";
 import { useDeleteBranch } from "../api";
+import { showDeleteBranchUndoToast } from "./deleteBranchToast";
 import { useToastStore } from "../../../store/useToastStore";
 import { mapGitError } from "../../../utils/errorMapping";
 import { useTranslation } from "../../../i18n";
@@ -12,6 +12,7 @@ export interface DeleteBranchFormOptions {
   branchName: string;
   onClose: () => void;
   onSuccess?: (backupRef: string) => void;
+  initialUnmerged?: boolean;
 }
 
 /** Delete state, the unmerged-branch retry path and the undo toast for DeleteBranchModal. */
@@ -21,6 +22,7 @@ export function useDeleteBranchForm({
   branchName,
   onClose,
   onSuccess,
+  initialUnmerged,
 }: DeleteBranchFormOptions) {
   const { t } = useTranslation();
   const deleteBranch = useDeleteBranch(repoPath);
@@ -31,23 +33,16 @@ export function useDeleteBranchForm({
   useEffect(() => {
     if (isOpen) {
       setError(null);
-      setIsUnmerged(false);
+      setIsUnmerged(Boolean(initialUnmerged));
     }
-  }, [isOpen, branchName]);
+  }, [isOpen, branchName, initialUnmerged]);
 
   const handleDelete = async (force: boolean) => {
     setError(null);
 
     try {
       const backupRef = await deleteBranch.mutateAsync({ name: branchName, force });
-      useToastStore.getState().showToast({
-        message: t.modals.deleteBranch.successToast.replace("{name}", branchName),
-        type: "success",
-        durationMs: 10000,
-        undoAction: async () => {
-          await undoDeleteBranch(repoPath, branchName, backupRef);
-        },
-      });
+      showDeleteBranchUndoToast(repoPath, branchName, backupRef, t);
       if (onSuccess) onSuccess(backupRef);
       onClose();
     } catch (err: unknown) {

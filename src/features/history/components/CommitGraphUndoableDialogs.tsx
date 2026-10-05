@@ -1,3 +1,4 @@
+import type { SCREEN_TYPE } from "../../../domain/enums";
 import type { QueryClient } from "@tanstack/react-query";
 import type { useTranslation } from "../../../i18n";
 import { CherryPickModal } from "./CherryPickModal";
@@ -12,7 +13,7 @@ interface CommitGraphUndoableDialogsProps {
   currentBranch: string;
   t: ReturnType<typeof useTranslation>["t"];
   queryClient: QueryClient;
-  setActiveScreen: (screen: "changes") => void;
+  setActiveScreen: (screen: typeof SCREEN_TYPE.CHANGES) => void;
   undoCommit: (undoToken: string) => Promise<void>;
 }
 

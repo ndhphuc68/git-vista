@@ -1,70 +1,28 @@
 import React from "react";
-import { GitBehaviorPullStrategy } from "./GitBehaviorPullStrategy";
-import { GitBehaviorFlagsSection } from "./GitBehaviorFlagsSection";
+import {
+  GitBehaviorPullFetchSection,
+  type GitBehaviorPullFetchSectionProps,
+} from "./GitBehaviorPullFetchSection";
+import { GitBehaviorRebaseSection } from "./GitBehaviorRebaseSection";
 import { GitBehaviorConfirmationsSection } from "./GitBehaviorConfirmationsSection";
-import { GitBehaviorAutoFetchSection } from "./GitBehaviorAutoFetchSection";
 
-export interface GitBehaviorOptionsProps {
-  activeScope: "global" | "repo";
-  currentRepoPath: string | null;
-  localPullRebase: boolean | null;
-  globalPullRebase: boolean;
-  fetchPrune: boolean;
+export interface GitBehaviorOptionsProps extends GitBehaviorPullFetchSectionProps {
   rebaseAutostash: boolean;
-  autoFetchInterval: number;
-  loading: boolean;
-  saving: boolean;
-  onGlobalPullStrategyChange: (isRebase: boolean) => void;
-  onRepoPullStrategyChange: (mode: "inherit" | "merge" | "rebase") => void;
-  onToggleFetchPrune: () => void;
   onToggleRebaseAutostash: () => void;
-  onAutoFetchChange: (seconds: number) => void;
 }
 
-/**
- * Pull strategy, fetch/rebase flags, safety confirmations, and auto-fetch
- * interval controls for the git behavior settings tab.
- */
+/** Pull & fetch, rebase, and safety confirmation sections of the git behavior tab. */
 export const GitBehaviorOptions: React.FC<GitBehaviorOptionsProps> = ({
-  activeScope,
-  currentRepoPath,
-  localPullRebase,
-  globalPullRebase,
-  fetchPrune,
   rebaseAutostash,
-  autoFetchInterval,
-  loading,
-  saving,
-  onGlobalPullStrategyChange,
-  onRepoPullStrategyChange,
-  onToggleFetchPrune,
   onToggleRebaseAutostash,
-  onAutoFetchChange,
+  ...pullFetch
 }) => (
   <>
-    <GitBehaviorPullStrategy
-      activeScope={activeScope}
-      currentRepoPath={currentRepoPath}
-      localPullRebase={localPullRebase}
-      globalPullRebase={globalPullRebase}
-      loading={loading}
-      saving={saving}
-      onGlobalPullStrategyChange={onGlobalPullStrategyChange}
-      onRepoPullStrategyChange={onRepoPullStrategyChange}
-    />
-
-    <GitBehaviorFlagsSection
-      fetchPrune={fetchPrune}
+    <GitBehaviorPullFetchSection {...pullFetch} />
+    <GitBehaviorRebaseSection
       rebaseAutostash={rebaseAutostash}
-      onToggleFetchPrune={onToggleFetchPrune}
       onToggleRebaseAutostash={onToggleRebaseAutostash}
     />
-
     <GitBehaviorConfirmationsSection />
-
-    <GitBehaviorAutoFetchSection
-      autoFetchInterval={autoFetchInterval}
-      onAutoFetchChange={onAutoFetchChange}
-    />
   </>
 );

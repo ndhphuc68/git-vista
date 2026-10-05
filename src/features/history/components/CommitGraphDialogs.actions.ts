@@ -2,6 +2,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import { qk } from "../../../domain/queryKeys";
 import { useToastStore } from "../../../store/useToastStore";
 import type { CommitActionResult } from "../../../ipc/bindings.generated";
+import { OPERATION_STATUS, SCREEN_TYPE } from "../../../domain/enums";
 
 interface CommitActionMessages {
   /** Success toast text, given the target commit's short SHA. */
@@ -15,7 +16,7 @@ interface CommitActionSuccessHandlerContext {
   queryClient: QueryClient;
   repoPath: string;
   onClose: () => void;
-  setActiveScreen: (screen: "changes") => void;
+  setActiveScreen: (screen: typeof SCREEN_TYPE.CHANGES) => void;
   undoCommit: (undoToken: string) => Promise<void>;
   messages: CommitActionMessages;
 }
@@ -29,28 +30,30 @@ export function createCommitActionSuccessHandler(ctx: CommitActionSuccessHandler
 
   return (result: CommitActionResult, commitShortId: string) => {
     onClose();
-    if (result.status === "Committed") {
+    if (result.status === OPERATION_STATUS.COMMITTED) {
       queryClient.invalidateQueries({ queryKey: qk.commitGraph(repoPath) });
       queryClient.invalidateQueries({ queryKey: qk.repo.status(repoPath) });
       queryClient.invalidateQueries({ queryKey: qk.repo.head(repoPath) });
       queryClient.invalidateQueries({ queryKey: qk.branches(repoPath) });
       const undoToken = result.undo_token;
-      useToastStore
-        .getState()
-        .showSuccess(
-          messages.successToast(commitShortId),
-          undoToken ? async () => { await undoCommit(undoToken); } : undefined,
-          messages.undoLabel
-        );
-    } else if (result.status === "Staged") {
+      useToastStore.getState().showSuccess(
+        messages.successToast(commitShortId),
+        undoToken
+          ? async () => {
+              await undoCommit(undoToken);
+            }
+          : undefined,
+        messages.undoLabel
+      );
+    } else if (result.status === OPERATION_STATUS.STAGED) {
       queryClient.invalidateQueries({ queryKey: qk.repo.status(repoPath) });
       useToastStore.getState().showToast({ message: messages.stagedToast, type: "info" });
-      setActiveScreen("changes");
-    } else if (result.status === "Conflict") {
+      setActiveScreen(SCREEN_TYPE.CHANGES);
+    } else if (result.status === OPERATION_STATUS.CONFLICT) {
       queryClient.invalidateQueries({ queryKey: qk.repo.status(repoPath) });
       queryClient.invalidateQueries({ queryKey: qk.repo.state(repoPath) });
       useToastStore.getState().showToast({ message: messages.conflictToast, type: "error" });
-      setActiveScreen("changes");
+      setActiveScreen(SCREEN_TYPE.CHANGES);
     }
   };
 }

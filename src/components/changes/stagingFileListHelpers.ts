@@ -1,4 +1,9 @@
-import { type RepoStatusResult, type StatusFileItem, type FileStatus } from "../../ipc/bindings.generated";
+import {
+  type RepoStatusResult,
+  type StatusFileItem,
+  type FileStatus,
+} from "../../ipc/bindings.generated";
+import { FILE_STATUS } from "../../domain/enums";
 
 export interface SelectedWorkingFile {
   path: string;
@@ -17,38 +22,38 @@ export function getStatusBadge(
   badgeDict: Record<"conflicted" | "modified" | "untracked" | "deleted" | "renamed", string>
 ): StatusBadge {
   switch (status) {
-    case "Conflicted":
+    case FILE_STATUS.CONFLICTED:
       return {
         label: "C",
         className: "bg-diff-remove-bg text-diff-remove-text",
         title: badgeDict.conflicted,
       };
-    case "Modified":
+    case FILE_STATUS.MODIFIED:
       return {
         label: "M",
         className: "bg-accent-subtle text-accent",
         title: badgeDict.modified,
       };
-    case "New":
+    case FILE_STATUS.NEW:
     case "Untracked":
       return {
         label: "U",
         className: "bg-diff-add-bg text-diff-add-text",
         title: badgeDict.untracked,
       };
-    case "Deleted":
+    case FILE_STATUS.DELETED:
       return {
         label: "D",
         className: "bg-diff-remove-bg text-diff-remove-text",
         title: badgeDict.deleted,
       };
-    case "Renamed":
+    case FILE_STATUS.RENAMED:
       return {
         label: "R",
         className: "bg-accent-subtle text-accent",
         title: badgeDict.renamed,
       };
-    case "Typechange":
+    case FILE_STATUS.TYPECHANGE:
     default:
       return {
         label: "M",
@@ -91,4 +96,3 @@ export function resolveStagingLists(props: ListsSource): StagingLists {
 
   return { stagedFiles, conflictedFiles, changesFiles };
 }
-

@@ -72,6 +72,7 @@ export const BranchSidebarDialogs: React.FC<BranchSidebarDialogsProps> = ({
         onClose={closeDialog}
         repoPath={repoPath}
         branchName={dialog.name}
+        initialUnmerged={dialog.unmerged}
         onSuccess={invalidateRepo}
       />
     )}

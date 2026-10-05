@@ -1,4 +1,4 @@
-import { useSettingsStore } from "../store/useSettingsStore";
+import { useSettingsStore, type DateFormat, type Locale } from "../store/useSettingsStore";
 import { vi, type Translations } from "./vi";
 import { en } from "./en";
 
@@ -39,6 +39,33 @@ export function formatRelativeTime(
   }
   const y = Math.floor(diff / (86400 * 365));
   return timeDict.yearsAgo.replace("{y}", String(y));
+}
+
+/** Locale-aware date and time, e.g. "Nov 14, 2023, 10:13 PM". */
+export function formatAbsoluteDate(timestampSec: number, locale: Locale): string {
+  return new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(
+    new Date(timestampSec * 1000)
+  );
+}
+
+/** Formats a timestamp the way the user chose in Settings › Appearance › Date format. */
+export function formatCommitDate(
+  timestampSec: number,
+  timeDict: Translations["diff"]["time"],
+  locale: Locale,
+  dateFormat: DateFormat
+): string {
+  return dateFormat === "absolute"
+    ? formatAbsoluteDate(timestampSec, locale)
+    : formatRelativeTime(timestampSec, timeDict);
+}
+
+/** Returns a formatter bound to the current locale and date format setting. */
+export function useFormatDate(): (timestampSec: number) => string {
+  const locale = useSettingsStore((s) => s.locale);
+  const dateFormat = useSettingsStore((s) => s.dateFormat);
+  const timeDict = (dictionaries[locale] || vi).diff.time;
+  return (timestampSec: number) => formatCommitDate(timestampSec, timeDict, locale, dateFormat);
 }
 
 export function useTranslation() {

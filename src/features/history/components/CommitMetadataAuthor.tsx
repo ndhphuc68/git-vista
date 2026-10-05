@@ -5,7 +5,7 @@ import { AuthorAvatar } from "./AuthorAvatar";
 interface CommitMetadataAuthorProps {
   authorName: string;
   authorEmail: string | null | undefined;
-  relativeTime: string;
+  displayTime: string;
   exactDateTime: string;
 }
 
@@ -13,7 +13,7 @@ interface CommitMetadataAuthorProps {
 export function CommitMetadataAuthor({
   authorName,
   authorEmail,
-  relativeTime,
+  displayTime,
   exactDateTime,
 }: CommitMetadataAuthorProps) {
   const { t } = useTranslation();
@@ -45,7 +45,7 @@ export function CommitMetadataAuthor({
             title={exactDateTime}
           >
             <Clock size={10} className="shrink-0" />
-            <span>{relativeTime}</span>
+            <span>{displayTime}</span>
           </div>
         </div>
 

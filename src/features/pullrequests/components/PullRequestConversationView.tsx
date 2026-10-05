@@ -1,6 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 import { CheckCircle2, XCircle, Clock, MinusCircle, ExternalLink } from "lucide-react";
+import { CHECK_STATUS } from "../../../domain/enums";
 import { useTranslation } from "../../../i18n";
 import type { PullRequestDetail, GitHubUserSummary, CheckRunItem } from "../../../ipc/githubApi";
 
@@ -27,13 +28,13 @@ const UserAvatarItem: React.FC<{ user: GitHubUserSummary }> = ({ user }) => (
 );
 
 const CheckRunStatusIcon: React.FC<{ status: CheckRunItem["status"] }> = ({ status }) => {
-  if (status === "success") {
+  if (status === CHECK_STATUS.SUCCESS) {
     return <CheckCircle2 size={14} className="text-emerald-500 shrink-0" aria-label="success" />;
   }
-  if (status === "failure") {
+  if (status === CHECK_STATUS.FAILURE) {
     return <XCircle size={14} className="text-rose-500 shrink-0" aria-label="failure" />;
   }
-  if (status === "in_progress" || status === "queued") {
+  if (status === CHECK_STATUS.IN_PROGRESS || status === CHECK_STATUS.QUEUED) {
     return <Clock size={14} className="text-amber-500 shrink-0" aria-label={status} />;
   }
   return <MinusCircle size={14} className="text-tertiary shrink-0" aria-label="neutral" />;

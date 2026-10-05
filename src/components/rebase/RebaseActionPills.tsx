@@ -1,6 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 import type { RebasePlanStep, RebaseActionKind } from "../../ipc/bindings.generated";
+import { REBASE_ACTION } from "../../domain/enums";
 import { useTranslation } from "../../i18n";
 import { getRebaseActionColor } from "./rebaseActionColor";
 import { RebaseSquashFixupPills } from "./RebaseSquashFixupPills";
@@ -23,11 +24,11 @@ export const RebaseActionPills: React.FC<RebaseActionPillsProps> = ({
       {/* Pick */}
       <button
         type="button"
-        onClick={() => onActionChange("Pick")}
+        onClick={() => onActionChange(REBASE_ACTION.PICK)}
         title={t.modals.interactiveRebase.actions.pickDesc}
         className={clsx(
           "px-2 py-0.5 text-[11px] rounded transition-all border cursor-pointer",
-          getRebaseActionColor("Pick", step.action === "Pick")
+          getRebaseActionColor(REBASE_ACTION.PICK, step.action === REBASE_ACTION.PICK)
         )}
       >
         {t.modals.interactiveRebase.actions.pick}
@@ -36,11 +37,11 @@ export const RebaseActionPills: React.FC<RebaseActionPillsProps> = ({
       {/* Reword */}
       <button
         type="button"
-        onClick={() => onActionChange("Reword")}
+        onClick={() => onActionChange(REBASE_ACTION.REWORD)}
         title={t.modals.interactiveRebase.actions.rewordDesc}
         className={clsx(
           "px-2 py-0.5 text-[11px] rounded transition-all border cursor-pointer",
-          getRebaseActionColor("Reword", step.action === "Reword")
+          getRebaseActionColor(REBASE_ACTION.REWORD, step.action === REBASE_ACTION.REWORD)
         )}
       >
         {t.modals.interactiveRebase.actions.reword}
@@ -55,11 +56,11 @@ export const RebaseActionPills: React.FC<RebaseActionPillsProps> = ({
       {/* Drop */}
       <button
         type="button"
-        onClick={() => onActionChange("Drop")}
+        onClick={() => onActionChange(REBASE_ACTION.DROP)}
         title={t.modals.interactiveRebase.actions.dropDesc}
         className={clsx(
           "px-2 py-0.5 text-[11px] rounded transition-all border cursor-pointer",
-          getRebaseActionColor("Drop", step.action === "Drop")
+          getRebaseActionColor(REBASE_ACTION.DROP, step.action === REBASE_ACTION.DROP)
         )}
       >
         {t.modals.interactiveRebase.actions.drop}

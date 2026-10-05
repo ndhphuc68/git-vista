@@ -63,7 +63,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRepo }) =>
       }`}
     >
       <div className="w-full max-w-[840px] flex flex-col gap-6 my-auto animate-fade-in">
-        <WelcomeHeader onOpenSettings={() => openSettings()} onOpenShortcuts={handleOpenShortcuts} />
+        <WelcomeHeader
+          onOpenSettings={() => openSettings()}
+          onOpenShortcuts={handleOpenShortcuts}
+        />
 
         {error && <WelcomeErrorBanner error={error} onDismiss={() => setError(null)} />}
 

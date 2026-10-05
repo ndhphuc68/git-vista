@@ -31,9 +31,9 @@ export const GitHubTokenPanel: React.FC<GitHubTokenPanelProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-3 bg-surface-header/30 p-4 rounded-xl border border-border-subtle">
+    <div className="space-y-3 p-4">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-semibold text-primary flex items-center gap-1.5">
+        <label className="text-sm font-medium text-primary flex items-center gap-1.5">
           <Key size={14} className="text-accent" />
           <span>{t.settings.github.tokenLabel}</span>
         </label>
@@ -41,7 +41,7 @@ export const GitHubTokenPanel: React.FC<GitHubTokenPanelProps> = ({
           href="https://github.com/settings/tokens/new?scopes=repo&description=GitVista"
           target="_blank"
           rel="noreferrer"
-          className="text-[11px] text-accent hover:underline flex items-center gap-1"
+          className="text-xs text-accent hover:underline flex items-center gap-1"
         >
           <span>{t.settings.github.createTokenLink}</span>
           <ExternalLink size={11} />
@@ -62,13 +62,14 @@ export const GitHubTokenPanel: React.FC<GitHubTokenPanelProps> = ({
           type="button"
           onClick={onToggleShowToken}
           className="absolute right-2.5 top-1/2 -translate-y-1/2 text-secondary hover:text-primary transition-colors cursor-pointer"
-          title={showToken ? "Ẩn" : "Hiện"}
+          title={showToken ? t.settings.github.hideToken : t.settings.github.showToken}
+          aria-label={showToken ? t.settings.github.hideToken : t.settings.github.showToken}
         >
           {showToken ? <EyeOff size={14} /> : <Eye size={14} />}
         </button>
       </div>
 
-      <p className="text-[11px] text-secondary">{t.settings.github.tokenHelp}</p>
+      <p className="text-xs text-secondary">{t.settings.github.tokenHelp}</p>
 
       {/* Action Buttons */}
       <div className="flex items-center gap-2 pt-2">
@@ -85,7 +86,7 @@ export const GitHubTokenPanel: React.FC<GitHubTokenPanelProps> = ({
           variant="secondary"
           onClick={onUseGhCli}
           disabled={isTesting}
-          title="Tự động lấy token từ `gh auth token`"
+          title={t.settings.github.useGhCliHint}
         >
           <Terminal size={13} />
           <span>{t.settings.github.useGhCli}</span>

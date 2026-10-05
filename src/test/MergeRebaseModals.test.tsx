@@ -144,19 +144,37 @@ describe("merge and rebase modal shells", () => {
 
     it("surfaces a conflict result and stays open", async () => {
       const onClose = vi.fn();
-      const onMerge = vi
-        .fn()
-        .mockResolvedValue({ success: false, status: "Conflict", output: "" });
+      const onMerge = vi.fn().mockResolvedValue({ success: false, status: "Conflict", output: "" });
       render(<MergeBranchModal {...mergeProps} onClose={onClose} onMerge={onMerge} />);
 
       fireEvent.click(screen.getByRole("button", { name: /Gộp nhánh|Merge/i }));
 
       await waitFor(() => expect(onMerge).toHaveBeenCalled());
       expect(onClose).not.toHaveBeenCalled();
+      expect(
+        await screen.findByText(
+          "Xung đột khi gộp nhánh. Vui lòng giải quyết xung đột trước khi tiếp tục."
+        )
+      ).toBeInTheDocument();
     });
   });
 
   describe("RebaseBranchModal", () => {
+    it("shows the conflict message when rebase reports a conflict", async () => {
+      const onClose = vi.fn();
+      const onRebase = vi
+        .fn()
+        .mockResolvedValue({ success: false, status: "Conflict", output: "" });
+      render(<RebaseBranchModal {...rebaseProps} onClose={onClose} onRebase={onRebase} />);
+
+      fireEvent.click(screen.getByRole("button", { name: /Rebase/i }));
+
+      expect(
+        await screen.findByText("Rebase bị xung đột. Hãy giải quyết conflict rồi dùng Continue.")
+      ).toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
     it("does not render when closed", () => {
       render(<RebaseBranchModal {...rebaseProps} isOpen={false} onClose={vi.fn()} />);
 

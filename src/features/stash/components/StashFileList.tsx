@@ -1,6 +1,7 @@
 import React from "react";
 import { type CommitDetails } from "../../../ipc/bindings.generated";
 import { useTranslation } from "../../../i18n";
+import { CHANGE_TYPE } from "../../../domain/enums";
 
 export interface StashFileListProps {
   commitId: string;
@@ -13,11 +14,7 @@ export interface StashFileListProps {
  * state, the loading state, and the per-file rows. Extracted from
  * `StashDiffView`, keeping the same markup verbatim.
  */
-export const StashFileList: React.FC<StashFileListProps> = ({
-  commitId,
-  error,
-  commitDetails,
-}) => {
+export const StashFileList: React.FC<StashFileListProps> = ({ commitId, error, commitDetails }) => {
   const { t } = useTranslation();
 
   return (
@@ -41,14 +38,18 @@ export const StashFileList: React.FC<StashFileListProps> = ({
               >
                 <span
                   className={
-                    file.status === "deleted"
+                    file.status === CHANGE_TYPE.DELETED
                       ? "text-diff-remove-text"
-                      : file.status === "added"
+                      : file.status === CHANGE_TYPE.ADDED
                         ? "text-diff-add-text"
                         : "text-secondary"
                   }
                 >
-                  {file.status === "deleted" ? "D" : file.status === "added" ? "A" : "M"}
+                  {file.status === CHANGE_TYPE.DELETED
+                    ? "D"
+                    : file.status === CHANGE_TYPE.ADDED
+                      ? "A"
+                      : "M"}
                 </span>
                 <span className="text-primary truncate">{file.path}</span>
                 <span className="ml-auto shrink-0 text-[10px] text-tertiary">

@@ -206,7 +206,7 @@ describe("InteractiveRebaseModal", () => {
       expect(handleClose).toHaveBeenCalled();
     });
   });
-// Pinned before migrating onto the shared Modal: nothing covered the shell,
+  // Pinned before migrating onto the shared Modal: nothing covered the shell,
   // and this modal guards Escape behind !submitting, which has to survive.
   describe("shell", () => {
     const props = {
@@ -218,7 +218,12 @@ describe("InteractiveRebaseModal", () => {
 
     it("does not render when closed", () => {
       renderWithClient(
-        <InteractiveRebaseModal {...props} isOpen={false} onClose={vi.fn()} onRebaseSuccess={vi.fn()} />
+        <InteractiveRebaseModal
+          {...props}
+          isOpen={false}
+          onClose={vi.fn()}
+          onRebaseSuccess={vi.fn()}
+        />
       );
 
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -251,7 +256,12 @@ describe("InteractiveRebaseModal", () => {
     it("does not react to Escape while closed", () => {
       const onClose = vi.fn();
       renderWithClient(
-        <InteractiveRebaseModal {...props} isOpen={false} onClose={onClose} onRebaseSuccess={vi.fn()} />
+        <InteractiveRebaseModal
+          {...props}
+          isOpen={false}
+          onClose={onClose}
+          onRebaseSuccess={vi.fn()}
+        />
       );
 
       fireEvent.keyDown(window, { key: "Escape" });
@@ -290,7 +300,7 @@ describe("InteractiveRebaseModal", () => {
         output: "",
       });
     });
-// Deliberate change, not a mechanical carry-over: the backdrop used to
+    // Deliberate change, not a mechanical carry-over: the backdrop used to
     // close the modal even mid-rebase, while Escape and both Cancel buttons
     // were already guarded by !submitting. That inconsistency is now fixed,
     // so it is pinned here.

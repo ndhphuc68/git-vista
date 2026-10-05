@@ -1,10 +1,16 @@
 import { setGitConfig, setRepoPullRebase } from "../api";
 import type { Translations } from "../../../i18n/vi";
-import { AUTOFETCH_INTERVAL_STORAGE_KEY } from "./useGitBehaviorSettings.constants";
+import {
+  SETTINGS_SCOPE,
+  PULL_STRATEGY,
+  CONFIG_SCOPE,
+  type SettingsScope,
+  type PullStrategy,
+} from "../../../domain/enums";
 
 export interface GitBehaviorActionsContext {
   currentRepoPath: string | null;
-  activeScope: "global" | "repo";
+  activeScope: SettingsScope;
   fetchPrune: boolean;
   rebaseAutostash: boolean;
   t: Translations;
@@ -23,7 +29,7 @@ export function createGlobalPullStrategyHandler(context: GitBehaviorActionsConte
     context.setGlobalPullRebase(isRebase);
     context.setSaving(true);
     try {
-      await setGitConfig(null, "global", "pull.rebase", String(isRebase));
+      await setGitConfig(null, CONFIG_SCOPE.GLOBAL, "pull.rebase", String(isRebase));
       context.showSuccess(context.t.settings.profile.savedSuccess);
     } catch (err) {
       console.error("Failed to update global pull strategy:", err);
@@ -35,16 +41,16 @@ export function createGlobalPullStrategyHandler(context: GitBehaviorActionsConte
 }
 
 export function createRepoPullStrategyHandler(context: GitBehaviorActionsContext) {
-  return async (mode: "inherit" | "merge" | "rebase") => {
+  return async (mode: PullStrategy) => {
     const { currentRepoPath } = context;
     if (!currentRepoPath) return;
     context.setSaving(true);
     try {
-      if (mode === "inherit") {
-        await setGitConfig(currentRepoPath, "local", "pull.rebase", "");
+      if (mode === PULL_STRATEGY.INHERIT) {
+        await setGitConfig(currentRepoPath, CONFIG_SCOPE.LOCAL, "pull.rebase", "");
         context.setLocalPullRebase(null);
       } else {
-        const isRebase = mode === "rebase";
+        const isRebase = mode === PULL_STRATEGY.REBASE;
         await setRepoPullRebase(currentRepoPath, isRebase);
         context.setLocalPullRebase(isRebase);
       }
@@ -65,8 +71,10 @@ export function createToggleFetchPruneHandler(context: GitBehaviorActionsContext
     context.setSaving(true);
     try {
       const configScope =
-        context.activeScope === "repo" && context.currentRepoPath ? "local" : "global";
-      const repo = context.activeScope === "repo" ? context.currentRepoPath : null;
+        context.activeScope === SETTINGS_SCOPE.REPO && context.currentRepoPath
+          ? CONFIG_SCOPE.LOCAL
+          : CONFIG_SCOPE.GLOBAL;
+      const repo = context.activeScope === SETTINGS_SCOPE.REPO ? context.currentRepoPath : null;
       await setGitConfig(repo, configScope, "fetch.prune", String(nextVal));
       context.showSuccess(context.t.settings.profile.savedSuccess);
     } catch (err) {
@@ -85,8 +93,10 @@ export function createToggleRebaseAutostashHandler(context: GitBehaviorActionsCo
     context.setSaving(true);
     try {
       const configScope =
-        context.activeScope === "repo" && context.currentRepoPath ? "local" : "global";
-      const repo = context.activeScope === "repo" ? context.currentRepoPath : null;
+        context.activeScope === SETTINGS_SCOPE.REPO && context.currentRepoPath
+          ? CONFIG_SCOPE.LOCAL
+          : CONFIG_SCOPE.GLOBAL;
+      const repo = context.activeScope === SETTINGS_SCOPE.REPO ? context.currentRepoPath : null;
       await setGitConfig(repo, configScope, "rebase.autoStash", String(nextVal));
       context.showSuccess(context.t.settings.profile.savedSuccess);
     } catch (err) {
@@ -101,9 +111,6 @@ export function createToggleRebaseAutostashHandler(context: GitBehaviorActionsCo
 export function createAutoFetchChangeHandler(context: GitBehaviorActionsContext) {
   return (seconds: number) => {
     context.setAutoFetchInterval(seconds);
-    if (typeof localStorage !== "undefined") {
-      localStorage.setItem(AUTOFETCH_INTERVAL_STORAGE_KEY, String(seconds));
-    }
     context.showSuccess(context.t.settings.profile.savedSuccess);
   };
 }

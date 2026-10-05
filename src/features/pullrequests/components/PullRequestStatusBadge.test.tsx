@@ -112,18 +112,12 @@ describe("PullRequestStatusBadge", () => {
 
   it("applies size variants correctly", () => {
     const { container: smContainer } = render(
-      <PullRequestStatusBadge
-        pr={{ merged_at: null, state: "open", draft: false }}
-        size="sm"
-      />
+      <PullRequestStatusBadge pr={{ merged_at: null, state: "open", draft: false }} size="sm" />
     );
     expect((smContainer.firstChild as HTMLElement).className).toContain("text-xs");
 
     const { container: mdContainer } = render(
-      <PullRequestStatusBadge
-        pr={{ merged_at: null, state: "open", draft: false }}
-        size="md"
-      />
+      <PullRequestStatusBadge pr={{ merged_at: null, state: "open", draft: false }} size="md" />
     );
     expect((mdContainer.firstChild as HTMLElement).className).toContain("text-sm");
   });

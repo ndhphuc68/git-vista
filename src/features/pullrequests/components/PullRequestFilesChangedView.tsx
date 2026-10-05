@@ -1,5 +1,6 @@
 import React from "react";
 import clsx from "clsx";
+import { PR_FILE_STATUS } from "../../../domain/enums";
 import { useTranslation } from "../../../i18n";
 import type { PullRequestFileItem } from "../../../ipc/githubApi";
 import { PullRequestPatchDiffViewer } from "./PullRequestPatchDiffViewer";
@@ -18,22 +19,22 @@ interface StatusBadgeInfo {
 
 function getFileStatusBadge(status: PullRequestFileItem["status"]): StatusBadgeInfo {
   switch (status) {
-    case "added":
+    case PR_FILE_STATUS.ADDED:
       return {
         letter: "A",
         className: "text-emerald-500 bg-emerald-500/10 border-emerald-500/30",
       };
-    case "modified":
+    case PR_FILE_STATUS.MODIFIED:
       return {
         letter: "M",
         className: "text-amber-500 bg-amber-500/10 border-amber-500/30",
       };
-    case "removed":
+    case PR_FILE_STATUS.REMOVED:
       return {
         letter: "D",
         className: "text-rose-500 bg-rose-500/10 border-rose-500/30",
       };
-    case "renamed":
+    case PR_FILE_STATUS.RENAMED:
       return {
         letter: "R",
         className: "text-purple-500 bg-purple-500/10 border-purple-500/30",
@@ -76,7 +77,9 @@ const FileListItem: React.FC<{
       onClick={onSelect}
       className={clsx(
         "w-full text-left flex items-center justify-between p-2.5 transition-colors border-l-2",
-        isActive ? "bg-surface-hover border-accent" : "border-transparent hover:bg-surface-hover/50"
+        isActive
+          ? "border-accent bg-accent-subtle/50"
+          : "border-transparent hover:bg-surface-hover/50"
       )}
     >
       <div className="flex items-center gap-2 min-w-0">

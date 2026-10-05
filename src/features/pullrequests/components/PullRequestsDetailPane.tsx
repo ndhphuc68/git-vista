@@ -233,17 +233,12 @@ export const PullRequestsDetailPane: React.FC<PullRequestsDetailPaneProps> = ({
 
   if (!selectedPr) {
     return (
-      <DetailPaneEmptyState
-        message={t.pullRequestsScreen.emptySelection}
-        className={className}
-      />
+      <DetailPaneEmptyState message={t.pullRequestsScreen.emptySelection} className={className} />
     );
   }
 
   return (
-    <section
-      className={clsx("flex-1 flex flex-col h-full overflow-hidden bg-window", className)}
-    >
+    <section className={clsx("flex-1 flex flex-col h-full overflow-hidden bg-window", className)}>
       <DetailPaneHeader
         pr={selectedPr}
         isCheckingOut={isCheckingOut}

@@ -31,9 +31,7 @@ export const RemoteProgressActive: React.FC<RemoteProgressActiveProps> = ({
         <h4 className="text-xs font-semibold text-zinc-100 truncate">{task.title}</h4>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
-        <span className="text-xs font-mono font-medium text-blue-400">
-          {task.progressPercent}%
-        </span>
+        <span className="text-xs font-mono font-medium text-blue-400">{task.progressPercent}%</span>
         {onCancel && running && (
           <button
             type="button"

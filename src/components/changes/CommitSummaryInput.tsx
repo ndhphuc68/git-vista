@@ -7,15 +7,17 @@ export interface CommitSummaryInputProps {
   summary: string;
   onSummaryChange: (value: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
-  isOver72: boolean;
+  limit: number;
+  isOverLimit: boolean;
 }
 
-/** The commit summary field, with its over-72-character warning. */
+/** The commit summary field, with its over-limit warning. */
 export const CommitSummaryInput: React.FC<CommitSummaryInputProps> = ({
   summary,
   onSummaryChange,
   onKeyDown,
-  isOver72,
+  limit,
+  isOverLimit,
 }) => {
   const { t } = useTranslation();
 
@@ -27,13 +29,13 @@ export const CommitSummaryInput: React.FC<CommitSummaryInputProps> = ({
         onChange={(e) => onSummaryChange(e.target.value)}
         onKeyDown={onKeyDown}
         placeholder={t.commit.summaryPlaceholder}
-        invalid={isOver72}
+        invalid={isOverLimit}
       />
 
-      {isOver72 && (
+      {isOverLimit && (
         <div className="flex items-center gap-1 text-diff-remove-text text-[10px] mt-0.5">
           <AlertCircle size={11} />
-          <span>{t.commit.charLimitWarn}</span>
+          <span>{t.commit.charLimitWarn.replace("{limit}", String(limit))}</span>
         </div>
       )}
     </div>

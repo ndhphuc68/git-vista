@@ -37,10 +37,12 @@ interface SettingsState {
   // Safety Confirmations
   confirmDiscard: boolean;
   confirmDeleteBranch: boolean;
-  confirmForcePush: boolean;
 
   // Commit Conventions
   commitMessageLimit: number;
+
+  // Background fetch interval in seconds; 0 turns auto-fetch off.
+  autoFetchInterval: number;
 
   // External Tools
   defaultEditor: ExternalEditor;
@@ -64,8 +66,8 @@ interface SettingsState {
   setDiffShowLineNumbers: (show: boolean) => void;
   setConfirmDiscard: (confirm: boolean) => void;
   setConfirmDeleteBranch: (confirm: boolean) => void;
-  setConfirmForcePush: (confirm: boolean) => void;
   setCommitMessageLimit: (limit: number) => void;
+  setAutoFetchInterval: (seconds: number) => void;
   setDefaultEditor: (editor: ExternalEditor) => void;
   setCustomEditorCommand: (cmd: string) => void;
   setDefaultTerminal: (terminal: ExternalTerminal) => void;
@@ -80,7 +82,7 @@ function applyThemeAttributes(theme: "light" | "dark", colorblind: boolean) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
   root.setAttribute("data-theme", theme);
-  root.classList.add("dark");
+  root.classList.toggle("dark", theme === "dark");
   root.setAttribute("data-colorblind", colorblind ? "true" : "false");
 }
 
@@ -109,8 +111,8 @@ function loadInitialSettingsState() {
   const savedDiffShowLineNumbers = getStorage("gitvista_diff_show_line_numbers", "true") === "true";
   const savedConfirmDiscard = getStorage("gitvista_confirm_discard", "true") === "true";
   const savedConfirmDeleteBranch = getStorage("gitvista_confirm_delete_branch", "true") === "true";
-  const savedConfirmForcePush = getStorage("gitvista_confirm_force_push", "true") === "true";
   const savedCommitMessageLimit = parseInt(getStorage("gitvista_commit_message_limit", "72"), 10);
+  const savedAutoFetchInterval = parseInt(getStorage("gitvista_autofetch_interval", "300"), 10);
   const savedDefaultEditor = getStorage("gitvista_default_editor", "code") as ExternalEditor;
   const savedCustomEditorCommand = getStorage("gitvista_custom_editor_command", "");
   const savedDefaultTerminal = getStorage(
@@ -139,8 +141,8 @@ function loadInitialSettingsState() {
     diffShowLineNumbers: savedDiffShowLineNumbers,
     confirmDiscard: savedConfirmDiscard,
     confirmDeleteBranch: savedConfirmDeleteBranch,
-    confirmForcePush: savedConfirmForcePush,
     commitMessageLimit: savedCommitMessageLimit,
+    autoFetchInterval: savedAutoFetchInterval,
     defaultEditor: savedDefaultEditor,
     customEditorCommand: savedCustomEditorCommand,
     defaultTerminal: savedDefaultTerminal,
@@ -230,15 +232,15 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
       "gitvista_confirm_delete_branch",
       "confirmDeleteBranch"
     ),
-    setConfirmForcePush: makePersistedSetter(
-      set,
-      "gitvista_confirm_force_push",
-      "confirmForcePush"
-    ),
     setCommitMessageLimit: makePersistedSetter(
       set,
       "gitvista_commit_message_limit",
       "commitMessageLimit"
+    ),
+    setAutoFetchInterval: makePersistedSetter(
+      set,
+      "gitvista_autofetch_interval",
+      "autoFetchInterval"
     ),
     setDefaultEditor: makePersistedSetter(set, "gitvista_default_editor", "defaultEditor"),
     setCustomEditorCommand: makePersistedSetter(

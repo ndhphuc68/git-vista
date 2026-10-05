@@ -47,10 +47,7 @@ export function CommitGraphRows({
       )}
 
       {/* Virtualized Commits */}
-      <div
-        style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
-        className="w-full relative"
-      >
+      <div style={{ height: `${rowVirtualizer.getTotalSize()}px` }} className="w-full relative">
         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
           const commit = commits[virtualRow.index];
           if (!commit) return null;

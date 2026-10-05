@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  getStatusBadge,
-  resolveStagingLists,
-} from "../components/changes/stagingFileListHelpers";
+import { getStatusBadge, resolveStagingLists } from "../components/changes/stagingFileListHelpers";
 import { type StatusFileItem } from "../ipc/bindings.generated";
 
 describe("getStatusBadge", () => {
@@ -82,10 +79,7 @@ describe("resolveStagingLists", () => {
 
     expect(result.stagedFiles).toBe(staged);
     expect(result.conflictedFiles).toBe(conflicted);
-    expect(result.changesFiles).toEqual([
-      ...unstaged,
-      { ...untracked[0], isUntracked: true },
-    ]);
+    expect(result.changesFiles).toEqual([...unstaged, { ...untracked[0], isUntracked: true }]);
   });
 
   it("falls back to the equivalent field of status when a list prop is not given", () => {
@@ -95,10 +89,7 @@ describe("resolveStagingLists", () => {
 
     expect(result.stagedFiles).toBe(staged);
     expect(result.conflictedFiles).toBe(conflicted);
-    expect(result.changesFiles).toEqual([
-      ...unstaged,
-      { ...untracked[0], isUntracked: true },
-    ]);
+    expect(result.changesFiles).toEqual([...unstaged, { ...untracked[0], isUntracked: true }]);
   });
 
   it("returns empty lists when neither explicit props nor status are given", () => {

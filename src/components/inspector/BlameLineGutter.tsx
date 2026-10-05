@@ -1,7 +1,7 @@
 import React from "react";
 import { Copy, Check, ExternalLink } from "lucide-react";
-import { useTranslation } from "../../i18n";
-import { AuthorAvatar, formatRelativeTime } from "../../features/history";
+import { useFormatDate, useTranslation } from "../../i18n";
+import { AuthorAvatar } from "../../features/history";
 import type { BlameLine } from "../../ipc/bindings.generated";
 
 interface BlameLineGutterProps {
@@ -19,6 +19,7 @@ export const BlameLineGutter: React.FC<BlameLineGutterProps> = ({
   onCopySha,
 }) => {
   const { t } = useTranslation();
+  const formatDate = useFormatDate();
 
   return (
     <>
@@ -36,9 +37,7 @@ export const BlameLineGutter: React.FC<BlameLineGutterProps> = ({
       </span>
 
       {/* Time */}
-      <span className="text-[10px] text-tertiary shrink-0">
-        {formatRelativeTime(line.timestamp_sec)}
-      </span>
+      <span className="text-[10px] text-tertiary shrink-0">{formatDate(line.timestamp_sec)}</span>
 
       {/* Commit SHA button */}
       <button
