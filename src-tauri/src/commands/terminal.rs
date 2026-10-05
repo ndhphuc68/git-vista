@@ -185,10 +185,10 @@ mod tests {
     #[test]
     fn finds_git_bash_from_cmd_or_mingw_dirs() {
         let files: HashSet<PathBuf> = [
-            "C:/Git/cmd/git.exe",
-            "C:/Git/git-bash.exe",
-            "E:/PortableGit/mingw64/bin/git.exe",
-            "E:/PortableGit/git-bash.exe",
+            "/c/Git/cmd/git.exe",
+            "/c/Git/git-bash.exe",
+            "/e/PortableGit/mingw64/bin/git.exe",
+            "/e/PortableGit/git-bash.exe",
         ]
         .iter()
         .map(PathBuf::from)
@@ -196,13 +196,13 @@ mod tests {
         let is_file = |p: &Path| files.contains(p);
 
         assert_eq!(
-            find_git_bash(&path_var(&["C:/Windows", "C:/Git/cmd"]), is_file),
-            Some(PathBuf::from("C:/Git/git-bash.exe"))
+            find_git_bash(&path_var(&["/c/Windows", "/c/Git/cmd"]), is_file),
+            Some(PathBuf::from("/c/Git/git-bash.exe"))
         );
         assert_eq!(
-            find_git_bash(&path_var(&["E:/PortableGit/mingw64/bin"]), is_file),
-            Some(PathBuf::from("E:/PortableGit/git-bash.exe"))
+            find_git_bash(&path_var(&["/e/PortableGit/mingw64/bin"]), is_file),
+            Some(PathBuf::from("/e/PortableGit/git-bash.exe"))
         );
-        assert_eq!(find_git_bash(&path_var(&["C:/Windows"]), is_file), None);
+        assert_eq!(find_git_bash(&path_var(&["/c/Windows"]), is_file), None);
     }
 }
