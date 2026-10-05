@@ -13,7 +13,7 @@ import { invokeCommand } from "../ipc/client";
  */
 describe("invokeCommand facade", () => {
   it("exposes every command from the Rust surface", () => {
-    expect(Object.keys(invokeCommand)).toHaveLength(79);
+    expect(Object.keys(invokeCommand)).toHaveLength(80);
   });
 
   it("exposes at least one command from each domain module", () => {

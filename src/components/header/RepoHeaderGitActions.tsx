@@ -1,11 +1,11 @@
 import React from "react";
-import { Code2, RefreshCw, Settings } from "lucide-react";
+import { Code2, RefreshCw, Settings, SquareTerminal } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { qk } from "../../domain/queryKeys";
 import { type Translations } from "../../i18n/vi";
 import { type useRemoteTask } from "../../features/remote/api";
 import { RepoHeaderRemoteButtons } from "./RepoHeaderRemoteButtons";
-import { openRepoInEditor } from "./RepoHeaderGitActions.actions";
+import { openRepoInEditor, openRepoInTerminal } from "./RepoHeaderGitActions.actions";
 
 interface RepoHeaderGitActionsProps {
   t: Translations;
@@ -18,7 +18,7 @@ interface RepoHeaderGitActionsProps {
   onOpenSettings: () => void;
 }
 
-/** GitKraken-style fetch/pull/push cluster plus the refresh, open-in-editor and settings buttons. */
+/** GitKraken-style fetch/pull/push cluster plus the refresh, open-in-editor, open-in-terminal and settings buttons. */
 export const RepoHeaderGitActions: React.FC<RepoHeaderGitActionsProps> = ({
   t,
   actions,
@@ -68,6 +68,19 @@ export const RepoHeaderGitActions: React.FC<RepoHeaderGitActionsProps> = ({
           aria-label={t.header.openInEditor}
         >
           <Code2 size={16} />
+        </button>
+
+        {/* Open the repo in the terminal chosen in settings */}
+        <button
+          type="button"
+          data-testid="btn-open-in-terminal"
+          onClick={() => repoPath && void openRepoInTerminal(repoPath, t)}
+          disabled={!repoPath}
+          className="flex items-center justify-center w-8 h-8 bg-surface border border-border-subtle rounded-md text-secondary cursor-pointer hover:bg-surface-hover hover:text-primary transition-colors shadow-2xs disabled:opacity-50"
+          title={t.header.openInTerminal}
+          aria-label={t.header.openInTerminal}
+        >
+          <SquareTerminal size={16} />
         </button>
 
         {/* Settings modal trigger */}

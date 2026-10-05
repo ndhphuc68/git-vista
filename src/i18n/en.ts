@@ -864,6 +864,7 @@ export const en: Translations = {
     fetchTitle: "Fetch from remote",
     pullTitle: "Pull latest commits from remote",
     openInEditor: "Open repository in editor",
+    openInTerminal: "Open repository in terminal",
     editorNotFound: "{program} was not found. Check your PATH or Settings › Tools.",
   },
   palette: {

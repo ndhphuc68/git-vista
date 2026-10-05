@@ -859,6 +859,7 @@ export const vi = {
     fetchTitle: "Fetch từ remote",
     pullTitle: "Pull commit mới từ remote",
     openInEditor: "Mở repo trong editor",
+    openInTerminal: "Mở repo trong terminal",
     editorNotFound: "Không tìm thấy {program}. Hãy kiểm tra PATH hoặc phần Cài đặt › Công cụ.",
   },
   palette: {
