@@ -2,11 +2,12 @@ import React from "react";
 import { Globe, FolderGit2 } from "lucide-react";
 import { useTranslation } from "../../../../i18n";
 import { SegmentedControl } from "../../../../shared/ui";
+import { SETTINGS_SCOPE, type SettingsScope } from "../../../../domain/enums";
 
 export interface SettingsScopeSelectorProps {
   hasRepo: boolean;
-  scope: "global" | "repo";
-  onScopeChange: (scope: "global" | "repo") => void;
+  scope: SettingsScope;
+  onScopeChange: (scope: SettingsScope) => void;
   /** Display name of the repository open in the current tab. */
   repoLabel: string;
 }
@@ -40,7 +41,7 @@ export const SettingsScopeSelector: React.FC<SettingsScopeSelectorProps> = ({
   }
 
   const hint =
-    scope === "repo"
+    scope === SETTINGS_SCOPE.REPO
       ? t.settings.scope.repoOnlyHint.replace("{repo}", repoLabel)
       : t.settings.scope.globalHint;
 
@@ -55,9 +56,9 @@ export const SettingsScopeSelector: React.FC<SettingsScopeSelectorProps> = ({
           value={scope}
           onChange={onScopeChange}
           options={[
-            { value: "global", label: globalLabel, testId: "scope-btn-global" },
+            { value: SETTINGS_SCOPE.GLOBAL, label: globalLabel, testId: "scope-btn-global" },
             {
-              value: "repo",
+              value: SETTINGS_SCOPE.REPO,
               label: (
                 <>
                   <FolderGit2 size={14} />

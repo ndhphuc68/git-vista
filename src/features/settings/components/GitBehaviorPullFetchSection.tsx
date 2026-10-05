@@ -4,6 +4,7 @@ import { SegmentedControl, Select, Switch } from "../../../shared/ui";
 import { HelpTooltip } from "../../../components/settings/HelpTooltip";
 import { PullStrategyDiagram, FetchPruneDiagram } from "../../../components/settings/helpDiagrams";
 import { SettingsRow, SettingsSection } from "./ui";
+import { PULL_STRATEGY } from "../../../domain/enums";
 
 export interface GitBehaviorPullFetchSectionProps {
   pullRebase: boolean;
@@ -91,12 +92,16 @@ export const GitBehaviorPullFetchSection: React.FC<GitBehaviorPullFetchSectionPr
       >
         <SegmentedControl
           aria-labelledby={PULL_LABEL_ID}
-          value={pullRebase ? "rebase" : "merge"}
-          onChange={(mode) => onPullStrategyChange(mode === "rebase")}
+          value={pullRebase ? PULL_STRATEGY.REBASE : PULL_STRATEGY.MERGE}
+          onChange={(mode) => onPullStrategyChange(mode === PULL_STRATEGY.REBASE)}
           disabled={busy || pullLocked}
           options={[
-            { value: "merge", label: b.pullMergeShort, testId: "pull-strategy-merge" },
-            { value: "rebase", label: b.pullRebaseShort, testId: "pull-strategy-rebase" },
+            { value: PULL_STRATEGY.MERGE, label: b.pullMergeShort, testId: "pull-strategy-merge" },
+            {
+              value: PULL_STRATEGY.REBASE,
+              label: b.pullRebaseShort,
+              testId: "pull-strategy-rebase",
+            },
           ]}
         />
       </SettingsRow>

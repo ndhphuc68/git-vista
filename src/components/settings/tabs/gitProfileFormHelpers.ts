@@ -1,4 +1,5 @@
 import type { GitConfigDto } from "../../../ipc/client";
+import { SETTINGS_SCOPE, type SettingsScope } from "../../../domain/enums";
 
 export interface GitProfileRepoFields {
   isOverride: boolean;
@@ -66,12 +67,12 @@ const GLOBAL_SCOPE_KEYS: readonly (keyof GitProfileSnapshot)[] = [
 
 /** The values the form would show right after loading the given config; null before the load. */
 export function deriveProfileBaseline(
-  activeScope: "global" | "repo",
+  activeScope: SettingsScope,
   globalCfg: GitConfigDto | null,
   localCfg: GitConfigDto | null
 ): GitProfileSnapshot | null {
   if (!globalCfg) return null;
-  if (activeScope === "repo" && localCfg) {
+  if (activeScope === SETTINGS_SCOPE.REPO && localCfg) {
     return {
       ...deriveRepoScopeFields(localCfg, globalCfg),
       defaultBranch: globalCfg.defaultBranch || "main",
@@ -88,9 +89,9 @@ function normalize(value: string | boolean): string | boolean {
 export function isProfileDirty(
   current: GitProfileSnapshot,
   baseline: GitProfileSnapshot | null,
-  activeScope: "global" | "repo"
+  activeScope: SettingsScope
 ): boolean {
   if (!baseline) return false;
-  const keys = activeScope === "repo" ? REPO_SCOPE_KEYS : GLOBAL_SCOPE_KEYS;
+  const keys = activeScope === SETTINGS_SCOPE.REPO ? REPO_SCOPE_KEYS : GLOBAL_SCOPE_KEYS;
   return keys.some((key) => normalize(current[key]) !== normalize(baseline[key]));
 }

@@ -1,6 +1,7 @@
 import type { UseGitProfileFormFieldsResult } from "./useGitProfileFormFields";
 import type { UseGitProfileFormStatusResult } from "./useGitProfileFormStatus";
 import { deriveProfileBaseline, isProfileDirty } from "./gitProfileFormHelpers";
+import { SETTINGS_SCOPE, type SettingsScope } from "../../../domain/enums";
 
 export interface UseGitProfileDirtyStateResult {
   isDirty: boolean;
@@ -11,7 +12,7 @@ export interface UseGitProfileDirtyStateResult {
 export function useGitProfileDirtyState(
   fields: UseGitProfileFormFieldsResult,
   status: UseGitProfileFormStatusResult,
-  activeScope: "global" | "repo"
+  activeScope: SettingsScope
 ): UseGitProfileDirtyStateResult {
   const baseline = deriveProfileBaseline(activeScope, status.globalConfig, status.localConfig);
   const current = {
@@ -30,7 +31,7 @@ export function useGitProfileDirtyState(
     fields.setUserEmail(baseline.userEmail);
     fields.setGpgSign(baseline.gpgSign);
     fields.setGpgKey(baseline.gpgKey);
-    if (activeScope === "global") fields.setDefaultBranch(baseline.defaultBranch);
+    if (activeScope === SETTINGS_SCOPE.GLOBAL) fields.setDefaultBranch(baseline.defaultBranch);
   };
 
   return { isDirty: isProfileDirty(current, baseline, activeScope), handleDiscard };

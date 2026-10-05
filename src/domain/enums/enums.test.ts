@@ -10,6 +10,8 @@ import {
   CONFIG_SCOPE,
   SCREEN_TYPE,
   TAB_TYPE,
+  SETTINGS_SCOPE,
+  PULL_STRATEGY,
   REBASE_ACTION,
   OPERATION_STATUS,
   REF_TYPE,
@@ -98,6 +100,15 @@ describe("enums", () => {
       "removed",
       "renamed",
     ]);
+  });
+
+  it("SETTINGS_SCOPE says repo where git config says local", () => {
+    expect(SETTINGS_SCOPE).toEqual({ GLOBAL: "global", REPO: "repo" });
+    expect(CONFIG_SCOPE.LOCAL).toBe("local");
+  });
+
+  it("PULL_STRATEGY lists the repo pull strategies", () => {
+    expect(PULL_STRATEGY).toEqual({ INHERIT: "inherit", MERGE: "merge", REBASE: "rebase" });
   });
 });
 

@@ -3,17 +3,18 @@ import { useTranslation } from "../../../i18n";
 import { SettingsInheritRow, SettingsPage } from "./ui";
 import { useGitBehaviorSettings } from "../hooks/useGitBehaviorSettings";
 import { GitBehaviorOptions } from "./GitBehaviorOptions";
+import { SETTINGS_SCOPE, PULL_STRATEGY, type SettingsScope } from "../../../domain/enums";
 
 export interface GitBehaviorTabProps {
   currentRepoPath: string | null;
-  scope?: "global" | "repo";
+  scope?: SettingsScope;
   /** Scope selector rendered under the page header. */
   toolbar?: React.ReactNode;
 }
 
 interface GitBehaviorTabBodyProps {
   currentRepoPath: string | null;
-  scope?: "global" | "repo";
+  scope?: SettingsScope;
 }
 
 /** Inherit row and options of the behavior tab; remounted when the scope or repository changes. */
@@ -21,14 +22,15 @@ const GitBehaviorTabBody: React.FC<GitBehaviorTabBodyProps> = ({ currentRepoPath
   const { t } = useTranslation();
   const s = useGitBehaviorSettings({ currentRepoPath, scope });
   const b = t.settings.behavior;
-  const isRepoScope = s.activeScope === "repo" && Boolean(currentRepoPath);
+  const isRepoScope = s.activeScope === SETTINGS_SCOPE.REPO && Boolean(currentRepoPath);
   const inheriting = s.localPullRebase === null || s.localPullRebase === undefined;
-  const globalMode = s.globalPullRebase ? "rebase" : "merge";
+  const globalMode = s.globalPullRebase ? PULL_STRATEGY.REBASE : PULL_STRATEGY.MERGE;
   const pullRebase = isRepoScope && !inheriting ? Boolean(s.localPullRebase) : s.globalPullRebase;
   const busy = s.loading || s.saving;
 
   const handlePullStrategyChange = (isRebase: boolean) => {
-    if (isRepoScope) s.handleRepoPullStrategyChange(isRebase ? "rebase" : "merge");
+    if (isRepoScope)
+      s.handleRepoPullStrategyChange(isRebase ? PULL_STRATEGY.REBASE : PULL_STRATEGY.MERGE);
     else s.handleGlobalPullStrategyChange(isRebase);
   };
 
@@ -38,7 +40,7 @@ const GitBehaviorTabBody: React.FC<GitBehaviorTabBodyProps> = ({ currentRepoPath
         <SettingsInheritRow
           inheriting={inheriting}
           onInheritChange={(inherit) =>
-            s.handleRepoPullStrategyChange(inherit ? "inherit" : globalMode)
+            s.handleRepoPullStrategyChange(inherit ? PULL_STRATEGY.INHERIT : globalMode)
           }
           description={b.inheritGlobalPullDesc.replace(
             "{strategy}",
@@ -79,7 +81,7 @@ export const GitBehaviorTab: React.FC<GitBehaviorTabProps> = ({
   return (
     <SettingsPage title={b.title} description={b.subtitle} toolbar={toolbar}>
       <GitBehaviorTabBody
-        key={`${scope || (currentRepoPath ? "repo" : "global")}-${currentRepoPath}`}
+        key={`${scope || (currentRepoPath ? SETTINGS_SCOPE.REPO : SETTINGS_SCOPE.GLOBAL)}-${currentRepoPath}`}
         currentRepoPath={currentRepoPath}
         scope={scope}
       />

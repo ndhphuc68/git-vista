@@ -7,6 +7,7 @@
 import { commands, type ConfigScope, type GitConfigDto } from "./bindings.generated";
 import { isTauri, unwrap } from "./core";
 import { mockState } from "./mocks";
+import { CONFIG_SCOPE } from "../domain/enums";
 
 type StringConfigField = "userName" | "userEmail" | "defaultBranch" | "gpgKey";
 type BooleanConfigField = "pullRebase" | "gpgSign" | "fetchPrune" | "rebaseAutostash";
@@ -90,9 +91,9 @@ export const configCommands = {
         const local = mockState.localConfigs[repoPath];
         return {
           userName: local.userName ?? mockState.globalConfig.userName,
-          userNameSource: local.userName ? "local" : "global",
+          userNameSource: local.userName ? CONFIG_SCOPE.LOCAL : CONFIG_SCOPE.GLOBAL,
           userEmail: local.userEmail ?? mockState.globalConfig.userEmail,
-          userEmailSource: local.userEmail ? "local" : "global",
+          userEmailSource: local.userEmail ? CONFIG_SCOPE.LOCAL : CONFIG_SCOPE.GLOBAL,
           defaultBranch: local.defaultBranch ?? mockState.globalConfig.defaultBranch,
           pullRebase: local.pullRebase ?? mockState.globalConfig.pullRebase,
           gpgSign: local.gpgSign ?? mockState.globalConfig.gpgSign,

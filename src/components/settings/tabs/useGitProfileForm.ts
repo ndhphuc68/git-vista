@@ -11,10 +11,11 @@ import {
   createResetToGlobalHandler,
   createSelectInheritHandler,
 } from "./useGitProfileForm.actions";
+import { SETTINGS_SCOPE, type SettingsScope } from "../../../domain/enums";
 
 export interface UseGitProfileFormOptions {
   currentRepoPath: string | null;
-  activeScope: "global" | "repo";
+  activeScope: SettingsScope;
 }
 
 export interface UseGitProfileFormResult {
@@ -93,7 +94,7 @@ export function useGitProfileForm({
   };
 
   const hasLocalOverride =
-    activeScope === "repo" &&
+    activeScope === SETTINGS_SCOPE.REPO &&
     Boolean(status.localConfig?.userNameSource === "local" && status.localConfig?.userName);
 
   return {

@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import type { GitConfigDto } from "../../../ipc/client";
 import { createLoadConfigHandler } from "./useGitProfileForm.load";
+import { type SettingsScope } from "../../../domain/enums";
 
 export interface UseGitProfileFormLoadEffectOptions {
   currentRepoPath: string | null;
-  activeScope: "global" | "repo";
+  activeScope: SettingsScope;
   setGlobalConfig: (value: GitConfigDto) => void;
   setLocalConfig: (value: GitConfigDto) => void;
   setIsOverride: (value: boolean) => void;

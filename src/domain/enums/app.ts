@@ -15,3 +15,21 @@ export const TAB_TYPE = {
   REPO: "repo",
 } as const;
 export type TabType = (typeof TAB_TYPE)[keyof typeof TAB_TYPE];
+
+/**
+ * Scope selected in the settings modal. The UI says "repo"; the matching git
+ * config scope is CONFIG_SCOPE.LOCAL.
+ */
+export const SETTINGS_SCOPE = {
+  GLOBAL: "global",
+  REPO: "repo",
+} as const;
+export type SettingsScope = (typeof SETTINGS_SCOPE)[keyof typeof SETTINGS_SCOPE];
+
+/** Pull strategy for a repo; "inherit" follows the global pull.rebase setting. */
+export const PULL_STRATEGY = {
+  INHERIT: "inherit",
+  MERGE: "merge",
+  REBASE: "rebase",
+} as const;
+export type PullStrategy = (typeof PULL_STRATEGY)[keyof typeof PULL_STRATEGY];

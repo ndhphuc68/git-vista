@@ -3,9 +3,10 @@ import { getGitConfig, setGitConfig } from "../../../features/settings";
 import type { GitConfigDto } from "../../../ipc/client";
 import type { Translations } from "../../../i18n/vi";
 import { applyProfileFields } from "./useGitProfileForm.load";
+import { SETTINGS_SCOPE, type SettingsScope } from "../../../domain/enums";
 
 export interface GitProfileActionsContext {
-  activeScope: "global" | "repo";
+  activeScope: SettingsScope;
   currentRepoPath: string | null;
   isOverride: boolean;
   userName: string;
@@ -51,7 +52,7 @@ export function createSaveHandler(context: GitProfileActionsContext) {
     e.preventDefault();
     setSaving(true);
     try {
-      if (activeScope === "repo" && currentRepoPath) {
+      if (activeScope === SETTINGS_SCOPE.REPO && currentRepoPath) {
         if (isOverride) {
           await setGitConfig(currentRepoPath, "local", "user.name", userName.trim());
           await setGitConfig(currentRepoPath, "local", "user.email", userEmail.trim());
