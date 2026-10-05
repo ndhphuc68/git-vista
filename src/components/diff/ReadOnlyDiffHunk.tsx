@@ -7,10 +7,15 @@ import { UnifiedDiffRow } from "./UnifiedDiffRow";
 export interface ReadOnlyDiffHunkProps {
   hunk: DiffHunk;
   showWordDiff: boolean;
+  showLineNumbers: boolean;
 }
 
 /** A read-only diff hunk (history and compare viewers): header plus its lines. */
-export const ReadOnlyDiffHunk: React.FC<ReadOnlyDiffHunkProps> = ({ hunk, showWordDiff }) => {
+export const ReadOnlyDiffHunk: React.FC<ReadOnlyDiffHunkProps> = ({
+  hunk,
+  showWordDiff,
+  showLineNumbers,
+}) => {
   const tokenMap = useMemo(() => pairHunkLines(hunk.lines), [hunk.lines]);
 
   return (
@@ -28,6 +33,7 @@ export const ReadOnlyDiffHunk: React.FC<ReadOnlyDiffHunkProps> = ({ hunk, showWo
             line={line}
             tokens={tokenMap.get(lIdx)}
             showWordDiff={showWordDiff}
+            showLineNumbers={showLineNumbers}
           />
         ))}
       </div>

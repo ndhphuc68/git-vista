@@ -103,20 +103,14 @@ describe("PullRequestPatchDiffViewer", () => {
     render(<PullRequestPatchDiffViewer filename="src/test.ts" />);
 
     expect(screen.getByText("src/test.ts")).toBeInTheDocument();
-    expect(
-      screen.getByText(viTranslations.pullRequestsScreen.files.noDiff)
-    ).toBeInTheDocument();
+    expect(screen.getByText(viTranslations.pullRequestsScreen.files.noDiff)).toBeInTheDocument();
   });
 
   it("renders empty diff fallback when patch is empty or whitespace only", () => {
-    render(
-      <PullRequestPatchDiffViewer patch="   " filename="README.md" />
-    );
+    render(<PullRequestPatchDiffViewer patch="   " filename="README.md" />);
 
     expect(screen.getByText("README.md")).toBeInTheDocument();
-    expect(
-      screen.getByText(viTranslations.pullRequestsScreen.files.noDiff)
-    ).toBeInTheDocument();
+    expect(screen.getByText(viTranslations.pullRequestsScreen.files.noDiff)).toBeInTheDocument();
   });
 
   it("renders diff header and parsed lines with styling tokens", () => {
@@ -129,10 +123,7 @@ describe("PullRequestPatchDiffViewer", () => {
     ].join("\n");
 
     const { container } = render(
-      <PullRequestPatchDiffViewer
-        patch={patch}
-        filename="src/constants.ts"
-      />
+      <PullRequestPatchDiffViewer patch={patch} filename="src/constants.ts" />
     );
 
     expect(screen.getByText("src/constants.ts")).toBeInTheDocument();
@@ -146,5 +137,21 @@ describe("PullRequestPatchDiffViewer", () => {
 
     expect(delRow).toBeInTheDocument();
     expect(addRow).toBeInTheDocument();
+  });
+
+  it("applies font size style and toggles line numbers per settings", () => {
+    useSettingsStore.setState({ diffFontSize: 16, diffShowLineNumbers: false });
+    const patch = ["@@ -1,1 +1,1 @@", "-old", "+new"].join("\n");
+    const { container, rerender } = render(
+      <PullRequestPatchDiffViewer patch={patch} filename="src/constants.ts" />
+    );
+
+    expect(container.querySelector('[style*="font-size: 16px"]')).not.toBeNull();
+    expect(screen.queryByText("1")).not.toBeInTheDocument();
+
+    useSettingsStore.setState({ diffShowLineNumbers: true });
+    rerender(<PullRequestPatchDiffViewer patch={patch} filename="src/constants.ts" />);
+    expect(screen.getAllByText("1")).toHaveLength(2);
+    useSettingsStore.setState({ diffFontSize: 13, diffShowLineNumbers: true });
   });
 });

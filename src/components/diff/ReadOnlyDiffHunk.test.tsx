@@ -18,9 +18,14 @@ const sampleHunk: DiffHunk = {
 
 describe("ReadOnlyDiffHunk", () => {
   it("renders the header and every line in unified order", () => {
-    render(<ReadOnlyDiffHunk hunk={sampleHunk} showWordDiff={false} />);
+    render(<ReadOnlyDiffHunk hunk={sampleHunk} showWordDiff={false} showLineNumbers={true} />);
     expect(screen.getByText("@@ -1,3 +1,3 @@")).toBeInTheDocument();
     const contents = screen.getAllByText(/^(keep|old|new)$/).map((el) => el.textContent?.trim());
     expect(contents).toEqual(["keep", "old", "new"]);
+  });
+
+  it("hides line numbers when turned off", () => {
+    render(<ReadOnlyDiffHunk hunk={sampleHunk} showWordDiff={false} showLineNumbers={false} />);
+    expect(screen.queryByTestId("diff-line-numbers")).not.toBeInTheDocument();
   });
 });

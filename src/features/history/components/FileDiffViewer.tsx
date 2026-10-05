@@ -5,6 +5,7 @@ import { useCommitFileDiff } from "../api/useFileInspection";
 import { FileDiffToolbar } from "./FileDiffToolbar";
 import { hunkKey } from "../../../shared/utils/listKeys";
 import { ReadOnlyDiffHunk } from "../../../components/diff/ReadOnlyDiffHunk";
+import { useDiffDisplaySettings } from "../../../components/diff/useDiffDisplaySettings";
 
 interface FileDiffViewerProps {
   repoPath: string;
@@ -16,6 +17,7 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
   const { t } = useTranslation();
   const [showWordDiff, setShowWordDiff] = useState(true);
   const { diffIgnoreWhitespace, setDiffIgnoreWhitespace } = useSettingsStore();
+  const { style, showLineNumbers } = useDiffDisplaySettings();
 
   const { data: diff, isLoading } = useCommitFileDiff(
     repoPath,
@@ -57,10 +59,18 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
   }
 
   return (
-    <div className="flex flex-col font-mono text-xs overflow-x-auto rounded-md border border-border-subtle bg-surface shadow-2xs">
+    <div
+      style={style}
+      className="flex flex-col font-mono text-xs overflow-x-auto rounded-md border border-border-subtle bg-surface shadow-2xs"
+    >
       {toolbar}
       {diff.hunks.map((hunk) => (
-        <ReadOnlyDiffHunk key={hunkKey(hunk)} hunk={hunk} showWordDiff={showWordDiff} />
+        <ReadOnlyDiffHunk
+          key={hunkKey(hunk)}
+          hunk={hunk}
+          showWordDiff={showWordDiff}
+          showLineNumbers={showLineNumbers}
+        />
       ))}
     </div>
   );

@@ -6,6 +6,7 @@ import { DiffViewerHeader } from "./DiffViewerHeader";
 import { DiffViewerStatus } from "./DiffViewerStatus";
 import { InteractiveHunk } from "./InteractiveHunk";
 import { hunkKey } from "../../shared/utils/listKeys";
+import { useDiffDisplaySettings } from "../diff/useDiffDisplaySettings";
 
 export interface InteractiveDiffViewerProps {
   repoPath: string;
@@ -29,6 +30,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
   const { t } = useTranslation();
   const [showWordDiff, setShowWordDiff] = useState(true);
   const { diffIgnoreWhitespace, setDiffIgnoreWhitespace } = useSettingsStore();
+  const { style } = useDiffDisplaySettings();
 
   const {
     data: diff,
@@ -81,7 +83,7 @@ export const InteractiveDiffViewer: React.FC<InteractiveDiffViewerProps> = ({
       />
 
       {/* Hunks list */}
-      <div className="flex flex-col font-mono text-xs overflow-x-auto">
+      <div style={style} className="flex flex-col font-mono text-xs overflow-x-auto">
         {diff.hunks.map((hunk, hIdx) => (
           <InteractiveHunk
             key={hunkKey(hunk)}

@@ -8,10 +8,16 @@ export interface UnifiedDiffRowProps {
   line: DiffLine;
   tokens: WordDiffToken[] | undefined;
   showWordDiff: boolean;
+  showLineNumbers: boolean;
 }
 
 /** One read-only unified diff line: old/new line numbers, sign and content. */
-export const UnifiedDiffRow: React.FC<UnifiedDiffRowProps> = ({ line, tokens, showWordDiff }) => {
+export const UnifiedDiffRow: React.FC<UnifiedDiffRowProps> = ({
+  line,
+  tokens,
+  showWordDiff,
+  showLineNumbers,
+}) => {
   const isAdd = line.line_type === "add";
   const isDel = line.line_type === "delete";
 
@@ -27,10 +33,15 @@ export const UnifiedDiffRow: React.FC<UnifiedDiffRowProps> = ({ line, tokens, sh
       )}
     >
       {/* Line numbers gutter */}
-      <div className="flex shrink-0 select-none border-r border-border-subtle/50 text-tertiary bg-window/40">
-        <span className="w-10 text-right pr-2 py-0.5 opacity-70">{line.old_lineno ?? ""}</span>
-        <span className="w-10 text-right pr-2 py-0.5 opacity-70">{line.new_lineno ?? ""}</span>
-      </div>
+      {showLineNumbers && (
+        <div
+          data-testid="diff-line-numbers"
+          className="flex shrink-0 select-none border-r border-border-subtle/50 text-tertiary bg-window/40"
+        >
+          <span className="w-10 text-right pr-2 py-0.5 opacity-70">{line.old_lineno ?? ""}</span>
+          <span className="w-10 text-right pr-2 py-0.5 opacity-70">{line.new_lineno ?? ""}</span>
+        </div>
+      )}
 
       {/* Sign (+ / - / space) */}
       <span

@@ -8,6 +8,7 @@ import { useCompareFileDiff } from "../../features/compare";
 import { CompareDiffToolbar } from "./CompareDiffToolbar";
 import { hunkKey } from "../../shared/utils/listKeys";
 import { ReadOnlyDiffHunk } from "../diff/ReadOnlyDiffHunk";
+import { useDiffDisplaySettings } from "../diff/useDiffDisplaySettings";
 
 export interface CompareDiffViewerProps {
   repoPath: string;
@@ -16,6 +17,20 @@ export interface CompareDiffViewerProps {
   file: CompareFileItem | null;
   mode: CompareMode;
 }
+
+const CompareDiffPlaceholder: React.FC<{ message: string }> = ({ message }) => (
+  <div className="flex flex-col items-center justify-center h-full p-8 text-tertiary text-xs gap-2 select-none">
+    <FileCode size={28} className="opacity-30" />
+    <span>{message}</span>
+  </div>
+);
+
+const CompareDiffLoading: React.FC<{ message: string }> = ({ message }) => (
+  <div className="flex flex-col items-center justify-center h-full p-8 text-secondary text-xs gap-2">
+    <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+    <span>{message}</span>
+  </div>
+);
 
 export const CompareDiffViewer: React.FC<CompareDiffViewerProps> = ({
   repoPath,
@@ -28,6 +43,7 @@ export const CompareDiffViewer: React.FC<CompareDiffViewerProps> = ({
   const [showWordDiff, setShowWordDiff] = useState(true);
   const { diffIgnoreWhitespace, setDiffIgnoreWhitespace } = useSettingsStore();
   const { openInspector } = useInspectorStore();
+  const { style, showLineNumbers } = useDiffDisplaySettings();
 
   const filePath = file?.path ?? "";
 
@@ -40,30 +56,17 @@ export const CompareDiffViewer: React.FC<CompareDiffViewerProps> = ({
   });
 
   if (!file) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full p-8 text-tertiary text-xs gap-2 select-none">
-        <FileCode size={28} className="opacity-30" />
-        <span>{t.compare.selectFileToViewDiff}</span>
-      </div>
-    );
+    return <CompareDiffPlaceholder message={t.compare.selectFileToViewDiff} />;
   }
 
   if (file.is_binary) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-8 text-tertiary text-xs gap-2 select-none">
-        <FileCode size={28} className="opacity-30" />
-        <span>Tập tin nhị phân (Binary). Không thể hiển thị diff văn bản.</span>
-      </div>
+      <CompareDiffPlaceholder message="Tập tin nhị phân (Binary). Không thể hiển thị diff văn bản." />
     );
   }
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full p-8 text-secondary text-xs gap-2">
-        <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-        <span>{t.diff.readingDiff}</span>
-      </div>
-    );
+    return <CompareDiffLoading message={t.diff.readingDiff} />;
   }
 
   const toolbar = (
@@ -93,9 +96,14 @@ export const CompareDiffViewer: React.FC<CompareDiffViewerProps> = ({
   return (
     <div className="flex flex-col h-full font-mono text-xs overflow-hidden bg-surface">
       {toolbar}
-      <div className="flex-1 overflow-y-auto">
+      <div style={style} className="flex-1 overflow-y-auto">
         {diff.hunks.map((hunk) => (
-          <ReadOnlyDiffHunk key={hunkKey(hunk)} hunk={hunk} showWordDiff={showWordDiff} />
+          <ReadOnlyDiffHunk
+            key={hunkKey(hunk)}
+            hunk={hunk}
+            showWordDiff={showWordDiff}
+            showLineNumbers={showLineNumbers}
+          />
         ))}
       </div>
     </div>
