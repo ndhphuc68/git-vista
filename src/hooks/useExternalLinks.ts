@@ -15,6 +15,8 @@ function findExternalAnchor(event: MouseEvent): HTMLAnchorElement | null {
 /**
  * Routes clicks on external links to the system browser. The webview would
  * otherwise drop `target="_blank"` links or navigate the app window away.
+ * Listens in the capture phase so links inside elements that stop click
+ * propagation (such as the `Modal` panel) are still handled.
  */
 export function useExternalLinks() {
   useEffect(() => {
@@ -27,11 +29,11 @@ export function useExternalLinks() {
         console.error("Failed to open external link", err);
       });
     };
-    document.addEventListener("click", handleClick);
-    document.addEventListener("auxclick", handleClick);
+    document.addEventListener("click", handleClick, true);
+    document.addEventListener("auxclick", handleClick, true);
     return () => {
-      document.removeEventListener("click", handleClick);
-      document.removeEventListener("auxclick", handleClick);
+      document.removeEventListener("click", handleClick, true);
+      document.removeEventListener("auxclick", handleClick, true);
     };
   }, []);
 }

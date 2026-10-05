@@ -16,6 +16,11 @@ function Harness() {
         <span>external</span>
       </a>
       <a href="#local">local</a>
+      <div onClick={(e) => e.stopPropagation()}>
+        <a href="https://github.com/settings/tokens" target="_blank" rel="noreferrer">
+          inside modal
+        </a>
+      </div>
     </>
   );
 }
@@ -31,6 +36,12 @@ describe("useExternalLinks", () => {
     getByText("external").dispatchEvent(event);
     expect(event.defaultPrevented).toBe(true);
     expect(openExternalUrl).toHaveBeenCalledWith("https://github.com/org/repo");
+  });
+
+  it("opens external links whose ancestor stops click propagation", () => {
+    const { getByText } = render(<Harness />);
+    fireEvent.click(getByText("inside modal"));
+    expect(openExternalUrl).toHaveBeenCalledWith("https://github.com/settings/tokens");
   });
 
   it("leaves in-app links alone", () => {
