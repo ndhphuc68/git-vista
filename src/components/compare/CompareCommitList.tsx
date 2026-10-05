@@ -1,6 +1,6 @@
 import React from "react";
 import { GitCommit, Calendar, User } from "lucide-react";
-import { useTranslation } from "../../i18n";
+import { useFormatDate, useTranslation } from "../../i18n";
 import type { CompareCommitItem } from "../../ipc/bindings.generated";
 
 export interface CompareCommitListProps {
@@ -8,25 +8,12 @@ export interface CompareCommitListProps {
   isLoading?: boolean;
 }
 
-function formatRelativeTime(timestampSec: number): string {
-  if (!timestampSec) return "";
-  const nowSec = Math.floor(Date.now() / 1000);
-  const diffSec = nowSec - timestampSec;
-
-  if (diffSec < 60) return "vừa xong";
-  if (diffSec < 3600) return `${Math.floor(diffSec / 60)} phút trước`;
-  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)} giờ trước`;
-  if (diffSec < 2592000) return `${Math.floor(diffSec / 86400)} ngày trước`;
-
-  const date = new Date(timestampSec * 1000);
-  return date.toLocaleDateString();
-}
-
 export const CompareCommitList: React.FC<CompareCommitListProps> = ({
   commits,
   isLoading = false,
 }) => {
   const { t } = useTranslation();
+  const formatDate = useFormatDate();
 
   if (isLoading) {
     return (
@@ -71,7 +58,7 @@ export const CompareCommitList: React.FC<CompareCommitListProps> = ({
             </div>
             <div className="flex items-center gap-1 text-tertiary shrink-0">
               <Calendar size={11} />
-              <span>{formatRelativeTime(commit.timestamp)}</span>
+              <span>{formatDate(commit.timestamp)}</span>
             </div>
           </div>
         </div>

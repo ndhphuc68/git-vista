@@ -1,7 +1,8 @@
 import React from "react";
 import { GitBranch, ArrowRight } from "lucide-react";
 import { type RecentRepoEntry } from "../../../ipc/bindings.generated";
-import { useTranslation } from "../../../i18n";
+import { formatAbsoluteDate, useTranslation } from "../../../i18n";
+import { useSettingsStore } from "../../../store/useSettingsStore";
 import { formatRelativeTime } from "../model/recentRepositories";
 import { RecentRepositoryRowActions } from "./RecentRepositoryRowActions";
 
@@ -29,9 +30,13 @@ export const RecentRepositoryRow: React.FC<RecentRepositoryRowProps> = ({
   onCopyPath,
   onTogglePin,
 }) => {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const dateFormat = useSettingsStore((s) => s.dateFormat);
   const displayPath = item.path.replace(/^\\\\\?\\/, "");
-  const relativeTime = formatRelativeTime(item.last_opened_at_ms, t.welcome);
+  const relativeTime =
+    dateFormat === "absolute" && item.last_opened_at_ms
+      ? formatAbsoluteDate(item.last_opened_at_ms / 1000, locale)
+      : formatRelativeTime(item.last_opened_at_ms, t.welcome);
 
   return (
     <div

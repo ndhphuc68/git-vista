@@ -1,7 +1,7 @@
 import React from "react";
 import clsx from "clsx";
-import { useTranslation } from "../../i18n";
-import { AuthorAvatar, formatRelativeTime } from "../../features/history";
+import { useFormatDate, useTranslation } from "../../i18n";
+import { AuthorAvatar } from "../../features/history";
 import { getChangeTypeBadgeClass } from "./fileHistoryChangeTypeBadge";
 import type { FileHistoryItem } from "../../ipc/bindings.generated";
 
@@ -18,6 +18,7 @@ export const FileHistoryCommitRow: React.FC<FileHistoryCommitRowProps> = ({
   onSelect,
 }) => {
   const { t } = useTranslation();
+  const formatDate = useFormatDate();
 
   const changeTypeBadge = getChangeTypeBadgeClass(commit.change_type);
   const changeTypeTitle =
@@ -56,7 +57,7 @@ export const FileHistoryCommitRow: React.FC<FileHistoryCommitRowProps> = ({
         </div>
 
         <span className="text-[10px] text-tertiary font-mono shrink-0">
-          {formatRelativeTime(commit.timestamp_sec)}
+          {formatDate(commit.timestamp_sec)}
         </span>
       </div>
 
