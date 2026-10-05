@@ -11,6 +11,7 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  useSettingsStore.setState({ diffFontSize: 13, diffShowLineNumbers: true });
 });
 
 describe("parsePatch", () => {
@@ -147,10 +148,12 @@ describe("PullRequestPatchDiffViewer", () => {
     );
 
     expect(container.querySelector('[style*="font-size: 16px"]')).not.toBeNull();
+    expect(screen.queryByTestId("diff-line-numbers")).not.toBeInTheDocument();
     expect(screen.queryByText("1")).not.toBeInTheDocument();
 
     useSettingsStore.setState({ diffShowLineNumbers: true });
     rerender(<PullRequestPatchDiffViewer patch={patch} filename="src/constants.ts" />);
+    expect(screen.getAllByTestId("diff-line-numbers")).toHaveLength(2);
     expect(screen.getAllByText("1")).toHaveLength(2);
     useSettingsStore.setState({ diffFontSize: 13, diffShowLineNumbers: true });
   });

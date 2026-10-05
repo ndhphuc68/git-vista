@@ -29,6 +29,7 @@ describe("StagingFileList & DiscardConfirmModal", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    useSettingsStore.getState().setConfirmDiscard(true);
   });
 
   it("renders staged and changes sections with correct counts", () => {
@@ -129,6 +130,5 @@ describe("StagingFileList & DiscardConfirmModal", () => {
 
     expect(mockProps.onDiscardFile).toHaveBeenCalledWith("src/unstaged1.ts");
     expect(screen.queryByTestId("confirm-discard-button")).not.toBeInTheDocument();
-    useSettingsStore.getState().setConfirmDiscard(true);
   });
 });

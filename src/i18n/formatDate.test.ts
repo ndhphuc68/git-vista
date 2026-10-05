@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { formatAbsoluteDate, formatCommitDate, getTranslation, useFormatDate } from "./index";
 import { useSettingsStore } from "../store/useSettingsStore";
@@ -30,6 +30,13 @@ describe("useFormatDate", () => {
     useSettingsStore.getState().setLocale("en");
   });
 
+  afterEach(() => {
+    act(() => {
+      useSettingsStore.getState().setLocale("vi");
+      useSettingsStore.getState().setDateFormat("relative");
+    });
+  });
+
   it("follows the date format setting", () => {
     useSettingsStore.getState().setDateFormat("absolute");
     const { result } = renderHook(() => useFormatDate());
@@ -37,5 +44,7 @@ describe("useFormatDate", () => {
     act(() => {
       useSettingsStore.getState().setDateFormat("relative");
     });
+    const nowSec = Math.floor(Date.now() / 1000);
+    expect(result.current(nowSec - 120)).toBe("2m ago");
   });
 });

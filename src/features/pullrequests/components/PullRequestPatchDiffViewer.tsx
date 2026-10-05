@@ -30,14 +30,14 @@ const PatchLineRow: React.FC<PatchLineRowProps> = ({ line, showLineNumbers }) =>
     )}
   >
     {showLineNumbers && (
-      <>
+      <span data-testid="diff-line-numbers" className="flex">
         <span className="w-10 text-right select-none text-tertiary px-1 shrink-0">
           {line.oldLine ?? ""}
         </span>
         <span className="w-10 text-right select-none text-tertiary px-1 shrink-0">
           {line.newLine ?? ""}
         </span>
-      </>
+      </span>
     )}
     <span className="w-4 text-center select-none text-tertiary shrink-0">{line.sign}</span>
     <span className="whitespace-pre-wrap break-all flex-1 px-1">{line.content}</span>
