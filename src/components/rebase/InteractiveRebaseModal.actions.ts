@@ -1,5 +1,6 @@
 import type { Translations } from "../../i18n/vi";
 import type { RebasePlanStep, InteractiveRebaseResult } from "../../ipc/bindings.generated";
+import { REBASE_ACTION } from "../../domain/enums";
 import type { ActiveScreen } from "../../store/useViewStore";
 import { useToastStore } from "../../store/useToastStore";
 import { messageOf } from "../../shared/utils/toError";
@@ -72,7 +73,7 @@ export function createSubmitHandler(context: SubmitHandlerContext) {
     // Validate messages
     for (const s of steps) {
       if (
-        (s.action === "Reword" || s.action === "Squash") &&
+        (s.action === REBASE_ACTION.REWORD || s.action === REBASE_ACTION.SQUASH) &&
         (!s.new_message || s.new_message.trim() === "")
       ) {
         setError(t.modals.interactiveRebase.validation.emptyMessage);

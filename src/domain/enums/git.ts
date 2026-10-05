@@ -25,3 +25,13 @@ export const CONFIG_SCOPE = {
   LOCAL: "local",
 } as const;
 export type ConfigScope = (typeof CONFIG_SCOPE)[keyof typeof CONFIG_SCOPE];
+
+/** Interactive rebase step action. Source: bindings.ts RebaseActionKind */
+export const REBASE_ACTION = {
+  PICK: "Pick",
+  REWORD: "Reword",
+  SQUASH: "Squash",
+  FIXUP: "Fixup",
+  DROP: "Drop",
+} as const;
+export type RebaseActionKind = (typeof REBASE_ACTION)[keyof typeof REBASE_ACTION];

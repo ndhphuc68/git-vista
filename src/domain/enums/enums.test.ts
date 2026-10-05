@@ -5,9 +5,14 @@ import {
   CHECK_STATUS,
   CONFIG_SCOPE,
   SCREEN_TYPE,
+  REBASE_ACTION,
   type ConfigScope,
+  type RebaseActionKind,
 } from ".";
-import type { ConfigScope as BindingConfigScope } from "../../ipc/bindings.generated";
+import type {
+  ConfigScope as BindingConfigScope,
+  RebaseActionKind as BindingRebaseActionKind,
+} from "../../ipc/bindings.generated";
 
 describe("enums", () => {
   it("CHANGE_TYPE matches the exact strings returned by the Rust backend", () => {
@@ -15,6 +20,12 @@ describe("enums", () => {
     expect(CHANGE_TYPE.MODIFIED).toBe("modified");
     expect(CHANGE_TYPE.DELETED).toBe("deleted");
     expect(CHANGE_TYPE.RENAMED).toBe("renamed");
+  });
+
+  it("REBASE_ACTION matches the exact strings accepted by the Rust backend", () => {
+    expect(Object.values(REBASE_ACTION).sort()).toEqual(
+      ["Drop", "Fixup", "Pick", "Reword", "Squash"].sort()
+    );
   });
 
   it("PR_STATE matches the exact strings of the GitHub API", () => {
@@ -45,5 +56,9 @@ describe("enums stay in sync with generated bindings", () => {
   // variant added or removed in Rust fails the build once bindings regenerate.
   it("CONFIG_SCOPE matches ConfigScope", () => {
     expectTypeOf<ConfigScope>().toEqualTypeOf<BindingConfigScope>();
+  });
+
+  it("REBASE_ACTION matches RebaseActionKind", () => {
+    expectTypeOf<RebaseActionKind>().toEqualTypeOf<BindingRebaseActionKind>();
   });
 });
