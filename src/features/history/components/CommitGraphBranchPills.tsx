@@ -3,6 +3,7 @@ import { GitBranch, Tag, Globe } from "lucide-react";
 import type { GraphCommitNode, RefBadge } from "../../../ipc/bindings.generated";
 import { getBranchPillStyle } from "../model/graphPresentation";
 import { useTranslation } from "../../../i18n";
+import { REF_TYPE } from "../../../domain/enums";
 
 export interface CommitGraphBranchPillsProps {
   refs: GraphCommitNode["refs"];
@@ -18,9 +19,9 @@ interface BranchPillPopoverRowProps {
 
 function BranchPillPopoverRow({ refBadge, headBadgeText, onCheckout }: BranchPillPopoverRowProps) {
   const { t } = useTranslation();
-  const isHead = refBadge.ref_type === "head";
-  const isTag = refBadge.ref_type === "tag";
-  const isRemote = refBadge.ref_type === "remote";
+  const isHead = refBadge.ref_type === REF_TYPE.HEAD;
+  const isTag = refBadge.ref_type === REF_TYPE.TAG;
+  const isRemote = refBadge.ref_type === REF_TYPE.REMOTE;
   const style = getBranchPillStyle(refBadge.name, isHead, isTag);
   const isBranch = !isTag;
   const canCheckout = isBranch && !isHead;
@@ -119,9 +120,9 @@ function BranchPillListPopover({
 function sortRefs(refs: RefBadge[]): RefBadge[] {
   return [...refs].sort((a, b) => {
     const priority = (type: string) => {
-      if (type === "head") return 0;
-      if (type === "tag") return 1;
-      if (type === "local") return 2;
+      if (type === REF_TYPE.HEAD) return 0;
+      if (type === REF_TYPE.TAG) return 1;
+      if (type === REF_TYPE.LOCAL) return 2;
       return 3;
     };
     return priority(a.ref_type) - priority(b.ref_type);
@@ -142,9 +143,9 @@ export function CommitGraphBranchPills({
 
   const sortedRefs = sortRefs(refs);
   const primaryRef = sortedRefs[0]!;
-  const isPrimaryHead = primaryRef.ref_type === "head";
-  const isPrimaryTag = primaryRef.ref_type === "tag";
-  const isPrimaryRemote = primaryRef.ref_type === "remote";
+  const isPrimaryHead = primaryRef.ref_type === REF_TYPE.HEAD;
+  const isPrimaryTag = primaryRef.ref_type === REF_TYPE.TAG;
+  const isPrimaryRemote = primaryRef.ref_type === REF_TYPE.REMOTE;
   const primaryStyle = getBranchPillStyle(primaryRef.name, isPrimaryHead, isPrimaryTag);
   const remainingCount = sortedRefs.length - 1;
   const canCheckoutPrimary = !isPrimaryTag && !isPrimaryHead;
@@ -168,8 +169,8 @@ export function CommitGraphBranchPills({
           canCheckoutPrimary
             ? t.graph.checkoutBranchHint.replace("{name}", primaryRef.name)
             : isPrimaryHead
-            ? `${primaryRef.name} (${t.graph.headBadge})`
-            : primaryRef.name
+              ? `${primaryRef.name} (${t.graph.headBadge})`
+              : primaryRef.name
         }
         className={clsx(
           "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-mono border shadow-2xs cursor-pointer transition-all hover:brightness-95 hover:shadow-xs min-w-0 max-w-32.5",

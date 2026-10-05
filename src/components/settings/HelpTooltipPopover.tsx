@@ -73,9 +73,7 @@ export const HelpTooltipPopover: React.FC<HelpTooltipPopoverProps> = ({
 
       {isPinned && (
         <div className="mt-2.5 pt-2 border-t border-border-subtle/50 flex justify-end">
-          <span className="text-xs text-tertiary italic">
-            Nhấn ESC hoặc bấm ra ngoài để đóng
-          </span>
+          <span className="text-xs text-tertiary italic">Nhấn ESC hoặc bấm ra ngoài để đóng</span>
         </div>
       )}
     </div>

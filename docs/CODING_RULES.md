@@ -225,9 +225,15 @@ Before writing new UI or helpers, check these:
 | Copy to clipboard | `useCopyToClipboard` |
 | Short SHA, error text | `shortSha()`, `toErrorMessage()`, `messageOf()` in `src/shared/utils` |
 | Magic numbers | `src/domain/constants/{ui,motion,zIndex}.ts`. No `z-[9999]`, no bare `setTimeout(..., 2000)`, no `substring(0, 7)`. |
-| String unions | `src/domain/enums.ts` |
+| String unions | `src/domain/enums/` (`git.ts` for Rust values, `github.ts` for GitHub API values, `app.ts` for frontend values) |
 | Mutually exclusive dialogs | One discriminated union state (like `SidebarDialog`), not one boolean per dialog |
 
+- **Compare backend and GitHub values through a constant.** Write
+  `res.status === OPERATION_STATUS.CONFLICT`, not `res.status === "Conflict"`.
+  Several of these fields are typed `string` in the bindings, so a typo in a
+  literal compiles. A union used in only one or two files may stay a literal
+  union type. UI variants (`AlertVariant`, toast type, button variants) are not
+  status values and do not use these constants.
 - **If a primitive is missing something, add it to the primitive** (the way
   `size="full"` and `label` were added to `Modal`). Do not work around it at
   each call site.

@@ -1,4 +1,5 @@
 import React from "react";
+import { SCREEN_TYPE } from "../../../domain/enums";
 import { useRepoStore } from "../../../store/useRepoStore";
 import { useViewStore } from "../../../store/useViewStore";
 import { type StashItem } from "../../../ipc/bindings.generated";
@@ -90,7 +91,7 @@ export const BranchSidebar: React.FC<BranchSidebarProps> = ({
         tagItems={shell.tagItems}
         onMerge={actions.mergeBranch}
         onRebase={actions.rebaseBranch}
-        onNavigateToChanges={() => setActiveScreen("changes")}
+        onNavigateToChanges={() => setActiveScreen(SCREEN_TYPE.CHANGES)}
         renderForeignDialog={renderForeignDialog}
       />
     </>

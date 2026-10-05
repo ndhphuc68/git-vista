@@ -227,7 +227,13 @@ function resolveModuleFile(
   if (!specifier.startsWith(".")) return null;
   const fromDir = posix.dirname(importingFileRel);
   const joined = posix.normalize(posix.join(fromDir, specifier));
-  const candidates = [joined, `${joined}.ts`, `${joined}.tsx`, `${joined}/index.ts`, `${joined}/index.tsx`];
+  const candidates = [
+    joined,
+    `${joined}.ts`,
+    `${joined}.tsx`,
+    `${joined}/index.ts`,
+    `${joined}/index.tsx`,
+  ];
   for (const candidate of candidates) {
     if (fileSet.has(candidate)) return candidate;
   }
@@ -516,9 +522,7 @@ describe("crossFeatureViolation", () => {
   });
 
   it("forbids an export-from deep import", () => {
-    const specifiers = extractImportSpecifiers(
-      `export { useApplyStash } from "../../stash/api";`
-    );
+    const specifiers = extractImportSpecifiers(`export { useApplyStash } from "../../stash/api";`);
     expect(specifiers).toEqual(["../../stash/api"]);
     expect(crossFeatureViolation(FILE, specifiers[0]!)).not.toBeNull();
   });
@@ -571,9 +575,9 @@ describe("resolveModuleFile", () => {
   ]);
 
   it("resolves a bare directory specifier to its index.ts", () => {
-    expect(
-      resolveModuleFile("features/history/components/CommitGraph.tsx", "..", fileSet)
-    ).toBe("features/history/index.ts");
+    expect(resolveModuleFile("features/history/components/CommitGraph.tsx", "..", fileSet)).toBe(
+      "features/history/index.ts"
+    );
   });
 
   it("resolves a specifier missing its .tsx extension", () => {

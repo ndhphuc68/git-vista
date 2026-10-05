@@ -3,6 +3,7 @@ import { GitCommit, ArrowRight } from "lucide-react";
 import { useTranslation } from "../../i18n";
 import { Modal, Button, Alert } from "../../shared/ui";
 import { toErrorMessage } from "../../shared/utils/toError";
+import { OPERATION_STATUS } from "../../domain/enums";
 
 const TITLE_ID = "rebase-branch-title";
 
@@ -43,7 +44,7 @@ export const RebaseBranchModal: React.FC<RebaseBranchModalProps> = ({
       if (res.success) {
         onClose();
       } else {
-        if (res.status === "Conflict") {
+        if (res.status === OPERATION_STATUS.CONFLICT) {
           setError(t.modals.rebase.conflictError);
         } else {
           setError(res.output || t.modals.rebase.genericError.replace("{msg}", res.status));

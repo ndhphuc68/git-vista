@@ -8,6 +8,13 @@ import {
   type CheckStatus,
   type PullRequestFileItem,
 } from "../ipc/githubApi";
+import {
+  CHECK_RUN_CONCLUSION,
+  CHECK_RUN_STATE,
+  CHECK_STATUS,
+  PR_STATE,
+  type PullRequestState,
+} from "../domain/enums";
 import { readJson } from "./readJson";
 
 const GITHUB_API_BASE = "https://api.github.com";
@@ -118,10 +125,14 @@ export function mapRawPullRequest(p: RawPullRequest): GitHubPullRequest {
 
 // Exported for unit testing only; not part of this module's public API surface.
 export function mapCheckRunStatus(status?: string, conclusion?: string | null): CheckStatus {
-  if (status === "completed") return conclusion === "success" ? "success" : "failure";
-  if (status === "in_progress") return "in_progress";
-  if (status === "queued") return "queued";
-  return "neutral";
+  if (status === CHECK_RUN_STATE.COMPLETED) {
+    return conclusion === CHECK_RUN_CONCLUSION.SUCCESS
+      ? CHECK_STATUS.SUCCESS
+      : CHECK_STATUS.FAILURE;
+  }
+  if (status === CHECK_RUN_STATE.IN_PROGRESS) return CHECK_STATUS.IN_PROGRESS;
+  if (status === CHECK_RUN_STATE.QUEUED) return CHECK_STATUS.QUEUED;
+  return CHECK_STATUS.NEUTRAL;
 }
 
 function mapCheckRun(c: RawCheckRun): CheckRunItem {
@@ -214,7 +225,7 @@ export async function fetchPullRequests(
   owner: string,
   repo: string,
   token?: string | null,
-  state: "open" | "closed" | "all" = "open"
+  state: PullRequestState = PR_STATE.OPEN
 ): Promise<GitHubPullRequest[]> {
   const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/pulls?state=${state}&per_page=30`;
   const res = await fetch(url, {

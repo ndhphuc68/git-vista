@@ -10,10 +10,11 @@ import {
   SettingsScopeSelector,
   type SettingsScopeSelectorProps,
 } from "../../features/settings";
+import { type SettingsScope } from "../../domain/enums";
 
 export interface SettingsModalTabContentProps {
   activeTab: SettingsTab;
-  effectiveScope: "global" | "repo";
+  effectiveScope: SettingsScope;
   effectiveRepoPath: string | null;
   scopeSelector: SettingsScopeSelectorProps;
 }

@@ -6,6 +6,7 @@
  */
 import { commands, type CommitActionResult } from "./bindings.generated";
 import { isTauri, unwrap } from "./core";
+import { OPERATION_STATUS } from "../domain/enums";
 
 export const commitActionCommands = {
   cherryPickCommit: async (
@@ -16,7 +17,7 @@ export const commitActionCommands = {
     if (!isTauri()) {
       return {
         success: true,
-        status: autoCommit ? "Committed" : "Staged",
+        status: autoCommit ? OPERATION_STATUS.COMMITTED : OPERATION_STATUS.STAGED,
         new_commit_id: autoCommit ? "mock_cherry_pick_" + commitId.slice(0, 7) : null,
         undo_token: autoCommit ? "refs/gitui-backup/commit-undo-mock" : null,
         output: "Mock cherry-pick output",
@@ -33,7 +34,7 @@ export const commitActionCommands = {
     if (!isTauri()) {
       return {
         success: true,
-        status: autoCommit ? "Committed" : "Staged",
+        status: autoCommit ? OPERATION_STATUS.COMMITTED : OPERATION_STATUS.STAGED,
         new_commit_id: autoCommit ? "mock_revert_" + commitId.slice(0, 7) : null,
         undo_token: autoCommit ? "refs/gitui-backup/commit-undo-mock" : null,
         output: "Mock revert output",

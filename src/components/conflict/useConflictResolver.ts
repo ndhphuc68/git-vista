@@ -45,9 +45,11 @@ export function useConflictResolver({
     return conflictHunks.filter((h) => resolutions[h.id] !== undefined).length;
   }, [conflictHunks, resolutions]);
 
-  const { handleSetResolution, handleTakeAllOurs, handleTakeAllTheirs } = createResolutionHandlers(
-    { resolutions, setResolutions, conflictHunks }
-  );
+  const { handleSetResolution, handleTakeAllOurs, handleTakeAllTheirs } = createResolutionHandlers({
+    resolutions,
+    setResolutions,
+    conflictHunks,
+  });
 
   const { handlePrevConflict, handleNextConflict } = createConflictNavigation({
     conflictHunks,

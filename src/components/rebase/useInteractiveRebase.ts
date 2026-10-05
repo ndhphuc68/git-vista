@@ -7,6 +7,7 @@ import type {
   RebasePlanStep,
   InteractiveRebaseResult,
 } from "../../ipc/bindings.generated";
+import { REBASE_ACTION } from "../../domain/enums";
 import { useRebaseCommits } from "../../features/merge";
 import { createSubmitHandler } from "./InteractiveRebaseModal.actions";
 import { commitsToPickSteps, buildCommitMap } from "./rebaseStepsHelpers";
@@ -72,12 +73,15 @@ export function useInteractiveRebase({
     commitMap,
   });
   const handleReset = createResetHandler({ fetchedCommits, setSteps, setError });
-  const { handleDragStart, handleDragOver, handleDrop, handleDragEnd } = createDragAndDropHandlers(
-    { steps, setSteps, draggedIndex, setDraggedIndex }
-  );
+  const { handleDragStart, handleDragOver, handleDrop, handleDragEnd } = createDragAndDropHandlers({
+    steps,
+    setSteps,
+    draggedIndex,
+    setDraggedIndex,
+  });
 
   // Validation
-  const nonDropped = steps.filter((s) => s.action !== "Drop");
+  const nonDropped = steps.filter((s) => s.action !== REBASE_ACTION.DROP);
   const isAllDropped = steps.length > 0 && nonDropped.length === 0;
   const canSubmit = steps.length > 0 && !isAllDropped && !submitting && !isLoading;
 

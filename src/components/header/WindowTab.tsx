@@ -1,4 +1,5 @@
 import React from "react";
+import { TAB_TYPE } from "../../domain/enums";
 import { type TabItem } from "../../types/tab";
 import { HomeWindowTab } from "./HomeWindowTab";
 import { RepoWindowTab } from "./RepoWindowTab";
@@ -19,7 +20,7 @@ export const WindowTab: React.FC<WindowTabProps> = ({
   onSelect,
   onClose,
 }) => {
-  if (tab.type === "home") {
+  if (tab.type === TAB_TYPE.HOME) {
     return <HomeWindowTab isActive={isActive} showSeparator={showSeparator} onSelect={onSelect} />;
   }
 

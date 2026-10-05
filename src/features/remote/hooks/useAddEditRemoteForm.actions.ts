@@ -135,7 +135,10 @@ export function createAddEditRemoteSubmitHandler(context: AddEditRemoteSubmitCon
     const validationError = validateAddEditRemoteForm(context.t, trimmedName, trimmedFetch);
     if (validationError) {
       context.setError(validationError.message);
-      (validationError.focus === "name" ? context.nameInputRef : context.fetchUrlInputRef).current?.focus();
+      (validationError.focus === "name"
+        ? context.nameInputRef
+        : context.fetchUrlInputRef
+      ).current?.focus();
       return;
     }
 

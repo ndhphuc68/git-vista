@@ -1,7 +1,10 @@
 import type { ChangeEvent, FormEvent, RefObject } from "react";
 import { messageOf, toErrorMessage } from "../../../shared/utils/toError";
 import { cancelRemoteTask, cloneRepo, openRepository, selectRepoFolder } from "../api";
-import { resolveTargetDirOnFolderSelect, resolveTargetDirOnUrlChange } from "../model/cloneTargetDir";
+import {
+  resolveTargetDirOnFolderSelect,
+  resolveTargetDirOnUrlChange,
+} from "../model/cloneTargetDir";
 import type { RepoSummary } from "../../../ipc/bindings.generated";
 import type { Translations } from "../../../i18n/vi";
 

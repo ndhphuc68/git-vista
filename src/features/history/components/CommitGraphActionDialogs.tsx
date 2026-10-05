@@ -1,4 +1,5 @@
 import type { QueryClient } from "@tanstack/react-query";
+import type { SCREEN_TYPE } from "../../../domain/enums";
 import type { useTranslation } from "../../../i18n";
 import { InteractiveRebaseModal } from "../../../components/rebase";
 import { CompareModal } from "../../../components/compare";
@@ -13,7 +14,7 @@ interface CommitGraphActionDialogsProps {
   currentBranch: string;
   t: ReturnType<typeof useTranslation>["t"];
   queryClient: QueryClient;
-  setActiveScreen: (screen: "changes") => void;
+  setActiveScreen: (screen: typeof SCREEN_TYPE.CHANGES) => void;
   undoCommit: (undoToken: string) => Promise<void>;
 }
 

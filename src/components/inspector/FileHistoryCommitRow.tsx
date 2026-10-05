@@ -4,6 +4,7 @@ import { useFormatDate, useTranslation } from "../../i18n";
 import { AuthorAvatar } from "../../features/history";
 import { getChangeTypeBadgeClass } from "./fileHistoryChangeTypeBadge";
 import type { FileHistoryItem } from "../../ipc/bindings.generated";
+import { CHANGE_TYPE } from "../../domain/enums";
 
 interface FileHistoryCommitRowProps {
   commit: FileHistoryItem;
@@ -22,9 +23,9 @@ export const FileHistoryCommitRow: React.FC<FileHistoryCommitRowProps> = ({
 
   const changeTypeBadge = getChangeTypeBadgeClass(commit.change_type);
   const changeTypeTitle =
-    commit.change_type === "added"
+    commit.change_type === CHANGE_TYPE.ADDED
       ? t.inspector.changeTypeAdded
-      : commit.change_type === "deleted"
+      : commit.change_type === CHANGE_TYPE.DELETED
         ? t.inspector.changeTypeDeleted
         : t.inspector.changeTypeModified;
 

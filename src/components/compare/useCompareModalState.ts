@@ -35,7 +35,13 @@ export function useCompareModalState({
   }, [isOpen, initialBaseRev, initialTargetRev, initialMode]);
 
   // Query comparison summary
-  const { data: summary, isLoading } = useCompareSummary(repoPath, baseRev, targetRev, mode, isOpen);
+  const { data: summary, isLoading } = useCompareSummary(
+    repoPath,
+    baseRev,
+    targetRev,
+    mode,
+    isOpen
+  );
 
   // Sync selected file when files change
   useEffect(() => {

@@ -5,7 +5,11 @@ import {
   getAvailableBaseBranches,
   getAvailableCompareBranches,
 } from "./pullRequestBranchOptions";
-import { type BranchListResult, type BranchItem, type GitHubRepoInfo } from "../../ipc/bindings.generated";
+import {
+  type BranchListResult,
+  type BranchItem,
+  type GitHubRepoInfo,
+} from "../../ipc/bindings.generated";
 
 function makeBranchItem(overrides: Partial<BranchItem> = {}): BranchItem {
   return {
@@ -68,7 +72,12 @@ describe("hasUnpushedCommits", () => {
 
 describe("getAvailableBaseBranches", () => {
   it("dedupes the default branch, remote branches (stripped of origin/), and local branches", () => {
-    const repoInfo = { is_github: true, owner: "o", repo: "r", default_branch: "main" } as GitHubRepoInfo;
+    const repoInfo = {
+      is_github: true,
+      owner: "o",
+      repo: "r",
+      default_branch: "main",
+    } as GitHubRepoInfo;
     const branchData = makeBranchData({
       remote: [makeBranchItem({ name: "origin/main" }), makeBranchItem({ name: "origin/dev" })],
       local: [makeBranchItem({ name: "main" }), makeBranchItem({ name: "feature" })],

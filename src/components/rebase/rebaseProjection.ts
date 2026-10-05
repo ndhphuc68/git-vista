@@ -1,4 +1,5 @@
 import type { RebasePlanStep, RebaseCommitItem } from "../../ipc/bindings.generated";
+import { REBASE_ACTION } from "../../domain/enums";
 
 export interface ProjectedCommit {
   id: string;
@@ -35,7 +36,7 @@ function applySquashStep(
   const target = projected[projected.length - 1]!;
   target.isSquashed = true;
   target.squashedSubCommits.push({ short_id: shortId, summary: originalSummary });
-  if (step.action === "Squash" && step.new_message) {
+  if (step.action === REBASE_ACTION.SQUASH && step.new_message) {
     target.displayMessage = step.new_message.split("\n")[0] || target.displayMessage;
   }
 }
@@ -46,7 +47,7 @@ function buildProjectedCommit(
   originalSummary: string,
   author: string
 ): ProjectedCommit {
-  const isReword = step.action === "Reword";
+  const isReword = step.action === REBASE_ACTION.REWORD;
   const displayMessage =
     isReword && step.new_message
       ? step.new_message.split("\n")[0] || originalSummary
@@ -77,18 +78,18 @@ export function projectRebasePlan(
     const commit = commitMap.get(step.commit_id);
     const { shortId, originalSummary, author } = resolveStepDisplay(commit, step.commit_id);
 
-    if (step.action === "Drop") {
+    if (step.action === REBASE_ACTION.DROP) {
       dropped.push({ short_id: shortId, summary: originalSummary });
       continue;
     }
 
-    if (step.action === "Squash" || step.action === "Fixup") {
+    if (step.action === REBASE_ACTION.SQUASH || step.action === REBASE_ACTION.FIXUP) {
       sqCount++;
       applySquashStep(projected, step, shortId, originalSummary);
       continue;
     }
 
-    if (step.action === "Reword") {
+    if (step.action === REBASE_ACTION.REWORD) {
       rwCount++;
     }
 

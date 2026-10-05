@@ -21,11 +21,7 @@ export const DiscardConfirmModal: React.FC<DiscardConfirmModalProps> = ({
   const { t } = useTranslation();
 
   return (
-    <Modal
-      isOpen={isOpen && filePath !== null}
-      onClose={onCancel}
-      labelledBy={TITLE_ID}
-    >
+    <Modal isOpen={isOpen && filePath !== null} onClose={onCancel} labelledBy={TITLE_ID}>
       <Modal.Header
         title={t.discard.title}
         onClose={onCancel}

@@ -7,8 +7,9 @@ import { usePullRequests, usePullRequestDetail } from "../api";
 import { filterPullRequests } from "../model/pullRequestFilter";
 import { createPullRequestsScreenActions } from "./usePullRequestsScreen.actions";
 import type { GitHubPullRequest } from "../../../ipc/githubApi";
+import { PR_STATE, type PullRequestState } from "../../../domain/enums";
 
-export type PullRequestFilterState = "open" | "closed" | "all";
+export type PullRequestFilterState = PullRequestState;
 export type PullRequestSubTab = "conversation" | "filesChanged";
 
 function useSelectedPullRequest(repoPath: string) {
@@ -18,9 +19,7 @@ function useSelectedPullRequest(repoPath: string) {
 
   const selectedPr = useMemo(
     () =>
-      !rawSelectedPr || (selectedRepoPath && selectedRepoPath !== repoPath)
-        ? null
-        : rawSelectedPr,
+      !rawSelectedPr || (selectedRepoPath && selectedRepoPath !== repoPath) ? null : rawSelectedPr,
     [rawSelectedPr, selectedRepoPath, repoPath]
   );
 
@@ -43,7 +42,7 @@ export function usePullRequestsScreen(repoPath: string) {
   const queryClient = useQueryClient();
   const { showToast, showSuccess, showError } = useToastStore();
 
-  const [filterState, setFilterState] = useState<PullRequestFilterState>("open");
+  const [filterState, setFilterState] = useState<PullRequestFilterState>(PR_STATE.OPEN);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [activeSubTab, setActiveSubTab] = useState<PullRequestSubTab>("conversation");
   const [isCheckingOut, setIsCheckingOut] = useState<boolean>(false);
@@ -54,15 +53,15 @@ export function usePullRequestsScreen(repoPath: string) {
     setSearchQuery("");
   }, [repoPath]);
 
-  const {
-    data: pullRequests = [],
-    isLoading: isLoadingPrs,
-  } = usePullRequests(repoPath, filterState);
+  const { data: pullRequests = [], isLoading: isLoadingPrs } = usePullRequests(
+    repoPath,
+    filterState
+  );
 
-  const {
-    data: prDetail,
-    isLoading: isLoadingDetail,
-  } = usePullRequestDetail(repoPath, selectedPr?.number ?? null);
+  const { data: prDetail, isLoading: isLoadingDetail } = usePullRequestDetail(
+    repoPath,
+    selectedPr?.number ?? null
+  );
 
   const filteredPrs = useMemo(
     () => filterPullRequests(pullRequests, searchQuery),

@@ -5,10 +5,7 @@ function keyEvent(init: Partial<KeyboardEventInit> & { key: string }): KeyboardE
   return new KeyboardEvent("keydown", init);
 }
 
-function runFirstMatch(
-  shortcuts: ReturnType<typeof buildModifierShortcuts>,
-  event: KeyboardEvent
-) {
+function runFirstMatch(shortcuts: ReturnType<typeof buildModifierShortcuts>, event: KeyboardEvent) {
   shortcuts.find((shortcut) => shortcut.match(event))?.run(event);
 }
 

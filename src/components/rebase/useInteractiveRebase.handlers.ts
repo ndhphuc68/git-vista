@@ -4,6 +4,7 @@ import type {
   RebasePlanStep,
   RebaseActionKind,
 } from "../../ipc/bindings.generated";
+import { REBASE_ACTION } from "../../domain/enums";
 import { sanitizeFirstAction, commitsToPickSteps } from "./rebaseStepsHelpers";
 
 /**
@@ -55,7 +56,7 @@ export function createStepActionHandlers({ steps, setSteps, commitMap }: StepAct
       ...current,
       action,
       new_message:
-        action === "Reword" || action === "Squash"
+        action === REBASE_ACTION.REWORD || action === REBASE_ACTION.SQUASH
           ? (current.new_message ?? commitMap.get(current.commit_id)?.message ?? "")
           : null,
     };

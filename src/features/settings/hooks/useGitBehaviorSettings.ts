@@ -10,14 +10,15 @@ import {
   createToggleFetchPruneHandler,
   createToggleRebaseAutostashHandler,
 } from "./useGitBehaviorSettings.actions";
+import { SETTINGS_SCOPE, type SettingsScope, type PullStrategy } from "../../../domain/enums";
 
 export interface UseGitBehaviorSettingsOptions {
   currentRepoPath: string | null;
-  scope?: "global" | "repo";
+  scope?: SettingsScope;
 }
 
 export interface UseGitBehaviorSettingsResult {
-  activeScope: "global" | "repo";
+  activeScope: SettingsScope;
   localPullRebase: boolean | null;
   globalPullRebase: boolean;
   fetchPrune: boolean;
@@ -26,7 +27,7 @@ export interface UseGitBehaviorSettingsResult {
   loading: boolean;
   saving: boolean;
   handleGlobalPullStrategyChange: (isRebase: boolean) => Promise<void>;
-  handleRepoPullStrategyChange: (mode: "inherit" | "merge" | "rebase") => Promise<void>;
+  handleRepoPullStrategyChange: (mode: PullStrategy) => Promise<void>;
   handleToggleFetchPrune: () => Promise<void>;
   handleToggleRebaseAutostash: () => Promise<void>;
   handleAutoFetchChange: (seconds: number) => void;
@@ -44,7 +45,7 @@ export function useGitBehaviorSettings({
   const { t } = useTranslation();
   const { showSuccess, showError } = useToastStore();
 
-  const activeScope = propScope || (currentRepoPath ? "repo" : "global");
+  const activeScope = propScope || (currentRepoPath ? SETTINGS_SCOPE.REPO : SETTINGS_SCOPE.GLOBAL);
 
   const [localPullRebase, setLocalPullRebase] = useState<boolean | null>(null);
   const [globalPullRebase, setGlobalPullRebase] = useState<boolean>(false);

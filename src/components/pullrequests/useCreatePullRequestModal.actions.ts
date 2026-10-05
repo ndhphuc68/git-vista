@@ -20,8 +20,14 @@ interface PushBranchContext {
 
 /** Factory for CreatePullRequestModal's "push branch" handler (verbatim move). */
 export function createHandlePushBranch(context: PushBranchContext) {
-  const { repoPath, compareBranch, currentCompareBranchItem, setIsPushing, setError, refetchBranches } =
-    context;
+  const {
+    repoPath,
+    compareBranch,
+    currentCompareBranchItem,
+    setIsPushing,
+    setError,
+    refetchBranches,
+  } = context;
   return async () => {
     if (!compareBranch) return;
     setIsPushing(true);

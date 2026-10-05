@@ -218,7 +218,9 @@ describe("useCommitGraphState - checkout commit", () => {
       target_name: "main",
       conflict_count: 0,
     });
-    const checkoutCommitSpy = vi.spyOn(invokeCommand, "checkoutCommit").mockResolvedValue(undefined);
+    const checkoutCommitSpy = vi
+      .spyOn(invokeCommand, "checkoutCommit")
+      .mockResolvedValue(undefined);
 
     const { hook, client } = setup();
 
@@ -245,7 +247,9 @@ describe("useCommitGraphState - checkout commit", () => {
       target_name: null,
       conflict_count: 0,
     });
-    const checkoutCommitSpy = vi.spyOn(invokeCommand, "checkoutCommit").mockResolvedValue(undefined);
+    const checkoutCommitSpy = vi
+      .spyOn(invokeCommand, "checkoutCommit")
+      .mockResolvedValue(undefined);
 
     useRepoStore.getState().setSelectedBranch("feature");
     const { hook } = setup();
@@ -260,4 +264,3 @@ describe("useCommitGraphState - checkout commit", () => {
     expect(toasts.some((t) => t.type === "success" && t.message.includes("commit1"))).toBe(true);
   });
 });
-

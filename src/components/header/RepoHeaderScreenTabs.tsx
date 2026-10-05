@@ -1,6 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 import { History, FileDiff, GitPullRequest } from "lucide-react";
+import { SCREEN_TYPE } from "../../domain/enums";
 import { type ActiveScreen } from "../../store/useViewStore";
 import { type Translations } from "../../i18n/vi";
 
@@ -132,32 +133,32 @@ export const RepoHeaderScreenTabs: React.FC<RepoHeaderScreenTabsProps> = ({
       className="flex items-center gap-0.5 bg-window p-0.5 rounded-lg border border-border-subtle shrink-0"
     >
       <TabButton
-        active={activeScreen === "history"}
+        active={activeScreen === SCREEN_TYPE.HISTORY}
         testId="tab-history"
-        onClick={() => setActiveScreen("history")}
+        onClick={() => setActiveScreen(SCREEN_TYPE.HISTORY)}
         title={`History (${shortcutLabel1})`}
         icon={
           <History
             size={15}
-            className={activeScreen === "history" ? "text-accent" : "text-secondary"}
+            className={activeScreen === SCREEN_TYPE.HISTORY ? "text-accent" : "text-secondary"}
           />
         }
         label={t.screens.history}
       />
 
       <ChangesTabButton
-        active={activeScreen === "changes"}
+        active={activeScreen === SCREEN_TYPE.CHANGES}
         totalChanges={totalChanges}
-        onClick={() => setActiveScreen("changes")}
+        onClick={() => setActiveScreen(SCREEN_TYPE.CHANGES)}
         title={`Changes (${shortcutLabel2})`}
         label={t.screens.changes}
       />
 
       {isGitHub && (
         <PullRequestsTabButton
-          active={activeScreen === "pull-requests"}
+          active={activeScreen === SCREEN_TYPE.PULL_REQUESTS}
           openPrCount={openPrCount}
-          onClick={() => setActiveScreen("pull-requests")}
+          onClick={() => setActiveScreen(SCREEN_TYPE.PULL_REQUESTS)}
           title={prTitle}
           label={t.screens.pullRequests}
         />

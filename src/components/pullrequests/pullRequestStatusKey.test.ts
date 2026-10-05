@@ -16,7 +16,9 @@ function makeStatusInput(overrides: Partial<StatusInput> = {}): StatusInput {
 describe("getStatusKey", () => {
   it("returns merged when merged_at is set, regardless of state or draft", () => {
     expect(
-      getStatusKey(makeStatusInput({ merged_at: "2024-01-01T00:00:00Z", state: "closed", draft: true }))
+      getStatusKey(
+        makeStatusInput({ merged_at: "2024-01-01T00:00:00Z", state: "closed", draft: true })
+      )
     ).toBe("merged");
   });
 

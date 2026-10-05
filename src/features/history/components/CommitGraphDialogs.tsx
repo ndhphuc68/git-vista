@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { SCREEN_TYPE } from "../../../domain/enums";
 import { useRepoStore } from "../../../store/useRepoStore";
 import { useViewStore } from "../../../store/useViewStore";
 import { useTranslation } from "../../../i18n";
@@ -63,7 +64,7 @@ export function CommitGraphDialogs({
         CreateTagModal={CreateTagModal}
         CreateBranchModal={CreateBranchModal}
         CheckoutConflictModal={CheckoutConflictModal}
-        onNavigateToChanges={() => setActiveScreen("changes")}
+        onNavigateToChanges={() => setActiveScreen(SCREEN_TYPE.CHANGES)}
       />
       <CommitGraphActionDialogs
         dialog={dialog}

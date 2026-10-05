@@ -57,11 +57,7 @@ describe("ScreenRouter", () => {
     expect(screen.getByText("Pull Requests Screen: /path/to/repo")).toBeInTheDocument();
 
     rerender(
-      <ScreenRouter
-        {...dummyProps}
-        repoPath="/path/to/other-repo"
-        activeScreen="pull-requests"
-      />
+      <ScreenRouter {...dummyProps} repoPath="/path/to/other-repo" activeScreen="pull-requests" />
     );
     expect(screen.getByText("Pull Requests Screen: /path/to/other-repo")).toBeInTheDocument();
   });

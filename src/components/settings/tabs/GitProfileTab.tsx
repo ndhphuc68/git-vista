@@ -7,10 +7,11 @@ import { useGitProfileForm } from "./useGitProfileForm";
 import { GitProfileIdentitySection } from "./GitProfileIdentitySection";
 import { GitProfileSigningSection } from "./GitProfileSigningSection";
 import { GitProfileCommitSection } from "./GitProfileCommitSection";
+import { SETTINGS_SCOPE, type SettingsScope } from "../../../domain/enums";
 
 interface GitProfileTabProps {
   currentRepoPath: string | null;
-  scope?: "global" | "repo";
+  scope?: SettingsScope;
   /** Scope selector rendered under the page header. */
   toolbar?: React.ReactNode;
 }
@@ -22,7 +23,7 @@ function formatIdentity(config: GitConfigDto | null): string {
 
 interface GitProfileTabBodyProps {
   currentRepoPath: string | null;
-  activeScope: "global" | "repo";
+  activeScope: SettingsScope;
 }
 
 /** Form and sections of the profile tab; remounted when the scope or repository changes. */
@@ -30,7 +31,7 @@ const GitProfileTabBody: React.FC<GitProfileTabBodyProps> = ({ currentRepoPath, 
   const { t } = useTranslation();
   const { commitMessageLimit, setCommitMessageLimit } = useSettingsStore();
   const form = useGitProfileForm({ currentRepoPath, activeScope });
-  const isRepoScope = activeScope === "repo" && Boolean(currentRepoPath);
+  const isRepoScope = activeScope === SETTINGS_SCOPE.REPO && Boolean(currentRepoPath);
   const locked = isRepoScope && !form.isOverride;
 
   return (
@@ -49,7 +50,7 @@ const GitProfileTabBody: React.FC<GitProfileTabBodyProps> = ({ currentRepoPath, 
           />
         )}
         <GitProfileIdentitySection
-          showDefaultBranch={activeScope === "global"}
+          showDefaultBranch={activeScope === SETTINGS_SCOPE.GLOBAL}
           locked={locked}
           userName={form.userName}
           onUserNameChange={form.setUserName}
@@ -87,7 +88,7 @@ export const GitProfileTab: React.FC<GitProfileTabProps> = ({
   toolbar,
 }) => {
   const { t } = useTranslation();
-  const activeScope = propScope || (currentRepoPath ? "repo" : "global");
+  const activeScope = propScope || (currentRepoPath ? SETTINGS_SCOPE.REPO : SETTINGS_SCOPE.GLOBAL);
 
   return (
     <SettingsPage

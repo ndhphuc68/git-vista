@@ -3,8 +3,9 @@ import { qk } from "../../../domain/queryKeys";
 import { useGitHubRepoInfo, useGitHubToken } from "../../github";
 import { fetchPullRequests } from "../../../services/githubService";
 import { type GitHubPullRequest } from "../../../ipc/githubApi";
+import { PR_STATE, type PullRequestState } from "../../../domain/enums";
 
-export function usePullRequests(repoPath: string, state: "open" | "closed" | "all" = "open") {
+export function usePullRequests(repoPath: string, state: PullRequestState = PR_STATE.OPEN) {
   const { data: repoInfo } = useGitHubRepoInfo(repoPath);
   const { data: token } = useGitHubToken();
 

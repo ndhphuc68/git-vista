@@ -3,6 +3,7 @@ import { useTranslation } from "../../i18n";
 import { useTabStore } from "../../store/useTabStore";
 import type { SettingsScopeSelectorProps } from "../../features/settings";
 import { buildNavGroups, currentRepoLabel, type NavGroup } from "./settingsModalState.helpers";
+import { SETTINGS_SCOPE, type SettingsScope } from "../../domain/enums";
 
 export interface UseSettingsModalStateOptions {
   currentRepoPath: string | null;
@@ -12,7 +13,7 @@ export interface UseSettingsModalStateOptions {
 export interface UseSettingsModalStateResult {
   navGroups: NavGroup[];
   scopeSelector: SettingsScopeSelectorProps;
-  effectiveScope: "global" | "repo";
+  effectiveScope: SettingsScope;
   effectiveRepoPath: string | null;
 }
 
@@ -24,17 +25,17 @@ export function useSettingsModalState({
   const { t } = useTranslation();
   const { tabs } = useTabStore();
 
-  const [scope, setScope] = useState<"global" | "repo">(() =>
-    currentRepoPath ? "repo" : "global"
+  const [scope, setScope] = useState<SettingsScope>(() =>
+    currentRepoPath ? SETTINGS_SCOPE.REPO : SETTINGS_SCOPE.GLOBAL
   );
 
   useEffect(() => {
     if (!isSettingsOpen) return;
-    setScope(currentRepoPath ? "repo" : "global");
+    setScope(currentRepoPath ? SETTINGS_SCOPE.REPO : SETTINGS_SCOPE.GLOBAL);
   }, [currentRepoPath, isSettingsOpen]);
 
-  const effectiveScope = currentRepoPath ? scope : "global";
-  const effectiveRepoPath = effectiveScope === "repo" ? currentRepoPath : null;
+  const effectiveScope = currentRepoPath ? scope : SETTINGS_SCOPE.GLOBAL;
+  const effectiveRepoPath = effectiveScope === SETTINGS_SCOPE.REPO ? currentRepoPath : null;
 
   return {
     navGroups: buildNavGroups(t),

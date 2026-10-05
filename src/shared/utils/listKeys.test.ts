@@ -8,7 +8,9 @@ describe("hunkKey", () => {
   });
 
   it("tells apart hunks that share only one start", () => {
-    expect(hunkKey({ old_start: 1, new_start: 5 })).not.toBe(hunkKey({ old_start: 5, new_start: 1 }));
+    expect(hunkKey({ old_start: 1, new_start: 5 })).not.toBe(
+      hunkKey({ old_start: 5, new_start: 1 })
+    );
   });
 });
 

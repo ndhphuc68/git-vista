@@ -1,3 +1,4 @@
+import { SCREEN_TYPE } from "../domain/enums";
 import type { ActiveScreen } from "../store/useViewStore";
 
 export interface ModifierShortcutCallbacks {
@@ -83,14 +84,14 @@ export function buildModifierShortcuts(
       match: (e) => e.key === "1",
       run: (e) => {
         e.preventDefault();
-        setActiveScreen("history");
+        setActiveScreen(SCREEN_TYPE.HISTORY);
       },
     },
     {
       match: (e) => e.key === "2",
       run: (e) => {
         e.preventDefault();
-        setActiveScreen("changes");
+        setActiveScreen(SCREEN_TYPE.CHANGES);
       },
     },
     {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "../../i18n";
 import { toErrorMessage } from "../../shared/utils/toError";
+import { OPERATION_STATUS } from "../../domain/enums";
 
 /**
  * State and submit handler for MergeBranchModal. Split out of the component
@@ -33,7 +34,7 @@ export function useMergeBranchModal(
       if (res.success) {
         onClose();
       } else {
-        if (res.status === "Conflict") {
+        if (res.status === OPERATION_STATUS.CONFLICT) {
           setError(t.modals.merge.conflictError);
         } else {
           setError(res.output || t.modals.merge.genericError.replace("{msg}", res.status));

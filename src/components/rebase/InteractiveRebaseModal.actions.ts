@@ -1,5 +1,6 @@
 import type { Translations } from "../../i18n/vi";
 import type { RebasePlanStep, InteractiveRebaseResult } from "../../ipc/bindings.generated";
+import { OPERATION_STATUS, REBASE_ACTION, SCREEN_TYPE } from "../../domain/enums";
 import type { ActiveScreen } from "../../store/useViewStore";
 import { useToastStore } from "../../store/useToastStore";
 import { messageOf } from "../../shared/utils/toError";
@@ -72,7 +73,7 @@ export function createSubmitHandler(context: SubmitHandlerContext) {
     // Validate messages
     for (const s of steps) {
       if (
-        (s.action === "Reword" || s.action === "Squash") &&
+        (s.action === REBASE_ACTION.REWORD || s.action === REBASE_ACTION.SQUASH) &&
         (!s.new_message || s.new_message.trim() === "")
       ) {
         setError(t.modals.interactiveRebase.validation.emptyMessage);
@@ -88,11 +89,11 @@ export function createSubmitHandler(context: SubmitHandlerContext) {
         showRebaseSuccessToast({ t, repoPath }, result);
         onRebaseSuccess?.(result);
         onClose();
-      } else if (result.status === "Conflict") {
+      } else if (result.status === OPERATION_STATUS.CONFLICT) {
         useToastStore
           .getState()
           .showToast({ type: "error", message: t.modals.interactiveRebase.conflictToast });
-        setActiveScreen("changes");
+        setActiveScreen(SCREEN_TYPE.CHANGES);
         onClose();
       } else {
         setError(
@@ -100,7 +101,9 @@ export function createSubmitHandler(context: SubmitHandlerContext) {
         );
       }
     } catch (err: unknown) {
-      setError(messageOf(err) || t.modals.interactiveRebase.errorToast.replace("{msg}", String(err)));
+      setError(
+        messageOf(err) || t.modals.interactiveRebase.errorToast.replace("{msg}", String(err))
+      );
     } finally {
       setSubmitting(false);
     }

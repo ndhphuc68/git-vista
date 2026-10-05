@@ -17,8 +17,7 @@ export function useWorkingFileDiff(
 ) {
   return useQuery({
     queryKey: qk.workingFileDiff(repoPath, filePath, isStaged, ignoreWhitespace),
-    queryFn: () =>
-      invokeCommand.getWorkingFileDiff(repoPath, filePath, isStaged, ignoreWhitespace),
+    queryFn: () => invokeCommand.getWorkingFileDiff(repoPath, filePath, isStaged, ignoreWhitespace),
     enabled: Boolean(repoPath && filePath),
   });
 }

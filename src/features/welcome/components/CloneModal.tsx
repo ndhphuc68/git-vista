@@ -51,52 +51,52 @@ export const CloneModal: React.FC<CloneModalProps> = ({ isOpen, onClose, onClone
           Modal.Header/Body/Footer: it has no header bar or footer row, just
           one padded card with an absolutely positioned close button. */}
       <div className="relative p-6 sm:p-7">
-          {/* Close Button */}
-          <button
-            type="button"
-            onClick={handleCancel}
-            disabled={isCloning}
-            className="absolute top-4 right-4 text-tertiary hover:text-primary p-1.5 rounded-lg cursor-pointer disabled:opacity-50 transition-colors"
-            aria-label={t.cloneModal.close}
+        {/* Close Button */}
+        <button
+          type="button"
+          onClick={handleCancel}
+          disabled={isCloning}
+          className="absolute top-4 right-4 text-tertiary hover:text-primary p-1.5 rounded-lg cursor-pointer disabled:opacity-50 transition-colors"
+          aria-label={t.cloneModal.close}
+        >
+          <X size={18} />
+        </button>
+
+        <CloneModalHeader titleId={TITLE_ID} />
+
+        {/* Error Notification */}
+        {error && (
+          <div
+            role="alert"
+            className="mb-5 px-4 py-3 bg-diff-remove-bg text-diff-remove-text rounded-xl text-xs sm:text-sm border border-diff-remove-border flex items-start gap-2.5"
           >
-            <X size={18} />
-          </button>
+            <AlertCircle size={17} className="shrink-0 mt-0.5" />
+            <span className="flex-1 leading-relaxed">{error}</span>
+          </div>
+        )}
 
-          <CloneModalHeader titleId={TITLE_ID} />
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5">
+          <CloneModalFields
+            url={url}
+            onUrlChange={handleUrlChange}
+            urlInputRef={urlInputRef}
+            targetDir={targetDir}
+            onTargetDirChange={setTargetDir}
+            onSelectFolder={handleSelectFolder}
+            isCloning={isCloning}
+          />
 
-          {/* Error Notification */}
-          {error && (
-            <div
-              role="alert"
-              className="mb-5 px-4 py-3 bg-diff-remove-bg text-diff-remove-text rounded-xl text-xs sm:text-sm border border-diff-remove-border flex items-start gap-2.5"
-            >
-              <AlertCircle size={17} className="shrink-0 mt-0.5" />
-              <span className="flex-1 leading-relaxed">{error}</span>
-            </div>
+          {isCloning && (
+            <CloneProgressBar progressPercent={progressPercent} statusText={statusText} />
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5">
-            <CloneModalFields
-              url={url}
-              onUrlChange={handleUrlChange}
-              urlInputRef={urlInputRef}
-              targetDir={targetDir}
-              onTargetDirChange={setTargetDir}
-              onSelectFolder={handleSelectFolder}
-              isCloning={isCloning}
-            />
-
-            {isCloning && (
-              <CloneProgressBar progressPercent={progressPercent} statusText={statusText} />
-            )}
-
-            <CloneModalActions
-              onCancel={handleCancel}
-              isSubmitDisabled={!url.trim() || !targetDir.trim() || isCloning}
-              isCloning={isCloning}
-            />
-          </form>
+          <CloneModalActions
+            onCancel={handleCancel}
+            isSubmitDisabled={!url.trim() || !targetDir.trim() || isCloning}
+            isCloning={isCloning}
+          />
+        </form>
       </div>
     </Modal>
   );

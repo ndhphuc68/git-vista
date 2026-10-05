@@ -1,10 +1,11 @@
 import { getGitConfig } from "../../../features/settings";
 import type { GitConfigDto } from "../../../ipc/client";
 import { deriveRepoScopeFields, deriveGlobalScopeFields } from "./gitProfileFormHelpers";
+import { SETTINGS_SCOPE, type SettingsScope } from "../../../domain/enums";
 
 export interface GitProfileLoadContext {
   currentRepoPath: string | null;
-  activeScope: "global" | "repo";
+  activeScope: SettingsScope;
   isMounted: () => boolean;
   setGlobalConfig: (value: GitConfigDto) => void;
   setLocalConfig: (value: GitConfigDto) => void;
@@ -29,11 +30,11 @@ export interface GitProfileFieldSetters {
 /** Seeds the form fields from the loaded config, the same way for initial load and after save. */
 export function applyProfileFields(
   setters: GitProfileFieldSetters,
-  activeScope: "global" | "repo",
+  activeScope: SettingsScope,
   globalCfg: GitConfigDto,
   localCfg: GitConfigDto | null
 ): void {
-  if (activeScope === "repo" && localCfg) {
+  if (activeScope === SETTINGS_SCOPE.REPO && localCfg) {
     const fields = deriveRepoScopeFields(localCfg, globalCfg);
     setters.setIsOverride(fields.isOverride);
     setters.setUserName(fields.userName);
