@@ -1,4 +1,5 @@
 export { useRemotes } from "./useRemotes";
+export { useAutoFetch } from "./useAutoFetch";
 export { useRemoteTask, pushRepo, type RemoteOperation } from "./useRemoteTask";
 export {
   useAddRemote,

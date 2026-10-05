@@ -20,6 +20,7 @@ describe("useSettingsStore", () => {
     store.setDefaultEditor("code");
     store.setCustomEditorCommand("");
     store.setDefaultTerminal("wt");
+    store.setAutoFetchInterval(300);
   });
 
   it("opens settings with default or specified tab", () => {
@@ -107,5 +108,16 @@ describe("useSettingsStore", () => {
     expect(updated.defaultEditor).toBe("custom");
     expect(updated.customEditorCommand).toBe("nvim");
     expect(updated.defaultTerminal).toBe("powershell");
+  });
+
+  it("updates background auto-fetch interval", () => {
+    const store = useSettingsStore.getState();
+    expect(store.autoFetchInterval).toBe(300);
+
+    store.setAutoFetchInterval(600);
+
+    const updated = useSettingsStore.getState();
+    expect(updated.autoFetchInterval).toBe(600);
+    expect(localStorage.getItem("gitvista_autofetch_interval")).toBe("600");
   });
 });

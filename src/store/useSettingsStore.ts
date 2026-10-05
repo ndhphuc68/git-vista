@@ -41,6 +41,9 @@ interface SettingsState {
   // Commit Conventions
   commitMessageLimit: number;
 
+  // Background fetch interval in seconds; 0 turns auto-fetch off.
+  autoFetchInterval: number;
+
   // External Tools
   defaultEditor: ExternalEditor;
   customEditorCommand: string;
@@ -64,6 +67,7 @@ interface SettingsState {
   setConfirmDiscard: (confirm: boolean) => void;
   setConfirmDeleteBranch: (confirm: boolean) => void;
   setCommitMessageLimit: (limit: number) => void;
+  setAutoFetchInterval: (seconds: number) => void;
   setDefaultEditor: (editor: ExternalEditor) => void;
   setCustomEditorCommand: (cmd: string) => void;
   setDefaultTerminal: (terminal: ExternalTerminal) => void;
@@ -108,6 +112,7 @@ function loadInitialSettingsState() {
   const savedConfirmDiscard = getStorage("gitvista_confirm_discard", "true") === "true";
   const savedConfirmDeleteBranch = getStorage("gitvista_confirm_delete_branch", "true") === "true";
   const savedCommitMessageLimit = parseInt(getStorage("gitvista_commit_message_limit", "72"), 10);
+  const savedAutoFetchInterval = parseInt(getStorage("gitvista_autofetch_interval", "300"), 10);
   const savedDefaultEditor = getStorage("gitvista_default_editor", "code") as ExternalEditor;
   const savedCustomEditorCommand = getStorage("gitvista_custom_editor_command", "");
   const savedDefaultTerminal = getStorage(
@@ -137,6 +142,7 @@ function loadInitialSettingsState() {
     confirmDiscard: savedConfirmDiscard,
     confirmDeleteBranch: savedConfirmDeleteBranch,
     commitMessageLimit: savedCommitMessageLimit,
+    autoFetchInterval: savedAutoFetchInterval,
     defaultEditor: savedDefaultEditor,
     customEditorCommand: savedCustomEditorCommand,
     defaultTerminal: savedDefaultTerminal,
@@ -230,6 +236,11 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
       set,
       "gitvista_commit_message_limit",
       "commitMessageLimit"
+    ),
+    setAutoFetchInterval: makePersistedSetter(
+      set,
+      "gitvista_autofetch_interval",
+      "autoFetchInterval"
     ),
     setDefaultEditor: makePersistedSetter(set, "gitvista_default_editor", "defaultEditor"),
     setCustomEditorCommand: makePersistedSetter(

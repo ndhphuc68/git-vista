@@ -1,6 +1,5 @@
 import { setGitConfig, setRepoPullRebase } from "../api";
 import type { Translations } from "../../../i18n/vi";
-import { AUTOFETCH_INTERVAL_STORAGE_KEY } from "./useGitBehaviorSettings.constants";
 
 export interface GitBehaviorActionsContext {
   currentRepoPath: string | null;
@@ -101,9 +100,6 @@ export function createToggleRebaseAutostashHandler(context: GitBehaviorActionsCo
 export function createAutoFetchChangeHandler(context: GitBehaviorActionsContext) {
   return (seconds: number) => {
     context.setAutoFetchInterval(seconds);
-    if (typeof localStorage !== "undefined") {
-      localStorage.setItem(AUTOFETCH_INTERVAL_STORAGE_KEY, String(seconds));
-    }
     context.showSuccess(context.t.settings.profile.savedSuccess);
   };
 }

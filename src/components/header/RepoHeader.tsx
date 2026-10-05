@@ -6,7 +6,7 @@ import { useSettingsStore } from "../../store/useSettingsStore";
 import { useTranslation } from "../../i18n";
 import { RemoteProgressBanner } from "../common/RemoteProgressBanner";
 
-import { useRemoteTask } from "../../features/remote/api";
+import { useAutoFetch, useRemoteTask } from "../../features/remote/api";
 import { useRepoStatus } from "../../features/history";
 import { useRepoHeadInfo } from "../../features/repo";
 import { useGitHubRepoInfo } from "../../features/github";
@@ -32,12 +32,17 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
   const { openSettings } = useSettingsStore();
   const { t, actions } = useTranslation();
 
-  const { data: repoStatus } = useRepoStatus(currentRepo?.path ?? "");
-  const { data: headInfo } = useRepoHeadInfo(currentRepo?.path);
-  const { data: repoInfo } = useGitHubRepoInfo(currentRepo?.path ?? "");
-  const { data: openPrs } = usePullRequests(currentRepo?.path ?? "");
+  const repoPath = currentRepo?.path;
+  const repoPathOrEmpty = repoPath ?? "";
 
-  const remote = useRemoteTask(currentRepo?.path, Boolean(headInfo?.upstream));
+  const { data: repoStatus } = useRepoStatus(repoPathOrEmpty);
+  const { data: headInfo } = useRepoHeadInfo(repoPath);
+  const { data: repoInfo } = useGitHubRepoInfo(repoPathOrEmpty);
+  const { data: openPrs } = usePullRequests(repoPathOrEmpty);
+
+  const hasUpstream = Boolean(headInfo?.upstream);
+  const remote = useRemoteTask(repoPath, hasUpstream);
+  useAutoFetch(repoPath, remote.isPending);
   const isGitHub = Boolean(repoInfo?.is_github);
 
   const { shortcutLabel1, shortcutLabel2, shortcutLabel3, shortcutSidebar } =
@@ -80,11 +85,11 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
         <RepoHeaderGitActions
           t={t}
           actions={actions}
-          repoPath={currentRepo?.path}
+          repoPath={repoPath}
           remote={remote}
           aheadCount={aheadCount}
           behindCount={behindCount}
-          hasUpstream={Boolean(headInfo?.upstream)}
+          hasUpstream={hasUpstream}
           onOpenSettings={() => openSettings("appearance")}
         />
       </header>

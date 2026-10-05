@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "../../../i18n";
 import { useToastStore } from "../../../store/useToastStore";
-import { AUTOFETCH_INTERVAL_STORAGE_KEY } from "./useGitBehaviorSettings.constants";
+import { useSettingsStore } from "../../../store/useSettingsStore";
 import { loadGitBehaviorSettings } from "./useGitBehaviorSettings.load";
 import {
   createAutoFetchChangeHandler,
@@ -51,13 +51,8 @@ export function useGitBehaviorSettings({
   const [fetchPrune, setFetchPrune] = useState<boolean>(false);
   const [rebaseAutostash, setRebaseAutostash] = useState<boolean>(false);
 
-  const [autoFetchInterval, setAutoFetchInterval] = useState<number>(() => {
-    if (typeof localStorage !== "undefined") {
-      const saved = localStorage.getItem(AUTOFETCH_INTERVAL_STORAGE_KEY);
-      return saved ? parseInt(saved, 10) : 300;
-    }
-    return 300;
-  });
+  const autoFetchInterval = useSettingsStore((s) => s.autoFetchInterval);
+  const setAutoFetchInterval = useSettingsStore((s) => s.setAutoFetchInterval);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
