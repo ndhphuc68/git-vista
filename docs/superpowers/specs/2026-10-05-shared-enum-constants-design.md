@@ -99,8 +99,10 @@ src/domain/enums/
 |---|---|---|
 | `CHECK_STATUS` | unchanged | the app's mapped CI status |
 | `CHECK_RUN_STATE` | `completed`, `in_progress`, `queued` | raw GitHub check-run `status`, read by `mapCheckRunStatus` |
+| `CHECK_RUN_CONCLUSION` | `success` | raw `conclusion` of a completed check run, read by `mapCheckRunStatus` |
 | `PR_STATE` | unchanged | |
 | `PR_STATUS` | `merged`, `closed`, `draft`, `open` | the badge status |
+| `PR_FILE_STATUS` | `added`, `modified`, `removed`, `renamed` | `status` of a file in a pull request; GitHub says `"removed"`, git says `"deleted"` |
 
 `app.ts`
 
@@ -111,7 +113,8 @@ src/domain/enums/
 | `SETTINGS_SCOPE` | `global`, `repo` |
 | `PULL_STRATEGY` | `inherit`, `merge`, `rebase` |
 
-`SETTINGS_SCOPE` and `CONFIG_SCOPE` stay separate: the settings UI says
+`HOME_TAB_ID` (defined in `src/domain/constants/app.ts`) is the stable ID of the
+home tab. `SETTINGS_SCOPE` and `CONFIG_SCOPE` stay separate: the settings UI says
 `repo`, git config says `local`.
 
 ### Duplicate types
@@ -183,11 +186,14 @@ its own.
    `mapCheckRunStatus`.
 5. `♻️ use FILE_STATUS, CHANGE_TYPE and REF_TYPE` — changes, inspector, stash,
    history graph.
-6. `♻️ use SCREEN_TYPE, TAB_TYPE, SETTINGS_SCOPE and PULL_STRATEGY` — includes
-   the `ScreenType` / `ActiveScreen` merge and the settings scope annotations.
-7. `📝 document shared enum constants in coding rules` — the "String unions"
+6. `♻️ use SCREEN_TYPE, TAB_TYPE and HOME_TAB_ID` — includes the `ScreenType` /
+   `ActiveScreen` merge.
+7. `♻️ use SETTINGS_SCOPE, PULL_STRATEGY and CONFIG_SCOPE in settings`.
+8. `📝 document shared enum constants in coding rules` — the "String unions"
    row points to `src/domain/enums/`, and a rule says that comparisons against
    backend or GitHub values use the constant.
+
+Two support commits sit between items 1 and 2: `🎨 apply prettier formatting` (pre-existing formatting debt, so the checks run clean) and `♻️ split functions that exceeded the length limit after formatting` (`RevertModal.actions.ts`, `PullStrategyRebaseLane`).
 
 ## Risks
 
