@@ -18,14 +18,38 @@ const sampleHunk: DiffHunk = {
 
 describe("ReadOnlyDiffHunk", () => {
   it("renders the header and every line in unified order", () => {
-    render(<ReadOnlyDiffHunk hunk={sampleHunk} showWordDiff={false} showLineNumbers={true} />);
+    render(
+      <ReadOnlyDiffHunk
+        hunk={sampleHunk}
+        showWordDiff={false}
+        showLineNumbers={true}
+        viewMode="unified"
+      />
+    );
     expect(screen.getByText("@@ -1,3 +1,3 @@")).toBeInTheDocument();
     const contents = screen.getAllByText(/^(keep|old|new)$/).map((el) => el.textContent?.trim());
     expect(contents).toEqual(["keep", "old", "new"]);
   });
 
   it("hides line numbers when turned off", () => {
-    render(<ReadOnlyDiffHunk hunk={sampleHunk} showWordDiff={false} showLineNumbers={false} />);
+    render(
+      <ReadOnlyDiffHunk
+        hunk={sampleHunk}
+        showWordDiff={false}
+        showLineNumbers={false}
+        viewMode="unified"
+      />
+    );
     expect(screen.queryByTestId("diff-line-numbers")).not.toBeInTheDocument();
+  });
+
+  it("renders paired rows in split mode", () => {
+    render(
+      <ReadOnlyDiffHunk hunk={sampleHunk} showWordDiff={false} showLineNumbers viewMode="split" />
+    );
+    const rows = screen.getAllByTestId("split-diff-row");
+    expect(rows).toHaveLength(2);
+    expect(rows[1]).toHaveTextContent("old");
+    expect(rows[1]).toHaveTextContent("new");
   });
 });

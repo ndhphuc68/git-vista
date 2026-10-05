@@ -121,8 +121,10 @@ export const en: Translations = {
       title: "Diff & Code Viewer",
       subtitle: "Customize layout, font size, and whitespace handling when comparing changes.",
       viewModeTitle: "Default Diff Layout",
-      viewModeUnifiedDesc: "Display additions and deletions in an inline stream.",
-      viewModeSplitDesc: "Display original file on left and modified file on right.",
+      viewModeUnifiedDesc:
+        "Display additions and deletions in an inline stream. The staging view always uses unified.",
+      viewModeSplitDesc:
+        "Display original file on left and modified file on right. The staging view always uses unified.",
       viewModeUnifiedShort: "Unified",
       viewModeSplitShort: "Split",
       fontSizeTitle: "Code Font Size",

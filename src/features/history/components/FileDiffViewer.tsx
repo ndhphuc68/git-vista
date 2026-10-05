@@ -17,7 +17,7 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
   const { t } = useTranslation();
   const [showWordDiff, setShowWordDiff] = useState(true);
   const { diffIgnoreWhitespace, setDiffIgnoreWhitespace } = useSettingsStore();
-  const { style, showLineNumbers } = useDiffDisplaySettings();
+  const { style, showLineNumbers, viewMode } = useDiffDisplaySettings();
 
   const { data: diff, isLoading } = useCommitFileDiff(
     repoPath,
@@ -70,6 +70,7 @@ export const FileDiffViewer: React.FC<FileDiffViewerProps> = ({ repoPath, commit
           hunk={hunk}
           showWordDiff={showWordDiff}
           showLineNumbers={showLineNumbers}
+          viewMode={viewMode}
         />
       ))}
     </div>

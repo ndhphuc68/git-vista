@@ -43,7 +43,7 @@ export const CompareDiffViewer: React.FC<CompareDiffViewerProps> = ({
   const [showWordDiff, setShowWordDiff] = useState(true);
   const { diffIgnoreWhitespace, setDiffIgnoreWhitespace } = useSettingsStore();
   const { openInspector } = useInspectorStore();
-  const { style, showLineNumbers } = useDiffDisplaySettings();
+  const { style, showLineNumbers, viewMode } = useDiffDisplaySettings();
 
   const filePath = file?.path ?? "";
 
@@ -103,6 +103,7 @@ export const CompareDiffViewer: React.FC<CompareDiffViewerProps> = ({
             hunk={hunk}
             showWordDiff={showWordDiff}
             showLineNumbers={showLineNumbers}
+            viewMode={viewMode}
           />
         ))}
       </div>

@@ -119,8 +119,10 @@ export const vi = {
       title: "Trình xem Diff & So sánh mã",
       subtitle: "Tùy chỉnh kiểu hiển thị, cỡ chữ và xử lý khoảng trắng khi xem thay đổi.",
       viewModeTitle: "Bố cục hiển thị Diff mặc định",
-      viewModeUnifiedDesc: "Hiển thị các dòng thêm và xóa trên cùng một luồng văn bản liền mạch.",
-      viewModeSplitDesc: "Hiển thị tệp gốc bên trái và tệp đã sửa bên phải trực quan.",
+      viewModeUnifiedDesc:
+        "Hiển thị các dòng thêm và xóa trên cùng một luồng văn bản liền mạch. Trình xem staging luôn dùng kiểu gộp dòng.",
+      viewModeSplitDesc:
+        "Hiển thị tệp gốc bên trái và tệp đã sửa bên phải trực quan. Trình xem staging luôn dùng kiểu gộp dòng.",
       viewModeUnifiedShort: "Gộp dòng",
       viewModeSplitShort: "Song song",
       fontSizeTitle: "Cỡ chữ hiển thị mã nguồn",
