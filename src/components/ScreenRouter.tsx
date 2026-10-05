@@ -1,3 +1,4 @@
+import { SCREEN_TYPE } from "../domain/enums";
 import React from "react";
 import { Shell } from "./Shell";
 import { ChangesScreen } from "./changes/ChangesScreen";
@@ -21,11 +22,11 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
   closeConflictResolver,
   onResolveAndStage,
 }) => {
-  if (activeScreen === "history") {
+  if (activeScreen === SCREEN_TYPE.HISTORY) {
     return <Shell />;
   }
 
-  if (activeScreen === "conflict" && activeConflictFile) {
+  if (activeScreen === SCREEN_TYPE.CONFLICT && activeConflictFile) {
     return (
       <ConflictResolverScreen
         filePath={activeConflictFile}
@@ -38,7 +39,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
     );
   }
 
-  if (activeScreen === "pull-requests") {
+  if (activeScreen === SCREEN_TYPE.PULL_REQUESTS) {
     return <PullRequestsScreen key={repoPath} repoPath={repoPath} />;
   }
 

@@ -9,6 +9,7 @@ import {
   PR_FILE_STATUS,
   CONFIG_SCOPE,
   SCREEN_TYPE,
+  TAB_TYPE,
   REBASE_ACTION,
   OPERATION_STATUS,
   REF_TYPE,
@@ -73,6 +74,10 @@ describe("enums", () => {
       ["changes", "conflict", "history", "pull-requests"].sort()
     );
   });
+  it("TAB_TYPE lists the window tab kinds", () => {
+    expect(TAB_TYPE).toEqual({ HOME: "home", REPO: "repo" });
+  });
+
   it("CHECK_RUN_STATE and CHECK_RUN_CONCLUSION match GitHub check-run fields", () => {
     expect(CHECK_RUN_STATE).toEqual({
       COMPLETED: "completed",

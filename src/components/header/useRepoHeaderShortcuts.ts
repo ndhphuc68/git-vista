@@ -1,3 +1,4 @@
+import { SCREEN_TYPE } from "../../domain/enums";
 import { useEffect } from "react";
 import { type RepoSummary } from "../../ipc/bindings.generated";
 import { type ActiveScreen } from "../../store/useViewStore";
@@ -18,13 +19,13 @@ export function useRepoHeaderShortcuts(
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "1") {
         e.preventDefault();
-        setActiveScreen("history");
+        setActiveScreen(SCREEN_TYPE.HISTORY);
       } else if ((e.metaKey || e.ctrlKey) && e.key === "2") {
         e.preventDefault();
-        setActiveScreen("changes");
+        setActiveScreen(SCREEN_TYPE.CHANGES);
       } else if ((e.metaKey || e.ctrlKey) && e.key === "3" && isGitHub) {
         e.preventDefault();
-        setActiveScreen("pull-requests");
+        setActiveScreen(SCREEN_TYPE.PULL_REQUESTS);
       } else if ((e.metaKey || e.ctrlKey) && (e.key === "b" || e.key === "B")) {
         e.preventDefault();
         toggleSidebar();

@@ -1,6 +1,6 @@
 import type { Translations } from "../../i18n/vi";
 import type { RebasePlanStep, InteractiveRebaseResult } from "../../ipc/bindings.generated";
-import { OPERATION_STATUS, REBASE_ACTION } from "../../domain/enums";
+import { OPERATION_STATUS, REBASE_ACTION, SCREEN_TYPE } from "../../domain/enums";
 import type { ActiveScreen } from "../../store/useViewStore";
 import { useToastStore } from "../../store/useToastStore";
 import { messageOf } from "../../shared/utils/toError";
@@ -93,7 +93,7 @@ export function createSubmitHandler(context: SubmitHandlerContext) {
         useToastStore
           .getState()
           .showToast({ type: "error", message: t.modals.interactiveRebase.conflictToast });
-        setActiveScreen("changes");
+        setActiveScreen(SCREEN_TYPE.CHANGES);
         onClose();
       } else {
         setError(

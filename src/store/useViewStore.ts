@@ -1,6 +1,7 @@
+import { SCREEN_TYPE, type ScreenType } from "../domain/enums";
 import { create } from "zustand";
 
-export type ActiveScreen = "history" | "changes" | "conflict" | "pull-requests";
+export type ActiveScreen = ScreenType;
 
 export interface ViewState {
   activeScreen: ActiveScreen;
@@ -11,10 +12,10 @@ export interface ViewState {
 }
 
 export const useViewStore = create<ViewState>((set) => ({
-  activeScreen: "history",
+  activeScreen: SCREEN_TYPE.HISTORY,
   activeConflictFile: null,
   setActiveScreen: (screen) => set({ activeScreen: screen }),
   openConflictResolver: (filePath) =>
-    set({ activeScreen: "conflict", activeConflictFile: filePath }),
-  closeConflictResolver: () => set({ activeScreen: "changes", activeConflictFile: null }),
+    set({ activeScreen: SCREEN_TYPE.CONFLICT, activeConflictFile: filePath }),
+  closeConflictResolver: () => set({ activeScreen: SCREEN_TYPE.CHANGES, activeConflictFile: null }),
 }));

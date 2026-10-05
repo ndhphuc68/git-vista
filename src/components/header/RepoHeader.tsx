@@ -1,3 +1,4 @@
+import { SCREEN_TYPE } from "../../domain/enums";
 import React, { useEffect } from "react";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
@@ -51,8 +52,8 @@ export const RepoHeader: React.FC<RepoHeaderProps> = ({ onBackToWelcome: _onBack
   useRepoHeaderShortcuts(currentRepo, setActiveScreen, toggleSidebar, isGitHub);
 
   useEffect(() => {
-    if (repoInfo && !repoInfo.is_github && activeScreen === "pull-requests") {
-      setActiveScreen("history");
+    if (repoInfo && !repoInfo.is_github && activeScreen === SCREEN_TYPE.PULL_REQUESTS) {
+      setActiveScreen(SCREEN_TYPE.HISTORY);
     }
   }, [repoInfo, activeScreen, setActiveScreen]);
 

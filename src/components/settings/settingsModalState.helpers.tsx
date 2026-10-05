@@ -1,3 +1,4 @@
+import { TAB_TYPE } from "../../domain/enums";
 import React from "react";
 import { User, Palette, Sliders, FileCode, Terminal, GitPullRequest } from "lucide-react";
 import type { Translations } from "../../i18n/vi";
@@ -55,6 +56,6 @@ export function repoDisplayName(path: string): string {
 
 /** Label for the current repo: its tab alias, then repo name, then the last path segment. */
 export function currentRepoLabel(tabs: TabItem[], currentRepoPath: string): string {
-  const tab = tabs.find((item) => item.type === "repo" && item.id === currentRepoPath);
+  const tab = tabs.find((item) => item.type === TAB_TYPE.REPO && item.id === currentRepoPath);
   return tab?.alias || tab?.repo?.name || repoDisplayName(currentRepoPath);
 }

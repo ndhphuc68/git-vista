@@ -1,3 +1,4 @@
+import { SCREEN_TYPE, TAB_TYPE } from "./domain/enums";
 import React, { useState } from "react";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { RepoHeader } from "./components/header/RepoHeader";
@@ -60,7 +61,7 @@ const RepoContent: React.FC<RepoContentProps> = ({
         repoState={repoState}
         onAbort={handleAbort}
         onContinue={handleContinue}
-        onNavigateToChanges={() => setActiveScreen("changes")}
+        onNavigateToChanges={() => setActiveScreen(SCREEN_TYPE.CHANGES)}
       />
       <div className="flex-1 min-h-0 h-full w-full overflow-hidden flex flex-col">
         <ScreenRouter
@@ -99,7 +100,7 @@ export const App: React.FC<AppProps> = ({
   const { tabs, activeTabId, setActiveTab, openRepoTab, openHomeTab, closeTab, restoreSession } =
     useTabStore();
   const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0];
-  const repoToDisplay = activeTab?.type === "repo" ? activeTab.repo || currentRepo : null;
+  const repoToDisplay = activeTab?.type === TAB_TYPE.REPO ? activeTab.repo || currentRepo : null;
   const { setActiveScreen } = useViewStore();
   const { resolvedTheme, setTheme, openSettings, closeSettings } = useSettingsStore();
   const { open: openCommandPalette, close: closeCommandPalette } = useCommandPaletteStore();

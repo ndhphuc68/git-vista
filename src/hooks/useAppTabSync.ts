@@ -1,3 +1,5 @@
+import { TAB_TYPE } from "../domain/enums";
+import { HOME_TAB_ID } from "../domain/constants/app";
 import { useEffect } from "react";
 import { type RepoSummary } from "../ipc/bindings.generated";
 import { type TabItem } from "../types/tab";
@@ -17,9 +19,9 @@ export function useAppTabSync(
   // Sync the active tab into repoStore for backward compatibility with all child components
   useEffect(() => {
     const activeTab = tabs.find((t) => t.id === activeTabId);
-    if (activeTab && activeTab.type === "repo" && activeTab.repo) {
+    if (activeTab && activeTab.type === TAB_TYPE.REPO && activeTab.repo) {
       setRepo(activeTab.repo);
-    } else if (activeTabId === "home") {
+    } else if (activeTabId === HOME_TAB_ID) {
       clearRepo();
     }
   }, [activeTabId, tabs, setRepo, clearRepo]);
