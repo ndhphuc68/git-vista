@@ -2,7 +2,7 @@
 //! Tuân thủ Deep Module: che giấu cơ chế notify OS-level và lọc các file nội bộ git.
 
 use crate::error::AppError;
-use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
+use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use std::path::Path;
 use std::sync::mpsc::{channel, Receiver, RecvTimeoutError, Sender};
 use std::thread::{spawn, JoinHandle};
@@ -69,6 +69,13 @@ pub fn should_ignore_event<P: AsRef<Path>>(paths: &[P]) -> bool {
     paths.iter().all(|p| is_ignored_path(p.as_ref()))
 }
 
+/// Ignores read-only access events (open/close) and events touching only ignored paths.
+/// On Linux, inotify reports IN_OPEN whenever a directory is read, so without this
+/// every `git status` (or notify's own recursive walk) would trigger a refresh.
+pub fn should_ignore_notify_event(event: &notify::Event) -> bool {
+    matches!(event.kind, EventKind::Access(_)) || should_ignore_event(&event.paths)
+}
+
 /// Bộ theo dõi filesystem cho Git repository với debounce và lọc file.
 pub struct RepoWatcher {
     watcher: Option<RecommendedWatcher>,
@@ -108,7 +115,7 @@ impl RepoWatcher {
         let mut watcher = RecommendedWatcher::new(
             move |res: Result<notify::Event, notify::Error>| {
                 if let Ok(event) = res {
-                    if !should_ignore_event(&event.paths) {
+                    if !should_ignore_notify_event(&event) {
                         let _ = event_tx.send(DebounceMsg::Event);
                     }
                 }

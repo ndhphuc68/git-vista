@@ -1,12 +1,16 @@
 mod common;
 
 use common::fixtures::create_clean_repo;
+use notify::event::{AccessKind, AccessMode, DataChange, ModifyKind};
+use notify::{Event, EventKind};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-use visual_git_lib::repo::watcher::{is_ignored_path, should_ignore_event, RepoWatcher};
+use visual_git_lib::repo::watcher::{
+    is_ignored_path, should_ignore_event, should_ignore_notify_event, RepoWatcher,
+};
 use visual_git_lib::repo::RepoManager;
 
 fn wait_for_count(counter: &AtomicUsize, expected: usize, timeout: Duration) -> bool {
@@ -71,6 +75,24 @@ fn test_path_filtering_unit() {
 
     let empty: Vec<PathBuf> = vec![];
     assert!(should_ignore_event(&empty));
+}
+
+#[test]
+fn test_access_events_are_ignored() {
+    // inotify reports IN_OPEN when a directory is read (e.g. by `git status` or by
+    // notify's own recursive walk); reads must never trigger a refresh.
+    let root = PathBuf::from("/tmp/repo");
+    let open =
+        Event::new(EventKind::Access(AccessKind::Open(AccessMode::Any))).add_path(root.clone());
+    assert!(should_ignore_notify_event(&open));
+
+    let close_read =
+        Event::new(EventKind::Access(AccessKind::Close(AccessMode::Read))).add_path(root.clone());
+    assert!(should_ignore_notify_event(&close_read));
+
+    let modify = Event::new(EventKind::Modify(ModifyKind::Data(DataChange::Any)))
+        .add_path(root.join("README.md"));
+    assert!(!should_ignore_notify_event(&modify));
 }
 
 #[test]
