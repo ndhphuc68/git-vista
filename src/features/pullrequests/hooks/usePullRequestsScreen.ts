@@ -7,8 +7,9 @@ import { usePullRequests, usePullRequestDetail } from "../api";
 import { filterPullRequests } from "../model/pullRequestFilter";
 import { createPullRequestsScreenActions } from "./usePullRequestsScreen.actions";
 import type { GitHubPullRequest } from "../../../ipc/githubApi";
+import { PR_STATE, type PullRequestState } from "../../../domain/enums";
 
-export type PullRequestFilterState = "open" | "closed" | "all";
+export type PullRequestFilterState = PullRequestState;
 export type PullRequestSubTab = "conversation" | "filesChanged";
 
 function useSelectedPullRequest(repoPath: string) {
@@ -41,7 +42,7 @@ export function usePullRequestsScreen(repoPath: string) {
   const queryClient = useQueryClient();
   const { showToast, showSuccess, showError } = useToastStore();
 
-  const [filterState, setFilterState] = useState<PullRequestFilterState>("open");
+  const [filterState, setFilterState] = useState<PullRequestFilterState>(PR_STATE.OPEN);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [activeSubTab, setActiveSubTab] = useState<PullRequestSubTab>("conversation");
   const [isCheckingOut, setIsCheckingOut] = useState<boolean>(false);

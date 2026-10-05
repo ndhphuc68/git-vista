@@ -7,7 +7,9 @@
  * HTTP rather than through IPC.
  */
 
-export type PullRequestState = "open" | "closed" | "all";
+import type { CheckStatus, PullRequestFileStatus, PullRequestState } from "../domain/enums";
+
+export type { CheckStatus, PullRequestState } from "../domain/enums";
 
 export interface GitHubUserSummary {
   login: string;
@@ -25,7 +27,7 @@ export interface GitHubLabel {
 export interface GitHubPullRequest {
   number: number;
   title: string;
-  state: "open" | "closed";
+  state: Exclude<PullRequestState, "all">;
   merged_at?: string | null;
   draft: boolean;
   user: GitHubUserSummary;
@@ -44,8 +46,6 @@ export interface GitHubPullRequest {
   html_url: string;
 }
 
-export type CheckStatus = "success" | "failure" | "in_progress" | "queued" | "neutral";
-
 export interface CheckRunItem {
   name: string;
   status: CheckStatus;
@@ -54,7 +54,7 @@ export interface CheckRunItem {
 
 export interface PullRequestFileItem {
   filename: string;
-  status: "added" | "modified" | "removed" | "renamed";
+  status: PullRequestFileStatus;
   additions: number;
   deletions: number;
   changes: number;

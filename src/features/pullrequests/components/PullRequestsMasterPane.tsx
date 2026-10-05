@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import clsx from "clsx";
 import { RotateCw, Plus, Search, ArrowRight, Loader2 } from "lucide-react";
+import { PR_STATE } from "../../../domain/enums";
 import { useTranslation } from "../../../i18n";
 import { Button } from "../../../shared/ui";
 import { PullRequestStatusBadge } from "./PullRequestStatusBadge";
@@ -86,11 +87,11 @@ const MasterPaneFilterControls: React.FC<MasterPaneFilterControlsProps> = ({
       <button
         type="button"
         role="tab"
-        aria-selected={filterState === "open"}
-        onClick={() => onFilterChange("open")}
+        aria-selected={filterState === PR_STATE.OPEN}
+        onClick={() => onFilterChange(PR_STATE.OPEN)}
         className={clsx(
           "flex-1 py-1 px-2 text-xs rounded-md font-medium transition-colors text-center cursor-pointer",
-          filterState === "open"
+          filterState === PR_STATE.OPEN
             ? "bg-surface text-primary shadow-xs border border-border-subtle font-semibold"
             : "text-secondary hover:text-primary"
         )}
@@ -100,11 +101,11 @@ const MasterPaneFilterControls: React.FC<MasterPaneFilterControlsProps> = ({
       <button
         type="button"
         role="tab"
-        aria-selected={filterState === "closed"}
-        onClick={() => onFilterChange("closed")}
+        aria-selected={filterState === PR_STATE.CLOSED}
+        onClick={() => onFilterChange(PR_STATE.CLOSED)}
         className={clsx(
           "flex-1 py-1 px-2 text-xs rounded-md font-medium transition-colors text-center cursor-pointer",
-          filterState === "closed"
+          filterState === PR_STATE.CLOSED
             ? "bg-surface text-primary shadow-xs border border-border-subtle font-semibold"
             : "text-secondary hover:text-primary"
         )}
@@ -114,11 +115,11 @@ const MasterPaneFilterControls: React.FC<MasterPaneFilterControlsProps> = ({
       <button
         type="button"
         role="tab"
-        aria-selected={filterState === "all"}
-        onClick={() => onFilterChange("all")}
+        aria-selected={filterState === PR_STATE.ALL}
+        onClick={() => onFilterChange(PR_STATE.ALL)}
         className={clsx(
           "flex-1 py-1 px-2 text-xs rounded-md font-medium transition-colors text-center cursor-pointer",
-          filterState === "all"
+          filterState === PR_STATE.ALL
             ? "bg-surface text-primary shadow-xs border border-border-subtle font-semibold"
             : "text-secondary hover:text-primary"
         )}

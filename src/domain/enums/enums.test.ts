@@ -3,6 +3,10 @@ import {
   CHANGE_TYPE,
   PR_STATE,
   CHECK_STATUS,
+  CHECK_RUN_STATE,
+  CHECK_RUN_CONCLUSION,
+  PR_STATUS,
+  PR_FILE_STATUS,
   CONFIG_SCOPE,
   SCREEN_TYPE,
   REBASE_ACTION,
@@ -60,6 +64,27 @@ describe("enums", () => {
     expect(Object.values(SCREEN_TYPE).sort()).toEqual(
       ["changes", "conflict", "history", "pull-requests"].sort()
     );
+  });
+  it("CHECK_RUN_STATE and CHECK_RUN_CONCLUSION match GitHub check-run fields", () => {
+    expect(CHECK_RUN_STATE).toEqual({
+      COMPLETED: "completed",
+      IN_PROGRESS: "in_progress",
+      QUEUED: "queued",
+    });
+    expect(CHECK_RUN_CONCLUSION).toEqual({ SUCCESS: "success" });
+  });
+
+  it("PR_STATUS lists the badge statuses", () => {
+    expect(Object.values(PR_STATUS).sort()).toEqual(["closed", "draft", "merged", "open"]);
+  });
+
+  it("PR_FILE_STATUS matches GitHub's pull request file status", () => {
+    expect(Object.values(PR_FILE_STATUS).sort()).toEqual([
+      "added",
+      "modified",
+      "removed",
+      "renamed",
+    ]);
   });
 });
 
