@@ -11,6 +11,7 @@ export interface DeleteBranchModalProps {
   repoPath: string;
   branchName: string;
   onSuccess?: (backupRef: string) => void;
+  initialUnmerged?: boolean;
 }
 
 export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
@@ -19,6 +20,7 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
   repoPath,
   branchName,
   onSuccess,
+  initialUnmerged,
 }) => {
   const { t, error, isUnmerged, loading, handleDelete } = useDeleteBranchForm({
     isOpen,
@@ -26,6 +28,7 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
     branchName,
     onClose,
     onSuccess,
+    initialUnmerged,
   });
 
   return (

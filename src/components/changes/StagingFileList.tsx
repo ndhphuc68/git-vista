@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { type RepoStatusResult, type StatusFileItem } from "../../ipc/bindings.generated";
+import { useSettingsStore } from "../../store/useSettingsStore";
 import { DiscardConfirmModal } from "./DiscardConfirmModal";
 import { resolveStagingLists, type SelectedWorkingFile } from "./stagingFileListHelpers";
 import { StagedSection } from "./StagedSection";
@@ -37,6 +38,13 @@ export const StagingFileList: React.FC<StagingFileListProps> = (props) => {
     onOpenConflictResolver,
   } = props;
   const [discardTarget, setDiscardTarget] = useState<string | null>(null);
+  const confirmDiscard = useSettingsStore((s) => s.confirmDiscard);
+
+  // With the confirmation turned off in settings, discard straight away.
+  const requestDiscard = (filePath: string) => {
+    if (confirmDiscard) setDiscardTarget(filePath);
+    else onDiscardFile(filePath);
+  };
 
   const { stagedFiles, conflictedFiles, changesFiles } = resolveStagingLists(props);
 
@@ -69,7 +77,7 @@ export const StagingFileList: React.FC<StagingFileListProps> = (props) => {
         selectedFile={selectedFile}
         onSelectFile={onSelectFile}
         onStageFile={onStageFile}
-        onSetDiscardTarget={setDiscardTarget}
+        onSetDiscardTarget={requestDiscard}
         onStageAll={onStageAll}
       />
 

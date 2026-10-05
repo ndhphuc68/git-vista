@@ -11,6 +11,7 @@ import { useSidebarActions } from "./useSidebarActions";
 import { useActiveSidebarMenu } from "./useActiveSidebarMenu";
 import { toErrorMessage } from "../../../shared/utils/toError";
 import { useSingleFlight } from "../../../shared/hooks/useSingleFlight";
+import { useDeleteBranchRequest } from "./useDeleteBranchRequest";
 
 export interface BranchSidebarShellOptions {
   repoPath: string;
@@ -112,6 +113,7 @@ export function useBranchSidebarShell({
   // the "two dialogs open at once" states the old flags allowed cannot arise.
   const [dialog, setDialog] = useState<SidebarDialog>(NO_DIALOG);
   const closeDialog = () => setDialog(NO_DIALOG);
+  const openDialog = useDeleteBranchRequest(repoPath, setDialog);
 
   // Context / Action menu state (strictly 1 active menu at any time)
   const { activeMenu, setActiveMenu, activeMenuRef } = useActiveSidebarMenu();
@@ -163,7 +165,7 @@ export function useBranchSidebarShell({
     selectedStash,
     setSelectedStash,
     dialog,
-    setDialog,
+    setDialog: openDialog,
     closeDialog,
     activeMenu,
     setActiveMenu,

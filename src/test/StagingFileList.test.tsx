@@ -1,11 +1,7 @@
-import {
-  render,
-  screen,
-  fireEvent,
-  waitForElementToBeRemoved,
-} from "@testing-library/react";
+import { render, screen, fireEvent, waitForElementToBeRemoved } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { StagingFileList } from "../components/changes/StagingFileList";
+import { useSettingsStore } from "../store/useSettingsStore";
 
 describe("StagingFileList & DiscardConfirmModal", () => {
   const mockProps = {
@@ -123,5 +119,16 @@ describe("StagingFileList & DiscardConfirmModal", () => {
 
     expect(mockProps.onDiscardFile).not.toHaveBeenCalled();
     await waitForElementToBeRemoved(() => screen.queryByRole("dialog"));
+  });
+
+  it("discards immediately without the modal when confirmation is off", () => {
+    useSettingsStore.getState().setConfirmDiscard(false);
+    render(<StagingFileList {...mockProps} />);
+
+    fireEvent.click(screen.getByTestId("discard-file-src/unstaged1.ts"));
+
+    expect(mockProps.onDiscardFile).toHaveBeenCalledWith("src/unstaged1.ts");
+    expect(screen.queryByTestId("confirm-discard-button")).not.toBeInTheDocument();
+    useSettingsStore.getState().setConfirmDiscard(true);
   });
 });

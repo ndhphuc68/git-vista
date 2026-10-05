@@ -151,4 +151,32 @@ describe("DeleteBranchModal", () => {
       expect(document.getElementById(labelledBy!)).toHaveTextContent(/xoá nhánh/i);
     });
   });
+
+  it("opens straight in the unmerged state and force deletes", async () => {
+    const onClose = vi.fn();
+    (invokeCommand.deleteBranch as ReturnType<typeof vi.fn>).mockResolvedValue(
+      "refs/gitui-backup/delete-branch-test-123"
+    );
+
+    renderWithClient(
+      <DeleteBranchModal
+        isOpen={true}
+        onClose={onClose}
+        repoPath="/test/repo"
+        branchName="feature/unmerged"
+        initialUnmerged
+      />
+    );
+
+    expect(screen.getByText(/Nhánh chưa được gộp/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Vẫn xoá nhánh này/i }));
+
+    await waitFor(() => {
+      expect(invokeCommand.deleteBranch).toHaveBeenCalledWith(
+        "/test/repo",
+        "feature/unmerged",
+        true
+      );
+    });
+  });
 });
