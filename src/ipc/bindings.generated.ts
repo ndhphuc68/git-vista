@@ -84,6 +84,8 @@ export const commands = {
 	checkoutPullRequest: (repoPath: string, prNumber: number) => typedError<CheckoutPrResult, AppError>(__TAURI_INVOKE("checkout_pull_request", { repoPath, prNumber })),
 	/**  Opens the repository folder in the user's external editor. */
 	openInEditor: (repoPath: string, editor: string, customCommand: string | null) => typedError<null, AppError>(__TAURI_INVOKE("open_in_editor", { repoPath, editor, customCommand })),
+	/**  Opens the repository folder in the user's terminal of choice. */
+	openInTerminal: (repoPath: string, terminal: string) => typedError<null, AppError>(__TAURI_INVOKE("open_in_terminal", { repoPath, terminal })),
 };
 
 /* Types */
