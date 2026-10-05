@@ -127,10 +127,7 @@ function teardownListenerIfIdle(): void {
  * one restores to its own opener as it closes — so closing a child dialog
  * hands focus back to the parent dialog, not to the page.
  */
-export function useFocusTrap(
-  containerRef: RefObject<HTMLElement | null>,
-  enabled: boolean
-): void {
+export function useFocusTrap(containerRef: RefObject<HTMLElement | null>, enabled: boolean): void {
   useEffect(() => {
     if (!enabled) return;
 

@@ -87,7 +87,10 @@ export const CherryPickModal: React.FC<CherryPickModalProps> = ({
           still submit across the two sections. */}
       <form onSubmit={handleSubmit} className="contents">
         <Modal.Body>
-          <CommitActionTargetCard label={t.modals.cherryPick.targetCommit} targetCommit={targetCommit} />
+          <CommitActionTargetCard
+            label={t.modals.cherryPick.targetCommit}
+            targetCommit={targetCommit}
+          />
 
           {currentBranch && <CherryPickDestinationBranch currentBranch={currentBranch} />}
 

@@ -17,7 +17,9 @@ export const STATUS_BADGE_LABELS: Record<StatusKey, string> = {
 };
 
 /** Which badge status a pull request is in, in priority order. */
-export function getStatusKey(pr: Pick<GitHubPullRequest, "merged_at" | "state" | "draft">): StatusKey {
+export function getStatusKey(
+  pr: Pick<GitHubPullRequest, "merged_at" | "state" | "draft">
+): StatusKey {
   if (pr.merged_at) return "merged";
   if (pr.state === "closed") return "closed";
   if (pr.draft) return "draft";

@@ -13,11 +13,7 @@ export interface StashFileListProps {
  * state, the loading state, and the per-file rows. Extracted from
  * `StashDiffView`, keeping the same markup verbatim.
  */
-export const StashFileList: React.FC<StashFileListProps> = ({
-  commitId,
-  error,
-  commitDetails,
-}) => {
+export const StashFileList: React.FC<StashFileListProps> = ({ commitId, error, commitDetails }) => {
   const { t } = useTranslation();
 
   return (

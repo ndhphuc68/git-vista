@@ -16,7 +16,7 @@ export const ToastProgressBar: React.FC<ToastProgressBarProps> = ({ toast }) => 
         <div
           className={clsx(
             "h-full origin-left rounded-full shadow-xs",
-            TOAST_PROGRESS_CLASS[toast.type],
+            TOAST_PROGRESS_CLASS[toast.type]
           )}
           style={{
             animation: `toast-progress ${toast.durationMs}ms linear forwards`,

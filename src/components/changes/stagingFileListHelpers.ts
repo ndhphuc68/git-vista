@@ -1,4 +1,8 @@
-import { type RepoStatusResult, type StatusFileItem, type FileStatus } from "../../ipc/bindings.generated";
+import {
+  type RepoStatusResult,
+  type StatusFileItem,
+  type FileStatus,
+} from "../../ipc/bindings.generated";
 
 export interface SelectedWorkingFile {
   path: string;
@@ -91,4 +95,3 @@ export function resolveStagingLists(props: ListsSource): StagingLists {
 
   return { stagedFiles, conflictedFiles, changesFiles };
 }
-

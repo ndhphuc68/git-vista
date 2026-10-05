@@ -1,5 +1,14 @@
 import type { RefObject } from "react";
-import { GitBranch, GitCommit, Tag, Copy, GitPullRequest, RotateCcw, GitMerge, GitCompare } from "lucide-react";
+import {
+  GitBranch,
+  GitCommit,
+  Tag,
+  Copy,
+  GitPullRequest,
+  RotateCcw,
+  GitMerge,
+  GitCompare,
+} from "lucide-react";
 import { useTranslation } from "../../../i18n";
 import type { GraphContextMenu, GraphDialog } from "../model/graphDialog";
 import { buildCompareDialogFromContextMenu } from "../model/graphDialog";

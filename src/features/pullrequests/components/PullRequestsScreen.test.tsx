@@ -59,9 +59,7 @@ const mockDetail: PullRequestDetail = {
   mergeable: true,
   assignees: [],
   requested_reviewers: [],
-  check_runs: [
-    { name: "build", status: "success", details_url: "https://ci.test/build" },
-  ],
+  check_runs: [{ name: "build", status: "success", details_url: "https://ci.test/build" }],
   files: [
     {
       filename: "src/search.ts",
@@ -81,11 +79,7 @@ function renderWithClient(ui: React.ReactElement) {
       queries: { retry: false },
     },
   });
-  return render(
-    <QueryClientProvider client={queryClient}>
-      {ui}
-    </QueryClientProvider>
-  );
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
 }
 
 describe("PullRequestsScreen", () => {
@@ -119,7 +113,9 @@ describe("PullRequestsScreen", () => {
 
     expect(screen.getByText("Pull Requests")).toBeInTheDocument();
     expect(screen.getByText("New PR")).toBeInTheDocument();
-    expect(screen.getByText("Select a pull request from the list to view details")).toBeInTheDocument();
+    expect(
+      screen.getByText("Select a pull request from the list to view details")
+    ).toBeInTheDocument();
     expect(screen.getByText("Add search functionality")).toBeInTheDocument();
     expect(screen.getByText("Fix crash on startup")).toBeInTheDocument();
   });
@@ -273,4 +269,3 @@ describe("PullRequestsScreen", () => {
     expect(newSearchInput).toHaveValue("");
   });
 });
-

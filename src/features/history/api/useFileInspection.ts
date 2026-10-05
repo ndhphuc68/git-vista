@@ -17,8 +17,7 @@ export function useCommitFileDiff(
 ) {
   return useQuery({
     queryKey: qk.fileDiff(repoPath, commitId, filePath, ignoreWhitespace),
-    queryFn: () =>
-      invokeCommand.getCommitFileDiff(repoPath, commitId, filePath, ignoreWhitespace),
+    queryFn: () => invokeCommand.getCommitFileDiff(repoPath, commitId, filePath, ignoreWhitespace),
   });
 }
 

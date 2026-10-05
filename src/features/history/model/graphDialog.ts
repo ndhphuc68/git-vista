@@ -22,9 +22,7 @@ export function buildCompareDialogFromContextMenu(
   contextMenu: GraphContextMenu,
   selectedCommitId: string | null
 ): Extract<GraphDialog, { type: "compare" }> {
-  const hasOtherSelection = Boolean(
-    selectedCommitId && selectedCommitId !== contextMenu.commit.id
-  );
+  const hasOtherSelection = Boolean(selectedCommitId && selectedCommitId !== contextMenu.commit.id);
   return {
     type: "compare",
     baseRev: hasOtherSelection ? selectedCommitId! : contextMenu.commit.id,

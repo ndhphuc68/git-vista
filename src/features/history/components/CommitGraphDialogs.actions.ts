@@ -35,13 +35,15 @@ export function createCommitActionSuccessHandler(ctx: CommitActionSuccessHandler
       queryClient.invalidateQueries({ queryKey: qk.repo.head(repoPath) });
       queryClient.invalidateQueries({ queryKey: qk.branches(repoPath) });
       const undoToken = result.undo_token;
-      useToastStore
-        .getState()
-        .showSuccess(
-          messages.successToast(commitShortId),
-          undoToken ? async () => { await undoCommit(undoToken); } : undefined,
-          messages.undoLabel
-        );
+      useToastStore.getState().showSuccess(
+        messages.successToast(commitShortId),
+        undoToken
+          ? async () => {
+              await undoCommit(undoToken);
+            }
+          : undefined,
+        messages.undoLabel
+      );
     } else if (result.status === "Staged") {
       queryClient.invalidateQueries({ queryKey: qk.repo.status(repoPath) });
       useToastStore.getState().showToast({ message: messages.stagedToast, type: "info" });

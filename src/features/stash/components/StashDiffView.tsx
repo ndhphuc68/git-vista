@@ -66,11 +66,7 @@ export const StashDiffView: React.FC<StashDiffViewProps> = ({
         <div className="text-[11px] text-tertiary mt-0.5">{createdDate}</div>
       </div>
 
-      <StashFileList
-        commitId={stashItem.commit_id}
-        error={error}
-        commitDetails={commitDetails}
-      />
+      <StashFileList commitId={stashItem.commit_id} error={error} commitDetails={commitDetails} />
     </div>
   );
 };

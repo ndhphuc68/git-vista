@@ -99,7 +99,9 @@ export interface SaveHandlerContext {
 function confirmUnresolvedSave(t: Translations, unresolvedCount: number): boolean {
   if (unresolvedCount <= 0) return true;
   return typeof window !== "undefined" && typeof window.confirm === "function"
-    ? window.confirm(t.conflictResolver.unresolvedWarning.replace("{count}", String(unresolvedCount)))
+    ? window.confirm(
+        t.conflictResolver.unresolvedWarning.replace("{count}", String(unresolvedCount))
+      )
     : true;
 }
 

@@ -88,7 +88,10 @@ export const RevertModal: React.FC<RevertModalProps> = ({
             <span>{t.modals.revert.desc}</span>
           </div>
 
-          <CommitActionTargetCard label={t.modals.revert.targetCommit} targetCommit={targetCommit} />
+          <CommitActionTargetCard
+            label={t.modals.revert.targetCommit}
+            targetCommit={targetCommit}
+          />
 
           <AutoCommitCheckbox
             checked={autoCommit}

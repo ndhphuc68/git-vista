@@ -6,10 +6,7 @@ export interface CommandPaletteFooterProps {
   commandCount: number;
 }
 
-export const CommandPaletteFooter: React.FC<CommandPaletteFooterProps> = ({
-  t,
-  commandCount,
-}) => (
+export const CommandPaletteFooter: React.FC<CommandPaletteFooterProps> = ({ t, commandCount }) => (
   <div className="px-4 py-2 bg-surface-hover/50 border-t border-border-subtle flex items-center justify-between text-xs text-muted select-none">
     <div className="flex items-center gap-3">
       <span>
@@ -31,6 +28,8 @@ export const CommandPaletteFooter: React.FC<CommandPaletteFooterProps> = ({
         {t.palette.closeHint}
       </span>
     </div>
-    <div className="text-[11px]">{t.palette.commandsCount.replace("{count}", String(commandCount))}</div>
+    <div className="text-[11px]">
+      {t.palette.commandsCount.replace("{count}", String(commandCount))}
+    </div>
   </div>
 );

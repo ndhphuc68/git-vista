@@ -11,7 +11,10 @@ export function hunkKey(hunk: { old_start: number; new_start: number }): string 
  * lines only the new one, deleted lines only the old one, and both counters
  * only increase inside a hunk, so the pair is unique.
  */
-export function diffLineKey(line: { old_lineno: number | null; new_lineno: number | null }): string {
+export function diffLineKey(line: {
+  old_lineno: number | null;
+  new_lineno: number | null;
+}): string {
   return `${line.old_lineno ?? "-"}:${line.new_lineno ?? "-"}`;
 }
 

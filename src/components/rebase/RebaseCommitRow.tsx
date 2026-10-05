@@ -1,6 +1,10 @@
 import React from "react";
 import clsx from "clsx";
-import type { RebasePlanStep, RebaseCommitItem, RebaseActionKind } from "../../ipc/bindings.generated";
+import type {
+  RebasePlanStep,
+  RebaseCommitItem,
+  RebaseActionKind,
+} from "../../ipc/bindings.generated";
 import { RebaseRowHeader } from "./RebaseRowHeader";
 import { RebaseActionPills } from "./RebaseActionPills";
 import { RebaseMessageEditor } from "./RebaseMessageEditor";

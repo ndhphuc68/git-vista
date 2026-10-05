@@ -44,7 +44,14 @@ export function useCompareFileDiff(
   return useQuery({
     queryKey: qk.compareFileDiff(repoPath, options),
     queryFn: () =>
-      invokeCommand.getCompareFileDiff(repoPath, baseRev, targetRev, filePath, mode, ignoreWhitespace),
+      invokeCommand.getCompareFileDiff(
+        repoPath,
+        baseRev,
+        targetRev,
+        filePath,
+        mode,
+        ignoreWhitespace
+      ),
     enabled: Boolean(repoPath && baseRev && targetRev && filePath),
   });
 }

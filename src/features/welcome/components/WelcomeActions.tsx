@@ -60,9 +60,7 @@ export const WelcomeActions: React.FC<WelcomeActionsProps> = ({ onOpenFolder, on
                 Ctrl+N
               </kbd>
             </div>
-            <p className="text-xs text-secondary mt-1 leading-relaxed">
-              {t.welcome.cloneRepoDesc}
-            </p>
+            <p className="text-xs text-secondary mt-1 leading-relaxed">{t.welcome.cloneRepoDesc}</p>
           </div>
         </button>
       </div>

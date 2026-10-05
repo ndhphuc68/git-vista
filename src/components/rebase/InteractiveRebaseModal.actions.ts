@@ -100,7 +100,9 @@ export function createSubmitHandler(context: SubmitHandlerContext) {
         );
       }
     } catch (err: unknown) {
-      setError(messageOf(err) || t.modals.interactiveRebase.errorToast.replace("{msg}", String(err)));
+      setError(
+        messageOf(err) || t.modals.interactiveRebase.errorToast.replace("{msg}", String(err))
+      );
     } finally {
       setSubmitting(false);
     }

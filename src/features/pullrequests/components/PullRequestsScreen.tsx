@@ -9,10 +9,7 @@ export interface PullRequestsScreenProps {
   className?: string;
 }
 
-export const PullRequestsScreen: React.FC<PullRequestsScreenProps> = ({
-  repoPath,
-  className,
-}) => {
+export const PullRequestsScreen: React.FC<PullRequestsScreenProps> = ({ repoPath, className }) => {
   const {
     filterState,
     setFilterState,

@@ -44,7 +44,10 @@ export const RecentRepositorySearchHeader: React.FC<RecentRepositorySearchHeader
         {/* Search input if recents exist */}
         {recentsCount > 0 && (
           <div className="relative w-full max-w-[220px]">
-            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-tertiary" />
+            <Search
+              size={14}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-tertiary"
+            />
             <input
               ref={searchInputRef}
               type="text"

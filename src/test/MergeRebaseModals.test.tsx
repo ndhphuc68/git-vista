@@ -144,9 +144,7 @@ describe("merge and rebase modal shells", () => {
 
     it("surfaces a conflict result and stays open", async () => {
       const onClose = vi.fn();
-      const onMerge = vi
-        .fn()
-        .mockResolvedValue({ success: false, status: "Conflict", output: "" });
+      const onMerge = vi.fn().mockResolvedValue({ success: false, status: "Conflict", output: "" });
       render(<MergeBranchModal {...mergeProps} onClose={onClose} onMerge={onMerge} />);
 
       fireEvent.click(screen.getByRole("button", { name: /Gộp nhánh|Merge/i }));

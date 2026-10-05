@@ -18,9 +18,7 @@ function useSelectedPullRequest(repoPath: string) {
 
   const selectedPr = useMemo(
     () =>
-      !rawSelectedPr || (selectedRepoPath && selectedRepoPath !== repoPath)
-        ? null
-        : rawSelectedPr,
+      !rawSelectedPr || (selectedRepoPath && selectedRepoPath !== repoPath) ? null : rawSelectedPr,
     [rawSelectedPr, selectedRepoPath, repoPath]
   );
 
@@ -54,15 +52,15 @@ export function usePullRequestsScreen(repoPath: string) {
     setSearchQuery("");
   }, [repoPath]);
 
-  const {
-    data: pullRequests = [],
-    isLoading: isLoadingPrs,
-  } = usePullRequests(repoPath, filterState);
+  const { data: pullRequests = [], isLoading: isLoadingPrs } = usePullRequests(
+    repoPath,
+    filterState
+  );
 
-  const {
-    data: prDetail,
-    isLoading: isLoadingDetail,
-  } = usePullRequestDetail(repoPath, selectedPr?.number ?? null);
+  const { data: prDetail, isLoading: isLoadingDetail } = usePullRequestDetail(
+    repoPath,
+    selectedPr?.number ?? null
+  );
 
   const filteredPrs = useMemo(
     () => filterPullRequests(pullRequests, searchQuery),

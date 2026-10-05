@@ -58,9 +58,6 @@ export function removeGitHubToken(): Promise<void> {
 }
 
 /** Checks out the branch for pull request `prNumber` in `repoPath`. */
-export function checkoutPullRequest(
-  repoPath: string,
-  prNumber: number
-): Promise<CheckoutPrResult> {
+export function checkoutPullRequest(repoPath: string, prNumber: number): Promise<CheckoutPrResult> {
   return invokeCommand.checkoutPullRequest(repoPath, prNumber);
 }

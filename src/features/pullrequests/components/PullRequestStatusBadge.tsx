@@ -3,10 +3,7 @@ import clsx from "clsx";
 import { GitPullRequest, GitMerge, AlertCircle, FileEdit } from "lucide-react";
 import type { GitHubPullRequest } from "../../../ipc/githubApi";
 
-import {
-  getPullRequestStatus,
-  type PullRequestStatus,
-} from "../model/pullRequestStatus";
+import { getPullRequestStatus, type PullRequestStatus } from "../model/pullRequestStatus";
 
 export type { PullRequestStatus };
 
@@ -27,14 +24,12 @@ const STATUS_CONFIG: Record<
   merged: {
     label: "Merged",
     icon: GitMerge,
-    className:
-      "bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/25",
+    className: "bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/25",
   },
   closed: {
     label: "Closed",
     icon: AlertCircle,
-    className:
-      "bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/25",
+    className: "bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/25",
   },
   draft: {
     label: "Draft",

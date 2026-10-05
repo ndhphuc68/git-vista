@@ -8,9 +8,7 @@ describe("Tauri configuration", () => {
     const rawContent = fs.readFileSync(configPath, "utf-8");
     const config = JSON.parse(rawContent);
 
-    const mainWindow = config.app?.windows?.find(
-      (w: { label: string }) => w.label === "main"
-    );
+    const mainWindow = config.app?.windows?.find((w: { label: string }) => w.label === "main");
 
     expect(mainWindow).toBeDefined();
     expect(mainWindow.maximized).toBe(true);

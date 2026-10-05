@@ -30,15 +30,13 @@ let queryClient: QueryClient;
 beforeEach(() => {
   queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   useSettingsStore.setState({ locale: "en" });
-  useRepoStore
-    .getState()
-    .setRepo({
-      path: "/test/repo",
-      name: "Test repo",
-      is_bare: false,
-      head_branch: "main",
-      head_commit_id: details.id,
-    });
+  useRepoStore.getState().setRepo({
+    path: "/test/repo",
+    name: "Test repo",
+    is_bare: false,
+    head_branch: "main",
+    head_commit_id: details.id,
+  });
   useRepoStore.getState().setSelectedCommit(details.id);
   useInspectorStore.getState().closeInspector();
   useLayoutStore.getState().setDetailPanelOpen(true);

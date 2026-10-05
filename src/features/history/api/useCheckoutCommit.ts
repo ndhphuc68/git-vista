@@ -9,8 +9,7 @@ export interface CheckoutCommitVars {
 export function useCheckoutCommit(repoPath: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (vars: CheckoutCommitVars) =>
-      invokeCommand.checkoutCommit(repoPath, vars.commitId),
+    mutationFn: (vars: CheckoutCommitVars) => invokeCommand.checkoutCommit(repoPath, vars.commitId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: qk.repo.all(repoPath) });
     },

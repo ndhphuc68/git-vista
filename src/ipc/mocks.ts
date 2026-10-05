@@ -16,7 +16,13 @@ import { getMockStashes, setMockStashes } from "./mocks/stashes";
 import { getMockGlobalConfig, getMockLocalConfigs, resetMockGitConfig } from "./mocks/gitConfig";
 import { getMockCompareSummary, resetMockCompareData } from "./mocks/compare";
 
-export { resetMockTags, resetMockRemotes, resetMockRebaseCommits, resetMockGitConfig, resetMockCompareData };
+export {
+  resetMockTags,
+  resetMockRemotes,
+  resetMockRebaseCommits,
+  resetMockGitConfig,
+  resetMockCompareData,
+};
 
 /**
  * Mutable handle on the fixtures above.

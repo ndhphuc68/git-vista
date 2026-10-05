@@ -72,9 +72,12 @@ export function useInteractiveRebase({
     commitMap,
   });
   const handleReset = createResetHandler({ fetchedCommits, setSteps, setError });
-  const { handleDragStart, handleDragOver, handleDrop, handleDragEnd } = createDragAndDropHandlers(
-    { steps, setSteps, draggedIndex, setDraggedIndex }
-  );
+  const { handleDragStart, handleDragOver, handleDrop, handleDragEnd } = createDragAndDropHandlers({
+    steps,
+    setSteps,
+    draggedIndex,
+    setDraggedIndex,
+  });
 
   // Validation
   const nonDropped = steps.filter((s) => s.action !== "Drop");

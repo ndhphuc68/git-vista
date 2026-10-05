@@ -45,7 +45,9 @@ describe("CompareHeader", () => {
     expect(baseInput).toHaveValue("main");
     expect(targetInput).toHaveValue("HEAD");
 
-    fireEvent.click(screen.getByRole("button", { name: /Đổi chiều so sánh|Swap base and target/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /Đổi chiều so sánh|Swap base and target/i })
+    );
     expect(onSwap).toHaveBeenCalledTimes(1);
   });
 
@@ -53,7 +55,9 @@ describe("CompareHeader", () => {
     const onModeChange = vi.fn();
     renderHeader({ onModeChange });
 
-    fireEvent.click(screen.getByRole("button", { name: /Trực tiếp \(A\.\.B\)|Direct \(A\.\.B\)/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /Trực tiếp \(A\.\.B\)|Direct \(A\.\.B\)/i })
+    );
     expect(onModeChange).toHaveBeenCalledWith("Direct");
   });
 

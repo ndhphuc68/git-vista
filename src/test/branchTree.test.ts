@@ -72,7 +72,11 @@ describe("countBranchesInNode", () => {
   });
 
   it("counts across nested folders", () => {
-    const tree = buildBranchTree([branch("team/web/a"), branch("team/api/b"), branch("team/api/c")]);
+    const tree = buildBranchTree([
+      branch("team/web/a"),
+      branch("team/api/b"),
+      branch("team/api/c"),
+    ]);
     expect(countBranchesInNode(tree[0]!)).toBe(3);
   });
 });

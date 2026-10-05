@@ -1,4 +1,8 @@
-import { type BranchListResult, type BranchItem, type GitHubRepoInfo } from "../../ipc/bindings.generated";
+import {
+  type BranchListResult,
+  type BranchItem,
+  type GitHubRepoInfo,
+} from "../../ipc/bindings.generated";
 
 /** Finds the branch list entry matching `compareBranch`, if any. */
 export function findCurrentCompareBranchItem(
