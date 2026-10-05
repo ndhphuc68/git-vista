@@ -10,6 +10,9 @@ export const AUTOFOCUS_DELAY_MS = 50;
 /** How long the undo toast stays visible, long enough for the user to click Undo. */
 export const UNDO_TOAST_MS = 10000;
 
+/** Fixed width of the desktop sidebar, in pixels. The sidebar is not resizable. */
+export const SIDEBAR_WIDTH = 350;
+
 export type ModalSize = "sm" | "md" | "lg" | "xl" | "full";
 
 /**

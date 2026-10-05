@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useLayoutStore } from "../store/useLayoutStore";
+import { SIDEBAR_WIDTH } from "../domain/constants/ui";
 
 describe("useLayoutStore", () => {
   beforeEach(() => {
@@ -19,6 +20,12 @@ describe("useLayoutStore", () => {
     expect(state.controlsOpen).toBe(true);
     expect(state.devToolsOpen).toBe(false);
     expect(state.activeChangesView).toBe("split");
+  });
+
+  it("uses a fixed 350px sidebar width without reading localStorage", () => {
+    expect(SIDEBAR_WIDTH).toBe(350);
+    expect(useLayoutStore.getState().sidebarWidth).toBe(SIDEBAR_WIDTH);
+    expect(localStorage.getItem("gitvista_sidebar_width")).toBeNull();
   });
 
   it("toggles sidebarOpen", () => {
