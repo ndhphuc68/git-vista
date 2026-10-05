@@ -35,3 +35,16 @@ export const REBASE_ACTION = {
   DROP: "Drop",
 } as const;
 export type RebaseActionKind = (typeof REBASE_ACTION)[keyof typeof REBASE_ACTION];
+
+/**
+ * Result status of merge, rebase, cherry-pick and revert commands.
+ * Rust returns these as a plain String (exec/commit_actions.rs, exec/merge.rs,
+ * exec/rebase.rs), so bindings type the field as `string`.
+ */
+export const OPERATION_STATUS = {
+  COMMITTED: "Committed",
+  STAGED: "Staged",
+  CONFLICT: "Conflict",
+  ERROR: "Error",
+} as const;
+export type OperationStatus = (typeof OPERATION_STATUS)[keyof typeof OPERATION_STATUS];

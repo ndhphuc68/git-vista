@@ -1,6 +1,6 @@
 import type { Translations } from "../../i18n/vi";
 import type { RebasePlanStep, InteractiveRebaseResult } from "../../ipc/bindings.generated";
-import { REBASE_ACTION } from "../../domain/enums";
+import { OPERATION_STATUS, REBASE_ACTION } from "../../domain/enums";
 import type { ActiveScreen } from "../../store/useViewStore";
 import { useToastStore } from "../../store/useToastStore";
 import { messageOf } from "../../shared/utils/toError";
@@ -89,7 +89,7 @@ export function createSubmitHandler(context: SubmitHandlerContext) {
         showRebaseSuccessToast({ t, repoPath }, result);
         onRebaseSuccess?.(result);
         onClose();
-      } else if (result.status === "Conflict") {
+      } else if (result.status === OPERATION_STATUS.CONFLICT) {
         useToastStore
           .getState()
           .showToast({ type: "error", message: t.modals.interactiveRebase.conflictToast });

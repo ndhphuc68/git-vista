@@ -5,6 +5,7 @@ import { useToastStore } from "../../../store/useToastStore";
 import { mapGitError } from "../../../utils/errorMapping";
 import { toErrorMessage } from "../../../shared/utils/toError";
 import { revertCommit } from "../api/commitActionsApi";
+import { OPERATION_STATUS } from "../../../domain/enums";
 
 interface RevertSubmitHandlerContext {
   repoPath: string;
@@ -29,7 +30,7 @@ export function createRevertSubmitHandler(ctx: RevertSubmitHandlerContext) {
     try {
       const res = await revertCommit(repoPath, commitId, autoCommit);
 
-      if (res.success || res.status === "Conflict") {
+      if (res.success || res.status === OPERATION_STATUS.CONFLICT) {
         if (onSuccess) onSuccess(res);
         onClose();
       } else {

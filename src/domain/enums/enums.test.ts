@@ -6,6 +6,7 @@ import {
   CONFIG_SCOPE,
   SCREEN_TYPE,
   REBASE_ACTION,
+  OPERATION_STATUS,
   type ConfigScope,
   type RebaseActionKind,
 } from ".";
@@ -26,6 +27,17 @@ describe("enums", () => {
     expect(Object.values(REBASE_ACTION).sort()).toEqual(
       ["Drop", "Fixup", "Pick", "Reword", "Squash"].sort()
     );
+  });
+
+  it("OPERATION_STATUS matches the status strings Rust returns", () => {
+    // String in Rust: src-tauri/src/exec/commit_actions.rs, src-tauri/src/exec/merge.rs,
+    // src-tauri/src/exec/rebase.rs. Not a generated union, so tsc cannot check it.
+    expect(OPERATION_STATUS).toEqual({
+      COMMITTED: "Committed",
+      STAGED: "Staged",
+      CONFLICT: "Conflict",
+      ERROR: "Error",
+    });
   });
 
   it("PR_STATE matches the exact strings of the GitHub API", () => {

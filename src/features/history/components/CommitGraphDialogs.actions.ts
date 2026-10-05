@@ -2,6 +2,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import { qk } from "../../../domain/queryKeys";
 import { useToastStore } from "../../../store/useToastStore";
 import type { CommitActionResult } from "../../../ipc/bindings.generated";
+import { OPERATION_STATUS } from "../../../domain/enums";
 
 interface CommitActionMessages {
   /** Success toast text, given the target commit's short SHA. */
@@ -29,7 +30,7 @@ export function createCommitActionSuccessHandler(ctx: CommitActionSuccessHandler
 
   return (result: CommitActionResult, commitShortId: string) => {
     onClose();
-    if (result.status === "Committed") {
+    if (result.status === OPERATION_STATUS.COMMITTED) {
       queryClient.invalidateQueries({ queryKey: qk.commitGraph(repoPath) });
       queryClient.invalidateQueries({ queryKey: qk.repo.status(repoPath) });
       queryClient.invalidateQueries({ queryKey: qk.repo.head(repoPath) });
@@ -44,11 +45,11 @@ export function createCommitActionSuccessHandler(ctx: CommitActionSuccessHandler
           : undefined,
         messages.undoLabel
       );
-    } else if (result.status === "Staged") {
+    } else if (result.status === OPERATION_STATUS.STAGED) {
       queryClient.invalidateQueries({ queryKey: qk.repo.status(repoPath) });
       useToastStore.getState().showToast({ message: messages.stagedToast, type: "info" });
       setActiveScreen("changes");
-    } else if (result.status === "Conflict") {
+    } else if (result.status === OPERATION_STATUS.CONFLICT) {
       queryClient.invalidateQueries({ queryKey: qk.repo.status(repoPath) });
       queryClient.invalidateQueries({ queryKey: qk.repo.state(repoPath) });
       useToastStore.getState().showToast({ message: messages.conflictToast, type: "error" });
