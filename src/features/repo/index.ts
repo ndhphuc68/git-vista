@@ -3,3 +3,4 @@ export { useRepoHeadInfo } from "./api/useRepoHeadInfo";
 export { openInEditor } from "./api/editorApi";
 export { openInTerminal } from "./api/terminalApi";
 export { ping, getSystemInfo, simulateRepoChange } from "./api/diagnosticsApi";
+export { isExternalUrl, openExternalUrl } from "./api/externalLinkApi";

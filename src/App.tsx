@@ -10,6 +10,7 @@ import { useTabStore } from "./store/useTabStore";
 import { useViewStore } from "./store/useViewStore";
 import { useSettingsStore } from "./store/useSettingsStore";
 import { useRepoChangedListener } from "./hooks/useRepoChangedListener";
+import { useExternalLinks } from "./hooks/useExternalLinks";
 import { useInProgressActions } from "./hooks/useInProgressActions";
 import { useAppTabSync } from "./hooks/useAppTabSync";
 import { useAppTabHandlers } from "./hooks/useAppTabHandlers";
@@ -137,6 +138,7 @@ export const App: React.FC<AppProps> = ({
   });
 
   useRepoChangedListener(queryClient);
+  useExternalLinks();
 
   return (
     <QueryClientProvider client={queryClient}>

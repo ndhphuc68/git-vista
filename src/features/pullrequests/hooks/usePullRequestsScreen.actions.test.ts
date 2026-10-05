@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createPullRequestsScreenActions } from "./usePullRequestsScreen.actions";
 import { checkoutPullRequest } from "../../github";
+import { openExternalUrl } from "../../repo";
 import { qk } from "../../../domain/queryKeys";
 import { usePullRequestStore } from "../../../store/usePullRequestStore";
 import { en } from "../../../i18n/en";
@@ -11,6 +12,10 @@ vi.mock("../../github", () => ({
   checkoutPullRequest: vi.fn(),
   useGitHubRepoInfo: vi.fn(),
   useGitHubToken: vi.fn(),
+}));
+
+vi.mock("../../repo", () => ({
+  openExternalUrl: vi.fn().mockResolvedValue(undefined),
 }));
 
 const mockPr: GitHubPullRequest = {
@@ -120,10 +125,7 @@ describe("createPullRequestsScreenActions", () => {
     expect(showSuccess).toHaveBeenCalledWith(en.pullRequests.linkCopied);
   });
 
-  it("handles opening browser", () => {
-    const openMock = vi.fn();
-    vi.stubGlobal("open", openMock);
-
+  it("opens the pull request in the system browser", () => {
     const actions = createPullRequestsScreenActions({
       repoPath: "/repo",
       t: en,
@@ -135,7 +137,7 @@ describe("createPullRequestsScreenActions", () => {
 
     actions.handleOpenBrowser(mockPr);
 
-    expect(openMock).toHaveBeenCalledWith(mockPr.html_url, "_blank");
+    expect(openExternalUrl).toHaveBeenCalledWith(mockPr.html_url);
   });
 
   it("opens create modal on handleNewPr", () => {

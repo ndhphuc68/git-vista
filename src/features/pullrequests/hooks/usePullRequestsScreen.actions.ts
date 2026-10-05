@@ -1,5 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { checkoutPullRequest } from "../../github";
+import { openExternalUrl } from "../../repo";
 import { qk } from "../../../domain/queryKeys";
 import { usePullRequestStore } from "../../../store/usePullRequestStore";
 import { toErrorMessage } from "../../../shared/utils/toError";
@@ -43,8 +44,8 @@ export function createPullRequestsScreenActions(context: PullRequestsScreenActio
   };
 
   const handleOpenBrowser = (pr: GitHubPullRequest) => {
-    if (pr.html_url && typeof window !== "undefined") {
-      window.open(pr.html_url, "_blank");
+    if (pr.html_url) {
+      openExternalUrl(pr.html_url).catch((err: unknown) => showError(toErrorMessage(err)));
     }
   };
 

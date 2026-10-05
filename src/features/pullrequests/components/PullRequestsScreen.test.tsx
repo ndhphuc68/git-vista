@@ -8,6 +8,7 @@ import { useToastStore } from "../../../store/useToastStore";
 import { useSettingsStore } from "../../../store/useSettingsStore";
 import { usePullRequests, usePullRequestDetail } from "../api";
 import { checkoutPullRequest } from "../../github";
+import { openerCommands } from "../../../ipc/opener";
 import type { GitHubPullRequest, PullRequestDetail } from "../../../ipc/githubApi";
 
 vi.mock("../api", () => ({
@@ -19,6 +20,10 @@ vi.mock("../../github", () => ({
   checkoutPullRequest: vi.fn(),
   useGitHubRepoInfo: vi.fn(),
   useGitHubToken: vi.fn(),
+}));
+
+vi.mock("../../../ipc/opener", () => ({
+  openerCommands: { openExternalUrl: vi.fn().mockResolvedValue(undefined) },
 }));
 
 const mockPr1: GitHubPullRequest = {
@@ -199,28 +204,22 @@ describe("PullRequestsScreen", () => {
 
   it("opens PR in browser", () => {
     usePullRequestStore.setState({ selectedPr: mockPr1 });
-    const openMock = vi.fn();
-    vi.stubGlobal("open", openMock);
-
     renderWithClient(<PullRequestsScreen repoPath="/test/repo" />);
 
     const browserBtn = screen.getByTitle("Open on GitHub.com");
     fireEvent.click(browserBtn);
 
-    expect(openMock).toHaveBeenCalledWith(mockPr1.html_url, "_blank");
+    expect(openerCommands.openExternalUrl).toHaveBeenCalledWith(mockPr1.html_url);
   });
 
   it("opens PR in browser when clicking PR number link", () => {
     usePullRequestStore.setState({ selectedPr: mockPr1 });
-    const openMock = vi.fn();
-    vi.stubGlobal("open", openMock);
-
     renderWithClient(<PullRequestsScreen repoPath="/test/repo" />);
 
     const prNumberLink = screen.getByRole("link", { name: new RegExp(`#${mockPr1.number}`) });
     fireEvent.click(prNumberLink);
 
-    expect(openMock).toHaveBeenCalledWith(mockPr1.html_url, "_blank");
+    expect(openerCommands.openExternalUrl).toHaveBeenCalledWith(mockPr1.html_url);
   });
 
   it("opens create PR modal when New PR button is clicked", () => {
