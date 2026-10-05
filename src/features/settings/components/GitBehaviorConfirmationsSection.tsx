@@ -6,7 +6,7 @@ import { HelpTooltip } from "../../../components/settings/HelpTooltip";
 import { ConfirmationsDiagram } from "../../../components/settings/helpDiagrams";
 import { SettingsRow, SettingsSection } from "./ui";
 
-/** Safety confirmation switches: discard, delete branch, and force-push warnings. */
+/** Safety confirmation switches: discard and delete branch warnings. */
 export const GitBehaviorConfirmationsSection: React.FC = () => {
   const { t } = useTranslation();
   const b = t.settings.behavior;
@@ -23,12 +23,6 @@ export const GitBehaviorConfirmationsSection: React.FC = () => {
       label: b.confirmDeleteBranchLabel,
       checked: s.confirmDeleteBranch,
       set: s.setConfirmDeleteBranch,
-    },
-    {
-      id: "confirm-force-push",
-      label: b.confirmForcePushLabel,
-      checked: s.confirmForcePush,
-      set: s.setConfirmForcePush,
     },
   ];
 

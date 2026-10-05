@@ -164,7 +164,6 @@ export const en: Translations = {
       confirmationsTitle: "Confirmations & Safety Checks",
       confirmDiscardLabel: "Confirm before discarding changes",
       confirmDeleteBranchLabel: "Confirm before deleting a branch",
-      confirmForcePushLabel: "Confirm before force pushing",
     },
     tools: {
       title: "External Tool Integrations",

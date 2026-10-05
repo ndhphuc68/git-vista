@@ -161,7 +161,6 @@ export const vi = {
       confirmationsTitle: "Hộp thoại cảnh báo & Xác nhận an toàn",
       confirmDiscardLabel: "Xác nhận trước khi hủy bỏ thay đổi (Discard changes)",
       confirmDeleteBranchLabel: "Xác nhận trước khi xóa nhánh (Delete branch)",
-      confirmForcePushLabel: "Xác nhận trước khi đẩy cưỡng bức (Force push)",
     },
     tools: {
       title: "Tích hợp Công cụ Ngoài",

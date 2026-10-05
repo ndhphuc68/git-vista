@@ -33,7 +33,6 @@ describe("Settings Tabs Components", () => {
     settings.setDefaultTerminal("wt");
     settings.setConfirmDiscard(true);
     settings.setConfirmDeleteBranch(true);
-    settings.setConfirmForcePush(true);
     settings.setCommitMessageLimit(50);
   });
 
@@ -123,8 +122,7 @@ describe("Settings Tabs Components", () => {
       fireEvent.click(screen.getByTestId("toggle-confirm-delete-branch"));
       expect(useSettingsStore.getState().confirmDeleteBranch).toBe(false);
 
-      fireEvent.click(screen.getByTestId("toggle-confirm-force-push"));
-      expect(useSettingsStore.getState().confirmForcePush).toBe(false);
+      expect(screen.queryByTestId("toggle-confirm-force-push")).not.toBeInTheDocument();
 
       // Toggle fetch.prune & rebase.autoStash
       const pruneToggle = screen.getByTestId("toggle-fetch-prune");

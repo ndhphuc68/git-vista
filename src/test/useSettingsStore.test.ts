@@ -16,7 +16,6 @@ describe("useSettingsStore", () => {
     store.setDiffShowLineNumbers(true);
     store.setConfirmDiscard(true);
     store.setConfirmDeleteBranch(true);
-    store.setConfirmForcePush(true);
     store.setCommitMessageLimit(50);
     store.setDefaultEditor("code");
     store.setCustomEditorCommand("");
@@ -82,18 +81,15 @@ describe("useSettingsStore", () => {
     const store = useSettingsStore.getState();
     expect(store.confirmDiscard).toBe(true);
     expect(store.confirmDeleteBranch).toBe(true);
-    expect(store.confirmForcePush).toBe(true);
     expect(store.commitMessageLimit).toBe(50);
 
     store.setConfirmDiscard(false);
     store.setConfirmDeleteBranch(false);
-    store.setConfirmForcePush(false);
     store.setCommitMessageLimit(72);
 
     const updated = useSettingsStore.getState();
     expect(updated.confirmDiscard).toBe(false);
     expect(updated.confirmDeleteBranch).toBe(false);
-    expect(updated.confirmForcePush).toBe(false);
     expect(updated.commitMessageLimit).toBe(72);
   });
 

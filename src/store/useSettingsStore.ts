@@ -37,7 +37,6 @@ interface SettingsState {
   // Safety Confirmations
   confirmDiscard: boolean;
   confirmDeleteBranch: boolean;
-  confirmForcePush: boolean;
 
   // Commit Conventions
   commitMessageLimit: number;
@@ -64,7 +63,6 @@ interface SettingsState {
   setDiffShowLineNumbers: (show: boolean) => void;
   setConfirmDiscard: (confirm: boolean) => void;
   setConfirmDeleteBranch: (confirm: boolean) => void;
-  setConfirmForcePush: (confirm: boolean) => void;
   setCommitMessageLimit: (limit: number) => void;
   setDefaultEditor: (editor: ExternalEditor) => void;
   setCustomEditorCommand: (cmd: string) => void;
@@ -109,7 +107,6 @@ function loadInitialSettingsState() {
   const savedDiffShowLineNumbers = getStorage("gitvista_diff_show_line_numbers", "true") === "true";
   const savedConfirmDiscard = getStorage("gitvista_confirm_discard", "true") === "true";
   const savedConfirmDeleteBranch = getStorage("gitvista_confirm_delete_branch", "true") === "true";
-  const savedConfirmForcePush = getStorage("gitvista_confirm_force_push", "true") === "true";
   const savedCommitMessageLimit = parseInt(getStorage("gitvista_commit_message_limit", "72"), 10);
   const savedDefaultEditor = getStorage("gitvista_default_editor", "code") as ExternalEditor;
   const savedCustomEditorCommand = getStorage("gitvista_custom_editor_command", "");
@@ -139,7 +136,6 @@ function loadInitialSettingsState() {
     diffShowLineNumbers: savedDiffShowLineNumbers,
     confirmDiscard: savedConfirmDiscard,
     confirmDeleteBranch: savedConfirmDeleteBranch,
-    confirmForcePush: savedConfirmForcePush,
     commitMessageLimit: savedCommitMessageLimit,
     defaultEditor: savedDefaultEditor,
     customEditorCommand: savedCustomEditorCommand,
@@ -229,11 +225,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
       set,
       "gitvista_confirm_delete_branch",
       "confirmDeleteBranch"
-    ),
-    setConfirmForcePush: makePersistedSetter(
-      set,
-      "gitvista_confirm_force_push",
-      "confirmForcePush"
     ),
     setCommitMessageLimit: makePersistedSetter(
       set,
