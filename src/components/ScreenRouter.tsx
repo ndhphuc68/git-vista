@@ -1,5 +1,5 @@
-import { SCREEN_TYPE } from "../domain/enums";
 import React from "react";
+import { SCREEN_TYPE } from "../domain/enums";
 import { Shell } from "./Shell";
 import { ChangesScreen } from "./changes/ChangesScreen";
 import { ConflictResolverScreen } from "./conflict/ConflictResolverScreen";

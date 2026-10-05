@@ -1,5 +1,5 @@
 import type { GitConfigDto } from "../../../ipc/client";
-import { SETTINGS_SCOPE, type SettingsScope } from "../../../domain/enums";
+import { CONFIG_SCOPE, SETTINGS_SCOPE, type SettingsScope } from "../../../domain/enums";
 
 export interface GitProfileRepoFields {
   isOverride: boolean;
@@ -24,7 +24,7 @@ export function deriveRepoScopeFields(
   globalCfg: GitConfigDto
 ): GitProfileRepoFields {
   return {
-    isOverride: localCfg.userNameSource === "local",
+    isOverride: localCfg.userNameSource === CONFIG_SCOPE.LOCAL,
     userName: localCfg.userName || globalCfg.userName || "",
     userEmail: localCfg.userEmail || globalCfg.userEmail || "",
     gpgSign: localCfg.gpgSign ?? globalCfg.gpgSign ?? false,

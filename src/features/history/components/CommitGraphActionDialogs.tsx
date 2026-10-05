@@ -1,5 +1,5 @@
-import type { SCREEN_TYPE } from "../../../domain/enums";
 import type { QueryClient } from "@tanstack/react-query";
+import type { SCREEN_TYPE } from "../../../domain/enums";
 import type { useTranslation } from "../../../i18n";
 import { InteractiveRebaseModal } from "../../../components/rebase";
 import { CompareModal } from "../../../components/compare";

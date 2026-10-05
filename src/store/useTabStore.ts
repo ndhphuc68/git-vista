@@ -1,6 +1,6 @@
+import { create } from "zustand";
 import { SCREEN_TYPE, TAB_TYPE } from "../domain/enums";
 import { HOME_TAB_ID } from "../domain/constants/app";
-import { create } from "zustand";
 import { type RepoSummary } from "../ipc/bindings.generated";
 import { type TabItem, type TabSessionData } from "../types/tab";
 import { closeRepository, openRepository } from "../features/repo";

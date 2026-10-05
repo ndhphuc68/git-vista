@@ -114,9 +114,9 @@ export const configCommands = {
     value: string
   ): Promise<void> => {
     if (!isTauri()) {
-      if (scope === "global") {
+      if (scope === CONFIG_SCOPE.GLOBAL) {
         setMockGlobalConfig(key, value);
-      } else if (scope === "local" && repoPath) {
+      } else if (scope === CONFIG_SCOPE.LOCAL && repoPath) {
         if (!mockState.localConfigs[repoPath]) mockState.localConfigs[repoPath] = {};
         const local = mockState.localConfigs[repoPath];
         if (value.trim() === "") {

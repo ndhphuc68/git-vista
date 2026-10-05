@@ -76,6 +76,7 @@ describe("enums", () => {
       ["changes", "conflict", "history", "pull-requests"].sort()
     );
   });
+
   it("TAB_TYPE lists the window tab kinds", () => {
     expect(TAB_TYPE).toEqual({ HOME: "home", REPO: "repo" });
   });

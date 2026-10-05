@@ -29,7 +29,7 @@ export function createGlobalPullStrategyHandler(context: GitBehaviorActionsConte
     context.setGlobalPullRebase(isRebase);
     context.setSaving(true);
     try {
-      await setGitConfig(null, "global", "pull.rebase", String(isRebase));
+      await setGitConfig(null, CONFIG_SCOPE.GLOBAL, "pull.rebase", String(isRebase));
       context.showSuccess(context.t.settings.profile.savedSuccess);
     } catch (err) {
       console.error("Failed to update global pull strategy:", err);
@@ -47,7 +47,7 @@ export function createRepoPullStrategyHandler(context: GitBehaviorActionsContext
     context.setSaving(true);
     try {
       if (mode === PULL_STRATEGY.INHERIT) {
-        await setGitConfig(currentRepoPath, "local", "pull.rebase", "");
+        await setGitConfig(currentRepoPath, CONFIG_SCOPE.LOCAL, "pull.rebase", "");
         context.setLocalPullRebase(null);
       } else {
         const isRebase = mode === PULL_STRATEGY.REBASE;

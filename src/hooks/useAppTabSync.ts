@@ -1,6 +1,6 @@
+import { useEffect } from "react";
 import { TAB_TYPE } from "../domain/enums";
 import { HOME_TAB_ID } from "../domain/constants/app";
-import { useEffect } from "react";
 import { type RepoSummary } from "../ipc/bindings.generated";
 import { type TabItem } from "../types/tab";
 

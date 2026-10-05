@@ -3,7 +3,7 @@ import { getGitConfig, setGitConfig } from "../../../features/settings";
 import type { GitConfigDto } from "../../../ipc/client";
 import type { Translations } from "../../../i18n/vi";
 import { applyProfileFields } from "./useGitProfileForm.load";
-import { SETTINGS_SCOPE, type SettingsScope } from "../../../domain/enums";
+import { CONFIG_SCOPE, SETTINGS_SCOPE, type SettingsScope } from "../../../domain/enums";
 
 export interface GitProfileActionsContext {
   activeScope: SettingsScope;
@@ -54,23 +54,33 @@ export function createSaveHandler(context: GitProfileActionsContext) {
     try {
       if (activeScope === SETTINGS_SCOPE.REPO && currentRepoPath) {
         if (isOverride) {
-          await setGitConfig(currentRepoPath, "local", "user.name", userName.trim());
-          await setGitConfig(currentRepoPath, "local", "user.email", userEmail.trim());
-          await setGitConfig(currentRepoPath, "local", "commit.gpgsign", String(gpgSign));
-          await setGitConfig(currentRepoPath, "local", "user.signingkey", gpgKey.trim());
+          await setGitConfig(currentRepoPath, CONFIG_SCOPE.LOCAL, "user.name", userName.trim());
+          await setGitConfig(currentRepoPath, CONFIG_SCOPE.LOCAL, "user.email", userEmail.trim());
+          await setGitConfig(
+            currentRepoPath,
+            CONFIG_SCOPE.LOCAL,
+            "commit.gpgsign",
+            String(gpgSign)
+          );
+          await setGitConfig(currentRepoPath, CONFIG_SCOPE.LOCAL, "user.signingkey", gpgKey.trim());
         } else {
           // Clear local override to inherit
-          await setGitConfig(currentRepoPath, "local", "user.name", "");
-          await setGitConfig(currentRepoPath, "local", "user.email", "");
-          await setGitConfig(currentRepoPath, "local", "commit.gpgsign", "");
-          await setGitConfig(currentRepoPath, "local", "user.signingkey", "");
+          await setGitConfig(currentRepoPath, CONFIG_SCOPE.LOCAL, "user.name", "");
+          await setGitConfig(currentRepoPath, CONFIG_SCOPE.LOCAL, "user.email", "");
+          await setGitConfig(currentRepoPath, CONFIG_SCOPE.LOCAL, "commit.gpgsign", "");
+          await setGitConfig(currentRepoPath, CONFIG_SCOPE.LOCAL, "user.signingkey", "");
         }
       } else {
-        await setGitConfig(null, "global", "user.name", userName.trim());
-        await setGitConfig(null, "global", "user.email", userEmail.trim());
-        await setGitConfig(null, "global", "init.defaultBranch", defaultBranch.trim() || "main");
-        await setGitConfig(null, "global", "commit.gpgsign", String(gpgSign));
-        await setGitConfig(null, "global", "user.signingkey", gpgKey.trim());
+        await setGitConfig(null, CONFIG_SCOPE.GLOBAL, "user.name", userName.trim());
+        await setGitConfig(null, CONFIG_SCOPE.GLOBAL, "user.email", userEmail.trim());
+        await setGitConfig(
+          null,
+          CONFIG_SCOPE.GLOBAL,
+          "init.defaultBranch",
+          defaultBranch.trim() || "main"
+        );
+        await setGitConfig(null, CONFIG_SCOPE.GLOBAL, "commit.gpgsign", String(gpgSign));
+        await setGitConfig(null, CONFIG_SCOPE.GLOBAL, "user.signingkey", gpgKey.trim());
       }
 
       showSuccess(t.settings.profile.savedSuccess);
@@ -114,10 +124,10 @@ export function createResetToGlobalHandler(context: GitProfileActionsContext) {
     if (!currentRepoPath) return;
     setSaving(true);
     try {
-      await setGitConfig(currentRepoPath, "local", "user.name", "");
-      await setGitConfig(currentRepoPath, "local", "user.email", "");
-      await setGitConfig(currentRepoPath, "local", "commit.gpgsign", "");
-      await setGitConfig(currentRepoPath, "local", "user.signingkey", "");
+      await setGitConfig(currentRepoPath, CONFIG_SCOPE.LOCAL, "user.name", "");
+      await setGitConfig(currentRepoPath, CONFIG_SCOPE.LOCAL, "user.email", "");
+      await setGitConfig(currentRepoPath, CONFIG_SCOPE.LOCAL, "commit.gpgsign", "");
+      await setGitConfig(currentRepoPath, CONFIG_SCOPE.LOCAL, "user.signingkey", "");
 
       const updatedLocal = await getGitConfig(currentRepoPath);
       setLocalConfig(updatedLocal);

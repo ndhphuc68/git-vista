@@ -122,7 +122,7 @@ function sortRefs(refs: RefBadge[]): RefBadge[] {
     const priority = (type: string) => {
       if (type === REF_TYPE.HEAD) return 0;
       if (type === REF_TYPE.TAG) return 1;
-      if (type === "local") return 2;
+      if (type === REF_TYPE.LOCAL) return 2;
       return 3;
     };
     return priority(a.ref_type) - priority(b.ref_type);

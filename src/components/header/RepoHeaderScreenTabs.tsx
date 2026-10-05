@@ -1,7 +1,7 @@
-import { SCREEN_TYPE } from "../../domain/enums";
 import React from "react";
 import clsx from "clsx";
 import { History, FileDiff, GitPullRequest } from "lucide-react";
+import { SCREEN_TYPE } from "../../domain/enums";
 import { type ActiveScreen } from "../../store/useViewStore";
 import { type Translations } from "../../i18n/vi";
 

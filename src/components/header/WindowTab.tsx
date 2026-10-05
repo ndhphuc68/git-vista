@@ -1,5 +1,5 @@
-import { TAB_TYPE } from "../../domain/enums";
 import React from "react";
+import { TAB_TYPE } from "../../domain/enums";
 import { type TabItem } from "../../types/tab";
 import { HomeWindowTab } from "./HomeWindowTab";
 import { RepoWindowTab } from "./RepoWindowTab";

@@ -1,6 +1,6 @@
-import { TAB_TYPE } from "../../domain/enums";
 import React from "react";
 import { User, Palette, Sliders, FileCode, Terminal, GitPullRequest } from "lucide-react";
+import { TAB_TYPE } from "../../domain/enums";
 import type { Translations } from "../../i18n/vi";
 import type { SettingsTab } from "../../store/useSettingsStore";
 import type { TabItem } from "../../types/tab";

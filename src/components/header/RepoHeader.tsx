@@ -1,5 +1,5 @@
-import { SCREEN_TYPE } from "../../domain/enums";
 import React, { useEffect } from "react";
+import { SCREEN_TYPE } from "../../domain/enums";
 import { useRepoStore } from "../../store/useRepoStore";
 import { useViewStore } from "../../store/useViewStore";
 import { useLayoutStore } from "../../store/useLayoutStore";

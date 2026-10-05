@@ -1,5 +1,5 @@
-import { SCREEN_TYPE } from "../../domain/enums";
 import { useEffect } from "react";
+import { SCREEN_TYPE } from "../../domain/enums";
 import { type RepoSummary } from "../../ipc/bindings.generated";
 import { type ActiveScreen } from "../../store/useViewStore";
 

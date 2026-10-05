@@ -39,7 +39,11 @@ export const PR_STATUS = {
 } as const;
 export type PullRequestStatus = (typeof PR_STATUS)[keyof typeof PR_STATUS];
 
-/** `status` of a file in a GitHub pull request. GitHub says "removed", git says "deleted". */
+/**
+ * `status` of a file in a GitHub pull request. GitHub says "removed", git says "deleted".
+ * Covers the statuses the app handles. GitHub can also send `copied`, `changed` and
+ * `unchanged`, which fall through to the default branch in `PullRequestFilesChangedView.tsx`.
+ */
 export const PR_FILE_STATUS = {
   ADDED: "added",
   MODIFIED: "modified",

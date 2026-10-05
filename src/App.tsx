@@ -1,6 +1,6 @@
-import { SCREEN_TYPE, TAB_TYPE } from "./domain/enums";
 import React, { useState } from "react";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { SCREEN_TYPE, TAB_TYPE } from "./domain/enums";
 import { RepoHeader } from "./components/header/RepoHeader";
 import { InProgressOperationBanner } from "./components/banner/InProgressOperationBanner";
 import { type RepoSummary } from "./ipc/bindings.generated";

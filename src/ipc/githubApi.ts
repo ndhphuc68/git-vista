@@ -7,7 +7,12 @@
  * HTTP rather than through IPC.
  */
 
-import type { CheckStatus, PullRequestFileStatus, PullRequestState } from "../domain/enums";
+import type {
+  CheckStatus,
+  PR_STATE,
+  PullRequestFileStatus,
+  PullRequestState,
+} from "../domain/enums";
 
 export type { CheckStatus, PullRequestState } from "../domain/enums";
 
@@ -27,7 +32,7 @@ export interface GitHubLabel {
 export interface GitHubPullRequest {
   number: number;
   title: string;
-  state: Exclude<PullRequestState, "all">;
+  state: Exclude<PullRequestState, typeof PR_STATE.ALL>;
   merged_at?: string | null;
   draft: boolean;
   user: GitHubUserSummary;
