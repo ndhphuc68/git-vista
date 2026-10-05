@@ -1,5 +1,6 @@
 import { type GraphCommitNode } from "../../../ipc/bindings.generated";
 import { localNameOfRemoteBranch } from "../../../shared/utils/git";
+import { REF_TYPE } from "../../../domain/enums";
 
 /**
  * The local branch HEAD lands on after checking out `name` from a graph pill.
@@ -12,7 +13,7 @@ export function graphCheckedOutBranchName(
 ): string {
   const matching = commits.flatMap((commit) => commit.refs).filter((ref) => ref.name === name);
   const isRemoteOnly =
-    matching.some((ref) => ref.ref_type === "remote") &&
-    !matching.some((ref) => ref.ref_type !== "remote");
+    matching.some((ref) => ref.ref_type === REF_TYPE.REMOTE) &&
+    !matching.some((ref) => ref.ref_type !== REF_TYPE.REMOTE);
   return isRemoteOnly ? localNameOfRemoteBranch(name) : name;
 }

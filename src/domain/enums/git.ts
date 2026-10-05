@@ -48,3 +48,27 @@ export const OPERATION_STATUS = {
   ERROR: "Error",
 } as const;
 export type OperationStatus = (typeof OPERATION_STATUS)[keyof typeof OPERATION_STATUS];
+
+/** Working-tree file status. Source: bindings.ts FileStatus */
+export const FILE_STATUS = {
+  MODIFIED: "Modified",
+  NEW: "New",
+  DELETED: "Deleted",
+  RENAMED: "Renamed",
+  TYPECHANGE: "Typechange",
+  CONFLICTED: "Conflicted",
+} as const;
+export type FileStatus = (typeof FILE_STATUS)[keyof typeof FILE_STATUS];
+
+/**
+ * Kind of ref shown on a commit graph row.
+ * Rust returns a plain String (src-tauri/src/read/graph.rs), so bindings type
+ * the field as `string`.
+ */
+export const REF_TYPE = {
+  HEAD: "head",
+  LOCAL: "local",
+  REMOTE: "remote",
+  TAG: "tag",
+} as const;
+export type RefType = (typeof REF_TYPE)[keyof typeof REF_TYPE];

@@ -11,11 +11,14 @@ import {
   SCREEN_TYPE,
   REBASE_ACTION,
   OPERATION_STATUS,
+  REF_TYPE,
   type ConfigScope,
+  type FileStatus,
   type RebaseActionKind,
 } from ".";
 import type {
   ConfigScope as BindingConfigScope,
+  FileStatus as BindingFileStatus,
   RebaseActionKind as BindingRebaseActionKind,
 } from "../../ipc/bindings.generated";
 
@@ -42,6 +45,11 @@ describe("enums", () => {
       CONFLICT: "Conflict",
       ERROR: "Error",
     });
+  });
+
+  it("REF_TYPE matches the ref_type strings Rust returns", () => {
+    // String in Rust: src-tauri/src/read/graph.rs (GraphRef.ref_type).
+    expect(REF_TYPE).toEqual({ HEAD: "head", LOCAL: "local", REMOTE: "remote", TAG: "tag" });
   });
 
   it("PR_STATE matches the exact strings of the GitHub API", () => {
@@ -97,5 +105,9 @@ describe("enums stay in sync with generated bindings", () => {
 
   it("REBASE_ACTION matches RebaseActionKind", () => {
     expectTypeOf<RebaseActionKind>().toEqualTypeOf<BindingRebaseActionKind>();
+  });
+
+  it("FILE_STATUS matches FileStatus", () => {
+    expectTypeOf<FileStatus>().toEqualTypeOf<BindingFileStatus>();
   });
 });
