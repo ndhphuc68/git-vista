@@ -20,7 +20,7 @@ export const CreatePullRequestModalHeader: React.FC<CreatePullRequestModalHeader
 }) => (
   <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle">
     <div className="flex items-center gap-2.5">
-      <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
+      <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center text-link">
         <GitPullRequest size={16} />
       </div>
       <div>

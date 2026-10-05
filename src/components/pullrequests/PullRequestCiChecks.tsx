@@ -15,7 +15,7 @@ export const PullRequestCiChecks: React.FC<PullRequestCiChecksProps> = ({ checkR
   return (
     <div className="p-3 bg-surface-header/40 border border-border-subtle rounded-xl space-y-2">
       <div className="text-xs font-semibold text-primary flex items-center gap-1.5">
-        <CheckCircle2 size={13} className="text-accent" />
+        <CheckCircle2 size={13} className="text-link" />
         <span>{t.pullRequests.ciStatus}</span>
       </div>
       <div className="space-y-1.5">
@@ -42,7 +42,7 @@ export const PullRequestCiChecks: React.FC<PullRequestCiChecksProps> = ({ checkR
                 href={c.details_url}
                 target="_blank"
                 rel="noreferrer"
-                className="text-accent hover:underline text-[11px] shrink-0 ml-2"
+                className="text-link hover:underline text-[11px] shrink-0 ml-2"
               >
                 Details
               </a>

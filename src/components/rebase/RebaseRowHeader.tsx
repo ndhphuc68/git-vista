@@ -78,7 +78,7 @@ export const RebaseRowHeader: React.FC<RebaseRowHeaderProps> = ({
             className={clsx(
               "text-xs font-medium text-primary truncate",
               isDropped && "line-through text-secondary",
-              isRewordOrSquash && "italic text-accent"
+              isRewordOrSquash && "italic text-link"
             )}
             title={commit.summary}
           >

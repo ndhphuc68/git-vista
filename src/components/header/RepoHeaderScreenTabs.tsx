@@ -68,7 +68,7 @@ const ChangesTabButton: React.FC<{
     testId="tab-changes"
     onClick={onClick}
     title={title}
-    icon={<FileDiff size={15} className={active ? "text-accent" : "text-secondary"} />}
+    icon={<FileDiff size={15} className={active ? "text-link" : "text-secondary"} />}
     label={label}
     badge={
       totalChanges > 0 ? (
@@ -95,13 +95,13 @@ const PullRequestsTabButton: React.FC<{
     testId="tab-pull-requests"
     onClick={onClick}
     title={title}
-    icon={<GitPullRequest size={15} className={active ? "text-accent" : "text-secondary"} />}
+    icon={<GitPullRequest size={15} className={active ? "text-link" : "text-secondary"} />}
     label={label}
     badge={
       openPrCount !== undefined && openPrCount > 0 ? (
         <span
           data-testid="pull-requests-badge"
-          className="inline-flex items-center justify-center px-1.5 min-w-4 h-4 rounded-full text-[10px] font-bold bg-accent/20 text-accent leading-none animate-scale-in"
+          className="inline-flex items-center justify-center px-1.5 min-w-4 h-4 rounded-full text-[10px] font-bold bg-accent/20 text-link leading-none animate-scale-in"
         >
           {openPrCount}
         </span>
@@ -140,7 +140,7 @@ export const RepoHeaderScreenTabs: React.FC<RepoHeaderScreenTabsProps> = ({
         icon={
           <History
             size={15}
-            className={activeScreen === SCREEN_TYPE.HISTORY ? "text-accent" : "text-secondary"}
+            className={activeScreen === SCREEN_TYPE.HISTORY ? "text-link" : "text-secondary"}
           />
         }
         label={t.screens.history}

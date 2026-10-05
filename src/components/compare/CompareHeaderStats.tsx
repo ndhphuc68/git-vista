@@ -34,7 +34,7 @@ export const CompareHeaderStats: React.FC<CompareHeaderStatsProps> = ({
       ) : summary ? (
         <div className="flex flex-wrap items-center gap-3 text-secondary">
           <div className="flex items-center gap-1">
-            <GitCommit size={13} className="text-accent" />
+            <GitCommit size={13} className="text-link" />
             <span>
               {t.compare.aheadBehind
                 .replace("{ahead}", String(summary.ahead_count))

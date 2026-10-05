@@ -31,7 +31,7 @@ export const DiffViewerHeader: React.FC<DiffViewerHeaderProps> = ({
           className={clsx(
             "inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-semibold shrink-0",
             isStaged
-              ? "bg-accent-subtle text-accent border border-accent"
+              ? "bg-accent-subtle text-link border border-accent"
               : "bg-surface text-secondary border border-border-subtle"
           )}
         >
@@ -65,7 +65,7 @@ export const DiffViewerHeader: React.FC<DiffViewerHeaderProps> = ({
             className={clsx(
               "p-1.5 rounded text-xs flex items-center justify-center transition-colors cursor-pointer",
               diffIgnoreWhitespace
-                ? "bg-accent/15 text-accent border border-accent/40"
+                ? "bg-accent/15 text-link border border-accent/40"
                 : "bg-surface text-secondary border border-border-subtle hover:bg-surface-hover hover:text-primary"
             )}
           >
@@ -79,7 +79,7 @@ export const DiffViewerHeader: React.FC<DiffViewerHeaderProps> = ({
             className={clsx(
               "p-1.5 rounded text-xs flex items-center justify-center transition-colors cursor-pointer",
               showWordDiff
-                ? "bg-accent/15 text-accent border border-accent/40"
+                ? "bg-accent/15 text-link border border-accent/40"
                 : "bg-surface text-secondary border border-border-subtle hover:bg-surface-hover hover:text-primary"
             )}
           >

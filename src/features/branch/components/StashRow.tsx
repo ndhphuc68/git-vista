@@ -32,7 +32,7 @@ export const StashRow: React.FC<StashRowProps> = ({
       className={clsx(
         "group flex items-center justify-between rounded-sm px-2 py-1 cursor-pointer text-xs transition-colors",
         isSelected
-          ? "bg-accent-subtle text-accent font-semibold"
+          ? "bg-accent-subtle text-link font-semibold"
           : "bg-transparent text-primary hover:bg-surface-hover"
       )}
       onClick={() => onSelect(item)}
@@ -50,7 +50,7 @@ export const StashRow: React.FC<StashRowProps> = ({
           type="button"
           title={t.sidebar.applyStashTitle}
           onClick={() => onApply(item.index)}
-          className="p-0.5 bg-transparent border-0 text-secondary hover:text-accent cursor-pointer rounded-sm"
+          className="p-0.5 bg-transparent border-0 text-secondary hover:text-link cursor-pointer rounded-sm"
         >
           <Play size={11} />
         </button>
@@ -58,7 +58,7 @@ export const StashRow: React.FC<StashRowProps> = ({
           type="button"
           title={t.sidebar.popStashTitle}
           onClick={() => onPop(item.index)}
-          className="p-0.5 bg-transparent border-0 text-secondary hover:text-accent cursor-pointer rounded-sm"
+          className="p-0.5 bg-transparent border-0 text-secondary hover:text-link cursor-pointer rounded-sm"
         >
           <PlayCircle size={11} />
         </button>

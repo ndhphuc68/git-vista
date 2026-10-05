@@ -26,7 +26,7 @@ export const GitHubAccountCard: React.FC<GitHubAccountCardProps> = ({
             className="w-10 h-10 rounded-full border border-border-subtle"
           />
         ) : (
-          <div className="w-10 h-10 rounded-full bg-accent-subtle flex items-center justify-center font-bold text-accent">
+          <div className="w-10 h-10 rounded-full bg-accent-subtle flex items-center justify-center font-bold text-link">
             {connectedUser.login.charAt(0).toUpperCase()}
           </div>
         )}

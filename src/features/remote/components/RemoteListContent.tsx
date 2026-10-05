@@ -37,7 +37,7 @@ export const RemoteListContent: React.FC<RemoteListContentProps> = ({
     return (
       <div className="p-6 overflow-y-auto flex flex-col gap-3 flex-1 min-h-0">
         <div className="flex flex-col items-center justify-center py-12 text-secondary gap-2.5">
-          <Loader2 size={24} className="animate-spin text-accent" />
+          <Loader2 size={24} className="animate-spin text-link" />
           <span className="text-xs">{t.common.loading}</span>
         </div>
       </div>

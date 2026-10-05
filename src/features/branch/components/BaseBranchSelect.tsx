@@ -32,7 +32,7 @@ const BRANCH_ICON = <GitBranch size={13} className="text-secondary shrink-0" ari
 
 // "HEAD" is the Git ref name, not translated text.
 const HEAD_BADGE = (
-  <span className="text-[10px] text-accent px-1.5 py-px bg-accent/10 rounded-xs font-semibold">
+  <span className="text-[10px] text-link px-1.5 py-px bg-accent/10 rounded-xs font-semibold">
     HEAD
   </span>
 );

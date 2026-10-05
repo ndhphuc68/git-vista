@@ -26,7 +26,7 @@ export const CompareTabBar: React.FC<CompareTabBarProps> = ({
         className={clsx(
           "flex-1 py-2.5 px-3 text-xs font-semibold text-center border-b-2 transition-colors cursor-pointer",
           activeTab === "files"
-            ? "border-accent text-accent bg-accent/5"
+            ? "border-accent text-link bg-accent/5"
             : "border-transparent text-secondary hover:text-primary hover:bg-surface-hover"
         )}
       >
@@ -38,7 +38,7 @@ export const CompareTabBar: React.FC<CompareTabBarProps> = ({
         className={clsx(
           "flex-1 py-2.5 px-3 text-xs font-semibold text-center border-b-2 transition-colors cursor-pointer",
           activeTab === "commits"
-            ? "border-accent text-accent bg-accent/5"
+            ? "border-accent text-link bg-accent/5"
             : "border-transparent text-secondary hover:text-primary hover:bg-surface-hover"
         )}
       >

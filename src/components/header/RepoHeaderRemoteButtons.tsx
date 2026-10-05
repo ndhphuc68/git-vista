@@ -54,7 +54,7 @@ export const RepoHeaderRemoteButtons: React.FC<RepoHeaderRemoteButtonsProps> = (
         className="flex items-center gap-1.5 px-3 py-1.5 text-secondary hover:text-primary hover:bg-surface-hover text-xs font-medium cursor-pointer transition-colors disabled:opacity-50 btn-press"
         title={t.header.pullTitle}
       >
-        <ArrowDown size={15} className="text-accent" />
+        <ArrowDown size={15} className="text-link" />
         <span>{actions.pull}</span>
         {behindCount > 0 && (
           <span

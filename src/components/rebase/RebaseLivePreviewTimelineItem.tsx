@@ -21,7 +21,7 @@ export const RebaseLivePreviewTimelineItem: React.FC<RebaseLivePreviewTimelineIt
       <div
         className={clsx(
           "w-5 h-5 rounded-full flex items-center justify-center shrink-0 z-10 shadow-xs border-2",
-          isLastItem ? "bg-accent border-accent text-white" : "bg-surface border-accent text-accent"
+          isLastItem ? "bg-accent border-accent text-white" : "bg-surface border-accent text-link"
         )}
       >
         <GitCommit size={11} />
@@ -35,7 +35,7 @@ export const RebaseLivePreviewTimelineItem: React.FC<RebaseLivePreviewTimelineIt
               {item.short_id}
             </span>
             {isLastItem && (
-              <span className="text-[9px] font-bold uppercase px-1 py-0.2 rounded bg-accent/20 text-accent">
+              <span className="text-[9px] font-bold uppercase px-1 py-0.2 rounded bg-accent/20 text-link">
                 HEAD
               </span>
             )}
@@ -50,7 +50,7 @@ export const RebaseLivePreviewTimelineItem: React.FC<RebaseLivePreviewTimelineIt
         <span
           className={clsx(
             "text-xs font-medium text-primary mt-1 truncate",
-            item.isReworded && "italic text-accent"
+            item.isReworded && "italic text-link"
           )}
           title={item.displayMessage}
         >

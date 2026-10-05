@@ -68,7 +68,7 @@ export function CommitFileListRow({
               e.stopPropagation();
               openInspector(file.path, "blame", selectedCommitId);
             }}
-            className="p-1 rounded hover:bg-surface-hover text-tertiary hover:text-accent transition-colors cursor-pointer"
+            className="p-1 rounded hover:bg-surface-hover text-tertiary hover:text-link transition-colors cursor-pointer"
             title={t.inspector.viewBlame}
           >
             <FileText size={11} />
@@ -79,7 +79,7 @@ export function CommitFileListRow({
               e.stopPropagation();
               openInspector(file.path, "history");
             }}
-            className="p-1 rounded hover:bg-surface-hover text-tertiary hover:text-accent transition-colors cursor-pointer"
+            className="p-1 rounded hover:bg-surface-hover text-tertiary hover:text-link transition-colors cursor-pointer"
             title={t.inspector.viewHistory}
           >
             <History size={11} />

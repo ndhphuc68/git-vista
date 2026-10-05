@@ -36,7 +36,7 @@ describe("SettingsNavButton", () => {
     expect(button.className).toContain("border-accent/20");
 
     const iconWrapper = screen.getByTestId("github-icon").parentElement;
-    expect(iconWrapper?.className).toContain("text-accent");
+    expect(iconWrapper?.className).toContain("text-link");
   });
 
   it("triggers onSelect callback with item.id on click", () => {

@@ -51,7 +51,7 @@ export const RemoteBranchesSection: React.FC<RemoteBranchesSectionProps> = ({
               e.stopPropagation();
               onManageRemotes();
             }}
-            className="flex items-center justify-center p-1 bg-transparent border-0 text-secondary hover:text-accent hover:bg-surface-hover rounded-sm cursor-pointer transition-colors"
+            className="flex items-center justify-center p-1 bg-transparent border-0 text-secondary hover:text-link hover:bg-surface-hover rounded-sm cursor-pointer transition-colors"
           >
             <Settings2 size={13} />
           </button>
@@ -63,7 +63,7 @@ export const RemoteBranchesSection: React.FC<RemoteBranchesSectionProps> = ({
               e.stopPropagation();
               onAddRemote();
             }}
-            className="flex items-center justify-center p-1 bg-transparent border-0 text-secondary hover:text-accent hover:bg-surface-hover rounded-sm cursor-pointer transition-colors"
+            className="flex items-center justify-center p-1 bg-transparent border-0 text-secondary hover:text-link hover:bg-surface-hover rounded-sm cursor-pointer transition-colors"
           >
             <Plus size={13} />
           </button>

@@ -8,7 +8,7 @@ const SampleTailwindCard: React.FC<{ title: string; subtitle: string }> = ({ tit
       data-testid="tailwind-card"
       className="flex flex-col gap-2 rounded-lg bg-surface p-4 text-primary shadow-md border border-border-subtle hover:bg-surface-hover transition-colors"
     >
-      <h3 className="text-sm font-semibold text-accent">{title}</h3>
+      <h3 className="text-sm font-semibold text-link">{title}</h3>
       <p className="text-xs text-secondary">{subtitle}</p>
     </div>
   );
@@ -32,7 +32,7 @@ describe("Tailwind CSS Integration", () => {
 
     const titleEl = screen.getByText("Visual Git Client");
     expect(titleEl).toBeInTheDocument();
-    expect(titleEl.className).toContain("text-accent");
+    expect(titleEl.className).toContain("text-link");
 
     const subtitleEl = screen.getByText("Powered by Tauri v2 and Tailwind CSS");
     expect(subtitleEl).toBeInTheDocument();

@@ -34,14 +34,14 @@ export const GitHubTokenPanel: React.FC<GitHubTokenPanelProps> = ({
     <div className="space-y-3 p-4">
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium text-primary flex items-center gap-1.5">
-          <Key size={14} className="text-accent" />
+          <Key size={14} className="text-link" />
           <span>{t.settings.github.tokenLabel}</span>
         </label>
         <a
           href="https://github.com/settings/tokens/new?scopes=repo&description=GitVista"
           target="_blank"
           rel="noreferrer"
-          className="text-xs text-accent hover:underline flex items-center gap-1"
+          className="text-xs text-link hover:underline flex items-center gap-1"
         >
           <span>{t.settings.github.createTokenLink}</span>
           <ExternalLink size={11} />

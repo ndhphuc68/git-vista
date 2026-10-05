@@ -116,7 +116,7 @@ export function getTypeBadgeStyle(type: string | null) {
       return "bg-stone-100 text-stone-800 dark:bg-stone-800 dark:text-stone-300 border-stone-300 dark:border-stone-700";
     case null:
     default:
-      return "bg-accent-subtle text-accent border-accent/30";
+      return "bg-accent-subtle text-link border-accent/30";
   }
 }
 

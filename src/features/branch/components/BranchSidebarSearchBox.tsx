@@ -22,7 +22,7 @@ export const BranchSidebarSearchBox: React.FC<BranchSidebarSearchBoxProps> = ({
       <div className="group relative flex items-center gap-2 bg-window/80 hover:bg-window focus-within:bg-surface focus-within:ring-2 focus-within:ring-accent/20 border border-border-subtle focus-within:border-accent rounded-md px-2.5 py-1.5 transition-all duration-150 shadow-2xs">
         <Search
           size={13}
-          className="text-tertiary group-focus-within:text-accent shrink-0 transition-colors"
+          className="text-tertiary group-focus-within:text-link shrink-0 transition-colors"
         />
         <input
           type="text"

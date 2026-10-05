@@ -37,7 +37,7 @@ export const ReadOnlyDiffHunk: React.FC<ReadOnlyDiffHunkProps> = ({
     <div className="border-b last:border-b-0 border-border-subtle">
       {/* Hunk Header */}
       <div className="bg-window px-3 py-1 text-[11px] font-semibold text-secondary border-b border-border-subtle flex items-center gap-2 select-none">
-        <span className="text-accent font-mono">{hunk.header}</span>
+        <span className="text-link font-mono">{hunk.header}</span>
       </div>
 
       {/* Hunk Lines */}

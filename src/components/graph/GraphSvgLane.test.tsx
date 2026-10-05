@@ -19,7 +19,7 @@ describe("GraphSvgLane", () => {
     expect(line?.getAttribute("x2")).toBe("8");
     expect(line?.getAttribute("y1")).toBe("0");
     expect(line?.getAttribute("y2")).toBe("32");
-    expect(line?.getAttribute("stroke")).toBe("#2F6FEB");
+    expect(line?.getAttribute("stroke")).toBe("#FFB000");
   });
 
   it("renders an incoming edge for root commit from top of row to node center", () => {
@@ -39,7 +39,7 @@ describe("GraphSvgLane", () => {
     expect(line?.getAttribute("x2")).toBe("8");
     expect(line?.getAttribute("y1")).toBe("0");
     expect(line?.getAttribute("y2")).toBe("16");
-    expect(line?.getAttribute("stroke")).toBe("#2F6FEB");
+    expect(line?.getAttribute("stroke")).toBe("#FFB000");
   });
 
   it("renders merge and fork edges as curved paths with the edge's own color", () => {
@@ -56,9 +56,9 @@ describe("GraphSvgLane", () => {
     const paths = container.querySelectorAll("path");
     expect(paths.length).toBe(2);
     expect(paths[0]?.getAttribute("d")).toBe("M 24 0 C 24 12, 8 12, 8 16");
-    expect(paths[0]?.getAttribute("stroke")).toBe("#8E44AD");
+    expect(paths[0]?.getAttribute("stroke")).toBe("#DC267F");
     expect(paths[1]?.getAttribute("d")).toBe("M 8 16 C 8 24, 40 24, 40 32");
-    expect(paths[1]?.getAttribute("stroke")).toBe("#27AE60");
+    expect(paths[1]?.getAttribute("stroke")).toBe("#994F00");
   });
 
   it("renders the HEAD node marker with four concentric circles", () => {

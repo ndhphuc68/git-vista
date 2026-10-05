@@ -17,7 +17,7 @@ export const ShortcutsHelpModalHeader: React.FC<ShortcutsHelpModalHeaderProps> =
 }) => (
   <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle bg-surface-header/40">
     <div className="flex items-center gap-2.5">
-      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
+      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-link">
         <Keyboard size={18} />
       </div>
       <div>

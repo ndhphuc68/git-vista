@@ -44,12 +44,12 @@ export const RecentRepositoryRow: React.FC<RecentRepositoryRowProps> = ({
       className="group flex items-center justify-between p-3 rounded-xl bg-transparent hover:bg-surface-hover border border-transparent hover:border-border-subtle transition-all cursor-pointer gap-2.5"
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="w-8 h-8 rounded-lg bg-window border border-border-subtle flex items-center justify-center text-secondary group-hover:text-accent group-hover:border-accent transition-colors shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-window border border-border-subtle flex items-center justify-center text-secondary group-hover:text-link group-hover:border-accent transition-colors shrink-0">
           <GitBranch size={15} />
         </div>
         <div className="flex flex-col min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-sm text-primary group-hover:text-accent transition-colors">
+            <span className="font-bold text-sm text-primary group-hover:text-link transition-colors">
               {item.name}
             </span>
             {isPinned && (

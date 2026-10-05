@@ -43,7 +43,7 @@ export const RepoWindowTab: React.FC<RepoWindowTabProps> = ({
           size={14}
           className={clsx(
             "shrink-0 transition-colors",
-            isActive ? "text-accent" : "text-secondary group-hover:text-primary"
+            isActive ? "text-link" : "text-secondary group-hover:text-primary"
           )}
         />
         <span className="truncate font-semibold">{repoName}</span>
@@ -53,7 +53,7 @@ export const RepoWindowTab: React.FC<RepoWindowTabProps> = ({
             className={clsx(
               "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono shrink-0 max-w-[120px] truncate border",
               isActive
-                ? "bg-accent-subtle text-accent border-accent/30 font-medium"
+                ? "bg-accent-subtle text-link border-accent/30 font-medium"
                 : "bg-surface-active/70 text-secondary border-border-subtle/60"
             )}
             title={`Branch: ${branchName}`}

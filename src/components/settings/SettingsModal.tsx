@@ -30,7 +30,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ currentRepoPath })
       <div className="w-[85vw] max-w-[85vw] h-[85vh] flex flex-col min-h-0">
         <div className="flex shrink-0 items-center justify-between gap-4 border-b border-border-subtle bg-surface-header/40 px-5 py-3">
           <div className="flex items-center gap-2.5">
-            <Settings size={18} className="text-accent" />
+            <Settings size={18} className="text-link" />
             <h2 id={TITLE_ID} className="m-0 text-sm font-semibold text-primary">
               {t.settings.title}
             </h2>

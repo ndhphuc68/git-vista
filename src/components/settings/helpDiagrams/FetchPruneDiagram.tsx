@@ -22,7 +22,7 @@ export const FetchPruneDiagram: React.FC = () => {
         {/* Local status */}
         <div className="flex items-center justify-between text-xs pt-1">
           <div className="flex items-center gap-1.5 text-secondary font-medium">
-            <GitBranch size={14} className="text-accent shrink-0" />
+            <GitBranch size={14} className="text-link shrink-0" />
             <span>Máy cục bộ (Local):</span>
           </div>
           {pruned ? (
@@ -41,7 +41,7 @@ export const FetchPruneDiagram: React.FC = () => {
           <button
             type="button"
             onClick={() => setPruned(!pruned)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 transition-all cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-accent/10 hover:bg-accent/20 text-link border border-accent/30 transition-all cursor-pointer shadow-2xs"
           >
             <Trash2 size={13} />
             <span>{pruned ? "Hoàn tác mô phỏng" : "Bấm để mô phỏng Fetch --prune"}</span>

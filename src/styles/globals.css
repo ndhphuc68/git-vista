@@ -18,6 +18,7 @@
   --color-primary: var(--text-primary);
   --color-secondary: var(--text-secondary);
   --color-tertiary: var(--text-tertiary);
+  --color-link: var(--text-link);
 
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);

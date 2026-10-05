@@ -52,7 +52,7 @@ describe("BranchSelectButton", () => {
     );
 
     const button = screen.getByRole("button");
-    expect(button).toHaveClass("text-accent");
+    expect(button).toHaveClass("text-link");
     expect(button).toHaveClass("font-semibold");
     expect(button).not.toHaveClass("bg-accent-subtle");
   });
@@ -68,7 +68,7 @@ describe("BranchSelectButton", () => {
     );
 
     const button = screen.getByRole("button");
-    expect(button).toHaveClass("text-accent");
+    expect(button).toHaveClass("text-link");
     expect(button).toHaveClass("bg-accent-subtle");
     expect(button).toHaveClass("font-semibold");
   });
@@ -86,7 +86,7 @@ describe("BranchSelectButton", () => {
     const button = screen.getByRole("button");
     expect(button).toHaveClass("bg-surface-active");
     expect(button).toHaveClass("text-primary");
-    expect(button).not.toHaveClass("text-accent");
+    expect(button).not.toHaveClass("text-link");
     expect(button).not.toHaveClass("bg-accent-subtle");
   });
 });

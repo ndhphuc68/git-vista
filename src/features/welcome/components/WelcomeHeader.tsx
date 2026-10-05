@@ -34,7 +34,7 @@ export const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-primary">
               GitVista
             </h1>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent-subtle text-accent border border-accent/20">
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent-subtle text-link border border-accent/20">
               v0.1
             </span>
           </div>

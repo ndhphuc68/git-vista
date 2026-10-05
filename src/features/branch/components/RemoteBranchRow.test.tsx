@@ -28,7 +28,7 @@ describe("RemoteBranchRow", () => {
     const button = screen.getByRole("button", { name: "origin/feature" });
     expect(button).toHaveClass("bg-transparent");
     expect(button).toHaveClass("text-primary");
-    expect(button).not.toHaveClass("text-accent");
+    expect(button).not.toHaveClass("text-link");
     expect(button).not.toHaveClass("bg-surface-active");
   });
 
@@ -37,7 +37,7 @@ describe("RemoteBranchRow", () => {
     const button = screen.getByRole("button", { name: "origin/feature" });
     expect(button).toHaveClass("bg-surface-active");
     expect(button).toHaveClass("text-primary");
-    expect(button).not.toHaveClass("text-accent");
+    expect(button).not.toHaveClass("text-link");
     expect(button).not.toHaveClass("bg-accent-subtle");
   });
 

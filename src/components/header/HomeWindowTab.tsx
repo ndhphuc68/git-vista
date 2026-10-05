@@ -31,7 +31,7 @@ export const HomeWindowTab: React.FC<HomeWindowTabProps> = ({
           size={14}
           className={clsx(
             "shrink-0 transition-colors",
-            isActive ? "text-accent" : "text-secondary group-hover:text-primary"
+            isActive ? "text-link" : "text-secondary group-hover:text-primary"
           )}
         />
         <span className="truncate">Home</span>

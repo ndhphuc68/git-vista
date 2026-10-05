@@ -27,7 +27,7 @@ export const InteractiveRebaseModalHeader: React.FC<InteractiveRebaseModalHeader
           subtitle and its close button is disabled while submitting. */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle bg-surface-subtle/40 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
+          <div className="w-8 h-8 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-link">
             <GitBranch size={16} />
           </div>
           <div>

@@ -50,7 +50,7 @@ export const ChangedFileRow: React.FC<ChangedFileRowProps> = ({
         <span
           className={clsx(
             "text-xs overflow-hidden text-ellipsis",
-            isSelected ? "text-accent font-semibold" : "text-primary font-normal"
+            isSelected ? "text-link font-semibold" : "text-primary font-normal"
           )}
           title={file.path}
         >

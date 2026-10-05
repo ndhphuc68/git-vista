@@ -52,7 +52,7 @@ export function FileDiffToolbar({
           className={clsx(
             "p-1.5 rounded text-xs flex items-center justify-center transition-colors cursor-pointer",
             diffIgnoreWhitespace
-              ? "bg-accent/15 text-accent border border-accent/40"
+              ? "bg-accent/15 text-link border border-accent/40"
               : "bg-surface text-secondary border border-border-subtle hover:bg-surface-hover hover:text-primary"
           )}
         >
@@ -66,7 +66,7 @@ export function FileDiffToolbar({
           className={clsx(
             "p-1.5 rounded text-xs flex items-center justify-center transition-colors cursor-pointer",
             showWordDiff
-              ? "bg-accent/15 text-accent border border-accent/40"
+              ? "bg-accent/15 text-link border border-accent/40"
               : "bg-surface text-secondary border border-border-subtle hover:bg-surface-hover hover:text-primary"
           )}
         >

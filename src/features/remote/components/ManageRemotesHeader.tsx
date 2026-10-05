@@ -28,7 +28,7 @@ export const ManageRemotesHeader: React.FC<ManageRemotesHeaderProps> = ({
   return (
     <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle bg-surface-hover/20 shrink-0">
       <div className="flex items-center gap-3">
-        <div className="p-2.5 rounded-lg bg-accent/10 text-accent">
+        <div className="p-2.5 rounded-lg bg-accent/10 text-link">
           <Cloud size={20} />
         </div>
         <div>

@@ -22,7 +22,7 @@ export const RebaseLivePreviewSummary: React.FC<RebaseLivePreviewSummaryProps> =
       {/* Header */}
       <div className="flex items-center justify-between pb-3 mb-3 border-b border-border-subtle">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-secondary flex items-center gap-1.5">
-          <GitBranch size={13} className="text-accent" />
+          <GitBranch size={13} className="text-link" />
           {t.modals.interactiveRebase.preview.title}
         </h3>
         <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20">

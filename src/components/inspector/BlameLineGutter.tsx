@@ -43,7 +43,7 @@ export const BlameLineGutter: React.FC<BlameLineGutterProps> = ({
       <button
         type="button"
         onClick={() => onCommitClick(line.commit_id)}
-        className="flex items-center gap-1 font-mono text-[10px] text-accent hover:underline shrink-0 p-0.5 rounded hover:bg-accent/10 transition-colors cursor-pointer"
+        className="flex items-center gap-1 font-mono text-[10px] text-link hover:underline shrink-0 p-0.5 rounded hover:bg-accent/10 transition-colors cursor-pointer"
         title={t.inspector.jumpToCommit}
       >
         <span>{line.short_id}</span>

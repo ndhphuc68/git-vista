@@ -19,7 +19,7 @@ const UserAvatarItem: React.FC<{ user: GitHubUserSummary }> = ({ user }) => (
         className="w-5 h-5 rounded-full object-cover shrink-0"
       />
     ) : (
-      <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center font-bold text-[10px] text-accent shrink-0">
+      <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center font-bold text-[10px] text-link shrink-0">
         {user.login?.charAt(0).toUpperCase() || "?"}
       </div>
     )}
@@ -55,7 +55,7 @@ const CheckRunRow: React.FC<{
         target="_blank"
         rel="noreferrer"
         aria-label={`${run.name} ${detailsLabel}`}
-        className="inline-flex items-center gap-1 text-accent hover:underline text-xs shrink-0 ml-2"
+        className="inline-flex items-center gap-1 text-link hover:underline text-xs shrink-0 ml-2"
       >
         <span>{detailsLabel}</span>
         <ExternalLink size={12} aria-hidden="true" />
@@ -87,7 +87,7 @@ const CiChecksSection: React.FC<{ checkRuns: CheckRunItem[] }> = ({ checkRuns })
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 text-xs font-semibold text-secondary uppercase tracking-wider">
-        <CheckCircle2 size={14} className="text-accent shrink-0" aria-hidden="true" />
+        <CheckCircle2 size={14} className="text-link shrink-0" aria-hidden="true" />
         <span>{t.pullRequestsScreen.checks.title}</span>
       </div>
 

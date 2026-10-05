@@ -49,7 +49,7 @@ function BranchPillPopoverRow({ refBadge, headBadgeText, onCheckout }: BranchPil
       )}
     >
       {isHead ? (
-        <GitBranch size={11} className="shrink-0 text-accent" />
+        <GitBranch size={11} className="shrink-0 text-link" />
       ) : isTag ? (
         <Tag size={11} className="shrink-0 text-amber-500" />
       ) : isRemote ? (
@@ -59,7 +59,7 @@ function BranchPillPopoverRow({ refBadge, headBadgeText, onCheckout }: BranchPil
       )}
       <span className="truncate flex-1 text-primary">{refBadge.name}</span>
       {isHead && (
-        <span className="text-[10px] px-1.5 py-0.5 bg-accent/10 text-accent rounded-xs font-semibold shrink-0">
+        <span className="text-[10px] px-1.5 py-0.5 bg-accent/10 text-link rounded-xs font-semibold shrink-0">
           {headBadgeText}
         </span>
       )}

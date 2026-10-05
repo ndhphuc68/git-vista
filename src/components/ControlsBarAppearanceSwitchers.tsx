@@ -24,7 +24,7 @@ export const ControlsBarAppearanceSwitchers: React.FC<ControlsBarAppearanceSwitc
       className={clsx(
         "px-1.5 py-0.5 rounded-md text-xs flex items-center gap-1 border border-border-subtle cursor-pointer transition-colors",
         colorblind
-          ? "bg-accent-subtle text-accent font-medium"
+          ? "bg-accent-subtle text-link font-medium"
           : "bg-window text-secondary hover:text-primary"
       )}
       title={t.settings.colorblind}

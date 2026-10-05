@@ -135,7 +135,7 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
   <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle shrink-0">
     <div className="flex items-center gap-2.5">
       {Icon && (
-        <Icon size={18} className={tone === "danger" ? "text-diff-remove-text" : "text-accent"} />
+        <Icon size={18} className={tone === "danger" ? "text-diff-remove-text" : "text-link"} />
       )}
       <h3 id={titleId} className="text-base font-semibold text-primary m-0 tracking-tight">
         {title}

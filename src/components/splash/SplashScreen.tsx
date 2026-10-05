@@ -53,7 +53,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
         <div className="flex flex-col items-center gap-1 animate-slide-up">
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-extrabold tracking-tight text-primary">GitVista</h1>
-            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-accent-subtle text-accent border border-accent/20">
+            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-accent-subtle text-link border border-accent/20">
               v0.1
             </span>
           </div>

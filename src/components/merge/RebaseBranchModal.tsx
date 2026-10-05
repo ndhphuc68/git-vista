@@ -71,7 +71,7 @@ export const RebaseBranchModal: React.FC<RebaseBranchModalProps> = ({
         <div className="flex items-center gap-2 text-xs text-primary bg-window p-2.5 rounded-sm border border-border-subtle">
           <span className="font-semibold text-primary">{currentBranch}</span>
           <ArrowRight size={13} className="text-secondary shrink-0" />
-          <span className="font-semibold text-accent">{upstreamBranch}</span>
+          <span className="font-semibold text-link">{upstreamBranch}</span>
         </div>
 
         <p className="text-xs text-secondary leading-normal m-0">{t.modals.rebase.desc}</p>

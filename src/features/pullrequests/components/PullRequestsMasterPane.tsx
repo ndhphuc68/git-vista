@@ -229,7 +229,7 @@ export const PullRequestsMasterPane: React.FC<PullRequestsMasterPaneProps> = ({
       >
         {isLoading ? (
           <div className="flex items-center justify-center p-8 text-secondary">
-            <Loader2 size={20} className="animate-spin text-accent" />
+            <Loader2 size={20} className="animate-spin text-link" />
           </div>
         ) : filteredPrs.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 text-center text-secondary">

@@ -22,7 +22,7 @@ export const SettingsNavButton: React.FC<SettingsNavButtonProps> = ({ item, acti
         : "border border-transparent text-secondary hover:bg-surface-hover/60 hover:text-primary"
     )}
   >
-    <span className={clsx("shrink-0 transition-colors", active ? "text-accent" : "text-tertiary")}>
+    <span className={clsx("shrink-0 transition-colors", active ? "text-link" : "text-tertiary")}>
       {item.icon}
     </span>
     <span>{item.label}</span>

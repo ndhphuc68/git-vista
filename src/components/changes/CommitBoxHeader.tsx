@@ -20,7 +20,7 @@ export const CommitBoxHeader: React.FC<CommitBoxHeaderProps> = ({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-1.5">
-        <GitCommit size={14} className="text-accent" />
+        <GitCommit size={14} className="text-link" />
         <span className="text-xs font-semibold text-secondary">{t.commit.title}</span>
       </div>
 

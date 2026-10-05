@@ -40,7 +40,7 @@ export const TagRowMenu: React.FC<TagRowMenuProps> = ({
         onClick={() => onCheckoutTag(tag)}
         className="flex items-center gap-2.5 px-3.5 py-2 bg-transparent border-0 text-primary hover:bg-surface-hover cursor-pointer text-left w-full whitespace-nowrap transition-colors"
       >
-        <Check size={14} className="text-accent shrink-0" />
+        <Check size={14} className="text-link shrink-0" />
         <span>{t.sidebar.checkoutTag}</span>
       </button>
 

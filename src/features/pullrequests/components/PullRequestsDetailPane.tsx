@@ -85,7 +85,7 @@ const DetailPaneHeader: React.FC<DetailPaneHeaderProps> = ({
           }}
           title={`${openInBrowserLabel} #${pr.number}`}
           aria-label={`${openInBrowserLabel} #${pr.number}`}
-          className="font-mono text-base font-bold text-accent hover:underline cursor-pointer inline-flex items-center gap-1 group"
+          className="font-mono text-base font-bold text-link hover:underline cursor-pointer inline-flex items-center gap-1 group"
         >
           <span>#{pr.number}</span>
           <ExternalLink
@@ -168,7 +168,7 @@ const DetailPaneSubTabs: React.FC<DetailPaneSubTabsProps> = ({
       className={clsx(
         "flex items-center gap-2 py-3 text-xs font-medium border-b-2 transition-colors cursor-pointer",
         activeSubTab === "conversation"
-          ? "border-accent text-accent font-semibold"
+          ? "border-accent text-link font-semibold"
           : "border-transparent text-secondary hover:text-primary"
       )}
     >
@@ -184,7 +184,7 @@ const DetailPaneSubTabs: React.FC<DetailPaneSubTabsProps> = ({
       className={clsx(
         "flex items-center gap-2 py-3 text-xs font-medium border-b-2 transition-colors cursor-pointer",
         activeSubTab === "filesChanged"
-          ? "border-accent text-accent font-semibold"
+          ? "border-accent text-link font-semibold"
           : "border-transparent text-secondary hover:text-primary"
       )}
     >
@@ -205,7 +205,7 @@ const DetailPaneContent: React.FC<{
   <div className="flex-1 overflow-y-auto p-6">
     {isLoadingDetail ? (
       <div className="flex items-center justify-center p-12 text-secondary">
-        <Loader2 size={24} className="animate-spin text-accent" />
+        <Loader2 size={24} className="animate-spin text-link" />
       </div>
     ) : detail ? (
       activeSubTab === "conversation" ? (

@@ -31,7 +31,7 @@ export function getStatusBadge(
     case FILE_STATUS.MODIFIED:
       return {
         label: "M",
-        className: "bg-accent-subtle text-accent",
+        className: "bg-accent-subtle text-link",
         title: badgeDict.modified,
       };
     case FILE_STATUS.NEW:
@@ -50,7 +50,7 @@ export function getStatusBadge(
     case FILE_STATUS.RENAMED:
       return {
         label: "R",
-        className: "bg-accent-subtle text-accent",
+        className: "bg-accent-subtle text-link",
         title: badgeDict.renamed,
       };
     case FILE_STATUS.TYPECHANGE:

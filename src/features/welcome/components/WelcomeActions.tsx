@@ -23,12 +23,12 @@ export const WelcomeActions: React.FC<WelcomeActionsProps> = ({ onOpenFolder, on
           onClick={onOpenFolder}
           className="group flex items-start gap-4 p-4.5 bg-surface hover:bg-surface-hover border border-border-subtle hover:border-accent rounded-xl text-left card-lift btn-press cursor-pointer shadow-xs hover:shadow-md min-h-[92px]"
         >
-          <div className="w-11 h-11 rounded-xl bg-accent-subtle text-accent flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform mt-0.5">
+          <div className="w-11 h-11 rounded-xl bg-accent-subtle text-link flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform mt-0.5">
             <FolderOpen size={22} />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm sm:text-base font-bold text-primary group-hover:text-accent transition-colors">
+              <span className="text-sm sm:text-base font-bold text-primary group-hover:text-link transition-colors">
                 {t.welcome.openFolder}
               </span>
               <kbd className="text-xs font-mono text-tertiary bg-window px-2 py-0.5 rounded border border-border-subtle shrink-0">

@@ -46,7 +46,7 @@ const ConflictResolverInner: React.FC<ConflictResolverScreenProps> = ({
   if (isLoading && !fileData) {
     return (
       <div className="flex flex-col items-center justify-center h-full w-full bg-surface text-secondary gap-3">
-        <RefreshCw size={24} className="animate-spin text-accent" />
+        <RefreshCw size={24} className="animate-spin text-link" />
         <span className="text-sm">{t.conflictResolver.loading}</span>
       </div>
     );

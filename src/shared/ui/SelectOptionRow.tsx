@@ -34,7 +34,7 @@ export const SelectOptionRow: React.FC<SelectOptionRowProps> = ({
     onMouseEnter={() => !option.disabled && onActivate(option.value)}
     className={clsx(
       "flex items-center gap-2 px-2.5 py-1.5 rounded-sm text-xs transition-colors",
-      isSelected ? "bg-accent-subtle text-accent font-semibold" : "text-primary",
+      isSelected ? "bg-accent-subtle text-link font-semibold" : "text-primary",
       isActive && !isSelected && "bg-surface-hover",
       option.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
       mono && "font-mono"
@@ -44,7 +44,7 @@ export const SelectOptionRow: React.FC<SelectOptionRowProps> = ({
     <span className="truncate">{option.label}</span>
     <span className="ml-auto flex items-center gap-1.5 shrink-0">
       {option.badge}
-      {isSelected && <Check size={12} className="text-accent" aria-hidden="true" />}
+      {isSelected && <Check size={12} className="text-link" aria-hidden="true" />}
     </span>
   </li>
 );

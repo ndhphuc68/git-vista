@@ -30,7 +30,7 @@ export const ChangedFileRowActions: React.FC<ChangedFileRowActionsProps> = ({
               e.stopPropagation();
               openInspector(filePath, "blame");
             }}
-            className="flex items-center justify-center w-[22px] h-[22px] bg-transparent border border-border-subtle rounded-sm text-secondary cursor-pointer hover:bg-surface-hover hover:text-accent transition-colors duration-fast ease-macos"
+            className="flex items-center justify-center w-[22px] h-[22px] bg-transparent border border-border-subtle rounded-sm text-secondary cursor-pointer hover:bg-surface-hover hover:text-link transition-colors duration-fast ease-macos"
             title={t.inspector.viewBlame}
           >
             <FileText size={12} />
@@ -41,7 +41,7 @@ export const ChangedFileRowActions: React.FC<ChangedFileRowActionsProps> = ({
               e.stopPropagation();
               openInspector(filePath, "history");
             }}
-            className="flex items-center justify-center w-[22px] h-[22px] bg-transparent border border-border-subtle rounded-sm text-secondary cursor-pointer hover:bg-surface-hover hover:text-accent transition-colors duration-fast ease-macos"
+            className="flex items-center justify-center w-[22px] h-[22px] bg-transparent border border-border-subtle rounded-sm text-secondary cursor-pointer hover:bg-surface-hover hover:text-link transition-colors duration-fast ease-macos"
             title={t.inspector.viewHistory}
           >
             <History size={12} />

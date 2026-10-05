@@ -33,8 +33,8 @@ export function CommitGraphCommitRowSummary({
           className={clsx(
             "whitespace-nowrap overflow-hidden text-ellipsis flex-1 text-xs",
             isSelected
-              ? "font-semibold text-accent"
-              : "font-normal text-primary group-hover:text-accent transition-colors"
+              ? "font-semibold text-link"
+              : "font-normal text-primary group-hover:text-link transition-colors"
           )}
         >
           {commit.summary}
@@ -73,7 +73,7 @@ export function CommitGraphCommitRowSummary({
       <div className="w-24 text-right pr-3 shrink-0">
         <span
           title={`${t.graph.columns.sha}: ${commit.id}`}
-          className="font-mono font-bold text-accent dark:text-accent text-xs px-1.5 py-0.5 rounded bg-surface hover:bg-surface-hover border border-border-subtle shadow-2xs inline-block"
+          className="font-mono font-bold text-link dark:text-link text-xs px-1.5 py-0.5 rounded bg-surface hover:bg-surface-hover border border-border-subtle shadow-2xs inline-block"
         >
           {commit.short_id}
         </span>

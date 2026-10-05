@@ -41,7 +41,7 @@ export function CommitMetadataAuthor({
             {authorName}
           </span>
           <div
-            className="flex items-center gap-1 text-[10px] text-accent font-semibold bg-accent-subtle/80 px-1.5 py-0.5 rounded border border-accent/20 shrink-0"
+            className="flex items-center gap-1 text-[10px] text-link font-semibold bg-accent-subtle/80 px-1.5 py-0.5 rounded border border-accent/20 shrink-0"
             title={exactDateTime}
           >
             <Clock size={10} className="shrink-0" />

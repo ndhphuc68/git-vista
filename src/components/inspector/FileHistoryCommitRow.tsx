@@ -52,7 +52,7 @@ export const FileHistoryCommitRow: React.FC<FileHistoryCommitRowProps> = ({
           >
             {commit.change_type.slice(0, 1)}
           </span>
-          <span className="font-mono text-[10px] text-accent font-bold truncate">
+          <span className="font-mono text-[10px] text-link font-bold truncate">
             {commit.short_id}
           </span>
         </div>

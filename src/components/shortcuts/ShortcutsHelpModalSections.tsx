@@ -14,7 +14,7 @@ export const ShortcutsHelpModalSections: React.FC<ShortcutsHelpModalSectionsProp
         key={section.title}
         className="bg-window/50 rounded-lg p-3.5 border border-border-subtle/50 flex flex-col gap-2.5"
       >
-        <h3 className="text-xs font-semibold text-accent uppercase tracking-wider m-0">
+        <h3 className="text-xs font-semibold text-link uppercase tracking-wider m-0">
           {section.title}
         </h3>
         <div className="flex flex-col gap-2">

@@ -63,7 +63,7 @@ export const ControlsBarDevTools: React.FC<ControlsBarDevToolsProps> = ({
       )}
 
       {lastEvent && (
-        <span className="bg-accent-subtle text-accent px-1.5 py-0.5 rounded-sm shrink-0">
+        <span className="bg-accent-subtle text-link px-1.5 py-0.5 rounded-sm shrink-0">
           Event: {lastEvent.reason}
         </span>
       )}

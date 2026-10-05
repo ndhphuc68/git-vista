@@ -28,7 +28,7 @@ export const ChangesSection: React.FC<ChangesSectionProps> = ({
     <div className="flex flex-col flex-1">
       <div className="flex items-center justify-between px-3 py-2 bg-window text-xs font-semibold text-secondary tracking-[0.5px]">
         <div className="flex items-center gap-1.5">
-          <AlertCircle size={13} className="text-accent" />
+          <AlertCircle size={13} className="text-link" />
           <span>
             {t.changes.changesTitle} ({changesFiles.length})
           </span>

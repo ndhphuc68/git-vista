@@ -29,7 +29,7 @@ export const StashActionBar: React.FC<StashActionBarProps> = ({
         onClick={() => onApply(stashIndex)}
         title={t.modals.stashDiff.applyTitle}
       >
-        <Play size={12} className="text-accent" />
+        <Play size={12} className="text-link" />
         <span>{t.modals.stashDiff.applyBtn}</span>
       </Button>
       <Button
@@ -37,7 +37,7 @@ export const StashActionBar: React.FC<StashActionBarProps> = ({
         onClick={() => onPop(stashIndex)}
         title={t.modals.stashDiff.popTitle}
       >
-        <PlayCircle size={12} className="text-accent" />
+        <PlayCircle size={12} className="text-link" />
         <span>{t.modals.stashDiff.popBtn}</span>
       </Button>
       <Button

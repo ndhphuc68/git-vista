@@ -39,7 +39,7 @@ export const RemoteListItem: React.FC<RemoteListItemProps> = ({
           </div>
           <span className="text-sm font-bold text-primary truncate">{remote.name}</span>
           {remote.is_default && (
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-accent/10 text-accent border border-accent/20">
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-accent/10 text-link border border-accent/20">
               {t.modals.remotes.defaultBadge}
             </span>
           )}

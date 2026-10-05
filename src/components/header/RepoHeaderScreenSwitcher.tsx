@@ -44,7 +44,7 @@ export const RepoHeaderScreenSwitcher: React.FC<RepoHeaderScreenSwitcherProps> =
         className={clsx(
           "flex items-center justify-center w-8 h-8 border border-border-subtle rounded-md cursor-pointer shrink-0 transition-colors shadow-2xs",
           sidebarOpen
-            ? "bg-accent-subtle text-accent font-semibold"
+            ? "bg-accent-subtle text-link font-semibold"
             : "bg-transparent text-secondary hover:bg-surface-hover hover:text-primary"
         )}
         title={t.header.toggleSidebar.replace("{shortcut}", shortcutSidebar)}

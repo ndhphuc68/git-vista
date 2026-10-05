@@ -44,7 +44,7 @@ export const InteractiveRebaseModalStepList: React.FC<InteractiveRebaseModalStep
       {/* Tip info bar */}
       <div className="px-4 py-2 bg-surface-subtle/50 border-b border-border-subtle flex items-center justify-between text-[11px] text-secondary shrink-0">
         <span className="flex items-center gap-1.5">
-          <Info size={12} className="text-accent" />
+          <Info size={12} className="text-link" />
           {t.modals.interactiveRebase.dragHandleTooltip}
         </span>
         <span className="font-mono">{steps.length} commits</span>
@@ -54,7 +54,7 @@ export const InteractiveRebaseModalStepList: React.FC<InteractiveRebaseModalStep
       <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-2">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-48 gap-2 text-secondary">
-            <Loader2 size={20} className="animate-spin text-accent" />
+            <Loader2 size={20} className="animate-spin text-link" />
             <span className="text-xs">{t.modals.interactiveRebase.loadingCommits}</span>
           </div>
         ) : steps.length === 0 ? (

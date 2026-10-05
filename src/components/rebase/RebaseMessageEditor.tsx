@@ -19,7 +19,7 @@ export const RebaseMessageEditor: React.FC<RebaseMessageEditorProps> = ({
   return (
     <div className="mt-2.5 pt-2.5 border-t border-border-subtle/70 pl-8 pr-1 flex flex-col gap-1 animate-fade-in">
       <div className="flex items-center justify-between text-[11px] text-secondary">
-        <span className="flex items-center gap-1 font-medium text-accent">
+        <span className="flex items-center gap-1 font-medium text-link">
           <Edit3 size={11} />
           {isSquash
             ? t.modals.interactiveRebase.actions.squashDesc

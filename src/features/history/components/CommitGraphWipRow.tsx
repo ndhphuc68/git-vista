@@ -38,7 +38,7 @@ export function CommitGraphWipRow({
             y1={WIP_NODE_Y}
             x2={WIP_NODE_X}
             y2={GRAPH_ROW_HEIGHT}
-            stroke="#0284C7"
+            className="stroke-accent"
             strokeWidth="2"
             strokeDasharray="3,3"
           />
@@ -46,11 +46,11 @@ export function CommitGraphWipRow({
             cx={WIP_NODE_X}
             cy={WIP_NODE_Y}
             r="6"
-            className="fill-surface stroke-[#0284C7]"
+            className="fill-surface stroke-accent"
             strokeWidth="2"
             strokeDasharray="2.5,2.5"
           />
-          <circle cx={WIP_NODE_X} cy={WIP_NODE_Y} r="2.5" fill="#0284C7" />
+          <circle cx={WIP_NODE_X} cy={WIP_NODE_Y} r="2.5" className="fill-accent" />
         </svg>
       </div>
 
@@ -58,7 +58,7 @@ export function CommitGraphWipRow({
         <span className="text-[10px] font-mono font-bold text-sky-700 dark:text-sky-400 bg-sky-100 dark:bg-sky-900/50 px-1.5 py-0.5 rounded shrink-0">
           // WIP
         </span>
-        <span className="font-semibold text-primary truncate text-xs group-hover:text-accent transition-colors">
+        <span className="font-semibold text-primary truncate text-xs group-hover:text-link transition-colors">
           {t.graph.wipChanges}
         </span>
         <div className="flex items-center gap-1.5 font-mono text-[10.5px] shrink-0">

@@ -47,7 +47,7 @@ export const HelpTooltip: React.FC<HelpTooltipProps> = ({
         className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent ${
           isOpen
             ? "bg-accent text-white shadow-sm ring-1 ring-accent"
-            : "text-secondary hover:text-accent bg-surface-header/80 hover:bg-accent/15 border border-border-subtle hover:border-accent/40"
+            : "text-secondary hover:text-link bg-surface-header/80 hover:bg-accent/15 border border-border-subtle hover:border-accent/40"
         }`}
       >
         <span className="leading-none select-none">?</span>

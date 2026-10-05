@@ -42,11 +42,11 @@ export const HelpTooltipPopover: React.FC<HelpTooltipPopoverProps> = ({
       <div className="flex items-start justify-between gap-2 mb-2.5">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-bold text-primary text-sm flex items-center gap-1.5">
-            <HelpCircle size={15} className="text-accent shrink-0" />
+            <HelpCircle size={15} className="text-link shrink-0" />
             {title}
           </span>
           {tag && (
-            <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-accent/10 text-accent border border-accent/20">
+            <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-accent/10 text-link border border-accent/20">
               {tag}
             </span>
           )}

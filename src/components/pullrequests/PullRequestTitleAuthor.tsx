@@ -13,7 +13,7 @@ export const PullRequestTitleAuthor: React.FC<PullRequestTitleAuthorProps> = ({ 
       {pr.user?.avatar_url ? (
         <img src={pr.user.avatar_url} alt={pr.user.login} className="w-5 h-5 rounded-full" />
       ) : (
-        <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center font-bold text-[10px] text-accent">
+        <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center font-bold text-[10px] text-link">
           {pr.user?.login?.charAt(0).toUpperCase() || "?"}
         </div>
       )}

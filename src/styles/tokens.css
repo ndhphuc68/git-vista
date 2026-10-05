@@ -52,71 +52,75 @@
   --min-target-size: 28px;
 }
 
-/* VS Code Dark Modern Theme (Default) */
+/* VS Code Dark Modern Theme (Default)
+ * Values come from VS Code's dark_modern.json and its color registry defaults. */
 :root,
 [data-theme="dark"] {
-  --bg-window: #181818;
-  --bg-surface: #1f1f1f;
-  --bg-surface-hover: #2a2d2e;
-  --bg-surface-active: #37373d;
-  --border-subtle: #2b2b2b;
-  --border-strong: #3c3c3c;
+  --bg-window: #181818; /* sideBar.background */
+  --bg-surface: #1f1f1f; /* editor.background */
+  --bg-surface-hover: #2a2d2e; /* list.hoverBackground */
+  --bg-surface-active: #37373d; /* list.inactiveSelectionBackground */
+  --border-subtle: #2b2b2b; /* panel.border */
+  --border-strong: #3c3c3c; /* input.border */
 
-  --text-primary: #cccccc;
-  --text-secondary: #9d9d9d;
-  --text-tertiary: #6e7681;
+  --text-primary: #cccccc; /* foreground */
+  --text-secondary: #9d9d9d; /* descriptionForeground */
+  --text-tertiary: #6e7681; /* editorLineNumber.foreground */
+  --text-link: #4daafc; /* textLink.foreground */
 
-  --accent: #3794ff;
-  --accent-hover: #6cb8ff;
-  --accent-subtle: #0e2a47;
-  --accent-contrast: #ffffff;
+  --accent: #0078d4; /* focusBorder, button.background */
+  --accent-hover: #026ec1; /* button.hoverBackground */
+  --accent-subtle: #2489db82; /* inputOption.activeBackground */
+  --accent-contrast: #ffffff; /* button.foreground */
 
-  --diff-add-bg: #1e382b;
-  --diff-add-text: #49d184;
-  --diff-add-border: #2ea043;
+  --diff-add-bg: #9bb95533; /* diffEditor.insertedLineBackground */
+  --diff-add-text: #81b88b; /* gitDecoration.addedResourceForeground */
+  --diff-add-border: #2ea043; /* editorGutter.addedBackground */
 
-  --diff-remove-bg: #421d23;
-  --diff-remove-text: #ff7b72;
-  --diff-remove-border: #da3633;
+  --diff-remove-bg: #ff000033; /* diffEditor.removedLineBackground */
+  --diff-remove-text: #c74e39; /* gitDecoration.deletedResourceForeground */
+  --diff-remove-border: #f85149; /* editorGutter.deletedBackground */
 
   --skeleton-bg: #252525;
   --skeleton-shine: #333333;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.36);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.36); /* widget.shadow */
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
 }
 
-/* VS Code Light Modern Theme */
+/* VS Code Light Modern Theme
+ * Values come from VS Code's light_modern.json and its color registry defaults. */
 [data-theme="light"] {
-  --bg-window: #f8f8f8;
-  --bg-surface: #ffffff;
-  --bg-surface-hover: #f0f0f0;
-  --bg-surface-active: #e4e6f1;
-  --border-subtle: #e5e5e5;
-  --border-strong: #d4d4d4;
+  --bg-window: #f8f8f8; /* sideBar.background */
+  --bg-surface: #ffffff; /* editor.background */
+  --bg-surface-hover: #f2f2f2; /* list.hoverBackground */
+  --bg-surface-active: #e8e8e8; /* list.activeSelectionBackground */
+  --border-subtle: #e5e5e5; /* panel.border */
+  --border-strong: #cecece; /* input.border */
 
-  --text-primary: #1f1f1f;
-  --text-secondary: #616161;
-  --text-tertiary: #8b8b8b;
+  --text-primary: #3b3b3b; /* foreground */
+  --text-secondary: #616161; /* tab.inactiveForeground */
+  --text-tertiary: #6e7681; /* editorLineNumber.foreground */
+  --text-link: #005fb8; /* textLink.foreground */
 
-  --accent: #005fb8;
-  --accent-hover: #004e98;
-  --accent-subtle: #ebf3fc;
-  --accent-contrast: #ffffff;
+  --accent: #005fb8; /* focusBorder, button.background */
+  --accent-hover: #0258a8; /* button.hoverBackground */
+  --accent-subtle: #bed6ed; /* inputOption.activeBackground */
+  --accent-contrast: #ffffff; /* button.foreground */
 
-  --diff-add-bg: #e6ffec;
-  --diff-add-text: #1a7f37;
-  --diff-add-border: #4ac26b;
+  --diff-add-bg: #9bb95533; /* diffEditor.insertedLineBackground */
+  --diff-add-text: #587c0c; /* gitDecoration.addedResourceForeground */
+  --diff-add-border: #2ea043; /* editorGutter.addedBackground */
 
-  --diff-remove-bg: #ffebe9;
-  --diff-remove-text: #cf222e;
-  --diff-remove-border: #ff8182;
+  --diff-remove-bg: #ff000033; /* diffEditor.removedLineBackground */
+  --diff-remove-text: #ad0707; /* gitDecoration.deletedResourceForeground */
+  --diff-remove-border: #f85149; /* editorGutter.deletedBackground */
 
   --skeleton-bg: #e1e4e8;
   --skeleton-shine: #f1f3f5;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.16); /* widget.shadow */
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.16);
 }
 
 /* Colorblind Mode Override: Dark & Light */

@@ -41,7 +41,7 @@ export const CompareHeader: React.FC<CompareHeaderProps> = ({
       {/* Top row: Title and Close button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-md bg-accent/15 text-accent">
+          <div className="p-1.5 rounded-md bg-accent/15 text-link">
             <GitCompare size={18} />
           </div>
           <div>

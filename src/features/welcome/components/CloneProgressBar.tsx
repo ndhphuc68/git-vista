@@ -21,10 +21,10 @@ export const CloneProgressBar: React.FC<CloneProgressBarProps> = ({
     <div className="mt-1 p-3.5 rounded-xl bg-window border border-border-subtle">
       <div className="flex items-center justify-between text-xs sm:text-sm mb-2">
         <span className="flex items-center gap-2 text-secondary">
-          <Loader2 size={15} className="animate-spin text-accent" />
+          <Loader2 size={15} className="animate-spin text-link" />
           <span>{t.cloneModal.cloning}</span>
         </span>
-        <span className="font-mono font-medium text-accent">{progressPercent}%</span>
+        <span className="font-mono font-medium text-link">{progressPercent}%</span>
       </div>
       <div
         role="progressbar"

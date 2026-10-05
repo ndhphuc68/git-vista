@@ -15,7 +15,7 @@ export const CloneModalHeader: React.FC<CloneModalHeaderProps> = ({ titleId }) =
 
   return (
     <div className="flex items-center gap-3.5 mb-6">
-      <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-accent-subtle text-accent">
+      <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-accent-subtle text-link">
         <Download size={22} />
       </div>
       <div>

@@ -63,7 +63,7 @@ export const DeleteBranchModal: React.FC<DeleteBranchModalProps> = ({
         )}
 
         <div className="flex items-start gap-2 p-2 bg-accent-subtle/40 border border-accent-subtle rounded-sm text-secondary text-[11px] leading-normal">
-          <ShieldCheck size={14} className="shrink-0 text-accent mt-0.5" />
+          <ShieldCheck size={14} className="shrink-0 text-link mt-0.5" />
           <span>
             {t.modals.deleteBranch.backupNoticePrefix}{" "}
             <code className="text-primary font-mono font-semibold">refs/gitui-backup/</code>{" "}

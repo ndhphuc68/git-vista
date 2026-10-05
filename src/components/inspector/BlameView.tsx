@@ -73,7 +73,7 @@ export const BlameView: React.FC<BlameViewProps> = ({
             {blame.file_path}
           </span>
           {blame.commit_id && (
-            <span className="bg-accent/15 text-accent font-mono px-1.5 py-0.5 rounded text-[10px]">
+            <span className="bg-accent/15 text-link font-mono px-1.5 py-0.5 rounded text-[10px]">
               {blame.commit_id.slice(0, 7)}
             </span>
           )}

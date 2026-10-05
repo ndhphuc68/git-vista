@@ -21,7 +21,7 @@ export function CommitDetailPanelHeader({
   return (
     <div className="h-13 px-4 border-b border-border-subtle bg-window flex items-center justify-between shrink-0 shadow-2xs">
       <div className="flex items-center gap-3 min-w-0">
-        <span className="p-1.5 rounded-md bg-accent/10 text-accent shrink-0 ring-1 ring-accent/20">
+        <span className="p-1.5 rounded-md bg-accent/10 text-link shrink-0 ring-1 ring-accent/20">
           <GitCommit size={17} />
         </span>
         <div className="flex items-center gap-2.5 min-w-0">
@@ -31,7 +31,7 @@ export function CommitDetailPanelHeader({
           <button
             type="button"
             onClick={() => handleCopySha(details.id)}
-            className="flex items-center gap-1.5 font-mono text-xs px-2 py-0.5 rounded-md bg-surface border border-border-subtle hover:bg-surface-hover text-accent font-semibold cursor-pointer transition-colors shadow-2xs"
+            className="flex items-center gap-1.5 font-mono text-xs px-2 py-0.5 rounded-md bg-surface border border-border-subtle hover:bg-surface-hover text-link font-semibold cursor-pointer transition-colors shadow-2xs"
             title={t.diff.copyShaTooltip}
           >
             <span>{details.id.substring(0, 7)}</span>

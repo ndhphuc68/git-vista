@@ -54,7 +54,7 @@ export const DeleteTagModal: React.FC<DeleteTagModalProps> = ({
 
         <div className="flex flex-col gap-1 px-3 py-2 bg-window rounded-sm border border-border-subtle">
           <div className="font-mono text-xs text-primary font-semibold break-all flex items-center gap-2">
-            <Tag size={14} className="text-accent shrink-0" />
+            <Tag size={14} className="text-link shrink-0" />
             <span>{tagName}</span>
           </div>
           {targetCommitId && (

@@ -30,7 +30,7 @@ export const BranchSelectButton: React.FC<BranchSelectButtonProps> = ({
         "flex-1 flex items-center gap-1.5 px-2 py-1 rounded-sm border-0 cursor-pointer text-left min-h-[26px] text-xs transition-colors overflow-hidden",
         branch.is_head
           ? clsx(
-              "text-accent font-semibold",
+              "text-link font-semibold",
               isSelected ? "bg-accent-subtle" : "bg-transparent hover:bg-surface-hover"
             )
           : clsx(
@@ -52,7 +52,7 @@ export const BranchSelectButton: React.FC<BranchSelectButtonProps> = ({
       />
       <span className="overflow-hidden text-ellipsis whitespace-nowrap">{name}</span>
       {branch.is_head && (
-        <span className="text-[10px] text-accent ml-auto shrink-0 px-1 py-0.2 bg-accent/10 rounded-xs font-semibold">
+        <span className="text-[10px] text-link ml-auto shrink-0 px-1 py-0.2 bg-accent/10 rounded-xs font-semibold">
           HEAD
         </span>
       )}

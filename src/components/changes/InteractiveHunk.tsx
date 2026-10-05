@@ -34,7 +34,7 @@ export const InteractiveHunk: React.FC<InteractiveHunkProps> = ({
   return (
     <div className="mb-4">
       {/* Hunk Header */}
-      <div className="flex items-center justify-between bg-accent-subtle text-accent px-3 py-1 text-[11px] font-semibold border-y border-border-subtle">
+      <div className="flex items-center justify-between bg-accent-subtle text-link px-3 py-1 text-[11px] font-semibold border-y border-border-subtle">
         <span>{hunk.header}</span>
 
         {isStaged ? (

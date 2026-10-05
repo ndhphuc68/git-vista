@@ -39,7 +39,7 @@ export const MergeBranchModal: React.FC<MergeBranchModalProps> = ({
 
       <Modal.Body>
         <div className="flex items-center gap-2 text-xs text-primary bg-window p-2.5 rounded-sm border border-border-subtle">
-          <span className="font-semibold text-accent">{targetBranch}</span>
+          <span className="font-semibold text-link">{targetBranch}</span>
           <ArrowRight size={13} className="text-secondary shrink-0" />
           <span className="font-semibold text-primary">{currentBranch}</span>
         </div>

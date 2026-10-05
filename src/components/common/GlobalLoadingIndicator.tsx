@@ -73,7 +73,7 @@ export const GlobalLoadingIndicator: React.FC = () => {
         className="flex flex-col items-center gap-3 px-6 py-5 rounded-2xl bg-surface/95 border border-border-subtle shadow-2xl text-center max-w-sm mx-4 animate-scale-in"
         onClick={blockEvent}
       >
-        <Loader2 size={28} className="animate-spin text-accent" aria-hidden="true" />
+        <Loader2 size={28} className="animate-spin text-link" aria-hidden="true" />
         <div className="flex flex-col gap-1">
           <span className="text-sm font-semibold text-primary">{displayMessage}</span>
           <span className="text-xs text-secondary">{t.common.pleaseWait}</span>

@@ -109,8 +109,8 @@ describe("commit detail models", () => {
   });
 
   it("uses the neutral badge for absent or unknown commit types", () => {
-    expect(getTypeBadgeStyle(null)).toBe("bg-accent-subtle text-accent border-accent/30");
-    expect(getTypeBadgeStyle("custom")).toBe("bg-accent-subtle text-accent border-accent/30");
+    expect(getTypeBadgeStyle(null)).toBe("bg-accent-subtle text-link border-accent/30");
+    expect(getTypeBadgeStyle("custom")).toBe("bg-accent-subtle text-link border-accent/30");
   });
 
   it.each([

@@ -29,7 +29,7 @@ export const RecentRepositorySearchHeader: React.FC<RecentRepositorySearchHeader
   return (
     <div className="flex items-center justify-between gap-3 pb-3 border-b border-border-subtle flex-wrap">
       <div className="flex items-center gap-2">
-        <Clock size={15} className="text-accent" />
+        <Clock size={15} className="text-link" />
         <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-primary">
           {t.welcome.recentTitle}
         </span>

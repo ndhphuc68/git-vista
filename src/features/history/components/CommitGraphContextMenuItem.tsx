@@ -20,7 +20,7 @@ export function CommitGraphContextMenuItem({
       role="menuitem"
       onClick={onClick}
       className={
-        "flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-accent cursor-pointer whitespace-nowrap transition-colors" +
+        "flex items-center gap-2.5 px-3.5 py-2 text-left text-primary hover:bg-surface-hover hover:text-link cursor-pointer whitespace-nowrap transition-colors" +
         (className ? ` ${className}` : "")
       }
     >
