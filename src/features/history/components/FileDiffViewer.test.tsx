@@ -66,4 +66,13 @@ describe("FileDiffViewer", () => {
     await screen.findByText("src/example.ts");
     expect(document.body.textContent).toContain("const a = 2;");
   });
+
+  it("renders the hunk header, line numbers, signs and contents", async () => {
+    renderView();
+
+    expect(await screen.findByText("@@ -1,2 +1,2 @@")).toBeInTheDocument();
+    expect(screen.getByText("+")).toBeInTheDocument();
+    expect(screen.getByText("-")).toBeInTheDocument();
+    expect(screen.getAllByText("1")).toHaveLength(3);
+  });
 });
