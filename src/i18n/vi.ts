@@ -488,8 +488,8 @@ export const vi = {
   },
   commit: {
     title: "COMMIT",
-    summaryPlaceholder: "Tiêu đề commit (ngắn gọn, dưới 72 ký tự)...",
-    charLimitWarn: "Vượt quá 72 ký tự khuyến nghị",
+    summaryPlaceholder: "Tiêu đề commit (ngắn gọn)...",
+    charLimitWarn: "Vượt quá {limit} ký tự khuyến nghị",
     descPlaceholder: "Mô tả chi tiết (tuỳ chọn)...",
     amendAdvanced: "Amend (Sửa commit gần nhất)",
     amendCommitAdvanced: "Amend Commit",

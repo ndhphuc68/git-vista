@@ -30,7 +30,8 @@ export const CommitBox: React.FC<CommitBoxProps> = (props) => {
     isAmend,
     submitting,
     shortcutHint,
-    isOver72,
+    commitMessageLimit,
+    isOverLimit,
     canCommit,
     handleAmendToggle,
     handleSubmit,
@@ -39,13 +40,18 @@ export const CommitBox: React.FC<CommitBoxProps> = (props) => {
 
   return (
     <div className="flex flex-col gap-2 p-3 bg-surface border-t border-border-subtle">
-      <CommitBoxHeader summaryLength={summary.length} isOver72={isOver72} />
+      <CommitBoxHeader
+        summaryLength={summary.length}
+        limit={commitMessageLimit}
+        isOverLimit={isOverLimit}
+      />
 
       <CommitSummaryInput
         summary={summary}
         onSummaryChange={setSummary}
         onKeyDown={handleKeyDown}
-        isOver72={isOver72}
+        limit={commitMessageLimit}
+        isOverLimit={isOverLimit}
       />
 
       <Textarea

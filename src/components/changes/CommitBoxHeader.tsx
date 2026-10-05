@@ -5,11 +5,16 @@ import { useTranslation } from "../../i18n";
 
 export interface CommitBoxHeaderProps {
   summaryLength: number;
-  isOver72: boolean;
+  limit: number;
+  isOverLimit: boolean;
 }
 
-/** Title row plus the summary character counter. */
-export const CommitBoxHeader: React.FC<CommitBoxHeaderProps> = ({ summaryLength, isOver72 }) => {
+/** Title row plus the summary character counter (no denominator when the limit is off). */
+export const CommitBoxHeader: React.FC<CommitBoxHeaderProps> = ({
+  summaryLength,
+  limit,
+  isOverLimit,
+}) => {
   const { t } = useTranslation();
 
   return (
@@ -23,10 +28,10 @@ export const CommitBoxHeader: React.FC<CommitBoxHeaderProps> = ({ summaryLength,
         <span
           className={clsx(
             "text-[11px] font-mono",
-            isOver72 ? "text-diff-remove-text font-semibold" : "text-secondary font-normal"
+            isOverLimit ? "text-diff-remove-text font-semibold" : "text-secondary font-normal"
           )}
         >
-          {summaryLength}/72
+          {limit > 0 ? `${summaryLength}/${limit}` : summaryLength}
         </span>
       </div>
     </div>

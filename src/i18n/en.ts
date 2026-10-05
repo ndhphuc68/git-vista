@@ -491,8 +491,8 @@ export const en: Translations = {
   },
   commit: {
     title: "COMMIT",
-    summaryPlaceholder: "Commit summary (concise, under 72 chars)...",
-    charLimitWarn: "Exceeds 72 characters recommendation",
+    summaryPlaceholder: "Commit summary (keep it concise)...",
+    charLimitWarn: "Exceeds the recommended {limit} characters",
     descPlaceholder: "Extended description (optional)...",
     amendAdvanced: "Amend (Edit last commit)",
     amendCommitAdvanced: "Amend Commit",

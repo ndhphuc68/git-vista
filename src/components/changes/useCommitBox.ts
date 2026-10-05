@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { useTranslation } from "../../i18n";
+import { useSettingsStore } from "../../store/useSettingsStore";
 import type { CommitBoxProps } from "./CommitBox";
-import { createAmendToggleHandler, createSubmitHandler, createKeyDownHandler } from "./useCommitBox.actions";
+import {
+  createAmendToggleHandler,
+  createSubmitHandler,
+  createKeyDownHandler,
+} from "./useCommitBox.actions";
 
 /** Detects a Mac-style keyboard so the shortcut hint matches the platform. */
 function getShortcutHint(): string {
@@ -41,7 +46,9 @@ export function useCommitBox({
   const [submitting, setSubmitting] = useState(false);
 
   const shortcutHint = getShortcutHint();
-  const isOver72 = summary.length > 72;
+  const commitMessageLimit = useSettingsStore((s) => s.commitMessageLimit);
+  // A limit of 0 means "no limit" in settings.
+  const isOverLimit = commitMessageLimit > 0 && summary.length > commitMessageLimit;
   const canCommit = computeCanCommit(summary, isAmend, stagedCount, isLoading, submitting);
 
   const handleAmendToggle = createAmendToggleHandler({
@@ -78,7 +85,8 @@ export function useCommitBox({
     isAmend,
     submitting,
     shortcutHint,
-    isOver72,
+    commitMessageLimit,
+    isOverLimit,
     canCommit,
     handleAmendToggle,
     handleSubmit,
