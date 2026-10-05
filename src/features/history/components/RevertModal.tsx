@@ -2,13 +2,10 @@ import React, { useState, useEffect } from "react";
 import { RotateCcw, AlertTriangle } from "lucide-react";
 import type { CommitActionResult } from "../../../ipc/bindings.generated";
 import { useTranslation } from "../../../i18n";
-import { useToastStore } from "../../../store/useToastStore";
-import { mapGitError } from "../../../utils/errorMapping";
 import { Modal, Button, Alert } from "../../../shared/ui";
-import { revertCommit } from "../api/commitActionsApi";
 import { CommitActionTargetCard } from "./CommitActionTargetCard";
 import { AutoCommitCheckbox } from "./AutoCommitCheckbox";
-import { toErrorMessage } from "../../../shared/utils/toError";
+import { createRevertSubmitHandler } from "./RevertModal.actions";
 
 const TITLE_ID = "revert-modal-title";
 
@@ -46,29 +43,17 @@ export const RevertModal: React.FC<RevertModalProps> = ({
     }
   }, [isOpen]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  const handleSubmit = createRevertSubmitHandler({
+    repoPath,
+    commitId: targetCommit.id,
+    autoCommit,
+    t,
+    setLoading,
+    setError,
+    onClose,
+    onSuccess,
+  });
 
-    try {
-      const res = await revertCommit(repoPath, targetCommit.id, autoCommit);
-
-      if (res.success || res.status === "Conflict") {
-        if (onSuccess) onSuccess(res);
-        onClose();
-      } else {
-        const errorMsg = res.output || t.modals.revert.genericError.replace("{msg}", res.status);
-        setError(errorMsg);
-      }
-    } catch (err: unknown) {
-      const msg = toErrorMessage(err);
-      setError(msg || t.common.error);
-      useToastStore.getState().showError(mapGitError(err));
-    } finally {
-      setLoading(false);
-    }
-  };
   return (
     <Modal isOpen={isOpen} onClose={onClose} labelledBy={TITLE_ID}>
       <Modal.Header
